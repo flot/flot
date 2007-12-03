@@ -15,7 +15,7 @@ Installation
 
 Just include the Javascript file after you've included jQuery. Note that you
 need to download a version of Excanvas (I currently suggest you take
-the one on the Flot homepage as it contains a bugfix for drawing
+the one bundled with Flot as it contains a bugfix for drawing
 filled shapes) which is canvas emulation on Internet Explorer. And
 don't worry, the emulation is otherwise working fine.
 
