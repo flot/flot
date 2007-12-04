@@ -34,8 +34,12 @@ Create a placeholder div to put the graph in:
    <div id="placeholder"></div>
 
 You need to set the width and height of this div, otherwise the plot
-library doesn't know how to scale the graph. You can do it inline or
-with an external stylesheet.
+library doesn't know how to scale the graph. You can do it inline like
+this:
+
+   <div id="placeholder" style="width:600px;height:300px"></div>
+
+You can also do it with an external stylesheet.
 
 Then on document ready, run the plot function:
 
