@@ -39,7 +39,7 @@ E.g.
 The format of a single series object is as follows:
 
   {
-    color: colorspec or number,
+    color: color or number,
     data: rawdata,
     label: string,
     lines: specific lines options,
@@ -78,6 +78,173 @@ override the default options for the plot for that data series.
 Plot Options
 ------------
 
+All options are completely optional. They are documented individually
+below, to change them you just specify them in an object, e.g.
+
+  var options = {
+    lines: { show: true },
+    points: { show: true }
+  };
+
+  $.plot(placeholder, data, options);
+
+
+Customizing the legend
+======================
+
+  legend: {
+    show: boolean,
+    noColumns: number,
+    labelBoxBorderColor: color,
+    position: "ne" or "nw" or "se" or "sw",
+    margin: number of pixels,
+    backgroundColor: null or color,
+    backgroundOpacity: number in 0.0 - 1.0,
+    container: null or jQuery object
+  }
+
+The legend is generated as a table with the data series labels and
+small label boxes with the color of the series. "noColumns" is the
+number of columns to divide the legend table into. "position"
+specifies the overall placement of the legend within the plot
+(top-right, top-left, etc.) and margin the distance to the plot edge.
+"backgroundColor" and "backgroundOpacity" specifies the background.
+The default is a partly transparent auto-detected background.
+
+If you want the legend to appear somewhere else, you can specify
+"container" as a jQuery object to put the legend table in. The
+"position" and "margin" etc. will then be ignored.
+
+
+Customizing the axes
+====================
+
+  xaxis, yaxis: {
+    ticks: null or ticks array,
+    noTicks: number,
+    tickFormatter: fn: number -> string,
+    tickDecimals: null or number,
+    min: null or number,
+    max: null or number,
+    autoscaleMargin: number
+  }
+
+The two axes have the same kind of options. The most import are
+min/max that specifies the precise minimum/maximum value on the scale.
+If you don't specify a value, it will automatically be chosen by a
+scaling algorithm that is based on perceived reasonable tick values.
+The "autoscaleMargin" is the fraction of margin that the scaling
+algorithm will add to avoid that the outermost points ends up on the
+grid outline. The default value is 0 for the x axis and 0.02 for the y
+axis.
+
+The rest of the options deal with the ticks. If you don't specify any
+ticks, a tick generator algorithm will make some for you based on the
+"noTicks" setting. The algorithm always tries to generate reasonably
+round tick values so even if you ask for 3 ticks, you might get 5 if
+that fits better with the rounding.
+
+You can control how the ticks look like with "tickDecimals", the
+number of decimals to display (default is auto-detected), or by
+providing a function to "tickFormatter". The function gets one
+argument, the tick value, and should return a string. The default
+formatter looks like this:
+
+  function defaultTickFormatter(val) {
+    return "" + val;
+  }
+
+If you want to override the tick algorithm, you can manually specify
+"ticks" which should be an array of tick values, either like this:
+
+  ticks: [0, 1.2, 2.4]
+
+Or like this (you can mix the two if you like):
+
+  ticks: [[0, "zero"], [1.2, "one mark"], [2.4, "two marks"]]
+
+For extra flexibility you can specify a function as the "ticks"
+parameter. The function will be called with an object with the axis
+min and max and should return a ticks array. Here's a simplistic tick
+generator that spits out intervals of pi, suitable for use on the x
+axis for trigonometric functions:
+
+  function piTickGenerator(axis) {
+    var res = [], i = Math.ceil(axis.min / Math.PI);
+    while (true) {
+      var v = i * Math.PI;
+      if (v > axis.max)
+        break;
+      res.push([v, i + "\u03c0"]);
+      ++i;
+    }
+    
+    return res;
+  }
+
+Note that the scaling and tick algorithms don't work with time series
+yet.
+
+
+Customizing the data series
+===========================
+
+  lines, points, bars: {
+    show: boolean,
+    lineWidth: number,
+    fill: boolean,
+    fillColor: color or null
+  }
+
+  points: {
+    radius: number
+  }
+
+  bars: {
+    barWidth: number
+  }
+
+  colors: [ color1, color2, ... ]
+
+  shadowSize: number
+
+The most important options are "lines", "points" and "bars" that
+specifies whether and how lines, points and bars should be shown for
+each data series. You can specify them independently of each other,
+and Flot will happily draw each of them in turn, e.g.
+
+  var options = {
+    lines: { show: true, fill: true, fillColor: "rgba(255, 255, 255, 0.8)" },
+    points: { show: true, fill: false }
+  };
+
+Try modifying the examples to see the effect of varying these options.
+Note that the options that take numbers works in units of pixels, but
+"barWidth" is the width of the bars in units of the x axis to allow
+for scaling.
+
+The "colors" array specifies a default color theme to get colors for
+the data series from. You can specify as many colors as you like, like
+this:
+
+  colors: ["#d18b2c", "#dba255", "#919733"]
+
+If there are more data series than colors, Flot will try to generate
+extra colors by lightening and darkening colors in the theme.
+
+"shadowSize" is the default size of shadows in pixels. Set it to 0 to
+remove shadows.
+
+
+Customizing the grid
+====================
+
+FIXME: fill in
+
+Customizing the selection
+=========================
+
+FIXME: fill in
 
 
 
@@ -106,12 +273,12 @@ members:
 
   - getCanvas()
 
-    Returns the canvas used for drawing if you need to hack on it
-    yourself.
+    Returns the canvas used for drawing in case you need to hack on it
+    yourself. You'll probably need to get the plot offset too.
   
   - getPlotOffset()
 
-    Gets the offset that grid has within the canvas as an object with
-    the members left, right, top, bottom. I.e., if you draw a circle
-    on the canvas with the center placed at (left, top), its center
-    will be at the top-most, left corner of the grid.
+    Gets the offset that the grid has within the canvas as an object
+    with the members left, right, top, bottom. I.e., if you draw a
+    circle on the canvas with the center placed at (left, top), its
+    center will be at the top-most, left corner of the grid.
