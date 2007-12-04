@@ -1,4 +1,4 @@
-/* Javascript plotting library for jQuery, v. 0.1 */
+/* Javascript plotting library for jQuery, v. 0.2 */
 
 (function($) {
     function Plot(target_, data_, options_) {
@@ -6,10 +6,6 @@
         //   [ series1 series2 ... ]
         // where series is either just the data as [ [x1, y1], [x2, y2], ... ]
         // or { data: [ [x1, y1], [x2, y2], ... ], label: "some label" }
-        
-        function defaultTickFormatter(val) {
-            return "" + val;
-        }
         
         var series = [];
         var options = {
@@ -33,7 +29,6 @@
                 noTicks: 5, // approximate number of ticks for auto-ticks
                 tickFormatter: defaultTickFormatter, // fn: number -> string
                 tickDecimals: null, // no. of decimals, null means auto
-                labelMargin: 3, // in pixels
                 min: null, // min. value to show, null means set automatically
                 max: null, // max. value to show, null means set automatically
                 autoscaleMargin: 0 // margin in % to add if auto-setting min/max
@@ -42,7 +37,6 @@
                 noTicks: 5,
                 ticks: null,
                 tickFormatter: defaultTickFormatter,
-                labelMargin: 3,
                 min: null,
                 max: null,
                 autoscaleMargin: 0.02
@@ -70,7 +64,8 @@
             grid: {
                 color: "#545454", // primary color used for outline and labels
                 backgroundColor: null, // null for transparent, else color
-                tickColor: "#dddddd" // color used for the ticks
+                tickColor: "#dddddd", // color used for the ticks
+                labelMargin: 3 // in pixels
             },
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
@@ -294,15 +289,25 @@
             }
         }
 
+        function defaultTickFormatter(val) {
+            return "" + val;
+        }
+
         function calculateTicks(axis, axisOptions) {
             var i;
             axis.ticks = [];
 
             if (axisOptions.ticks) {
-                // user-supplied ticks, just copy them
-                for (i = 0; i < axisOptions.ticks.length; ++i) {
+                var ticks = axisOptions.ticks;
+
+                if ($.isFunction(ticks))
+                    // generate the ticks
+                    ticks = ticks({ min: axis.min, max: axis.max });
+                
+                // clean up the user-supplied ticks, copy them over
+                for (i = 0; i < ticks.length; ++i) {
                     var v, label;
-                    var t = axisOptions.ticks[i];
+                    var t = ticks[i];
                     if (typeof(t) == "object") {
                         v = t[0];
                         if (t.length > 1)
@@ -364,8 +369,8 @@
 
             plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
             
-            plotOffset.left += labelMaxWidth + options.yaxis.labelMargin;
-            plotOffset.bottom += labelMaxHeight + options.xaxis.labelMargin;
+            plotOffset.left += labelMaxWidth + options.grid.labelMargin;
+            plotOffset.bottom += labelMaxHeight + options.grid.labelMargin;
             
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
@@ -452,7 +457,7 @@
                 tick = xaxis.ticks[i];
                 if (!tick.label)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.xaxis.labelMargin) + 'px;left:' + (plotOffset.left + translateHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="gridLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + translateHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="gridLabel">' + tick.label + "</div>";
             }
             
             // do the y-axis
