@@ -110,8 +110,8 @@
         draw();
         insertLegend();
 
-        this.getCanvas = function() { return canvas; }
-        this.getPlotOffset = function() { return plotOffset; }
+        this.getCanvas = function() { return canvas; };
+        this.getPlotOffset = function() { return plotOffset; };
         
         function parseData(d) {
             var res = [];
@@ -1125,7 +1125,7 @@
 
             drawSelection();
             triggerSelectedEvent();
-        }
+        };
         
         function drawSelection() {
             if (prevSelection != null
