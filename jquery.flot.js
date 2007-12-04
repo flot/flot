@@ -24,7 +24,9 @@
                 labelBoxBorderColor: "#ccc", // border color for the little label boxes
                 container: null, // container (as jQuery object) to put legend in, null means default on top of graph
                 position: "ne", // position of default legend container within plot
-                margin: 5 // distance from grid edge to default legend container within plot 
+                margin: 5, // distance from grid edge to default legend container within plot
+                backgroundColor: null, // null means auto-detect
+                backgroundOpacity: 0.85 // set to 0 to avoid background
             },
             xaxis: {
                 ticks: null, // either [1, 3] or [[1, "a"], 3]
@@ -502,7 +504,7 @@
                     c = parseColor(options.colors[i]);
 
                 // vary color if needed
-                var sign = variation % 2 == 0 ? -1 : 1;
+                var sign = variation % 2 == 1 ? -1 : 1;
                 var factor = 1 + sign * Math.ceil(variation / 2) * 0.2;
                 c.scale(factor, factor, factor);
 
@@ -534,7 +536,7 @@
                 s.lines = $.extend(true, {}, options.lines, s.lines);
                 s.points = $.extend(true, {}, options.points, s.points);
                 s.bars = $.extend(true, {}, options.bars, s.bars);
-                if (!s.shadowSize)
+                if (s.shadowSize != null)
                     s.shadowSize = options.shadowSize;
             }
         }
@@ -969,7 +971,17 @@
                         pos += 'right:' + (m + plotOffset.right) + 'px;';
                     else if (p.charAt(1) == "w")
                         pos += 'left:' + (m + plotOffset.bottom) + 'px;';
-                    target.append('<div class="legend" style="position:absolute;' + pos +'">' + table + '</div>')
+                    var div = $('<div class="legend" style="position:absolute;z-index:2;' + pos +'">' + table + '</div>').appendTo(target);
+                    if (options.legend.backgroundOpacity != 0.0) {
+                        // put in the transparent background
+                        // separately to avoid blended labels and
+                        // label boxes
+                        var c = options.legend.backgroundColor;
+                        if (c == null)
+                            c = parseColor(extractColor(div)).adjust(null, null, null, 1).toString();
+                        $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').appendTo(target).css('opacity', options.legend.backgroundOpacity);
+                        
+                    }
                 }
             }
         }
@@ -1290,7 +1302,25 @@
 	yellow:[255,255,0]
     };    
 
-    // parse string looking for color tuples, returns Color
+    function extractColor(element) {
+        var color, elem = element;
+	do {
+	    color = elem.css("background-color").toLowerCase();
+            // keep going until we find an element that has color, or
+            // we hit the body
+	    if (color != '' && color != 'transparent')
+		break;
+            elem = elem.parent();
+	} while (!$.nodeName(elem.get(0), "body"));
+
+        // catch Safari's way of signalling transparent
+        if (color == "rgba(0, 0, 0, 0)") 
+            return "transparent";
+        
+        return color;
+    }
+    
+    // parse string, returns Color
     function parseColor(str) {
         // Some named colors to work with
         // From Interface by Stefan Petre
@@ -1325,7 +1355,7 @@
 	// Otherwise, we're most likely dealing with a named color
         var name = jQuery.trim(str).toLowerCase();
         if (name == "transparent")
-            return new Color(0, 0, 0, 0);
+            return new Color(255, 255, 255, 0);
         else {
             result = lookupColors[name];
 	    return new Color(result[0], result[1], result[2]);
