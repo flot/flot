@@ -977,8 +977,14 @@
                         // separately to avoid blended labels and
                         // label boxes
                         var c = options.legend.backgroundColor;
-                        if (c == null)
-                            c = parseColor(extractColor(div)).adjust(null, null, null, 1).toString();
+                        if (c == null) {
+                            var tmp;
+                            if (options.grid.backgroundColor != null)
+                                tmp = options.grid.backgroundColor;
+                            else
+                                tmp = extractColor(div);
+                            c = parseColor(tmp).adjust(null, null, null, 1).toString();
+                        }
                         $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').appendTo(target).css('opacity', options.legend.backgroundOpacity);
                         
                     }
