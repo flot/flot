@@ -112,6 +112,8 @@
 
         this.getCanvas = function() { return canvas; };
         this.getPlotOffset = function() { return plotOffset; };
+        this.clearSelection = clearSelection;
+        this.setSelection = setSelection;
         
         function parseData(d) {
             var res = [];
@@ -147,13 +149,13 @@
             // the canvas
             canvas = jQuery('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
 	    if (jQuery.browser.msie) // excanvas hack
-		canvas = window.G_vmlCanvasManager.initElement(canvas)
+		canvas = window.G_vmlCanvasManager.initElement(canvas);
             ctx = canvas.getContext("2d");
 
             // overlay canvas for interactive features
             overlay = jQuery('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
 	    if (jQuery.browser.msie) // excanvas hack
-		overlay = window.G_vmlCanvasManager.initElement(overlay)
+		overlay = window.G_vmlCanvasManager.initElement(overlay);
             octx = overlay.getContext("2d");
         }
 
@@ -248,9 +250,10 @@
                 axis.tickSize = getTickSize(axisOptions.noTicks, min, max, axisOptions.tickDecimals);
                 
                 // consider autoscaling
+                var margin;
                 if (axisOptions.min == null) {
                     // first add in a little margin
-                    var margin = axisOptions.autoscaleMargin;
+                    margin = axisOptions.autoscaleMargin;
                     if (margin != 0) {
                         min -= axis.tickSize * margin;
                         // make sure we don't go below zero if all
@@ -262,7 +265,7 @@
                     }
                 }
                 if (axisOptions.max == null) {
-                    var margin = axisOptions.autoscaleMargin;
+                    margin = axisOptions.autoscaleMargin;
                     if (margin != 0) {
                         max += axis.tickSize * margin;
                         if (max > 0 && axis.datamax <= 0)
@@ -290,11 +293,12 @@
         }
 
         function calculateTicks(axis, axisOptions) {
+            var i;
             axis.ticks = [];
 
             if (axisOptions.ticks) {
                 // user-supplied ticks, just copy them
-                for (var i = 0; i < axisOptions.ticks.length; ++i) {
+                for (i = 0; i < axisOptions.ticks.length; ++i) {
                     var v, label;
                     var t = axisOptions.ticks[i];
                     if (typeof(t) == "object") {
@@ -315,7 +319,7 @@
                 // round to nearest multiple of tick size
                 var start = axis.tickSize * Math.ceil(axis.min / axis.tickSize);
                 // then spew out all possible ticks
-                for (var i = 0; start + i * axis.tickSize <= axis.max; ++i) {
+                for (i = 0; start + i * axis.tickSize <= axis.max; ++i) {
                     v = start + i * axis.tickSize;
                     
                     // round (this is always needed to fix numerical instability)
@@ -345,7 +349,7 @@
             // measure it
             var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller" class="gridLabel">' + max_label + '</div>').appendTo(target);
             labelMaxWidth = dummyDiv.width();
-            labelMaxHeight = dummyDiv.height()
+            labelMaxHeight = dummyDiv.height();
             dummyDiv.remove();
 
             var maxOutset = 2; // grid outline line width
@@ -435,8 +439,9 @@
             // easy to mid-align
             var noLabels = 0;
             for (i = 0; i < xaxis.ticks.length; ++i) {
-                if (xaxis.ticks[i].label)
+                if (xaxis.ticks[i].label) {
                     ++noLabels;
+                }
             }
             var xBoxWidth = plotWidth / noLabels;
             
@@ -456,7 +461,7 @@
                 html += '<div style="position:absolute;top:' + (plotOffset.top + translateVert(tick.v) - labelMaxHeight/2) + 'px;left:0;width:' + labelMaxWidth + 'px;text-align:right" class="gridLabel">' + tick.label + "</div>";
             }
 
-            html += '</div>'
+            html += '</div>';
             
             target.append(html);
         }
@@ -937,7 +942,7 @@
                 
                 if (i % options.legend.noColumns == 0) {
                     if (rowStarted)
-                        fragments.push('</tr>')
+                        fragments.push('</tr>');
                     fragments.push('<tr>');
                     rowStarted = true;
                 }
@@ -974,11 +979,9 @@
         var prevSelection = null;
         var selectionInterval = null;
         
-        function onMouseMove(e) {
+        function onMouseMove(ev) {
             // FIXME: temp. work-around until jQuery bug 1871 is fixed
-            var e = e || window.event;
-            var de = document.documentElement;
-	    var b = document.body;
+            var e = ev || window.event;
 	    if (e.pageX == null && e.clientX != null) {
 		var de = document.documentElement, b = document.body;
 		lastMousePos.pageX = e.clientX + (de && de.scrollLeft || b.scrollLeft || 0);
@@ -1041,7 +1044,7 @@
             setSelectionPos(selection.second, e);
             clearSelection();
             if (!selectionIsSane() || e.which != 1)
-                return;
+                return false;
             
             drawSelection();
             triggerSelectedEvent();
@@ -1050,7 +1053,7 @@
         }
 
         function setSelectionPos(pos, e) {
-            var offset = $(overlay).offset()
+            var offset = $(overlay).offset();
             if (options.selection.mode == "y") {
                 if (pos == selection.first)
                     pos.x = 0;
@@ -1101,9 +1104,7 @@
             prevSelection = null;
         }
         
-        this.clearSelection = clearSelection;
-
-        this.setSelection = function(area) {
+        function setSelection(area) {
             clearSelection();
             
             if (options.selection.mode == "x") {
@@ -1111,28 +1112,28 @@
                 selection.second.y = plotHeight;
             }
             else {
-                selection.first.y = (yaxis.max - area.y1) * vertScale
-                selection.second.y = (yaxis.max - area.y2) * vertScale
+                selection.first.y = (yaxis.max - area.y1) * vertScale;
+                selection.second.y = (yaxis.max - area.y2) * vertScale;
             }
             if (options.selection.mode == "y") {
                 selection.first.x = 0;
                 selection.second.x = plotWidth;
             }
             else {
-                selection.first.x = (area.x1 - xaxis.min) * hozScale
-                selection.second.x = (area.x2 - xaxis.min) * hozScale
+                selection.first.x = (area.x1 - xaxis.min) * hozScale;
+                selection.second.x = (area.x2 - xaxis.min) * hozScale;
             }
 
             drawSelection();
             triggerSelectedEvent();
-        };
+        }
         
         function drawSelection() {
-            if (prevSelection != null
-                && selection.first.x == prevSelection.first.x
-                && selection.first.y == prevSelection.first.y
-                && selection.second.x == prevSelection.second.x
-                && selection.second.y == prevSelection.second.y)
+            if (prevSelection != null &&
+                selection.first.x == prevSelection.first.x &&
+                selection.first.y == prevSelection.first.y && 
+                selection.second.x == prevSelection.second.x &&
+                selection.second.y == prevSelection.second.y)
                 return;
             
             octx.strokeStyle = parseColor(options.selection.color).scale(null, null, null, 0.8).toString();
@@ -1188,10 +1189,10 @@
     // color helpers, inspiration from the jquery color animation
     // plugin by John Resig
     function Color (r, g, b, a) {
-        this.r = r != null ? r: 0;
-        this.g = g != null ? g: 0;
-        this.b = b != null ? b: 0;
-        this.a = a != null ? a: 1.0;
+        this.r = (r != null) ? r: 0;
+        this.g = (g != null) ? g: 0;
+        this.b = (b != null) ? b: 0;
+        this.a = (a != null) ? a: 1.0;
 
         this.toString = function() {
             if (this.a >= 1.0)
@@ -1202,7 +1203,7 @@
                 return "rgba(" + [
                     this.r, this.g, this.b, this.a
                 ].join(",") + ")";
-        }
+        };
 
         this.scale = function(rf, gf, bf, af) {
             if (rf != null)
@@ -1214,7 +1215,7 @@
             if (af != null)
                 this.a *= af;
             return this.normalize();
-        }
+        };
 
         this.adjust = function(rd, gd, bd, ad) {
             if (rd != null)
@@ -1226,11 +1227,11 @@
             if (ad != null)
                 this.a += ad;
             return this.normalize();
-        }
+        };
 
         this.clone = function() {
             return new Color(this.r, this.b, this.g, this.a);
-        }
+        };
 
         this.normalize = function() {
             this.r = Math.max(Math.min(parseInt(this.r), 255), 0);
@@ -1238,7 +1239,7 @@
             this.b = Math.max(Math.min(parseInt(this.b), 255), 0);
             this.a = Math.max(Math.min(this.a, 1), 0);
             return this;
-        }
+        };
 
         this.normalize();
     }
