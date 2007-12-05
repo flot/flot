@@ -541,7 +541,7 @@
                 s.lines = $.extend(true, {}, options.lines, s.lines);
                 s.points = $.extend(true, {}, options.points, s.points);
                 s.bars = $.extend(true, {}, options.bars, s.bars);
-                if (s.shadowSize != null)
+                if (s.shadowSize == null)
                     s.shadowSize = options.shadowSize;
             }
         }
