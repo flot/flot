@@ -57,9 +57,11 @@ object with a couple of methods.
 What's with the name?
 ---------------------
 
-Well, "Flot" is like "Plot".
+First: it's pronounced with a short o, like "plot". Not like "flawed".
+
+So "Flot" is like "Plot".
 
 And if you look up "flot" in a Danish-to-English dictionary, some up
 the words that come up are "good-looking", "attractive", "stylish",
 "smart", "impressive", "extravagant". One of the main goals with Flot
-is pretty looks.
+is pretty looks. Flot is supposed to be "flot".
