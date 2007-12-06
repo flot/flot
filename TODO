@@ -2,8 +2,10 @@ These are mostly ideas, that they're written down here is no guarantee
 that they'll ever be done. If you want something done, feel free to
 say why or come up with a patch. :-)
 
-support segmented lines
-  - put in null value to signify a break in the data set
+handling time data
+  - dataformat
+  - axis adjustment
+  - tick generation
 
 grid configuration
   - how ticks look like
@@ -16,12 +18,7 @@ selection
 interactive zooming
   - convenience zoom(x1, y1, x2, y2)? and zoomOut() (via zoom stack)?
   - auto-zoom mode?
-  - auto-margin
-
-handling time data
-  - dataformat
-  - axis adjustment
-  - tick generation
+  - auto-margins
 
 support for highlighting stuff
   - lines
@@ -30,8 +27,10 @@ support for highlighting stuff
 legend
   - interactive auto-highlight of graph?
 
-interactive hot points
-  - fire event with value
+interactive hover over
+  - fire event with value for points
+  - fire event with graph id for lines
 
-interactive hover over lines
-  - fire event with graph id
+support segmented lines
+  - put in null value to signify a break in the data set
+
