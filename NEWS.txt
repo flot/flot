@@ -1,0 +1,25 @@
+Flot 0.2
+--------
+
+Added support for putting a background behind the default legend. The
+default is the partly transparent background color. Added
+backgroundColor and backgroundOpacity to the legend options to control
+this.
+
+The ticks options can now be a callback function that takes one
+parameter, an object with the attributes min and max. The function
+should return a ticks array.
+
+Fixed a couple of bugs.
+
+The API should now be fully documented.
+
+Patch from Guy Fraser to make parts of the code smaller.
+
+API changes: Moved labelMargin option to grid from x/yaxis.
+
+
+Flot 0.1
+--------
+
+First public release.
