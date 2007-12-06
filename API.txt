@@ -218,7 +218,11 @@ and Flot will happily draw each of them in turn, e.g.
     points: { show: true, fill: false }
   };
 
-Try modifying the examples to see the effect of varying these options.
+"lineWidth" is the thickness of the line or outline and "fill" is
+whether the shape should be filled. For lines, this produces area
+graphs. If "fillColor" is null (default), the color for the data
+series is used.
+
 Note that the options that take numbers works in units of pixels, but
 "barWidth" is the width of the bars in units of the x axis to allow
 for scaling.
@@ -239,13 +243,45 @@ remove shadows.
 Customizing the grid
 ====================
 
-FIXME: fill in
+  grid: {
+    color: color,
+    backgroundColor: color or null,
+    tickColor: color,
+    labelMargin: number
+  }
+
+The grid is the thing with the two axes and a number of ticks. "color"
+is the color of the grid itself whereas "backgroundColor" specifies
+the background color inside the grid area. The default value of null
+means that the background is transparent. You should only need to set
+backgroundColor if want the grid area to be a different color from the
+page color. Otherwise you might as well just set the background color
+of the page with CSS.
+
+"tickColor" is the color of the ticks and labelMargin is the spacing
+between tick labels and the grid.
+
 
 Customizing the selection
 =========================
 
-FIXME: fill in
+  selection: {
+    mode: null or "x" or "y" or "xy",
+    color: color
+  }
 
+You enable selection support by setting the mode to one of "x", "y" or
+"xy". In "x" mode, the user will only be able to specify the x range,
+similarly for "y" mode. For "xy", the selection becomes a rectangle
+where both ranges can be specified. "color" is color of the selection.
+
+When selection support is enabled, a "selected" event will be emitted
+on the DOM element you passed into the plot function. The event
+handler gets one extra parameter with the area selected, like this:
+
+  placeholder.bind("selected", function(event, area) {
+    // area selected is area.x1 to area.x2 and area.y1 to area.y2
+  });
 
 
 Plot Members
