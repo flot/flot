@@ -1,4 +1,8 @@
-/* Javascript plotting library for jQuery, v. 0.2 */
+/* Javascript plotting library for jQuery, v. 0.2.
+ *
+ * Released under the MIT license by iola, December 2007.
+ *
+ */
 
 (function($) {
     function Plot(target_, data_, options_) {
@@ -11,9 +15,6 @@
         var options = {
             // the color theme used for graphs
             colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
-            //colors: ["#edc240", "#ed4040", "#80ed40", "#40edd6", "#4048ed", "#9440ed", "#ed40d4"],
-            //45 colors: ["#edc240", "#ed4040", "#ed40c2", "#9740ed", "#406bed", "#40eded", "#40ed6b", "#97ed40"],
-            //scheme colors: ["#d18b2c", "#dba255", "#919733", "#c5cc6d", "#5b8385", "#adcbc1", "#af844f", "#ddb884", "#e8cfac"],
             legend: {
                 show: true,
                 noColumns: 1, // number of colums in legend table
@@ -1187,7 +1188,7 @@
     
     $.plot = function(target, data, options) {
         var plot = new Plot(target, data, options);
-        /*var t0 = new Date();        
+        /*var t0 = new Date();     
         var t1 = new Date();
 	var tstr = "time used (msecs): " + (t1.getTime() - t0.getTime())
 	if (window.console)
@@ -1197,72 +1198,63 @@
         return plot;
     };
 
-    /* FIXME: delete
-    function drawLine(ctx, x1, y1, x2, y2) {
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-    }
-    */
     function getMagnitude(x) {
         return Math.pow(10, Math.floor(Math.log(x) / Math.LN10));
     }
 
+       
     // color helpers, inspiration from the jquery color animation
     // plugin by John Resig
     function Color (r, g, b, a) {
-        this.r = (r != null) ? r: 0;
-        this.g = (g != null) ? g: 0;
-        this.b = (b != null) ? b: 0;
-        this.a = (a != null) ? a: 1.0;
-
+       
+        var rgba = ['r','g','b','a'];
+        var x = 4; //rgba.length
+       
+        while (-1<--x) {
+            this[rgba[x]] = arguments[x] || ((x==3) ? 1.0 : 0);
+        }
+       
         this.toString = function() {
-            if (this.a >= 1.0)
-                return "rgb(" + [
-                    this.r, this.g, this.b
-                ].join(",") + ")";
-            else
-                return "rgba(" + [
-                    this.r, this.g, this.b, this.a
-                ].join(",") + ")";
-        };
+            if (this.a >= 1.0) {
+                return "rgb("+[this.r,this.g,this.b].join(",")+")";
+            } else {
+                return "rgba("+[this.r,this.g,this.b,this.a].join(",")+")";
+            }
+        }
 
         this.scale = function(rf, gf, bf, af) {
-            if (rf != null)
-                this.r *= rf;
-            if (gf != null)
-                this.g *= gf;
-            if (bf != null)
-                this.b *= bf;
-            if (af != null)
-                this.a *= af;
+            x = 4; //rgba.length
+            while (-1<--x) {
+                if (arguments[x] != null)
+                    this[rgba[x]] *= arguments[x];
+            }
             return this.normalize();
-        };
+        }
 
         this.adjust = function(rd, gd, bd, ad) {
-            if (rd != null)
-                this.r += rd;
-            if (gd != null)
-                this.g += gd;
-            if (bd != null)
-                this.b += bd;
-            if (ad != null)
-                this.a += ad;
+            x = 4; //rgba.length
+            while (-1<--x) {
+                if (arguments[x] != null)
+                    this[rgba[x]] += arguments[x];
+            }
             return this.normalize();
-        };
+        }
 
         this.clone = function() {
             return new Color(this.r, this.b, this.g, this.a);
-        };
+        }
+
+        var limit = function(val,minVal,maxVal) {
+            return Math.max(Math.min(val, maxVal), minVal);
+        }
 
         this.normalize = function() {
-            this.r = Math.max(Math.min(parseInt(this.r), 255), 0);
-            this.g = Math.max(Math.min(parseInt(this.g), 255), 0);
-            this.b = Math.max(Math.min(parseInt(this.b), 255), 0);
-            this.a = Math.max(Math.min(this.a, 1), 0);
+            this.r = limit(parseInt(this.r), 0, 255);
+            this.g = limit(parseInt(this.g), 0, 255);
+            this.b = limit(parseInt(this.b), 0, 255);
+            this.a = limit(this.a, 0, 1)
             return this;
-        };
+        }
 
         this.normalize();
     }
