@@ -10,6 +10,9 @@ The ticks options can now be a callback function that takes one
 parameter, an object with the attributes min and max. The function
 should return a ticks array.
 
+Added labelFormatter option in legend, useful for turning the legend
+labels into links.
+
 Fixed a couple of bugs.
 
 The API should now be fully documented.

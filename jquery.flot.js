@@ -18,6 +18,7 @@
             legend: {
                 show: true,
                 noColumns: 1, // number of colums in legend table
+                labelFormatter: null, // fn: string -> string
                 labelBoxBorderColor: "#ccc", // border color for the little label boxes
                 container: null, // container (as jQuery object) to put legend in, null means default on top of graph
                 position: "ne", // position of default legend container within plot
@@ -954,10 +955,14 @@
                     fragments.push('<tr>');
                     rowStarted = true;
                 }
+
+                var label = series[i].label;
+                if (options.legend.labelFormatter != null)
+                    label = options.legend.labelFormatter(label);
                 
                 fragments.push(
                     '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:14px;height:10px;background-color:' + series[i].color + '"></div></div></td>' +
-                    '<td class="legendLabel">' + series[i].label + '</td>');
+                    '<td class="legendLabel">' + label + '</td>');
             }
             if (rowStarted)
                 fragments.push('</tr>');

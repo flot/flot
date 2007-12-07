@@ -94,8 +94,9 @@ Customizing the legend
 
   legend: {
     show: boolean,
-    noColumns: number,
+    labelFormatter: null or (fn: string -> string),
     labelBoxBorderColor: color,
+    noColumns: number,
     position: "ne" or "nw" or "se" or "sw",
     margin: number of pixels,
     backgroundColor: null or color,
@@ -104,23 +105,33 @@ Customizing the legend
   }
 
 The legend is generated as a table with the data series labels and
-small label boxes with the color of the series. "noColumns" is the
-number of columns to divide the legend table into. "position"
-specifies the overall placement of the legend within the plot
-(top-right, top-left, etc.) and margin the distance to the plot edge.
-"backgroundColor" and "backgroundOpacity" specifies the background.
-The default is a partly transparent auto-detected background.
+small label boxes with the color of the series. If you want to format
+the labels in some way, e.g. make them to links, you can pass in a
+function for "labelFormatter". Here's an example that makes them
+clickable:
 
-If you want the legend to appear somewhere else, you can specify
-"container" as a jQuery object to put the legend table in. The
-"position" and "margin" etc. will then be ignored.
+  labelFormatter: function(label) {
+    return '<a href="' + label + '">' + label + '</a>';
+  }
+
+"noColumns" is the number of columns to divide the legend table into.
+"position" specifies the overall placement of the legend within the
+plot (top-right, top-left, etc.) and margin the distance to the plot
+edge. "backgroundColor" and "backgroundOpacity" specifies the
+background. The default is a partly transparent auto-detected
+background.
+
+If you want the legend to appear somewhere else in the DOM, you can
+specify "container" as a jQuery object to put the legend table into.
+The "position" and "margin" etc. options will then be ignored.
+
 
 
 Customizing the axes
 ====================
 
   xaxis, yaxis: {
-    ticks: null or ticks array,
+    ticks: null or ticks array or (fn: range -> ticks array),
     noTicks: number,
     tickFormatter: fn: number -> string,
     tickDecimals: null or number,
