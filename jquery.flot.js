@@ -434,7 +434,7 @@
             ctx.lineWidth = 2;
             ctx.strokeStyle = options.grid.color;
             ctx.lineJoin = "round";
-            ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, plotWidth, plotHeight);
+            ctx.strokeRect(0, 0, plotWidth, plotHeight);
             ctx.restore();
         }
         

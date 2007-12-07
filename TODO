@@ -9,7 +9,6 @@ handling time data
 
 grid configuration
   - how ticks look like
-  - (handling of 1/2 linewidth hack in grid?)
 
 selection
   - user should be able to cancel selection with escape
