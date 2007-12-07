@@ -388,11 +388,11 @@
             }
         }
 
-        function translateHoz(x) {
+        function tHoz(x) {
             return (x - xaxis.min) * hozScale;
         }
 
-        function translateVert(y) {
+        function tVert(y) {
             return plotHeight - (y - yaxis.min) * vertScale;
         }
 
@@ -416,8 +416,8 @@
                 if (v == xaxis.min || v == xaxis.max)
                     continue;   // skip those lying on the axes
 
-                ctx.moveTo(Math.floor(translateHoz(v)) + ctx.lineWidth/2, 0);
-                ctx.lineTo(Math.floor(translateHoz(v)) + ctx.lineWidth/2, plotHeight);
+                ctx.moveTo(Math.floor(tHoz(v)) + ctx.lineWidth/2, 0);
+                ctx.lineTo(Math.floor(tHoz(v)) + ctx.lineWidth/2, plotHeight);
             }
 
             for (i = 0; i < yaxis.ticks.length; ++i) {
@@ -425,8 +425,8 @@
                 if (v == yaxis.min || v == yaxis.max)
                     continue;
 
-                ctx.moveTo(0, Math.floor(translateVert(v)) + ctx.lineWidth/2);
-                ctx.lineTo(plotWidth, Math.floor(translateVert(v)) + ctx.lineWidth/2);
+                ctx.moveTo(0, Math.floor(tVert(v)) + ctx.lineWidth/2);
+                ctx.lineTo(plotWidth, Math.floor(tVert(v)) + ctx.lineWidth/2);
             }
             ctx.stroke();
             
@@ -459,7 +459,7 @@
                 tick = xaxis.ticks[i];
                 if (!tick.label)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + translateHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="gridLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + tHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="gridLabel">' + tick.label + "</div>";
             }
             
             // do the y-axis
@@ -467,7 +467,7 @@
                 tick = yaxis.ticks[i];
                 if (!tick.label || tick.label.length == 0)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + translateVert(tick.v) - labelMaxHeight/2) + 'px;left:0;width:' + labelMaxWidth + 'px;text-align:right" class="gridLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + tVert(tick.v) - labelMaxHeight/2) + 'px;left:0;width:' + labelMaxWidth + 'px;text-align:right" class="gridLabel">' + tick.label + "</div>";
             }
 
             html += '</div>';
@@ -562,8 +562,8 @@
                 if (data.length < 2)
                     return;
 
-                var prevx = translateHoz(data[0][0]),
-                    prevy = translateVert(data[0][1]) + offset;
+                var prevx = tHoz(data[0][0]),
+                    prevy = tVert(data[0][1]) + offset;
 
                 ctx.beginPath();
                 ctx.moveTo(prevx, prevy);
@@ -628,11 +628,11 @@
                         x2 = xaxis.max;
                     }
 
-                    if (prevx != translateHoz(x1) || prevy != translateVert(y1) + offset)
-                        ctx.moveTo(translateHoz(x1), translateVert(y1) + offset);
+                    if (prevx != tHoz(x1) || prevy != tVert(y1) + offset)
+                        ctx.moveTo(tHoz(x1), tVert(y1) + offset);
                     
-                    prevx = translateHoz(x2);
-                    prevy = translateVert(y2) + offset;
+                    prevx = tHoz(x2);
+                    prevy = tVert(y2) + offset;
                     ctx.lineTo(prevx, prevy);
                 }
                 ctx.stroke();
@@ -683,19 +683,19 @@
                     }
 
                     if (first) {
-                        ctx.moveTo(translateHoz(x1), translateVert(bottom));
+                        ctx.moveTo(tHoz(x1), tVert(bottom));
                         first = false;
                     }
                     
                     // now first check the case where both is outside
                     if (y1 >= yaxis.max && y2 >= yaxis.max) {
-                        ctx.lineTo(translateHoz(x1), translateVert(yaxis.max));
-                        ctx.lineTo(translateHoz(x2), translateVert(yaxis.max));
+                        ctx.lineTo(tHoz(x1), tVert(yaxis.max));
+                        ctx.lineTo(tHoz(x2), tVert(yaxis.max));
                         continue;
                     }
                     else if (y1 <= yaxis.min && y2 <= yaxis.min) {
-                        ctx.lineTo(translateHoz(x1), translateVert(yaxis.min));
-                        ctx.lineTo(translateHoz(x2), translateVert(yaxis.min));
+                        ctx.lineTo(tHoz(x1), tVert(yaxis.min));
+                        ctx.lineTo(tHoz(x2), tVert(yaxis.min));
                         continue;
                     }
                     
@@ -735,13 +735,13 @@
                         else
                             top = yaxis.max;
                         
-                        ctx.lineTo(translateHoz(x1old), translateVert(top));
-                        ctx.lineTo(translateHoz(x1), translateVert(top));
+                        ctx.lineTo(tHoz(x1old), tVert(top));
+                        ctx.lineTo(tHoz(x1), tVert(top));
                     }
 		    
                     // fill the triangles
-                    ctx.lineTo(translateHoz(x1), translateVert(y1));
-                    ctx.lineTo(translateHoz(x2), translateVert(y2));
+                    ctx.lineTo(tHoz(x1), tVert(y1));
+                    ctx.lineTo(tHoz(x2), tVert(y2));
 
 		    // fill the other rectangle if it's there
                     if (x2 != x2old) {
@@ -750,20 +750,20 @@
                         else
                             top = yaxis.max;
                         
-                        ctx.lineTo(translateHoz(x2old), translateVert(top));
-                        ctx.lineTo(translateHoz(x2), translateVert(top));
+                        ctx.lineTo(tHoz(x2old), tVert(top));
+                        ctx.lineTo(tHoz(x2), tVert(top));
                     }
 
                     lastX = Math.max(x2, x2old);
                 }
                 /*
                 ctx.beginPath();
-                ctx.moveTo(translateHoz(data[0][0]), translateVert(0));
+                ctx.moveTo(tHoz(data[0][0]), tVert(0));
 	        for (var i = 0; i < data.length; i++) {
-                    ctx.lineTo(translateHoz(data[i][0]), translateVert(data[i][1]));
+                    ctx.lineTo(tHoz(data[i][0]), tVert(data[i][1]));
                 }
-                ctx.lineTo(translateHoz(data[data.length - 1][0]), translateVert(0));*/
-                ctx.lineTo(translateHoz(lastX), translateVert(bottom));
+                ctx.lineTo(tHoz(data[data.length - 1][0]), tVert(0));*/
+                ctx.lineTo(tHoz(lastX), tVert(bottom));
                 ctx.fill();
             }
             
@@ -804,7 +804,7 @@
                         continue;
                     
                     ctx.beginPath();
-                    ctx.arc(translateHoz(x), translateVert(y), radius, 0, 2 * Math.PI, true);
+                    ctx.arc(tHoz(x), tVert(y), radius, 0, 2 * Math.PI, true);
                     if (fill)
                         ctx.fill();
                     ctx.stroke();
@@ -817,7 +817,7 @@
                     if (x < xaxis.min || x > xaxis.max || y < yaxis.min || y > yaxis.max)
                         continue;
                     ctx.beginPath();
-                    ctx.arc(translateHoz(x), translateVert(y) + offset, radius, 0, Math.PI, false);
+                    ctx.arc(tHoz(x), tVert(y) + offset, radius, 0, Math.PI, false);
                     ctx.stroke();
                 }
             }
@@ -880,30 +880,30 @@
                     // fill the bar
                     if (fill) {
                         ctx.beginPath();
-                        ctx.moveTo(translateHoz(left), translateVert(bottom) + offset);
-                        ctx.lineTo(translateHoz(left), translateVert(top) + offset);
-                        ctx.lineTo(translateHoz(right), translateVert(top) + offset);
-                        ctx.lineTo(translateHoz(right), translateVert(bottom) + offset);
+                        ctx.moveTo(tHoz(left), tVert(bottom) + offset);
+                        ctx.lineTo(tHoz(left), tVert(top) + offset);
+                        ctx.lineTo(tHoz(right), tVert(top) + offset);
+                        ctx.lineTo(tHoz(right), tVert(bottom) + offset);
                         ctx.fill();
                     }
 
                     // draw outline
                     if (drawLeft || drawRight || drawTop) {
                         ctx.beginPath();
-                        ctx.moveTo(translateHoz(left), translateVert(bottom) + offset);
+                        ctx.moveTo(tHoz(left), tVert(bottom) + offset);
                         if (drawLeft)
-                            ctx.lineTo(translateHoz(left), translateVert(top) + offset);
+                            ctx.lineTo(tHoz(left), tVert(top) + offset);
                         else
-                            ctx.moveTo(translateHoz(left), translateVert(top) + offset);
+                            ctx.moveTo(tHoz(left), tVert(top) + offset);
 
                         if (drawTop)
-                            ctx.lineTo(translateHoz(right), translateVert(top) + offset);
+                            ctx.lineTo(tHoz(right), tVert(top) + offset);
                         else
-                            ctx.moveTo(translateHoz(right), translateVert(top) + offset);
+                            ctx.moveTo(tHoz(right), tVert(top) + offset);
                         if (drawRight)
-                            ctx.lineTo(translateHoz(right), translateVert(bottom) + offset);
+                            ctx.lineTo(tHoz(right), tVert(bottom) + offset);
                         else
-                            ctx.moveTo(translateHoz(right), translateVert(bottom) + offset);
+                            ctx.moveTo(tHoz(right), tVert(bottom) + offset);
                         ctx.stroke();
                     }
                 }
@@ -1225,7 +1225,7 @@
             } else {
                 return "rgba("+[this.r,this.g,this.b,this.a].join(",")+")";
             }
-        }
+        };
 
         this.scale = function(rf, gf, bf, af) {
             x = 4; //rgba.length
@@ -1234,7 +1234,7 @@
                     this[rgba[x]] *= arguments[x];
             }
             return this.normalize();
-        }
+        };
 
         this.adjust = function(rd, gd, bd, ad) {
             x = 4; //rgba.length
@@ -1243,23 +1243,23 @@
                     this[rgba[x]] += arguments[x];
             }
             return this.normalize();
-        }
+        };
 
         this.clone = function() {
             return new Color(this.r, this.b, this.g, this.a);
-        }
+        };
 
         var limit = function(val,minVal,maxVal) {
             return Math.max(Math.min(val, maxVal), minVal);
-        }
+        };
 
         this.normalize = function() {
             this.r = limit(parseInt(this.r), 0, 255);
             this.g = limit(parseInt(this.g), 0, 255);
             this.b = limit(parseInt(this.b), 0, 255);
-            this.a = limit(this.a, 0, 1)
+            this.a = limit(this.a, 0, 1);
             return this;
-        }
+        };
 
         this.normalize();
     }
