@@ -7,7 +7,8 @@ website:
   http://code.google.com/p/flot/
 
 Take a look at the examples linked from above, they should give a good
-impression of what Flot can do.
+impression of what Flot can do and the source code of the examples is
+probably the fastest way to learn how to use Flot.
   
 
 Installation
