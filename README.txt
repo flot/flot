@@ -23,6 +23,11 @@ include the excanvas script like this:
 
   <!--[if IE]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
 
+If it's not working on your development IE 6.0, check that it has
+support for VML which excanvas is relying on. It appears that some
+stripped down versions used for test environments on virtual machines
+lack the VML support.
+  
 Also note that you need at least jQuery 1.2.1.
 
 
