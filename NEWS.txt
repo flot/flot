@@ -1,3 +1,10 @@
+Flot 0.x
+--------
+
+Fixed a bug in dealing with data where min = max, thanks to Michael
+Messinides.
+
+
 Flot 0.2
 --------
 

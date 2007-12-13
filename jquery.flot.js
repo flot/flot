@@ -232,51 +232,49 @@
         function calculateRange(axis, axisOptions) {
             var min = axisOptions.min != null ? axisOptions.min : axis.datamin;
             var max = axisOptions.max != null ? axisOptions.max : axis.datamax;
-            var delta = max - min;
 
             // check degenerate case
-            if (delta == 0.0) {
+            if (max - min == 0.0) {
                 var widen;
                 if (max == 0.0)
                     widen = 1.0;
                 else
                     widen = 0.01;
 
-                axis.min = max - widen;
-                axis.max = max + widen;
+                min -= widen;
+                max += widen;
             }
-            else {
-                axis.tickSize = getTickSize(axisOptions.noTicks, min, max, axisOptions.tickDecimals);
+            
+            axis.tickSize = getTickSize(axisOptions.noTicks, min, max, axisOptions.tickDecimals);
                 
-                // consider autoscaling
-                var margin;
-                if (axisOptions.min == null) {
-                    // first add in a little margin
-                    margin = axisOptions.autoscaleMargin;
-                    if (margin != 0) {
-                        min -= axis.tickSize * margin;
-                        // make sure we don't go below zero if all
-                        // values are positive
-                        if (min < 0 && axis.datamin >= 0)
-                            min = 0;
-
-                        min = axis.tickSize * Math.floor(min / axis.tickSize);
-                    }
+            // consider autoscaling
+            var margin;
+            if (axisOptions.min == null) {
+                // first add in a little margin
+                margin = axisOptions.autoscaleMargin;
+                if (margin != 0) {
+                    min -= axis.tickSize * margin;
+                    // make sure we don't go below zero if all
+                    // values are positive
+                    if (min < 0 && axis.datamin >= 0)
+                        min = 0;
+                    
+                    min = axis.tickSize * Math.floor(min / axis.tickSize);
                 }
-                if (axisOptions.max == null) {
-                    margin = axisOptions.autoscaleMargin;
-                    if (margin != 0) {
-                        max += axis.tickSize * margin;
-                        if (max > 0 && axis.datamax <= 0)
-                            max = 0;
-
-                        max = axis.tickSize * Math.ceil(max / axis.tickSize);
-                    }
-                }
-                
-                axis.min = min;
-                axis.max = max;
             }
+            if (axisOptions.max == null) {
+                margin = axisOptions.autoscaleMargin;
+                if (margin != 0) {
+                    max += axis.tickSize * margin;
+                    if (max > 0 && axis.datamax <= 0)
+                        max = 0;
+                    
+                    max = axis.tickSize * Math.ceil(max / axis.tickSize);
+                }
+            }
+            
+            axis.min = min;
+            axis.max = max;
         }
 
         function extendXRangeIfNeededByBar() {
