@@ -385,7 +385,7 @@
         function draw() {
             drawGrid();
             drawLabels();
-	    for (var i = 0; i < series.length; i++) {
+            for (var i = 0; i < series.length; i++) {
                 drawSeries(series[i]);
             }
         }
@@ -569,7 +569,7 @@
 
                 ctx.beginPath();
                 ctx.moveTo(prevx, prevy);
-	        for (var i = 0; i < data.length - 1; ++i) {
+                for (var i = 0; i < data.length - 1; ++i) {
                     var x1 = data[i][0], y1 = data[i][1],
                         x2 = data[i+1][0], y2 = data[i+1][1];
 
@@ -645,12 +645,12 @@
                     return;
 
                 var bottom = Math.min(Math.max(0, yaxis.min), yaxis.max);
-		var top, lastX = 0;
+                var top, lastX = 0;
 
                 var first = true;
                 
                 ctx.beginPath();
-	        for (var i = 0; i < data.length - 1; ++i) {
+                for (var i = 0; i < data.length - 1; ++i) {
                     var x1 = data[i][0], y1 = data[i][1],
                         x2 = data[i+1][0], y2 = data[i+1][1];
 
@@ -740,12 +740,12 @@
                         ctx.lineTo(tHoz(x1old), tVert(top));
                         ctx.lineTo(tHoz(x1), tVert(top));
                     }
-		    
+                    
                     // fill the triangles
                     ctx.lineTo(tHoz(x1), tVert(y1));
                     ctx.lineTo(tHoz(x2), tVert(y2));
 
-		    // fill the other rectangle if it's there
+                    // fill the other rectangle if it's there
                     if (x2 != x2old) {
                         if (y2 <= yaxis.min)
                             top = yaxis.min;
@@ -761,7 +761,7 @@
                 /*
                 ctx.beginPath();
                 ctx.moveTo(tHoz(data[0][0]), tVert(0));
-	        for (var i = 0; i < data.length; i++) {
+                for (var i = 0; i < data.length; i++) {
                     ctx.lineTo(tHoz(data[i][0]), tVert(data[i][1]));
                 }
                 ctx.lineTo(tHoz(data[data.length - 1][0]), tVert(0));*/
@@ -800,7 +800,7 @@
 
         function drawSeriesPoints(series) {
             function plotPoints(data, radius, fill) {
-	        for (var i = 0; i < data.length; ++i) {
+                for (var i = 0; i < data.length; ++i) {
                     var x = data[i][0], y = data[i][1];
                     if (x < xaxis.min || x > xaxis.max || y < yaxis.min || y > yaxis.max)
                         continue;
@@ -814,7 +814,7 @@
             }
 
             function plotPointShadows(data, offset, radius) {
-	        for (var i = 0; i < data.length; ++i) {
+                for (var i = 0; i < data.length; ++i) {
                     var x = data[i][0], y = data[i][1];
                     if (x < xaxis.min || x > xaxis.max || y < yaxis.min || y > yaxis.max)
                         continue;
@@ -852,7 +852,7 @@
                 if (data.length < 2)
                     return;
 
-	        for (var i = 0; i < data.length; i++) {
+                for (var i = 0; i < data.length; i++) {
                     var x = data[i][0], y = data[i][1];
                     var drawLeft = true, drawTop = true, drawRight = true;
                     var left = x, right = x + barWidth, bottom = 0, top = y;
@@ -1014,11 +1014,11 @@
         function onMouseMove(ev) {
             // FIXME: temp. work-around until jQuery bug 1871 is fixed
             var e = ev || window.event;
-	    if (e.pageX == null && e.clientX != null) {
-		var de = document.documentElement, b = document.body;
-		lastMousePos.pageX = e.clientX + (de && de.scrollLeft || b.scrollLeft || 0);
-		lastMousePos.pageY = e.clientY + (de && de.scrollTop || b.scrollTop || 0);
-	    }
+            if (e.pageX == null && e.clientX != null) {
+                var de = document.documentElement, b = document.body;
+                lastMousePos.pageX = e.clientX + (de && de.scrollLeft || b.scrollLeft || 0);
+                lastMousePos.pageY = e.clientY + (de && de.scrollTop || b.scrollTop || 0);
+            }
             else {
                 lastMousePos.pageX = e.pageX;
                 lastMousePos.pageY = e.pageY;
