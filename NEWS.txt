@@ -1,8 +1,17 @@
-Flot 0.x
+Flot 0.3
 --------
+
+This is mostly a quick-fix release because jquery.js wasn't included
+in the previous zip/tarball.
+
+Support clicking on the plot. Turn it on with grid: { clickable: true },
+then you get a "plotclick" event on the graph placeholder with the
+position in units of the plot.
 
 Fixed a bug in dealing with data where min = max, thanks to Michael
 Messinides.
+
+Include jquery.js in the zip/tarball.
 
 
 Flot 0.2
