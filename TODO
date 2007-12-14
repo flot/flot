@@ -33,6 +33,9 @@ interactive hover over
 support segmented lines
   - put in null value to signify a break in the data set
 
+error margin indicators
+  - for scientific/statistical purposes
+
 non-xy based graph types
   - figure out how to integrate them with the rest of the plugin
   - pie charts
