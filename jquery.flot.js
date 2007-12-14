@@ -67,7 +67,8 @@
                 color: "#545454", // primary color used for outline and labels
                 backgroundColor: null, // null for transparent, else color
                 tickColor: "#dddddd", // color used for the ticks
-                labelMargin: 3 // in pixels
+                labelMargin: 3, // in pixels
+                clickable: null
             },
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
@@ -164,8 +165,11 @@
                 // FIXME: temp. work-around until jQuery bug 1871 is fixed
                 target.get(0).onmousemove = onMouseMove;
             }
+
+            if (options.grid.clickable)
+                $(overlay).click(onClick);
         }
-        
+
         function findDataRanges() {
             yaxis.datamin = xaxis.datamin = 0;
             xaxis.datamax = yaxis.datamax = 1;
@@ -1005,6 +1009,7 @@
         var selection = { first: { x: -1, y: -1}, second: { x: -1, y: -1} };
         var prevSelection = null;
         var selectionInterval = null;
+        var ignoreClick = false;
         
         function onMouseMove(ev) {
             // FIXME: temp. work-around until jQuery bug 1871 is fixed
@@ -1033,6 +1038,22 @@
             $(document).one("mouseup", onSelectionMouseUp);
         }
 
+        function onClick(e) {
+            if (ignoreClick) {
+                ignoreClick = false;
+                return;
+            }
+            
+            var offset = $(overlay).offset();
+            var pos = {};
+            pos.x = e.pageX - offset.left - plotOffset.left;
+            pos.x = xaxis.min + pos.x / hozScale;
+            pos.y = e.pageY - offset.top - plotOffset.top;
+            pos.y = yaxis.max - pos.y / vertScale;
+
+            target.trigger("plotclick", [ pos ]);
+        }
+        
         function triggerSelectedEvent() {
             var x1, x2, y1, y2;
             if (selection.first.x <= selection.second.x) {
@@ -1075,6 +1096,7 @@
             
             drawSelection();
             triggerSelectedEvent();
+            ignoreClick = true;
 
             return false;
         }

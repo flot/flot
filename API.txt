@@ -8,16 +8,16 @@ Consider a call to the plot function:
 The placeholder is a jQuery object that the plot will be put into.
 This placeholder needs to have its width and height set as explained
 in the README. The plot will modify some properties of the placeholder
-so it's recommended you simply pass in a div that you don't use it for
+so it's recommended you simply pass in a div that you don't use for
 anything else.
 
 The format of the data is documented below, as is the available
 options. The "plot" object returned has some members you can call.
 These are documented separately below.
 
-Note that in general there are no guarantees if you change any of the
-objects you pass in to the plot function or get out of it as the
-objects may not be deep-copied.
+Note that in general Flot gives no guarantees if you change any of the
+objects you pass in to the plot function or get out of it. The objects
+may not be deep-copied.
 
 
 Data Format
@@ -262,7 +262,8 @@ Customizing the grid
     color: color,
     backgroundColor: color or null,
     tickColor: color,
-    labelMargin: number
+    labelMargin: number,
+    clickable: boolean
   }
 
 The grid is the thing with the two axes and a number of ticks. "color"
@@ -273,8 +274,24 @@ backgroundColor if want the grid area to be a different color from the
 page color. Otherwise you might as well just set the background color
 of the page with CSS.
 
-"tickColor" is the color of the ticks and labelMargin is the spacing
+"tickColor" is the color of the ticks and "labelMargin" is the spacing
 between tick labels and the grid.
+
+
+If you set "clickable" to true, the plot will listen for click events
+on the plot are and fire a "plotclick" event on the placeholder with
+an object { x: number, y: number } as parameter when one occurs. The
+returned coordinates will be in the unit of the plot (not in pixels).
+You can use it like this:
+
+    $.plot($("#placeholder"), [ d ], { grid: { clickable: true } });
+
+    $("#placeholder").bind("plotclick", function (e, pos) {
+        // the values are in pos.x and pos.y
+    });
+
+Support for hover indications or for associating the clicks with any
+specific data is still forthcoming.
 
 
 Customizing the selection
