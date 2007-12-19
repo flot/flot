@@ -28,7 +28,7 @@ $(function () {
     var d1 = [];
     for (var i = 0; i < Math.PI * 2; i += 0.25)
         d1.push([i, Math.sin(i)]);
-
+    
     var d2 = [];
     for (var i = 0; i < Math.PI * 2; i += 0.25)
         d2.push([i, Math.cos(i)]);
@@ -45,7 +45,7 @@ $(function () {
         lines: { show: true },
         points: { show: true },
         xaxis: {
-            ticks: [[Math.PI/2, "\u03c0/2"], [Math.PI, "\u03c0"], [Math.PI * 3/2, "3\u03c0/2"], [Math.PI * 2, "2\u03c0"]]
+            ticks: [0, [Math.PI/2, "\u03c0/2"], [Math.PI, "\u03c0"], [Math.PI * 3/2, "3\u03c0/2"], [Math.PI * 2, "2\u03c0"]]
         },
         yaxis: {
             noTicks: 10,
