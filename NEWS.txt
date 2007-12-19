@@ -1,3 +1,15 @@
+Flot x.x
+--------
+
+Cleaned up the automatic axis scaling algorithm and fixed how it
+interacts with ticks. Also fixed a couple of tick-related corner case
+bugs.
+
+"tickFormatter" now takes a function with two parameters, the second
+parameter is an optional object with information about the axis. It
+has min, max, tickDecimals, tickSize.
+
+
 Flot 0.3
 --------
 

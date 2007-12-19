@@ -133,37 +133,61 @@ Customizing the axes
   xaxis, yaxis: {
     ticks: null or ticks array or (fn: range -> ticks array),
     noTicks: number,
-    tickFormatter: fn: number -> string,
+    tickFormatter: fn: number, object -> string,
     tickDecimals: null or number,
     min: null or number,
     max: null or number,
-    autoscaleMargin: number
+    autoscaleMargin: null or number
   }
 
 The two axes have the same kind of options. The most import are
-min/max that specifies the precise minimum/maximum value on the scale.
-If you don't specify a value, it will automatically be chosen by a
-scaling algorithm that is based on perceived reasonable tick values.
-The "autoscaleMargin" is the fraction of margin that the scaling
-algorithm will add to avoid that the outermost points ends up on the
-grid outline. The default value is 0 for the x axis and 0.02 for the y
-axis.
+"min"/"max" that specifies the precise minimum/maximum value on the
+scale. If you don't specify a value, it will automatically be chosen
+by a scaling algorithm based on the minimum/maximum data values.
+
+The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
+that the scaling algorithm will add to avoid that the outermost points
+ends up on the grid outline. Note that this margin is only applied
+when a min or max value is not explicitly set. If a margin is
+specified, the plot will furthermore extend the axis end-point to the
+nearest whole tick. The default value is "null" for the x axis and
+0.02 for the y axis which seems appropriate for most cases.
 
 The rest of the options deal with the ticks. If you don't specify any
 ticks, a tick generator algorithm will make some for you based on the
-"noTicks" setting. The algorithm always tries to generate reasonably
-round tick values so even if you ask for 3 ticks, you might get 5 if
-that fits better with the rounding.
+number of ticks setting, "noTicks". The algorithm always tries to
+generate reasonably round tick values so even if you ask for 3 ticks,
+you might get 5 if that fits better with the rounding. Never set
+"noTicks" to 0, that will just break the auto-detection stuff. If you
+don't want ticks, provide an empty "ticks" array as described below.
 
 You can control how the ticks look like with "tickDecimals", the
 number of decimals to display (default is auto-detected), or by
-providing a function to "tickFormatter". The function gets one
-argument, the tick value, and should return a string. The default
-formatter looks like this:
+providing a function to "tickFormatter".
 
-  function defaultTickFormatter(val) {
-    return "" + val;
+The tick formatter function gets two argument, the tick value and an
+optional "axis" object with information, and should return a string.
+The default formatter looks like this:
+
+  function defaultTickFormatter(val, axis) {
+    return val.toFixed(axis.tickDecimals);
   }
+
+The axis object has "min" and "max" with the range of the axis,
+"tickDecimals" with the number of decimals to round the value to and
+"tickSize" with the size of the interval between ticks as calculated
+by the automatic axis scaling algorithm. Here's an example of a
+custom formatter:
+
+  function suffixFormatter(val, axis) {
+    if (val > 1000000)
+      return (val / 1000000).toFixed(axis.tickDecimals) + " MB";
+    else if (val > 1000)
+      return (val / 1000).toFixed(axis.tickDecimals) + " kB";
+    else
+      return val.toFixed(axis.tickDecimals) + " B";
+  }
+
 
 If you want to override the tick algorithm, you can manually specify
 "ticks" which should be an array of tick values, either like this:

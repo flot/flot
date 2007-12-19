@@ -33,7 +33,7 @@
                 tickDecimals: null, // no. of decimals, null means auto
                 min: null, // min. value to show, null means set automatically
                 max: null, // max. value to show, null means set automatically
-                autoscaleMargin: 0 // margin in % to add if auto-setting min/max
+                autoscaleMargin: null // margin in % to add if auto-setting min/max
             },
             yaxis: {
                 noTicks: 5,
@@ -101,12 +101,14 @@
         constructCanvas();
         bindEvents();
         findDataRanges();
-        calculateRange(xaxis, options.xaxis);
+        setRange(xaxis, options.xaxis);
+        setTickSize(xaxis, options.xaxis);
+        setTicks(xaxis, options.xaxis);
         extendXRangeIfNeededByBar();
-        calculateRange(yaxis, options.yaxis);
-        calculateTicks(xaxis, options.xaxis);
-        calculateTicks(yaxis, options.yaxis);
-        calculateSpacing();
+        setRange(yaxis, options.yaxis);
+        setTickSize(yaxis, options.yaxis);
+        setTicks(yaxis, options.yaxis);
+        setSpacing();
         draw();
         insertLegend();
 
@@ -209,31 +211,36 @@
             }
         }
 
-        function getTickSize(noTicks, min, max, decimals) {
-            var delta = (max - min) / noTicks;
-            var magn = getMagnitude(delta);
+        function setTickSize(axis, axisOptions) {
+            var delta = (axis.max - axis.min) / axisOptions.noTicks;
+            var maxDec = axisOptions.tickDecimals;
+            var dec = -Math.floor(Math.log(delta) / Math.LN10);
+            if (maxDec != null && dec > maxDec)
+                dec = maxDec;
+            var magn = Math.pow(10, -dec);
             var norm = delta / magn; // norm is between 1.0 and 10.0
 
             var tickSize = 1;
             if (norm < 1.5)
                 tickSize = 1;
-            else if (norm < 2.25)
+            else if (norm < 3) {
                 tickSize = 2;
-            else if (norm < 3)
-                tickSize = 2.5;
+                // special case for 2.5, requires an extra decimal
+                if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
+                    tickSize = 2.5;
+                    ++dec;
+                }
+            }
             else if (norm < 7.5)
                 tickSize = 5;
             else
                 tickSize = 10;
 
-            if (tickSize == 2.5 && decimals == 0)
-                tickSize = 2;
-            
-            tickSize *= magn;
-            return tickSize;
+            axis.tickSize = tickSize * magn;
+            axis.tickDecimals = Math.max(0, (maxDec != null) ? maxDec : dec);
         }
         
-        function calculateRange(axis, axisOptions) {
+        function setRange(axis, axisOptions) {
             var min = axisOptions.min != null ? axisOptions.min : axis.datamin;
             var max = axisOptions.max != null ? axisOptions.max : axis.datamax;
 
@@ -249,34 +256,22 @@
                 max += widen;
             }
             
-            axis.tickSize = getTickSize(axisOptions.noTicks, min, max, axisOptions.tickDecimals);
-                
             // consider autoscaling
-            var margin;
-            if (axisOptions.min == null) {
-                // first add in a little margin
-                margin = axisOptions.autoscaleMargin;
-                if (margin != 0) {
-                    min -= axis.tickSize * margin;
-                    // make sure we don't go below zero if all
-                    // values are positive
+            var margin = axisOptions.autoscaleMargin;
+            if (margin != null) {
+                if (axisOptions.min == null) {
+                    min -= (max - min) * margin;
+                    // make sure we don't go below zero if all values
+                    // are positive
                     if (min < 0 && axis.datamin >= 0)
                         min = 0;
-                    
-                    min = axis.tickSize * Math.floor(min / axis.tickSize);
                 }
-            }
-            if (axisOptions.max == null) {
-                margin = axisOptions.autoscaleMargin;
-                if (margin != 0) {
-                    max += axis.tickSize * margin;
+                if (axisOptions.max == null) {
+                    max += (max - min) * margin;
                     if (max > 0 && axis.datamax <= 0)
                         max = 0;
-                    
-                    max = axis.tickSize * Math.ceil(max / axis.tickSize);
                 }
             }
-            
             axis.min = min;
             axis.max = max;
         }
@@ -288,17 +283,17 @@
                 var newmax = xaxis.max;
                 for (var i = 0; i < series.length; ++i)
                     if (series[i].bars.show && series[i].bars.barWidth + xaxis.datamax > newmax)
-                        newmax = xaxis.max + series[i].bars.barWidth;
+                        newmax = xaxis.datamax + series[i].bars.barWidth;
                 xaxis.max = newmax;
             }
         }
 
-        function defaultTickFormatter(val) {
-            return "" + val;
+        function defaultTickFormatter(val, axis) {
+            return val.toFixed(axis.tickDecimals);
         }
 
-        function calculateTicks(axis, axisOptions) {
-            var i;
+        function setTicks(axis, axisOptions) {
+            var i, v;
             axis.ticks = [];
 
             if (axisOptions.ticks) {
@@ -310,43 +305,41 @@
                 
                 // clean up the user-supplied ticks, copy them over
                 for (i = 0; i < ticks.length; ++i) {
-                    var v, label;
+                    var label = null;
                     var t = ticks[i];
                     if (typeof(t) == "object") {
                         v = t[0];
                         if (t.length > 1)
                             label = t[1];
-                        else
-                            label = axisOptions.tickFormatter(v);
                     }
-                    else {
+                    else
                         v = t;
-                        label = axisOptions.tickFormatter(v);
-                    }
+                    if (label == null)
+                        label = "" + axisOptions.tickFormatter(v, axis);
                     axis.ticks[i] = { v: v, label: label };
                 }
             }
             else {
                 // round to nearest multiple of tick size
-                var start = axis.tickSize * Math.ceil(axis.min / axis.tickSize);
+                var start = axis.tickSize * Math.floor(axis.min / axis.tickSize);
                 // then spew out all possible ticks
-                for (i = 0; start + i * axis.tickSize <= axis.max; ++i) {
+                i = 0;
+                do {
                     v = start + i * axis.tickSize;
-                    
-                    // round (this is always needed to fix numerical instability)
-                    var decimals = axisOptions.tickDecimals;
-                    if (decimals == null)
-                        decimals = 1 - Math.floor(Math.log(axis.tickSize) / Math.LN10);
-                    if (decimals < 0)
-                        decimals = 0;
-                    
-                    v = v.toFixed(decimals);
-                    axis.ticks.push({ v: v, label: axisOptions.tickFormatter(v) });
-                }
+                    axis.ticks.push({ v: v, label: "" + axisOptions.tickFormatter(v, axis) });
+                    ++i;
+                } while (v < axis.max);
+            }
+
+            if (axisOptions.autoscaleMargin != null) {
+                if (axisOptions.min == null)
+                    axis.min = axis.ticks[0].v;
+                if (axisOptions.max == null && axis.ticks.length > 1)
+                    axis.max = axis.ticks[axis.ticks.length - 1].v;
             }
         }
         
-        function calculateSpacing() {
+        function setSpacing() {
             // calculate spacing for labels, using the heuristic
             // that the longest string is probably the one that takes
             // up the most space
@@ -415,7 +408,7 @@
             var i, v;
             for (i = 0; i < xaxis.ticks.length; ++i) {
                 v = xaxis.ticks[i].v;
-                if (v == xaxis.min || v == xaxis.max)
+                if (v <= xaxis.min || v >= xaxis.max)
                     continue;   // skip those lying on the axes
 
                 ctx.moveTo(Math.floor(tHoz(v)) + ctx.lineWidth/2, 0);
@@ -424,7 +417,7 @@
 
             for (i = 0; i < yaxis.ticks.length; ++i) {
                 v = yaxis.ticks[i].v;
-                if (v == yaxis.min || v == yaxis.max)
+                if (v <= yaxis.min || v >= yaxis.max)
                     continue;
 
                 ctx.moveTo(0, Math.floor(tVert(v)) + ctx.lineWidth/2);
@@ -441,25 +434,18 @@
         }
         
         function drawLabels() {
-            var i;
-            var tick;
+            var i, tick;
             var html = '<div style="font-size:smaller;color:' + options.grid.color + '">';
-            // calculate width for labels; to avoid measuring the
-            // widths of the labels, we construct fixed-size boxes and
-            // put the labels inside them, the fixed-size boxes are
-            // easy to mid-align
-            var noLabels = 0;
-            for (i = 0; i < xaxis.ticks.length; ++i) {
-                if (xaxis.ticks[i].label) {
-                    ++noLabels;
-                }
-            }
-            var xBoxWidth = plotWidth / noLabels;
+            // set width for labels; to avoid measuring the widths of
+            // the labels, we construct fixed-size boxes and put the
+            // labels inside them, the fixed-size boxes are easy to
+            // mid-align
+            var xBoxWidth = plotWidth / 6;
             
             // do the x-axis
             for (i = 0; i < xaxis.ticks.length; ++i) {
                 tick = xaxis.ticks[i];
-                if (!tick.label)
+                if (!tick.label || tick.v < xaxis.min || tick.v > xaxis.max)
                     continue;
                 html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + tHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="gridLabel">' + tick.label + "</div>";
             }
@@ -467,7 +453,7 @@
             // do the y-axis
             for (i = 0; i < yaxis.ticks.length; ++i) {
                 tick = yaxis.ticks[i];
-                if (!tick.label || tick.label.length == 0)
+                if (!tick.label || tick.v < yaxis.min || tick.v > yaxis.max)
                     continue;
                 html += '<div style="position:absolute;top:' + (plotOffset.top + tVert(tick.v) - labelMaxHeight/2) + 'px;left:0;width:' + labelMaxWidth + 'px;text-align:right" class="gridLabel">' + tick.label + "</div>";
             }
@@ -1223,11 +1209,6 @@
         return plot;
     };
 
-    function getMagnitude(x) {
-        return Math.pow(10, Math.floor(Math.log(x) / Math.LN10));
-    }
-
-       
     // color helpers, inspiration from the jquery color animation
     // plugin by John Resig
     function Color (r, g, b, a) {
