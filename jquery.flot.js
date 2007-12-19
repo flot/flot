@@ -211,6 +211,43 @@
             }
         }
 
+        function setRange(axis, axisOptions) {
+            var min = axisOptions.min != null ? axisOptions.min : axis.datamin;
+            var max = axisOptions.max != null ? axisOptions.max : axis.datamax;
+
+            if (max - min == 0.0) {
+                // degenerate case
+                var widen;
+                if (max == 0.0)
+                    widen = 1.0;
+                else
+                    widen = 0.01;
+
+                min -= widen;
+                max += widen;
+            }
+            else {
+                // consider autoscaling
+                var margin = axisOptions.autoscaleMargin;
+                if (margin != null) {
+                    if (axisOptions.min == null) {
+                        min -= (max - min) * margin;
+                        // make sure we don't go below zero if all values
+                        // are positive
+                        if (min < 0 && axis.datamin >= 0)
+                            min = 0;
+                    }
+                    if (axisOptions.max == null) {
+                        max += (max - min) * margin;
+                        if (max > 0 && axis.datamax <= 0)
+                            max = 0;
+                    }
+                }
+            }
+            axis.min = min;
+            axis.max = max;
+        }
+
         function setTickSize(axis, axisOptions) {
             var delta = (axis.max - axis.min) / axisOptions.noTicks;
             var maxDec = axisOptions.tickDecimals;
@@ -240,42 +277,6 @@
             axis.tickDecimals = Math.max(0, (maxDec != null) ? maxDec : dec);
         }
         
-        function setRange(axis, axisOptions) {
-            var min = axisOptions.min != null ? axisOptions.min : axis.datamin;
-            var max = axisOptions.max != null ? axisOptions.max : axis.datamax;
-
-            // check degenerate case
-            if (max - min == 0.0) {
-                var widen;
-                if (max == 0.0)
-                    widen = 1.0;
-                else
-                    widen = 0.01;
-
-                min -= widen;
-                max += widen;
-            }
-            
-            // consider autoscaling
-            var margin = axisOptions.autoscaleMargin;
-            if (margin != null) {
-                if (axisOptions.min == null) {
-                    min -= (max - min) * margin;
-                    // make sure we don't go below zero if all values
-                    // are positive
-                    if (min < 0 && axis.datamin >= 0)
-                        min = 0;
-                }
-                if (axisOptions.max == null) {
-                    max += (max - min) * margin;
-                    if (max > 0 && axis.datamax <= 0)
-                        max = 0;
-                }
-            }
-            axis.min = min;
-            axis.max = max;
-        }
-
         function extendXRangeIfNeededByBar() {
             if (options.xaxis.max == null) {
                 // great, we're autoscaling, check if we might need a bump
