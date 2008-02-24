@@ -27,10 +27,11 @@
                 backgroundOpacity: 0.85 // set to 0 to avoid background
             },
             xaxis: {
-                ticks: null, // either [1, 3] or [[1, "a"], 3]
+                ticks: null, // either [1, 3] or [[1, "a"], 3] or function that outputs this
                 noTicks: 5, // approximate number of ticks for auto-ticks
-                tickFormatter: defaultTickFormatter, // fn: number -> string
+                tickFormatter: null, // fn: number -> string or format string if datatype is date
                 tickDecimals: null, // no. of decimals, null means auto
+                datatype: "number", // one of "number", "time"
                 min: null, // min. value to show, null means set automatically
                 max: null, // max. value to show, null means set automatically
                 autoscaleMargin: null // margin in % to add if auto-setting min/max
@@ -38,9 +39,7 @@
             yaxis: {
                 noTicks: 5,
                 ticks: null,
-                tickFormatter: defaultTickFormatter,
-                min: null,
-                max: null,
+                datatype: "number",
                 autoscaleMargin: 0.02
             },
             points: {
@@ -74,7 +73,10 @@
                 mode: null, // one of null, "x", "y" or "xy"
                 color: "#e8cfac"
             },
-            shadowSize: 4
+            shadowSize: 4,
+            date: {
+                monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            }
         };
         var canvas = null, overlay = null;
         var ctx = null, octx = null;
@@ -91,7 +93,16 @@
         var plotHeight = 0;
         var hozScale = 0;
         var vertScale = 0;
-        
+
+        // map of app. size of time units in milliseconds
+        var dateUnitSize = {
+            "second": 1000,
+            "minute": 60 * 1000,
+            "hour": 60 * 60 * 1000,
+            "day": 24 * 60 * 60 * 1000,
+            "month": 30 * 24 * 60 * 60 * 1000,
+            "year": 365.2425 * 24 * 60 * 60 * 1000
+        };
 
         // initialize
         series = parseData(data_);
@@ -150,14 +161,14 @@
 
             // the canvas
             canvas = jQuery('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-	    if (jQuery.browser.msie) // excanvas hack
-		canvas = window.G_vmlCanvasManager.initElement(canvas);
+            if (jQuery.browser.msie) // excanvas hack
+                canvas = window.G_vmlCanvasManager.initElement(canvas);
             ctx = canvas.getContext("2d");
 
             // overlay canvas for interactive features
             overlay = jQuery('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-	    if (jQuery.browser.msie) // excanvas hack
-		overlay = window.G_vmlCanvasManager.initElement(overlay);
+            if (jQuery.browser.msie) // excanvas hack
+                overlay = window.G_vmlCanvasManager.initElement(overlay);
             octx = overlay.getContext("2d");
         }
 
@@ -250,31 +261,219 @@
 
         function setTickSize(axis, axisOptions) {
             var delta = (axis.max - axis.min) / axisOptions.noTicks;
-            var maxDec = axisOptions.tickDecimals;
-            var dec = -Math.floor(Math.log(delta) / Math.LN10);
-            if (maxDec != null && dec > maxDec)
-                dec = maxDec;
-            var magn = Math.pow(10, -dec);
-            var norm = delta / magn; // norm is between 1.0 and 10.0
+            var size, generator, unit = "", formatter, i;
 
-            var tickSize = 1;
-            if (norm < 1.5)
-                tickSize = 1;
-            else if (norm < 3) {
-                tickSize = 2;
-                // special case for 2.5, requires an extra decimal
-                if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
-                    tickSize = 2.5;
-                    ++dec;
+            if (axisOptions.datatype == "time") {
+                // pretty handling of time
+
+                // the allowed tick sizes, after 1 year we use
+                // an integer algorithm
+                var spec = [
+                    [1, "second"], [2, "second"], [5, "second"], [10, "second"],
+                    [30, "second"], 
+                    [1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
+                    [30, "minute"], 
+                    [1, "hour"], [2, "hour"], [4, "hour"],
+                    [8, "hour"], [12, "hour"],
+                    [1, "day"], [2, "day"], [3, "day"],
+                    [0.25, "month"], [0.5, "month"], [1, "month"],
+                    [2, "month"], [3, "month"], [6, "month"],
+                    [1, "year"]
+                ];
+
+
+                // a generic tick generator for the well-behaved cases
+                // where it's simply matter of adding a fixed no. of seconds
+                var genericTimeGenerator = function(axis) {
+                    var ticks = [];
+                    var step = axis.tickSize * dateUnitSize[axis.tickSizeUnit];
+                    var d = new Date(axis.min);
+                    d.setMilliseconds(0);
+
+                    if (axis.tickSizeUnit == "second")
+                        d.setSeconds(floorInBase(d.getSeconds(), axis.tickSize));
+                    else if (step >= dateUnitSize.minute)
+                        d.setSeconds(0);
+                    
+                    if (axis.tickSizeUnit == "minute")
+                        d.setMinutes(floorInBase(d.getMinutes(), axis.tickSize));
+                    else if (step >= dateUnitSize.hour)
+                        d.setMinutes(0);
+                    
+                    if (axis.tickSizeUnit == "hour")
+                        d.setHours(floorInBase(d.getHours(), axis.tickSize));
+                    else if (step >= dateUnitSize.day)
+                        d.setHours(0);
+                    
+                    do {
+                        var v = d.getTime();
+                        ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
+                        //console.log(d, "generic", axis.tickSize, axis.tickSizeUnit)
+                        d.setTime(v + step);
+                    } while (v < axis.max);
+                    return ticks;
+                };
+
+                var unitGenerator = {
+                    "second": genericTimeGenerator,
+                    "minute": genericTimeGenerator,
+                    "hour": genericTimeGenerator,
+                    "day": genericTimeGenerator,
+                    "month": function(axis) {
+                        var ticks = [];
+                        var d = new Date(axis.min);
+                        d.setMilliseconds(0);
+                        d.setSeconds(0);
+                        d.setMinutes(0);
+                        d.setHours(0);
+                        d.setDate(1);
+                        d.setMonth(floorInBase(d.getMonth(), axis.tickSize));
+                        do {
+                            var v = d.getTime();
+                            ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
+                            //console.log(d, "month", axis.tickSize)
+                            if (axis.tickSize < 1) {
+                                d.setDate(1);
+                                var start = d.getTime();
+                                d.setMonth(d.getMonth() + 1);
+                                var end = d.getTime();
+                                d.setTime(v + (end - start) * axis.tickSize);
+                            }
+                            else
+                                d.setMonth(d.getMonth() + axis.tickSize);
+                        } while (v < axis.max);
+                        return ticks;
+                    },
+                    "year": function(axis) {
+                        var ticks = [];
+                        var d = new Date(axis.min);
+                        d.setMilliseconds(0);
+                        d.setSeconds(0);
+                        d.setMinutes(0);
+                        d.setHours(0);
+                        d.setDate(1);
+                        d.setMonth(0);
+                        d.setFullYear(floorInBase(d.getFullYear(), axis.tickSize));
+                        
+                        do {
+                            var v = d.getTime();
+                            ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
+                            //console.log(d, "year", axis.tickSize);
+                            d.setFullYear(d.getFullYear() + axis.tickSize);
+                        } while (v < axis.max);
+                        return ticks;
+                    }
                 }
-            }
-            else if (norm < 7.5)
-                tickSize = 5;
-            else
-                tickSize = 10;
+                
+                for (i = 0; i < spec.length - 1; ++i)
+                    if (delta < (spec[i][0] * dateUnitSize[spec[i][1]]
+                                 + spec[i + 1][0] * dateUnitSize[spec[i + 1][1]]) / 2)
+                        break;
+                size = spec[i][0];
+                unit = spec[i][1];
+                generator = unitGenerator[unit];
+                
+                // special-case the possibility of several years
+                if (unit == "year") {
+                    var magn = Math.pow(10, Math.floor(Math.log(delta / dateUnitSize.year) / Math.LN10));
+                    var norm = (delta / dateUnitSize.year) / magn;
+                    if (norm < 1.5)
+                        size = 1;
+                    else if (norm < 3)
+                        size = 2;
+                    else if (norm < 7.5)
+                        size = 5;
+                    else
+                        size = 10;
 
-            axis.tickSize = tickSize * magn;
-            axis.tickDecimals = Math.max(0, (maxDec != null) ? maxDec : dec);
+                    size *= magn;
+                }
+
+                if (typeof axisOptions.tickFormatter == "string")
+                    formatter = function (v, axis) {
+                        return formatDate(new Date(v), axisOptions.tickFormatter);
+                    };
+                else
+                    formatter = function (v, axis) {
+                        var d = new Date(v);
+                        var t = axis.tickSize * dateUnitSize[axis.tickSizeUnit];
+                        var span = axis.max - axis.min;
+                        
+                        if (t < dateUnitSize.minute)
+                            fmt = "%h:%M:%S";
+                        else if (t < dateUnitSize.day) {
+                            if (span < 2 * dateUnitSize.day)
+                                fmt = "%h:%M";
+                            else
+                            fmt = "%b %d %h:%M";
+                        }
+                        else if (t < dateUnitSize.month)
+                            fmt = "%b %d";
+                        else if (t < dateUnitSize.year) {
+                            if (span < dateUnitSize.year)
+                                fmt = "%b";
+                            else
+                                fmt = "%b %y";
+                        }
+                        else
+                            fmt = "%y";
+                        
+                        return formatDate(d, fmt);
+                    };
+            }
+            else {
+                // pretty rounding of base-10 numbers
+                var maxDec = axisOptions.tickDecimals;
+                var dec = -Math.floor(Math.log(delta) / Math.LN10);
+                if (maxDec != null && dec > maxDec)
+                    dec = maxDec;
+                
+                var magn = Math.pow(10, -dec);
+                var norm = delta / magn; // norm is between 1.0 and 10.0
+                
+                if (norm < 1.5)
+                    size = 1;
+                else if (norm < 3) {
+                    size = 2;
+                    // special case for 2.5, requires an extra decimal
+                    if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
+                        size = 2.5;
+                        ++dec;
+                    }
+                }
+                else if (norm < 7.5)
+                    size = 5;
+                else
+                    size = 10;
+
+                size *= magn;
+                axis.tickDecimals = Math.max(0, (maxDec != null) ? maxDec : dec);
+                generator = function (axis) {
+                    var ticks = [];
+                    var start = floorInBase(axis.min, axis.tickSize);
+                    // then spew out all possible ticks
+                    i = 0;
+                    do {
+                        v = start + i * axis.tickSize;
+                        ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
+                        ++i;
+                    } while (v < axis.max);
+                    return ticks;
+                };
+
+                formatter = function (v, axis) {
+                    return v.toFixed(axis.tickDecimals);
+                };
+            }
+
+            axis.tickSize = size;
+            axis.tickGenerator = generator;
+            axis.tickSizeUnit = unit;
+            axis.datatype = axisOptions.datatype;
+            if ($.isFunction(axisOptions.tickFormatter))
+                axis.tickFormatter = function (v, axis) { return "" + axisOptions.tickFormatter(v, axis); };
+            else
+                axis.tickFormatter = formatter;
         }
         
         function extendXRangeIfNeededByBar() {
@@ -287,10 +486,6 @@
                         newmax = xaxis.datamax + series[i].bars.barWidth;
                 xaxis.max = newmax;
             }
-        }
-
-        function defaultTickFormatter(val, axis) {
-            return val.toFixed(axis.tickDecimals);
         }
 
         function setTicks(axis, axisOptions) {
@@ -316,21 +511,12 @@
                     else
                         v = t;
                     if (label == null)
-                        label = "" + axisOptions.tickFormatter(v, axis);
+                        label = axis.tickFormatter(v, axis);
                     axis.ticks[i] = { v: v, label: label };
                 }
             }
-            else {
-                // round to nearest multiple of tick size
-                var start = axis.tickSize * Math.floor(axis.min / axis.tickSize);
-                // then spew out all possible ticks
-                i = 0;
-                do {
-                    v = start + i * axis.tickSize;
-                    axis.ticks.push({ v: v, label: "" + axisOptions.tickFormatter(v, axis) });
-                    ++i;
-                } while (v < axis.max);
-            }
+            else
+                axis.ticks = axis.tickGenerator(axis);
 
             if (axisOptions.autoscaleMargin != null) {
                 if (axisOptions.min == null)
@@ -1108,7 +1294,7 @@
                     pos.y = plotHeight;
             }
             else {
-	        pos.y = e.pageY - offset.top - plotOffset.top;
+                pos.y = e.pageY - offset.top - plotOffset.top;
                 pos.y = Math.min(Math.max(0, pos.y), plotHeight);
             }
         }
@@ -1196,20 +1382,61 @@
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
                 Math.abs(selection.second.y - selection.first.y) >= minSize;
         }
+
+        function formatDate(d, s) {
+            var leftPad = function(n) {
+                n = "" + n;
+                return n.length == 1 ? "0" + n : n;
+            };
+
+            var r = [];
+            var escape = false;
+            for (var i = 0; i < s.length; ++i) {
+                var c = s.charAt(i);
+
+                if (escape) {
+                    switch (c) {
+                    case 'h': c = "" + d.getHours(); break;
+                    case 'H': c = leftPad(d.getHours()); break;
+                    case 'M': c = leftPad(d.getMinutes()); break;
+                    case 'S': c = leftPad(d.getSeconds()); break;
+                    case 'd': c = "" + d.getDate(); break;
+                    case 'm': c = "" + (d.getMonth() + 1); break;
+                    case 'y': c = "" + d.getFullYear(); break;
+                    case 'b': c = "" + options.date.monthNames[d.getMonth()]; break;
+                    default: c;
+                    }
+                    r.push(c);
+                    escape = false;
+                }
+                else {
+                    if (c == "%")
+                        escape = true;
+                    else
+                        r.push(c);
+                }
+            }
+            return r.join("");
+        }
     }
     
     $.plot = function(target, data, options) {
         var plot = new Plot(target, data, options);
         /*var t0 = new Date();     
         var t1 = new Date();
-	var tstr = "time used (msecs): " + (t1.getTime() - t0.getTime())
-	if (window.console)
+        var tstr = "time used (msecs): " + (t1.getTime() - t0.getTime())
+        if (window.console)
             console.log(tstr);
-	else
-	    alert(tstr);*/
+        else
+            alert(tstr);*/
         return plot;
     };
-
+    
+    // round to nearby lower multiple of base
+    function floorInBase(n, base) {
+        return base * Math.floor(n / base);
+    }
+    
     // color helpers, inspiration from the jquery color animation
     // plugin by John Resig
     function Color (r, g, b, a) {
@@ -1267,61 +1494,61 @@
     }
     
     var lookupColors = {
-	aqua:[0,255,255],
-	azure:[240,255,255],
-	beige:[245,245,220],
-	black:[0,0,0],
-	blue:[0,0,255],
-	brown:[165,42,42],
-	cyan:[0,255,255],
-	darkblue:[0,0,139],
-	darkcyan:[0,139,139],
-	darkgrey:[169,169,169],
-	darkgreen:[0,100,0],
-	darkkhaki:[189,183,107],
-	darkmagenta:[139,0,139],
-	darkolivegreen:[85,107,47],
-	darkorange:[255,140,0],
-	darkorchid:[153,50,204],
-	darkred:[139,0,0],
-	darksalmon:[233,150,122],
-	darkviolet:[148,0,211],
-	fuchsia:[255,0,255],
-	gold:[255,215,0],
-	green:[0,128,0],
-	indigo:[75,0,130],
-	khaki:[240,230,140],
-	lightblue:[173,216,230],
-	lightcyan:[224,255,255],
-	lightgreen:[144,238,144],
-	lightgrey:[211,211,211],
-	lightpink:[255,182,193],
-	lightyellow:[255,255,224],
-	lime:[0,255,0],
-	magenta:[255,0,255],
-	maroon:[128,0,0],
-	navy:[0,0,128],
-	olive:[128,128,0],
-	orange:[255,165,0],
-	pink:[255,192,203],
-	purple:[128,0,128],
-	violet:[128,0,128],
-	red:[255,0,0],
-	silver:[192,192,192],
-	white:[255,255,255],
-	yellow:[255,255,0]
+        aqua:[0,255,255],
+        azure:[240,255,255],
+        beige:[245,245,220],
+        black:[0,0,0],
+        blue:[0,0,255],
+        brown:[165,42,42],
+        cyan:[0,255,255],
+        darkblue:[0,0,139],
+        darkcyan:[0,139,139],
+        darkgrey:[169,169,169],
+        darkgreen:[0,100,0],
+        darkkhaki:[189,183,107],
+        darkmagenta:[139,0,139],
+        darkolivegreen:[85,107,47],
+        darkorange:[255,140,0],
+        darkorchid:[153,50,204],
+        darkred:[139,0,0],
+        darksalmon:[233,150,122],
+        darkviolet:[148,0,211],
+        fuchsia:[255,0,255],
+        gold:[255,215,0],
+        green:[0,128,0],
+        indigo:[75,0,130],
+        khaki:[240,230,140],
+        lightblue:[173,216,230],
+        lightcyan:[224,255,255],
+        lightgreen:[144,238,144],
+        lightgrey:[211,211,211],
+        lightpink:[255,182,193],
+        lightyellow:[255,255,224],
+        lime:[0,255,0],
+        magenta:[255,0,255],
+        maroon:[128,0,0],
+        navy:[0,0,128],
+        olive:[128,128,0],
+        orange:[255,165,0],
+        pink:[255,192,203],
+        purple:[128,0,128],
+        violet:[128,0,128],
+        red:[255,0,0],
+        silver:[192,192,192],
+        white:[255,255,255],
+        yellow:[255,255,0]
     };    
 
     function extractColor(element) {
         var color, elem = element;
-	do {
-	    color = elem.css("background-color").toLowerCase();
+        do {
+            color = elem.css("background-color").toLowerCase();
             // keep going until we find an element that has color, or
             // we hit the body
-	    if (color != '' && color != 'transparent')
-		break;
+            if (color != '' && color != 'transparent')
+                break;
             elem = elem.parent();
-	} while (!$.nodeName(elem.get(0), "body"));
+        } while (!$.nodeName(elem.get(0), "body"));
 
         // catch Safari's way of signalling transparent
         if (color == "rgba(0, 0, 0, 0)") 
@@ -1336,40 +1563,40 @@
         // From Interface by Stefan Petre
         // http://interface.eyecon.ro/
 
-	var result;
+        var result;
 
-	// Look for rgb(num,num,num)
-	if (result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str))
-	    return new Color(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]));
+        // Look for rgb(num,num,num)
+        if (result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str))
+            return new Color(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]));
 
-	// Look for rgba(num,num,num,num)
-	if (result = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
-	    return new Color(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]), parseFloat(result[4]));
+        // Look for rgba(num,num,num,num)
+        if (result = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
+            return new Color(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]), parseFloat(result[4]));
         
-	// Look for rgb(num%,num%,num%)
-	if (result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str))
-	    return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55);
+        // Look for rgb(num%,num%,num%)
+        if (result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str))
+            return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55);
 
-	// Look for rgba(num%,num%,num%,num)
-	if (result = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
-	    return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55, parseFloat(result[4]));
+        // Look for rgba(num%,num%,num%,num)
+        if (result = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
+            return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55, parseFloat(result[4]));
         
-	// Look for #a0b1c2
-	if (result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str))
-	    return new Color(parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16));
+        // Look for #a0b1c2
+        if (result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str))
+            return new Color(parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16));
 
-	// Look for #fff
-	if (result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(str))
-	    return new Color(parseInt(result[1]+result[1],16), parseInt(result[2]+result[2],16), parseInt(result[3]+result[3],16));
+        // Look for #fff
+        if (result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(str))
+            return new Color(parseInt(result[1]+result[1],16), parseInt(result[2]+result[2],16), parseInt(result[3]+result[3],16));
 
-	// Otherwise, we're most likely dealing with a named color
+        // Otherwise, we're most likely dealing with a named color
         var name = jQuery.trim(str).toLowerCase();
         if (name == "transparent")
             return new Color(255, 255, 255, 0);
         else {
             result = lookupColors[name];
-	    return new Color(result[0], result[1], result[2]);
+            return new Color(result[0], result[1], result[2]);
         }
     }
-	
+        
 })(jQuery);
