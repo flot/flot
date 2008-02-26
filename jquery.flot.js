@@ -27,7 +27,7 @@
                 backgroundOpacity: 0.85 // set to 0 to avoid background
             },
             xaxis: {
-                ticks: null, // either [1, 3] or [[1, "a"], 3] or function that outputs this
+                ticks: null, // either [1, 3] or [[1, "a"], 3] or fn: axis info -> ticks
                 noTicks: 5, // approximate number of ticks for auto-ticks
                 tickFormatter: null, // fn: number -> string or format string if datatype is date
                 tickDecimals: null, // no. of decimals, null means auto
@@ -67,15 +67,19 @@
                 backgroundColor: null, // null for transparent, else color
                 tickColor: "#dddddd", // color used for the ticks
                 labelMargin: 3, // in pixels
-                clickable: null
+                clickable: null,
+                coloredAreas: null, // array of { x1, y1, x2, y2 } or fn: plot area -> areas
+                coloredAreasColor: "#f4f4f4"
             },
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
                 color: "#e8cfac"
             },
             shadowSize: 4,
-            date: {
-                monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            datatype: {
+                time: {
+                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
             }
         };
         var canvas = null, overlay = null;
@@ -95,7 +99,7 @@
         var vertScale = 0;
 
         // map of app. size of time units in milliseconds
-        var dateUnitSize = {
+        var timeUnitSize = {
             "second": 1000,
             "minute": 60 * 1000,
             "hour": 60 * 60 * 1000,
@@ -286,23 +290,23 @@
                 // where it's simply matter of adding a fixed no. of seconds
                 var genericTimeGenerator = function(axis) {
                     var ticks = [];
-                    var step = axis.tickSize * dateUnitSize[axis.tickSizeUnit];
+                    var step = axis.tickSize * timeUnitSize[axis.tickSizeUnit];
                     var d = new Date(axis.min);
                     d.setMilliseconds(0);
 
                     if (axis.tickSizeUnit == "second")
                         d.setSeconds(floorInBase(d.getSeconds(), axis.tickSize));
-                    else if (step >= dateUnitSize.minute)
+                    else if (step >= timeUnitSize.minute)
                         d.setSeconds(0);
                     
                     if (axis.tickSizeUnit == "minute")
                         d.setMinutes(floorInBase(d.getMinutes(), axis.tickSize));
-                    else if (step >= dateUnitSize.hour)
+                    else if (step >= timeUnitSize.hour)
                         d.setMinutes(0);
                     
                     if (axis.tickSizeUnit == "hour")
                         d.setHours(floorInBase(d.getHours(), axis.tickSize));
-                    else if (step >= dateUnitSize.day)
+                    else if (step >= timeUnitSize.day)
                         d.setHours(0);
                     
                     do {
@@ -328,16 +332,23 @@
                         d.setHours(0);
                         d.setDate(1);
                         d.setMonth(floorInBase(d.getMonth(), axis.tickSize));
+                        var carry = 0;
                         do {
                             var v = d.getTime();
                             ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
                             //console.log(d, "month", axis.tickSize)
                             if (axis.tickSize < 1) {
+                                // a bit complicated - we'll divide the month
+                                // up but we need to take care
+                                // of fractions so we don't end up in the
+                                // middle of a day
                                 d.setDate(1);
                                 var start = d.getTime();
                                 d.setMonth(d.getMonth() + 1);
                                 var end = d.getTime();
-                                d.setTime(v + (end - start) * axis.tickSize);
+                                d.setTime(v + carry * timeUnitSize.hour + (end - start) * axis.tickSize);
+                                carry = d.getHours();
+                                d.setHours(0);
                             }
                             else
                                 d.setMonth(d.getMonth() + axis.tickSize);
@@ -366,8 +377,8 @@
                 }
                 
                 for (i = 0; i < spec.length - 1; ++i)
-                    if (delta < (spec[i][0] * dateUnitSize[spec[i][1]]
-                                 + spec[i + 1][0] * dateUnitSize[spec[i + 1][1]]) / 2)
+                    if (delta < (spec[i][0] * timeUnitSize[spec[i][1]]
+                                 + spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2)
                         break;
                 size = spec[i][0];
                 unit = spec[i][1];
@@ -375,8 +386,8 @@
                 
                 // special-case the possibility of several years
                 if (unit == "year") {
-                    var magn = Math.pow(10, Math.floor(Math.log(delta / dateUnitSize.year) / Math.LN10));
-                    var norm = (delta / dateUnitSize.year) / magn;
+                    var magn = Math.pow(10, Math.floor(Math.log(delta / timeUnitSize.year) / Math.LN10));
+                    var norm = (delta / timeUnitSize.year) / magn;
                     if (norm < 1.5)
                         size = 1;
                     else if (norm < 3)
@@ -396,21 +407,21 @@
                 else
                     formatter = function (v, axis) {
                         var d = new Date(v);
-                        var t = axis.tickSize * dateUnitSize[axis.tickSizeUnit];
+                        var t = axis.tickSize * timeUnitSize[axis.tickSizeUnit];
                         var span = axis.max - axis.min;
                         
-                        if (t < dateUnitSize.minute)
+                        if (t < timeUnitSize.minute)
                             fmt = "%h:%M:%S";
-                        else if (t < dateUnitSize.day) {
-                            if (span < 2 * dateUnitSize.day)
+                        else if (t < timeUnitSize.day) {
+                            if (span < 2 * timeUnitSize.day)
                                 fmt = "%h:%M";
                             else
                             fmt = "%b %d %h:%M";
                         }
-                        else if (t < dateUnitSize.month)
+                        else if (t < timeUnitSize.month)
                             fmt = "%b %d";
-                        else if (t < dateUnitSize.year) {
-                            if (span < dateUnitSize.year)
+                        else if (t < timeUnitSize.year) {
+                            if (span < timeUnitSize.year)
                                 fmt = "%b";
                             else
                                 fmt = "%b %y";
@@ -579,6 +590,8 @@
         }
 
         function drawGrid() {
+            var i;
+            
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
@@ -587,12 +600,52 @@
                 ctx.fillStyle = options.grid.backgroundColor;
                 ctx.fillRect(0, 0, plotWidth, plotHeight);
             }
+
+            // draw colored areas
+            if (options.grid.coloredAreas) {
+                var areas = options.grid.coloredAreas;
+                if ($.isFunction(areas))
+                    areas = areas({ xmin: xaxis.min, xmax: xaxis.max, ymin: yaxis.min, ymax: yaxis.max });
+
+                ctx.fillStyle = options.grid.coloredAreasColor;
+                for (i = 0; i < areas.length; ++i) {
+                    var a = areas[i];
+
+                    // clip
+                    if (a.x1 == null || a.x1 < xaxis.min)
+                        a.x1 = xaxis.min;
+                    if (a.x2 == null || a.x2 > xaxis.max)
+                        a.x2 = xaxis.max;
+                    if (a.y1 == null || a.y1 < yaxis.min)
+                        a.y1 = yaxis.min;
+                    if (a.y2 == null || a.y2 > yaxis.max)
+                        a.y2 = yaxis.max;
+
+                    var tmp;
+                    if (a.x1 > a.x2) {
+                        tmp = a.x1;
+                        a.x1 = a.x2;
+                        a.x2 = tmp;
+                    }
+                    if (a.y1 > a.y2) {
+                        tmp = a.y1;
+                        a.y1 = a.y2;
+                        a.y2 = tmp;
+                    }
+
+                    if (a.x1 >= xaxis.max || a.x2 <= xaxis.min || a.x1 == a.x2
+                        || a.y1 >= yaxis.max || a.y2 <= yaxis.min || a.y1 == a.y2)
+                        continue;
+                    ctx.fillRect(Math.floor(tHoz(a.x1)), Math.floor(tVert(a.y2)),
+                                 Math.floor(tHoz(a.x2) - tHoz(a.x1)), Math.floor(tVert(a.y1) - tVert(a.y2)));
+                }
+            }
             
             // draw the inner grid
             ctx.lineWidth = 1;
             ctx.strokeStyle = options.grid.tickColor;
             ctx.beginPath();
-            var i, v;
+            var v;
             for (i = 0; i < xaxis.ticks.length; ++i) {
                 v = xaxis.ticks[i].v;
                 if (v <= xaxis.min || v >= xaxis.max)
@@ -1403,7 +1456,7 @@
                     case 'd': c = "" + d.getDate(); break;
                     case 'm': c = "" + (d.getMonth() + 1); break;
                     case 'y': c = "" + d.getFullYear(); break;
-                    case 'b': c = "" + options.date.monthNames[d.getMonth()]; break;
+                    case 'b': c = "" + options.datatype.time.monthNames[d.getMonth()]; break;
                     default: c;
                     }
                     r.push(c);
