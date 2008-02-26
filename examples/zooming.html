@@ -21,7 +21,7 @@
       <p id="overviewLegend" style="margin-left:10px"></p>
     </div>
 
-    <p style="clear:left"> The selection support makes even
+    <p style="clear:left"> The selection support makes 
       pretty advanced zooming schemes possible. With a few lines of code,
       the small overview plot to the right has been connected to the large
       plot. Try selecting a rectangle on either of them.</p>
@@ -43,7 +43,7 @@ $(function () {
         legend: { show: false },
         lines: { show: true },
         points: { show: true },
-        yaxis: { noTicks: 10 },
+        yaxis: { ticks: 10 },
         selection: { mode: "xy" }
     };
 
@@ -56,8 +56,8 @@ $(function () {
         legend: { show: true, container: $("#overviewLegend") },
         lines: { show: true, lineWidth: 1 },
         shadowSize: 0,
-        xaxis: { noTicks: 4 },
-        yaxis: { noTicks: 3, min: -2, max: 2 },
+        xaxis: { ticks: 4 },
+        yaxis: { ticks: 3, min: -2, max: 2 },
         grid: { color: "#999" },
         selection: { mode: "xy" }
     });

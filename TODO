@@ -2,10 +2,9 @@ These are mostly ideas, that they're written down here is no guarantee
 that they'll ever be done. If you want something done, feel free to
 say why or come up with a patch. :-)
 
-handling time data
-  - dataformat
-  - axis adjustment
-  - tick generation
+pending
+  - split out autoscaleMargin into a snapToTicks
+  - autodetect a sensible ticks setting
 
 grid configuration
   - how ticks look like

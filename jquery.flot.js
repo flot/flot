@@ -7,7 +7,7 @@
 (function($) {
     function Plot(target_, data_, options_) {
         // data is on the form:
-        //   [ series1 series2 ... ]
+        //   [ series1, series2 ... ]
         // where series is either just the data as [ [x1, y1], [x2, y2], ... ]
         // or { data: [ [x1, y1], [x2, y2], ... ], label: "some label" }
         
@@ -27,19 +27,21 @@
                 backgroundOpacity: 0.85 // set to 0 to avoid background
             },
             xaxis: {
-                ticks: null, // either [1, 3] or [[1, "a"], 3] or fn: axis info -> ticks
-                noTicks: 5, // approximate number of ticks for auto-ticks
-                tickFormatter: null, // fn: number -> string or format string if datatype is date
-                tickDecimals: null, // no. of decimals, null means auto
-                datatype: "number", // one of "number", "time"
+                mode: null, // null or "time"
                 min: null, // min. value to show, null means set automatically
                 max: null, // max. value to show, null means set automatically
-                autoscaleMargin: null // margin in % to add if auto-setting min/max
+                autoscaleMargin: null, // margin in % to add if auto-setting min/max
+                ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
+                tickFormatter: null, // fn: number -> string
+                
+                // mode specific options
+                tickDecimals: null, // no. of decimals, null means auto
+
+                monthNames: null, // list of names of months
+                timeformat: null, // format string to use
             },
             yaxis: {
-                noTicks: 5,
                 ticks: null,
-                datatype: "number",
                 autoscaleMargin: 0.02
             },
             points: {
@@ -75,12 +77,7 @@
                 mode: null, // one of null, "x", "y" or "xy"
                 color: "#e8cfac"
             },
-            shadowSize: 4,
-            datatype: {
-                time: {
-                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                }
-            }
+            shadowSize: 4
         };
         var canvas = null, overlay = null;
         var ctx = null, octx = null;
@@ -98,16 +95,6 @@
         var hozScale = 0;
         var vertScale = 0;
 
-        // map of app. size of time units in milliseconds
-        var timeUnitSize = {
-            "second": 1000,
-            "minute": 60 * 1000,
-            "hour": 60 * 60 * 1000,
-            "day": 24 * 60 * 60 * 1000,
-            "month": 30 * 24 * 60 * 60 * 1000,
-            "year": 365.2425 * 24 * 60 * 60 * 1000
-        };
-
         // initialize
         series = parseData(data_);
         parseOptions(options_);
@@ -117,11 +104,11 @@
         bindEvents();
         findDataRanges();
         setRange(xaxis, options.xaxis);
-        setTickSize(xaxis, options.xaxis);
+        prepareTickGeneration(xaxis, options.xaxis);
         setTicks(xaxis, options.xaxis);
         extendXRangeIfNeededByBar();
         setRange(yaxis, options.yaxis);
-        setTickSize(yaxis, options.yaxis);
+        prepareTickGeneration(yaxis, options.yaxis);
         setTicks(yaxis, options.yaxis);
         setSpacing();
         draw();
@@ -152,6 +139,12 @@
         
         function parseOptions(o) {
             $.extend(true, options, o);
+
+            // backwards compatibility, to be removed in future
+            if (options.xaxis.noTicks && options.xaxis.ticks == null)
+                options.xaxis.ticks = options.xaxis.noTicks;
+            if (options.yaxis.noTicks && options.yaxis.ticks == null)
+                options.yaxis.ticks = options.yaxis.noTicks;
         }
 
         function constructCanvas() {
@@ -263,12 +256,66 @@
             axis.max = max;
         }
 
-        function setTickSize(axis, axisOptions) {
-            var delta = (axis.max - axis.min) / axisOptions.noTicks;
+        function prepareTickGeneration(axis, axisOptions) {
+            var noTicks = 5;
+            if (typeof axisOptions.ticks == "number" && axisOptions.ticks > 0)
+                noTicks = axisOptions.ticks;
+            
+            var delta = (axis.max - axis.min) / noTicks;
             var size, generator, unit = "", formatter, i;
 
-            if (axisOptions.datatype == "time") {
+            if (axisOptions.mode == "time") {
                 // pretty handling of time
+                
+                function formatDate(d, fmt, monthNames) {
+                    var leftPad = function(n) {
+                        n = "" + n;
+                        return n.length == 1 ? "0" + n : n;
+                    };
+                    
+                    var r = [];
+                    var escape = false;
+                    if (monthNames == null)
+                        monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    for (var i = 0; i < fmt.length; ++i) {
+                        var c = fmt.charAt(i);
+                        
+                        if (escape) {
+                            switch (c) {
+                            case 'h': c = "" + d.getHours(); break;
+                            case 'H': c = leftPad(d.getHours()); break;
+                            case 'M': c = leftPad(d.getMinutes()); break;
+                            case 'S': c = leftPad(d.getSeconds()); break;
+                            case 'd': c = "" + d.getDate(); break;
+                            case 'm': c = "" + (d.getMonth() + 1); break;
+                            case 'y': c = "" + d.getFullYear(); break;
+                            case 'b': c = "" + monthNames[d.getMonth()]; break;
+                            default: c;
+                            }
+                            r.push(c);
+                            escape = false;
+                        }
+                        else {
+                            if (c == "%")
+                                escape = true;
+                            else
+                                r.push(c);
+                        }
+                    }
+                    return r.join("");
+                }
+                
+                    
+                // map of app. size of time units in milliseconds
+                var timeUnitSize = {
+                    "second": 1000,
+                    "minute": 60 * 1000,
+                    "hour": 60 * 60 * 1000,
+                    "day": 24 * 60 * 60 * 1000,
+                    "month": 30 * 24 * 60 * 60 * 1000,
+                    "year": 365.2425 * 24 * 60 * 60 * 1000
+                };
+
 
                 // the allowed tick sizes, after 1 year we use
                 // an integer algorithm
@@ -339,9 +386,8 @@
                             //console.log(d, "month", axis.tickSize)
                             if (axis.tickSize < 1) {
                                 // a bit complicated - we'll divide the month
-                                // up but we need to take care
-                                // of fractions so we don't end up in the
-                                // middle of a day
+                                // up but we need to take care of fractions
+                                // so we don't end up in the middle of a day
                                 d.setDate(1);
                                 var start = d.getTime();
                                 d.setMonth(d.getMonth() + 1);
@@ -400,37 +446,37 @@
                     size *= magn;
                 }
 
-                if (typeof axisOptions.tickFormatter == "string")
-                    formatter = function (v, axis) {
-                        return formatDate(new Date(v), axisOptions.tickFormatter);
-                    };
-                else
-                    formatter = function (v, axis) {
-                        var d = new Date(v);
-                        var t = axis.tickSize * timeUnitSize[axis.tickSizeUnit];
-                        var span = axis.max - axis.min;
-                        
-                        if (t < timeUnitSize.minute)
-                            fmt = "%h:%M:%S";
-                        else if (t < timeUnitSize.day) {
-                            if (span < 2 * timeUnitSize.day)
-                                fmt = "%h:%M";
-                            else
-                            fmt = "%b %d %h:%M";
-                        }
-                        else if (t < timeUnitSize.month)
-                            fmt = "%b %d";
-                        else if (t < timeUnitSize.year) {
-                            if (span < timeUnitSize.year)
-                                fmt = "%b";
-                            else
-                                fmt = "%b %y";
-                        }
+                formatter = function (v, axis) {
+                    var d = new Date(v);
+                    
+                    // first check global format
+                    if (axisOptions.timeformat != null)
+                        return formatDate(d, axisOptions.timeformat, axisOptions.monthNames);
+                    
+                    var t = axis.tickSize * timeUnitSize[axis.tickSizeUnit];
+                    var span = axis.max - axis.min;
+                    
+                    if (t < timeUnitSize.minute)
+                        fmt = "%h:%M:%S";
+                    else if (t < timeUnitSize.day) {
+                        if (span < 2 * timeUnitSize.day)
+                            fmt = "%h:%M";
                         else
-                            fmt = "%y";
-                        
-                        return formatDate(d, fmt);
-                    };
+                            fmt = "%b %d %h:%M";
+                    }
+                    else if (t < timeUnitSize.month)
+                        fmt = "%b %d";
+                    else if (t < timeUnitSize.year) {
+                        if (span < timeUnitSize.year)
+                            fmt = "%b";
+                        else
+                            fmt = "%b %y";
+                    }
+                    else
+                        fmt = "%y";
+                    
+                    return formatDate(d, fmt, axisOptions.monthNames);
+                };
             }
             else {
                 // pretty rounding of base-10 numbers
@@ -480,7 +526,6 @@
             axis.tickSize = size;
             axis.tickGenerator = generator;
             axis.tickSizeUnit = unit;
-            axis.datatype = axisOptions.datatype;
             if ($.isFunction(axisOptions.tickFormatter))
                 axis.tickFormatter = function (v, axis) { return "" + axisOptions.tickFormatter(v, axis); };
             else
@@ -500,10 +545,15 @@
         }
 
         function setTicks(axis, axisOptions) {
-            var i, v;
             axis.ticks = [];
-
-            if (axisOptions.ticks) {
+            
+            if (axisOptions.ticks == null)
+                axis.ticks = axis.tickGenerator(axis);
+            else if (typeof axisOptions.ticks == "number") {
+                if (axisOptions.ticks > 0)
+                    axis.ticks = axis.tickGenerator(axis);
+            }
+            else if (axisOptions.ticks) {
                 var ticks = axisOptions.ticks;
 
                 if ($.isFunction(ticks))
@@ -511,10 +561,11 @@
                     ticks = ticks({ min: axis.min, max: axis.max });
                 
                 // clean up the user-supplied ticks, copy them over
+                var i, v;
                 for (i = 0; i < ticks.length; ++i) {
                     var label = null;
                     var t = ticks[i];
-                    if (typeof(t) == "object") {
+                    if (typeof t == "object") {
                         v = t[0];
                         if (t.length > 1)
                             label = t[1];
@@ -526,10 +577,8 @@
                     axis.ticks[i] = { v: v, label: label };
                 }
             }
-            else
-                axis.ticks = axis.tickGenerator(axis);
 
-            if (axisOptions.autoscaleMargin != null) {
+            if (axisOptions.autoscaleMargin != null && axis.ticks.length > 0) {
                 if (axisOptions.min == null)
                     axis.min = axis.ticks[0].v;
                 if (axisOptions.max == null && axis.ticks.length > 1)
@@ -714,7 +763,7 @@
                 var sc = series[i].color;
                 if (sc != null) {
                     --neededColors;
-                    if (typeof(sc) == "number")
+                    if (typeof sc == "number")
                         assignedColors.push(sc);
                     else
                         usedColors.push(parseColor(series[i].color));
@@ -764,7 +813,7 @@
                     s.color = colors[colori].toString();
                     ++colori;
                 }
-                else if (typeof(s.color) == "number")
+                else if (typeof s.color == "number")
                     s.color = colors[s.color].toString();
 
                 // copy the rest
@@ -1434,42 +1483,6 @@
             var minSize = 5;
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
                 Math.abs(selection.second.y - selection.first.y) >= minSize;
-        }
-
-        function formatDate(d, s) {
-            var leftPad = function(n) {
-                n = "" + n;
-                return n.length == 1 ? "0" + n : n;
-            };
-
-            var r = [];
-            var escape = false;
-            for (var i = 0; i < s.length; ++i) {
-                var c = s.charAt(i);
-
-                if (escape) {
-                    switch (c) {
-                    case 'h': c = "" + d.getHours(); break;
-                    case 'H': c = leftPad(d.getHours()); break;
-                    case 'M': c = leftPad(d.getMinutes()); break;
-                    case 'S': c = leftPad(d.getSeconds()); break;
-                    case 'd': c = "" + d.getDate(); break;
-                    case 'm': c = "" + (d.getMonth() + 1); break;
-                    case 'y': c = "" + d.getFullYear(); break;
-                    case 'b': c = "" + options.datatype.time.monthNames[d.getMonth()]; break;
-                    default: c;
-                    }
-                    r.push(c);
-                    escape = false;
-                }
-                else {
-                    if (c == "%")
-                        escape = true;
-                    else
-                        r.push(c);
-                }
-            }
-            return r.join("");
         }
     }
     

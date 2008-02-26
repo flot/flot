@@ -36,6 +36,13 @@ E.g.
 
   [ [1, 3], [2, 14.01], [3.5, 3.14] ]
 
+Note that to simplify the internal logic in Flot both the x and y
+values must be numbers, even if specifying time series (see below for
+how to do this). If you put in something else, e.g. a string, the plot
+function fails with strange errors. This is a common problem because
+you might accidentally retrieve data from the database as strings and
+serialize them directly to JSON without noticing the wrong type.
+
 The format of a single series object is as follows:
 
   {
@@ -74,6 +81,11 @@ as the default options passed in via the options parameter in the plot
 commmand. When you specify them for a specific data series, they will
 override the default options for the plot for that data series.
 
+Here's a complete example of a simple data specification:
+
+  [ { label: "Foo", data: [ [10, 1], [17, -14], [30, 5] ] },
+    { label: "Bar", data: [ [11, 13], [19, 11], [30, -7] ] } ]
+
 
 Plot Options
 ------------
@@ -93,14 +105,14 @@ Customizing the legend
 ======================
 
   legend: {
-    show: boolean,
-    labelFormatter: null or (fn: string -> string),
-    labelBoxBorderColor: color,
-    noColumns: number,
-    position: "ne" or "nw" or "se" or "sw",
-    margin: number of pixels,
-    backgroundColor: null or color,
-    backgroundOpacity: number in 0.0 - 1.0,
+    show: boolean
+    labelFormatter: null or (fn: string -> string)
+    labelBoxBorderColor: color
+    noColumns: number
+    position: "ne" or "nw" or "se" or "sw"
+    margin: number of pixels
+    backgroundColor: null or color
+    backgroundOpacity: number in 0.0 - 1.0
     container: null or jQuery object
   }
 
@@ -131,19 +143,22 @@ Customizing the axes
 ====================
 
   xaxis, yaxis: {
-    ticks: null or ticks array or (fn: range -> ticks array),
-    noTicks: number,
-    tickFormatter: fn: number, object -> string,
-    tickDecimals: null or number,
-    min: null or number,
-    max: null or number,
+    mode: null or "time"
+    min: null or number
+    max: null or number
     autoscaleMargin: null or number
+    ticks: null or number or ticks array or (fn: range -> ticks array)
+    tickFormatter: (fn: number, object -> string) or string
+    tickDecimals: null or number
   }
 
-The two axes have the same kind of options. The most import are
-"min"/"max" that specifies the precise minimum/maximum value on the
-scale. If you don't specify a value, it will automatically be chosen
-by a scaling algorithm based on the minimum/maximum data values.
+The two axes have the same kind of options. The "mode" option
+determines how the data is interpreted, the default of null means as
+decimal numbers. Use "time" for time series data, see the next section.
+
+The options "min"/"max" are the precise minimum/maximum value on the
+scale. If you don't specify either of them, a value will automatically
+be chosen based on the minimum/maximum data values.
 
 The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
 that the scaling algorithm will add to avoid that the outermost points
@@ -153,23 +168,23 @@ specified, the plot will furthermore extend the axis end-point to the
 nearest whole tick. The default value is "null" for the x axis and
 0.02 for the y axis which seems appropriate for most cases.
 
-The rest of the options deal with the ticks. If you don't specify any
-ticks, a tick generator algorithm will make some for you based on the
-number of ticks setting, "noTicks". The algorithm always tries to
-generate reasonably round tick values so even if you ask for 3 ticks,
-you might get 5 if that fits better with the rounding. Never set
-"noTicks" to 0, that will just break the auto-detection stuff. If you
-don't want ticks, provide an empty "ticks" array as described below.
+The rest of the options deal with the ticks.
+
+If you don't specify any ticks, a tick generator algorithm will make
+some for you. You can tweak how many it tries to generate by setting
+"ticks" to a number. The algorithm always tries to generate reasonably
+round tick values so even if you ask for 3 ticks, you might get 5 if
+that fits better with the rounding. If you don't want ticks, set
+"ticks" to 0 or an empty array.
 
 You can control how the ticks look like with "tickDecimals", the
 number of decimals to display (default is auto-detected), or by
-providing a function to "tickFormatter".
+providing a function as "tickFormatter". The tick formatter function
+gets two argument, the tick value and an optional "axis" object with
+information, and should return a string. The default formatter looks
+like this:
 
-The tick formatter function gets two argument, the tick value and an
-optional "axis" object with information, and should return a string.
-The default formatter looks like this:
-
-  function defaultTickFormatter(val, axis) {
+  function formatter(val, axis) {
     return val.toFixed(axis.tickDecimals);
   }
 
@@ -189,8 +204,8 @@ custom formatter:
   }
 
 
-If you want to override the tick algorithm, you can manually specify
-"ticks" which should be an array of tick values, either like this:
+If you want to override the tick algorithm, you can specify an array
+to "ticks", either like this:
 
   ticks: [0, 1.2, 2.4]
 
@@ -198,10 +213,6 @@ Or like this (you can mix the two if you like):
 
   ticks: [[0, "zero"], [1.2, "one mark"], [2.4, "two marks"]]
 
-You can disable the ticks by providing an empty array:
-
-  ticks: []
-  
 For extra flexibility you can specify a function as the "ticks"
 parameter. The function will be called with an object with the axis
 min and max and should return a ticks array. Here's a simplistic tick
@@ -221,8 +232,84 @@ axis for trigonometric functions:
     return res;
   }
 
-Note that the scaling and tick algorithms don't work with time series
-yet.
+
+Time series data
+================
+
+The time series support in Flot is based on Javascript timestamps,
+i.e. everywhere a time value is expected or passed over, a Javascript
+timestamp number is used. This is not the same as a Date object. A
+Javascript timestamp is the number of milliseconds since January 1,
+1970 00:00:00. This is almost the same as Unix timestamps, except it's
+in milliseconds, so remember to multiply by 1000!
+
+You can see a timestamp by outputting
+
+  (new Date()).getTime()
+
+In PHP you can get an appropriate timestamp with
+'strtotime("2002-02-20") * 1000', in Python with
+'time.mktime(datetime_object.timetuple()) * 1000', in .NET with
+something like:
+
+  public static int GetJavascriptTimestamp(System.DateTime input)
+  {
+    System.TimeSpan span = new System.TimeSpan(System.DateTime.Parse("1/1/1970").Ticks);
+    System.DateTime time = input.Subtract(span);
+    return (int)(time.Ticks / 10000);
+  }
+
+Once you've got the timestamps into the data and specified "time" as
+the axis mode, Flot will automatically generate relevant ticks and
+format them. As always, you can tweak the ticks via the "ticks"
+option. Again the values should be timestamps, not Date objects!
+
+Formatting is controlled separately through the following axis
+options:
+
+  xaxis, yaxis: {
+    timeformat: null or format string
+    monthNames: null or array of size 12 of strings
+  }
+
+Here "timeformat" is a format string to use. You might use it like
+this:
+
+  xaxis: {
+    mode: "time",
+    timeformat: "%y/%m/%d"
+  }
+  
+This will result in tick labels like "2000/12/24". The following
+specifiers are supported
+
+  %h': hours
+  %H': hours (left-padded with a zero)
+  %M': minutes (left-padded with a zero)
+  %S': seconds (left-padded with a zero)
+  %d': day of month (1-31)
+  %m': month (1-12)
+  %y': year (four digits)
+  %b': month name (customizable)
+
+You can customize the month names with the "monthNames" option. For
+instance, for Danish you might specify:
+
+  monthName: ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
+
+If everything else fails, you can control the formatting by specifying
+a custom tick formatter function as usual. Here's a simple example
+which will format December 24 as 24/12:
+
+  tickFormatter: function (val, axis) {
+    var d = new Date(val);
+    return d.getDate() + "/" + (d.getMonth() + 1);
+  }
+
+For the time mode the axis object contains an additional
+"tickSizeUnit" which is one of "second", "minute", "hour", "day",
+"month" and "year". So if axis.tickSize is 2 and axis.tickSizeUnit is
+"day", the ticks have been produced with two days in-between.
 
 
 Customizing the data series

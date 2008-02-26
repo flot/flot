@@ -43,7 +43,7 @@ $(function () {
     }
     
     var options = {
-        xaxis: { datatype: "time" },
+        xaxis: { mode: "time" },
         selection: { mode: "x" },
         grid: { coloredAreas: weekendAreas }
     };
@@ -53,7 +53,7 @@ $(function () {
     var overview = $.plot($("#overview"), [d], {
         lines: { show: true, lineWidth: 1 },
         shadowSize: 0,
-        xaxis: { ticks: [], datatype: "time" },
+        xaxis: { ticks: [], mode: "time" },
         yaxis: { ticks: [], min: 0, max: 4000 },
         selection: { mode: "x" }
     });
