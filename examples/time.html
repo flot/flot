@@ -23,7 +23,7 @@
       <button id="nineties">1990-2000</button>
       <button id="ninetynine">1999</button></p>
 
-    <p>The timestamps <em>must</em> be specified as Javascript
+    <p>The timestamps must be specified as Javascript
       timestamps, as milliseconds since January 1, 1970 00:00. This is
       like Unix timestamps, but in milliseconds instead of seconds
       (remember to multiply with 1000!).</p> 
@@ -49,6 +49,7 @@ $(function () {
     $("#ninetynine").click(function () {
         $.plot($("#placeholder"), [d], { xaxis: {
             mode: "time",
+            minTickSize: [1, "month"],
             min: (new Date("1999/01/01")).getTime(),
             max: (new Date("2000/01/01")).getTime()
         } });

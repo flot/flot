@@ -148,6 +148,8 @@ Customizing the axes
     max: null or number
     autoscaleMargin: null or number
     ticks: null or number or ticks array or (fn: range -> ticks array)
+    tickSize: number or array
+    minTickSize: number or array
     tickFormatter: (fn: number, object -> string) or string
     tickDecimals: null or number
   }
@@ -171,41 +173,25 @@ nearest whole tick. The default value is "null" for the x axis and
 The rest of the options deal with the ticks.
 
 If you don't specify any ticks, a tick generator algorithm will make
-some for you. You can tweak how many it tries to generate by setting
+some for you. The algorithm has two passes. It first estimates how
+many ticks would be reasonable and uses this number to compute a nice
+round tick interval size. Then it generates the ticks.
+
+You can specify how many ticks the algorithm aims for by setting
 "ticks" to a number. The algorithm always tries to generate reasonably
-round tick values so even if you ask for 3 ticks, you might get 5 if
-that fits better with the rounding. If you don't want ticks, set
-"ticks" to 0 or an empty array.
+round tick values so even if you ask for three ticks, you might get
+five if that fits better with the rounding. If you don't want ticks,
+set "ticks" to 0 or an empty array.
 
-You can control how the ticks look like with "tickDecimals", the
-number of decimals to display (default is auto-detected), or by
-providing a function as "tickFormatter". The tick formatter function
-gets two argument, the tick value and an optional "axis" object with
-information, and should return a string. The default formatter looks
-like this:
+Another option is to skip the rounding part and directly set the tick
+interval size with "tickSize". If you set it to 2, you'll get ticks at
+2, 4, 6, etc. Alternatively, you can specify that you just don't want
+ticks at a size less than a specific tick size with "minTickSize".
+Note that for time series, the format is an array like [2, "month"],
+see the next section.
 
-  function formatter(val, axis) {
-    return val.toFixed(axis.tickDecimals);
-  }
-
-The axis object has "min" and "max" with the range of the axis,
-"tickDecimals" with the number of decimals to round the value to and
-"tickSize" with the size of the interval between ticks as calculated
-by the automatic axis scaling algorithm. Here's an example of a
-custom formatter:
-
-  function suffixFormatter(val, axis) {
-    if (val > 1000000)
-      return (val / 1000000).toFixed(axis.tickDecimals) + " MB";
-    else if (val > 1000)
-      return (val / 1000).toFixed(axis.tickDecimals) + " kB";
-    else
-      return val.toFixed(axis.tickDecimals) + " B";
-  }
-
-
-If you want to override the tick algorithm, you can specify an array
-to "ticks", either like this:
+If you want to completely override the tick algorithm, you can specify
+an array for "ticks", either like this:
 
   ticks: [0, 1.2, 2.4]
 
@@ -220,16 +206,42 @@ generator that spits out intervals of pi, suitable for use on the x
 axis for trigonometric functions:
 
   function piTickGenerator(axis) {
-    var res = [], i = Math.ceil(axis.min / Math.PI);
-    while (true) {
+    var res = [], i = Math.floor(axis.min / Math.PI);
+    do {
       var v = i * Math.PI;
-      if (v > axis.max)
-        break;
       res.push([v, i + "\u03c0"]);
       ++i;
-    }
+    } while (v < axis.max);
     
     return res;
+  }
+
+
+You can control how the ticks look like with "tickDecimals", the
+number of decimals to display (default is auto-detected).
+
+Alternatively, for ultimate control you can provide a function to
+"tickFormatter". The function is passed two parameters, the tick value
+and an "axis" object with information, and should return a string. The
+default formatter looks like this:
+
+  function formatter(val, axis) {
+    return val.toFixed(axis.tickDecimals);
+  }
+
+The axis object has "min" and "max" with the range of the axis,
+"tickDecimals" with the number of decimals to round the value to and
+"tickSize" with the size of the interval between ticks as calculated
+by the automatic axis scaling algorithm (or specified by you). Here's
+an example of a custom formatter:
+
+  function suffixFormatter(val, axis) {
+    if (val > 1000000)
+      return (val / 1000000).toFixed(axis.tickDecimals) + " MB";
+    else if (val > 1000)
+      return (val / 1000).toFixed(axis.tickDecimals) + " kB";
+    else
+      return val.toFixed(axis.tickDecimals) + " B";
   }
 
 
@@ -237,7 +249,7 @@ Time series data
 ================
 
 The time series support in Flot is based on Javascript timestamps,
-i.e. everywhere a time value is expected or passed over, a Javascript
+i.e. everywhere a time value is expected or handed over, a Javascript
 timestamp number is used. This is not the same as a Date object. A
 Javascript timestamp is the number of milliseconds since January 1,
 1970 00:00:00. This is almost the same as Unix timestamps, except it's
@@ -264,10 +276,11 @@ the axis mode, Flot will automatically generate relevant ticks and
 format them. As always, you can tweak the ticks via the "ticks"
 option. Again the values should be timestamps, not Date objects!
 
-Formatting is controlled separately through the following axis
-options:
+Tick generation and formatting is controlled separately through the
+following axis options:
 
   xaxis, yaxis: {
+    minTickSize
     timeformat: null or format string
     monthNames: null or array of size 12 of strings
   }
@@ -306,10 +319,17 @@ which will format December 24 as 24/12:
     return d.getDate() + "/" + (d.getMonth() + 1);
   }
 
-For the time mode the axis object contains an additional
-"tickSizeUnit" which is one of "second", "minute", "hour", "day",
-"month" and "year". So if axis.tickSize is 2 and axis.tickSizeUnit is
-"day", the ticks have been produced with two days in-between.
+Note that for the time mode "tickSize" and "minTickSize" are a bit
+special in that they are arrays on the form "[value, unit]" where unit
+is one of "second", "minute", "hour", "day", "month" and "year". So
+you can specify
+
+  minTickSize: [1, "month"]
+
+to get a tick interval size of at least 1 month and correspondingly,
+if axis.tickSize is [2, "day"] in the tick formatter, the ticks have
+been produced with two days in-between.
+
 
 
 Customizing the data series
@@ -370,10 +390,12 @@ Customizing the grid
 ====================
 
   grid: {
-    color: color,
-    backgroundColor: color or null,
-    tickColor: color,
-    labelMargin: number,
+    color: color
+    backgroundColor: color or null
+    tickColor: color
+    labelMargin: number
+    coloredAreas: array of areas or (fn: plot area -> array of areas)
+    coloredAreasColor: color
     clickable: boolean
   }
 
@@ -389,8 +411,33 @@ of the page with CSS.
 between tick labels and the grid.
 
 
+"coloredAreas" is an array of areas that will be drawn on top of the
+background. You can either specify an array of objects with { x1, y1,
+x2, y2 } or a function that returns such an array given the plot area
+as { xmin, xmax, ymin, ymax }. The default color of the areas are
+"coloredAreasColor". You can override the color of individual areas by
+specifying "color" in the area object.
+
+Here's an example array:
+
+  coloredAreas: [ { x1: 0, y1: 10, x2: 2, y2: 15, color: "#bb0000" }, ... ]
+
+If you leave out one of the values, that value is assumed to go to the
+border of the plot. So for example { x1: 0, x2: 2 } means an area that
+extends from the top to the bottom of the plot in the x range 0-2.
+
+An example function might look like this:
+
+  coloredAreas: function (plotarea) {
+    var areas = [];
+    for (var x = Math.floor(plotarea.xmin); x < plotarea.xmax; x += 2)
+      areas.push({ x1: x, x2: x + 1 });
+    return areas;
+  }
+
+
 If you set "clickable" to true, the plot will listen for click events
-on the plot are and fire a "plotclick" event on the placeholder with
+on the plot area and fire a "plotclick" event on the placeholder with
 an object { x: number, y: number } as parameter when one occurs. The
 returned coordinates will be in the unit of the plot (not in pixels).
 You can use it like this:

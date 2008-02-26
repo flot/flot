@@ -4,10 +4,10 @@ say why or come up with a patch. :-)
 
 pending
   - split out autoscaleMargin into a snapToTicks
-  - autodetect a sensible ticks setting
 
 grid configuration
   - how ticks look like
+  - consider setting default grid colors from each other?
 
 selection
   - user should be able to cancel selection with escape
