@@ -25,6 +25,11 @@ support for highlighting stuff
 legend
   - interactive auto-highlight of graph?
 
+labels
+  - labels on bars, data points
+  - plan "all points" option
+  - interactive "label this point" command
+
 interactive hover over
   - fire event with value for points
   - fire event with graph id for lines

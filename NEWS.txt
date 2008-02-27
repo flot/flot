@@ -1,6 +1,10 @@
 Flot x.x
 --------
 
+API changes: deprecated axis.noTicks in favor of just specifying the
+number as axis.ticks. So "xaxis: { noTicks: 10 }" becomes
+"xaxis: { ticks: 10 }"
+
 Time series support. Specify axis.mode: "time", put in Javascript
 timestamps as data, and Flot will automatically spit out sensible
 ticks. Take a look at the two new examples. The format can be
@@ -23,8 +27,7 @@ The option axis.tickFormatter now takes a function with two
 parameters, the second parameter is an optional object with
 information about the axis. It has min, max, tickDecimals, tickSize.
 
-API changes: deprecated axis.noTicks in favor of just specifying the
-number as axis.ticks.
+Fixed a bug in handling single-item bar series (reported by Emil Filipov).
 
 
 
