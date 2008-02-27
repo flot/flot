@@ -1122,7 +1122,7 @@
 
         function drawSeriesBars(series) {
             function plotBars(data, barWidth, offset, fill) {
-                if (data.length < 2)
+                if (data.length < 1)
                     return;
 
                 for (var i = 0; i < data.length; i++) {
