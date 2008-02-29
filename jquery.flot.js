@@ -95,6 +95,9 @@
         var hozScale = 0;
         var vertScale = 0;
 
+        // dedicated to storing data for buggy standard compliance cases
+        var workarounds = {};
+        
         // initialize
         series = parseData(data_);
         parseOptions(options_);
@@ -172,6 +175,11 @@
         function bindEvents() {
             if (options.selection.mode != null) {
                 $(overlay).mousedown(onMouseDown);
+                
+                // we put the mouse down on canvas too, because IE 7 sometimes
+                // has trouble with the stacking order
+                $(canvas).mousedown(onMouseDown);
+                
                 // FIXME: temp. work-around until jQuery bug 1871 is fixed
                 target.get(0).onmousemove = onMouseMove;
             }
@@ -1302,6 +1310,21 @@
             if (e.which != 1)  // only accept left-click
                 return;
             
+            // cancel out any text selections
+            document.body.focus();
+
+            // prevent text selection in IE
+            if ($.browser == "msie") {
+                if (workarounds.onselectstart == null) {
+                    workarounds.onselectstart = document.onselectstart;
+                    document.onselectstart = function () { return false; };
+                }
+                if (workarounds.ondrag == null) {
+                    workarounds.ondrag = document.ondrag;
+                    document.ondrag = function () { return false; };
+                }
+            }
+            
             setSelectionPos(selection.first, e);
                 
             if (selectionInterval != null)
@@ -1357,6 +1380,11 @@
         }
         
         function onSelectionMouseUp(e) {
+            if ($.browser == "msie") {
+                document.onselectstart = workarounds.onselectstart;
+                document.ondrag = workarounds.ondrag;
+            }
+            
             if (selectionInterval != null) {
                 clearInterval(selectionInterval);
                 selectionInterval = null;
