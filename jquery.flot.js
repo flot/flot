@@ -79,7 +79,7 @@
             },
             shadowSize: 4
         };
-        var canvas = null, overlay = null;
+        var canvas = null, overlay = null, eventHolder = null;
         var ctx = null, octx = null;
         var target = target_;
         var xaxis = {};
@@ -160,32 +160,34 @@
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
 
             // the canvas
-            canvas = jQuery('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-            if (jQuery.browser.msie) // excanvas hack
+            canvas = $('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
+            if ($.browser.msie) // excanvas hack
                 canvas = window.G_vmlCanvasManager.initElement(canvas);
             ctx = canvas.getContext("2d");
 
             // overlay canvas for interactive features
-            overlay = jQuery('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-            if (jQuery.browser.msie) // excanvas hack
+            overlay = $('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
+            if ($.browser.msie) // excanvas hack
                 overlay = window.G_vmlCanvasManager.initElement(overlay);
             octx = overlay.getContext("2d");
+
+            // we include the canvas in the event holder too, because IE 7
+            // sometimes has trouble with the stacking order
+            eventHolder = $([overlay, canvas]);
         }
 
         function bindEvents() {
             if (options.selection.mode != null) {
-                $(overlay).mousedown(onMouseDown);
-                
-                // we put the mouse down on canvas too, because IE 7 sometimes
-                // has trouble with the stacking order
-                $(canvas).mousedown(onMouseDown);
+                eventHolder.mousedown(onMouseDown);
                 
                 // FIXME: temp. work-around until jQuery bug 1871 is fixed
-                target.get(0).onmousemove = onMouseMove;
+                eventHolder.each(function () {
+                    this.onmousemove = onMouseMove;
+                });
             }
 
             if (options.grid.clickable)
-                $(overlay).click(onClick);
+                eventHolder.click(onClick);
         }
 
         function findDataRanges() {
@@ -275,7 +277,7 @@
                 noTicks = canvasHeight / 60;
             
             var delta = (axis.max - axis.min) / noTicks;
-            var size, generator, unit, formatter, i;
+            var size, generator, unit, formatter, i, magn, norm;
 
             if (axisOptions.mode == "time") {
                 // pretty handling of time
@@ -303,7 +305,6 @@
                             case 'm': c = "" + (d.getMonth() + 1); break;
                             case 'y': c = "" + d.getFullYear(); break;
                             case 'b': c = "" + monthNames[d.getMonth()]; break;
-                            default: c;
                             }
                             r.push(c);
                             escape = false;
@@ -363,8 +364,8 @@
                 
                 // special-case the possibility of several years
                 if (unit == "year") {
-                    var magn = Math.pow(10, Math.floor(Math.log(delta / timeUnitSize.year) / Math.LN10));
-                    var norm = (delta / timeUnitSize.year) / magn;
+                    magn = Math.pow(10, Math.floor(Math.log(delta / timeUnitSize.year) / Math.LN10));
+                    norm = (delta / timeUnitSize.year) / magn;
                     if (norm < 1.5)
                         size = 1;
                     else if (norm < 3)
@@ -415,8 +416,8 @@
 
 
                     var carry = 0;
+                    var v = d.getTime();
                     do {
-                        var v = d.getTime();
                         ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
                         if (unit == "month") {
                             if (tickSize < 1) {
@@ -483,8 +484,8 @@
                 if (maxDec != null && dec > maxDec)
                     dec = maxDec;
                 
-                var magn = Math.pow(10, -dec);
-                var norm = delta / magn; // norm is between 1.0 and 10.0
+                magn = Math.pow(10, -dec);
+                norm = delta / magn; // norm is between 1.0 and 10.0
                 
                 if (norm < 1.5)
                     size = 1;
@@ -1313,16 +1314,14 @@
             // cancel out any text selections
             document.body.focus();
 
-            // prevent text selection in IE
-            if ($.browser == "msie") {
-                if (workarounds.onselectstart == null) {
-                    workarounds.onselectstart = document.onselectstart;
-                    document.onselectstart = function () { return false; };
-                }
-                if (workarounds.ondrag == null) {
-                    workarounds.ondrag = document.ondrag;
-                    document.ondrag = function () { return false; };
-                }
+            // prevent text selection and drag in old-school browsers
+            if (document.onselectstart !== undefined && workarounds.onselectstart == null) {
+                workarounds.onselectstart = document.onselectstart;
+                document.onselectstart = function () { return false; };
+            }
+            if (document.ondrag !== undefined && workarounds.ondrag == null) {
+                workarounds.ondrag = document.ondrag;
+                document.ondrag = function () { return false; };
             }
             
             setSelectionPos(selection.first, e);
@@ -1340,7 +1339,7 @@
                 return;
             }
             
-            var offset = $(overlay).offset();
+            var offset = eventHolder.offset();
             var pos = {};
             pos.x = e.pageX - offset.left - plotOffset.left;
             pos.x = xaxis.min + pos.x / hozScale;
@@ -1380,10 +1379,10 @@
         }
         
         function onSelectionMouseUp(e) {
-            if ($.browser == "msie") {
+            if (document.onselectstart !== undefined)
                 document.onselectstart = workarounds.onselectstart;
+            if (document.ondrag !== undefined)
                 document.ondrag = workarounds.ondrag;
-            }
             
             if (selectionInterval != null) {
                 clearInterval(selectionInterval);
@@ -1651,20 +1650,16 @@
     
     // parse string, returns Color
     function parseColor(str) {
-        // Some named colors to work with
-        // From Interface by Stefan Petre
-        // http://interface.eyecon.ro/
-
         var result;
 
         // Look for rgb(num,num,num)
         if (result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str))
-            return new Color(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]));
-
+            return new Color(parseInt(result[1], 10), parseInt(result[2], 10), parseInt(result[3], 10));
+        
         // Look for rgba(num,num,num,num)
         if (result = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
-            return new Color(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]), parseFloat(result[4]));
-        
+            return new Color(parseInt(result[1], 10), parseInt(result[2], 10), parseInt(result[3], 10), parseFloat(result[4]));
+            
         // Look for rgb(num%,num%,num%)
         if (result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str))
             return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55);
@@ -1675,14 +1670,14 @@
         
         // Look for #a0b1c2
         if (result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str))
-            return new Color(parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16));
+            return new Color(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16));
 
         // Look for #fff
         if (result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(str))
-            return new Color(parseInt(result[1]+result[1],16), parseInt(result[2]+result[2],16), parseInt(result[3]+result[3],16));
+            return new Color(parseInt(result[1]+result[1], 16), parseInt(result[2]+result[2], 16), parseInt(result[3]+result[3], 16));
 
         // Otherwise, we're most likely dealing with a named color
-        var name = jQuery.trim(str).toLowerCase();
+        var name = $.trim(str).toLowerCase();
         if (name == "transparent")
             return new Color(255, 255, 255, 0);
         else {

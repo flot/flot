@@ -28,8 +28,9 @@ parameters, the second parameter is an optional object with
 information about the axis. It has min, max, tickDecimals, tickSize.
 
 Fixed a bug in handling single-item bar series (reported by Emil
-Filipov). Fixed erratic behaviour when selecting with IE 7 (reported
-by Lau Bech Lauritzen).
+Filipov). Fixed erratic behaviour when interacting with the plot
+with IE 7 (reported by Lau Bech Lauritzen). Prevent IE/Safari text
+selection when selecting stuff on the canvas.
 
 
 
