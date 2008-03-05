@@ -191,42 +191,40 @@
         }
 
         function findDataRanges() {
-            yaxis.datamin = xaxis.datamin = 0;
-            xaxis.datamax = yaxis.datamax = 1;
+            xaxis.datamin = yaxis.datamin = Number.MAX_VALUE;
+            xaxis.datamax = yaxis.datamax = Number.MIN_VALUE;
 
-            if (series.length == 0)
-                return;
-
-            // get datamin, datamax start values
-            var i, found = false;
-            for (i = 0; i < series.length; ++i) {
-                if (series[i].data.length > 0) {
-                    xaxis.datamin = xaxis.datamax = series[i].data[0][0];
-                    yaxis.datamin = yaxis.datamax = series[i].data[0][1];
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                return;
-
-            // then find real datamin, datamax
-            for (i = 0; i < series.length; ++i) {
+            for (var i = 0; i < series.length; ++i) {
                 var data = series[i].data;
                 for (var j = 0; j < data.length; ++j) {
+                    if (data[j] == null)
+                        continue;
+                    
                     var x = data[j][0];
                     var y = data[j][1];
+
+                    if (x == null || isNaN(x) || y == null || isNaN(y))
+                        continue;
+
                     if (x < xaxis.datamin)
                         xaxis.datamin = x;
-                    else if (x > xaxis.datamax)
+                    if (x > xaxis.datamax)
                         xaxis.datamax = x;
                     if (y < yaxis.datamin)
                         yaxis.datamin = y;
-                    else if (y > yaxis.datamax)
+                    if (y > yaxis.datamax)
                         yaxis.datamax = y;
                 }
             }
+            
+            if (xaxis.datamin == Number.MAX_VALUE)
+                xaxis.datamin = 0;
+            if (yaxis.datamin == Number.MAX_VALUE)
+                yaxis.datamin = 0;
+            if (xaxis.datamax == Number.MIN_VALUE)
+                xaxis.datamax = 1;
+            if (yaxis.datamax == Number.MIN_VALUE)
+                yaxis.datamax = 1;
         }
 
         function setRange(axis, axisOptions) {
@@ -415,9 +413,9 @@
                         d.setMonth(0);
 
 
-                    var carry = 0;
-                    var v = d.getTime();
+                    var carry = 0, v;
                     do {
+                        v = d.getTime();
                         ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
                         if (unit == "month") {
                             if (tickSize < 1) {
@@ -447,7 +445,7 @@
 
                 formatter = function (v, axis) {
                     var d = new Date(v);
-                    
+
                     // first check global format
                     if (axisOptions.timeformat != null)
                         return formatDate(d, axisOptions.timeformat, axisOptions.monthNames);
@@ -516,7 +514,7 @@
                     var ticks = [];
                     var start = floorInBase(axis.min, axis.tickSize);
                     // then spew out all possible ticks
-                    i = 0;
+                    var i = 0, v;
                     do {
                         v = start + i * axis.tickSize;
                         ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
