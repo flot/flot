@@ -16,8 +16,8 @@ options. The "plot" object returned has some members you can call.
 These are documented separately below.
 
 Note that in general Flot gives no guarantees if you change any of the
-objects you pass in to the plot function or get out of it. The objects
-may not be deep-copied.
+objects you pass in to the plot function or get out of it since
+they're not necessarily deep-copied.
 
 
 Data Format
@@ -38,10 +38,14 @@ E.g.
 
 Note that to simplify the internal logic in Flot both the x and y
 values must be numbers, even if specifying time series (see below for
-how to do this). If you put in something else, e.g. a string, the plot
-function fails with strange errors. This is a common problem because
-you might accidentally retrieve data from the database as strings and
-serialize them directly to JSON without noticing the wrong type.
+how to do this). This is a common problem because you might
+accidentally retrieve data from the database as strings and serialize
+them directly to JSON without noticing the wrong type.
+
+If a null is specified as a point or if one of the coordinates is null
+or NaN, the point is ignored. As a special case, a null value for
+lines is interpreted as a line segment end, i.e. the two points before
+and after the null value are not connected.
 
 The format of a single series object is as follows:
 

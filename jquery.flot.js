@@ -200,11 +200,12 @@
                     if (data[j] == null)
                         continue;
                     
-                    var x = data[j][0];
-                    var y = data[j][1];
+                    var x = data[j][0], y = data[j][1];
 
-                    if (x == null || isNaN(x) || y == null || isNaN(y))
+                    if (x == null || isNaN(x) || y == null || isNaN(y)) {
+                        data[j] = null; // mark this point as invalid
                         continue;
+                    }
 
                     if (x < xaxis.datamin)
                         xaxis.datamin = x;
@@ -841,17 +842,18 @@
         
         function drawSeriesLines(series) {
             function plotLine(data, offset) {
-                if (data.length < 2)
-                    return;
-
-                var prevx = tHoz(data[0][0]),
-                    prevy = tVert(data[0][1]) + offset;
-
+                var prev, cur = null, drawx = null, drawy = null;
+                
                 ctx.beginPath();
-                ctx.moveTo(prevx, prevy);
-                for (var i = 0; i < data.length - 1; ++i) {
-                    var x1 = data[i][0], y1 = data[i][1],
-                        x2 = data[i+1][0], y2 = data[i+1][1];
+                for (var i = 0; i < data.length; ++i) {
+                    prev = cur;
+                    cur = data[i];
+
+                    if (prev == null || cur == null)
+                        continue;
+                    
+                    var x1 = prev[0], y1 = prev[1],
+                        x2 = cur[0], y2 = cur[1];
 
                     // clip with ymin
                     if (y1 <= y2 && y1 < yaxis.min) {
@@ -910,29 +912,41 @@
                         x2 = xaxis.max;
                     }
 
-                    if (prevx != tHoz(x1) || prevy != tVert(y1) + offset)
+                    if (drawx != tHoz(x1) || drawy != tVert(y1) + offset)
                         ctx.moveTo(tHoz(x1), tVert(y1) + offset);
                     
-                    prevx = tHoz(x2);
-                    prevy = tVert(y2) + offset;
-                    ctx.lineTo(prevx, prevy);
+                    drawx = tHoz(x2);
+                    drawy = tVert(y2) + offset;
+                    ctx.lineTo(drawx, drawy);
                 }
                 ctx.stroke();
             }
 
             function plotLineArea(data) {
-                if (data.length < 2)
-                    return;
-
+                var prev, cur = null;
+                
                 var bottom = Math.min(Math.max(0, yaxis.min), yaxis.max);
                 var top, lastX = 0;
 
-                var first = true;
+                var areaOpen = false;
                 
-                ctx.beginPath();
-                for (var i = 0; i < data.length - 1; ++i) {
-                    var x1 = data[i][0], y1 = data[i][1],
-                        x2 = data[i+1][0], y2 = data[i+1][1];
+                for (var i = 0; i < data.length; ++i) {
+                    prev = cur;
+                    cur = data[i];
+
+                    if (areaOpen && prev != null && cur == null) {
+                        // close area
+                        ctx.lineTo(tHoz(lastX), tVert(bottom));
+                        ctx.fill();
+                        areaOpen = false;
+                        continue;
+                    }
+
+                    if (prev == null || cur == null)
+                        continue;
+                        
+                    var x1 = prev[0], y1 = prev[1],
+                        x2 = cur[0], y2 = cur[1];
 
                     // clip x values
                     
@@ -964,9 +978,11 @@
                         x2 = xaxis.max;
                     }
 
-                    if (first) {
+                    if (!areaOpen) {
+                        // open area
+                        ctx.beginPath();
                         ctx.moveTo(tHoz(x1), tVert(bottom));
-                        first = false;
+                        areaOpen = true;
                     }
                     
                     // now first check the case where both is outside
@@ -1038,15 +1054,11 @@
 
                     lastX = Math.max(x2, x2old);
                 }
-                /*
-                ctx.beginPath();
-                ctx.moveTo(tHoz(data[0][0]), tVert(0));
-                for (var i = 0; i < data.length; i++) {
-                    ctx.lineTo(tHoz(data[i][0]), tVert(data[i][1]));
+
+                if (areaOpen) {
+                    ctx.lineTo(tHoz(lastX), tVert(bottom));
+                    ctx.fill();
                 }
-                ctx.lineTo(tHoz(data[data.length - 1][0]), tVert(0));*/
-                ctx.lineTo(tHoz(lastX), tVert(bottom));
-                ctx.fill();
             }
             
             ctx.save();
@@ -1081,6 +1093,9 @@
         function drawSeriesPoints(series) {
             function plotPoints(data, radius, fill) {
                 for (var i = 0; i < data.length; ++i) {
+                    if (data[i] == null)
+                        continue;
+                    
                     var x = data[i][0], y = data[i][1];
                     if (x < xaxis.min || x > xaxis.max || y < yaxis.min || y > yaxis.max)
                         continue;
@@ -1095,6 +1110,9 @@
 
             function plotPointShadows(data, offset, radius) {
                 for (var i = 0; i < data.length; ++i) {
+                    if (data[i] == null)
+                        continue;
+                    
                     var x = data[i][0], y = data[i][1];
                     if (x < xaxis.min || x > xaxis.max || y < yaxis.min || y > yaxis.max)
                         continue;
@@ -1129,10 +1147,10 @@
 
         function drawSeriesBars(series) {
             function plotBars(data, barWidth, offset, fill) {
-                if (data.length < 1)
-                    return;
-
                 for (var i = 0; i < data.length; i++) {
+                    if (data[i] == null)
+                        continue;
+                    
                     var x = data[i][0], y = data[i][1];
                     var drawLeft = true, drawTop = true, drawRight = true;
                     var left = x, right = x + barWidth, bottom = 0, top = y;

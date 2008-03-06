@@ -34,9 +34,6 @@ interactive hover over
   - fire event with value for points
   - fire event with graph id for lines
 
-support segmented lines
-  - put in null value to signify a break in the data set
-
 error margin indicators
   - for scientific/statistical purposes
 
