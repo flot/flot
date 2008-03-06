@@ -69,6 +69,7 @@
                 backgroundColor: null, // null for transparent, else color
                 tickColor: "#dddddd", // color used for the ticks
                 labelMargin: 3, // in pixels
+                borderWidth: 2,
                 clickable: null,
                 coloredAreas: null, // array of { x1, y1, x2, y2 } or fn: plot area -> areas
                 coloredAreasColor: "#f4f4f4"
@@ -604,7 +605,7 @@
             }
 
             // measure it
-            var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller" class="gridLabel">' + max_label + '</div>').appendTo(target);
+            var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller" class="tickLabel">' + max_label + '</div>').appendTo(target);
             labelMaxWidth = dummyDiv.width();
             labelMaxHeight = dummyDiv.height();
             dummyDiv.remove();
@@ -721,12 +722,14 @@
             }
             ctx.stroke();
             
-            // draw outline
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = options.grid.color;
-            ctx.lineJoin = "round";
-            ctx.strokeRect(0, 0, plotWidth, plotHeight);
-            ctx.restore();
+            if (options.grid.borderWidth) {
+                // draw border
+                ctx.lineWidth = options.grid.borderWidth;
+                ctx.strokeStyle = options.grid.color;
+                ctx.lineJoin = "round";
+                ctx.strokeRect(0, 0, plotWidth, plotHeight);
+                ctx.restore();
+            }
         }
         
         function drawLabels() {
@@ -743,7 +746,7 @@
                 tick = xaxis.ticks[i];
                 if (!tick.label || tick.v < xaxis.min || tick.v > xaxis.max)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + tHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="gridLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + tHoz(tick.v) - xBoxWidth/2) + 'px;width:' + xBoxWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
             }
             
             // do the y-axis
@@ -751,7 +754,7 @@
                 tick = yaxis.ticks[i];
                 if (!tick.label || tick.v < yaxis.min || tick.v > yaxis.max)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + tVert(tick.v) - labelMaxHeight/2) + 'px;left:0;width:' + labelMaxWidth + 'px;text-align:right" class="gridLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + tVert(tick.v) - labelMaxHeight/2) + 'px;left:0;width:' + labelMaxWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
             }
 
             html += '</div>';

@@ -28,14 +28,16 @@ parameters, the second parameter is an optional object with
 information about the axis. It has min, max, tickDecimals, tickSize.
 
 Added support for segmented lines (based on patch from Michael
-MacDonald) and for ignoring null values (suggestion from Nick
-Konidaris). 
+MacDonald) and for ignoring null and bad values (suggestion from Nick
+Konidaris and joshwaihi). 
+
+Added support for changing the border width (joebno and safoo).
+Label colors can be changed via CSS by selecting the tickLabel class.
 
 Fixed a bug in handling single-item bar series (reported by Emil
 Filipov). Fixed erratic behaviour when interacting with the plot
 with IE 7 (reported by Lau Bech Lauritzen). Prevent IE/Safari text
-selection when selecting stuff on the canvas. The data is now
-implicitly converted to 
+selection when selecting stuff on the canvas.
 
 
 

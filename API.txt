@@ -169,7 +169,7 @@ be chosen based on the minimum/maximum data values.
 
 The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
 that the scaling algorithm will add to avoid that the outermost points
-ends up on the grid outline. Note that this margin is only applied
+ends up on the grid border. Note that this margin is only applied
 when a min or max value is not explicitly set. If a margin is
 specified, the plot will furthermore extend the axis end-point to the
 nearest whole tick. The default value is "null" for the x axis and
@@ -401,6 +401,7 @@ Customizing the grid
     labelMargin: number
     coloredAreas: array of areas or (fn: plot area -> array of areas)
     coloredAreasColor: color
+    borderWidth: number
     clickable: boolean
   }
 
@@ -413,8 +414,10 @@ page color. Otherwise you might as well just set the background color
 of the page with CSS.
 
 "tickColor" is the color of the ticks and "labelMargin" is the spacing
-between tick labels and the grid.
-
+between tick labels and the grid. Note that you can style the tick
+labels with CSS, e.g. to change the color. They have class "tickLabel".
+"borderWidth" is the width of the border around the plot. Set it to 0
+to disable the border.
 
 "coloredAreas" is an array of areas that will be drawn on top of the
 background. You can either specify an array of objects with { x1, y1,
