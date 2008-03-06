@@ -202,7 +202,8 @@
                     
                     var x = data[j][0], y = data[j][1];
 
-                    if (x == null || isNaN(x) || y == null || isNaN(y)) {
+                    // convert to number
+                    if (x == null || y == null || isNaN(x = +x) || isNaN(y = +y)) {
                         data[j] = null; // mark this point as invalid
                         continue;
                     }

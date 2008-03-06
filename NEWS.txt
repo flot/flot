@@ -21,16 +21,21 @@ directly with axis.minTickSize and axis.tickSize.
 
 Cleaned up the automatic axis scaling algorithm and fixed how it
 interacts with ticks. Also fixed a couple of tick-related corner case
-bugs.
+bugs (one reported by mainstreetmark).
 
 The option axis.tickFormatter now takes a function with two
 parameters, the second parameter is an optional object with
 information about the axis. It has min, max, tickDecimals, tickSize.
 
+Added support for segmented lines (based on patch from Michael
+MacDonald) and for ignoring null values (suggestion from Nick
+Konidaris). 
+
 Fixed a bug in handling single-item bar series (reported by Emil
 Filipov). Fixed erratic behaviour when interacting with the plot
 with IE 7 (reported by Lau Bech Lauritzen). Prevent IE/Safari text
-selection when selecting stuff on the canvas.
+selection when selecting stuff on the canvas. The data is now
+implicitly converted to 
 
 
 
