@@ -66,6 +66,12 @@ $(function () {
     var internalSelection = false;
     
     $("#placeholder").bind("selected", function (event, area) {
+        // clamp the zooming to prevent eternal zoom
+        if (area.x2 - area.x1 < 0.00001)
+            area.x2 = area.x1 + 0.00001;
+        if (area.y2 - area.y1 < 0.00001)
+            area.y2 = area.y1 + 0.00001;
+        
         // do the zooming
         plot = $.plot($("#placeholder"), getData(area.x1, area.x2),
                       $.extend(true, {}, options, {
