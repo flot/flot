@@ -21,7 +21,7 @@ directly with axis.minTickSize and axis.tickSize.
 
 Cleaned up the automatic axis scaling algorithm and fixed how it
 interacts with ticks. Also fixed a couple of tick-related corner case
-bugs (one reported by mainstreetmark).
+bugs (one reported by mainstreetmark, another reported by timothytoe).
 
 The option axis.tickFormatter now takes a function with two
 parameters, the second parameter is an optional object with
