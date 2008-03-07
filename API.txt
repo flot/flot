@@ -523,6 +523,12 @@ members:
     ticks, legend etc. will not be recomputed (use setupGrid() to do
     that). You'll probably want to call draw() afterwards.
 
+    You can use this function to speed up redrawing a plot if you now
+    that the axis won't change. Put in the new data with
+    setData(newdata) and call draw() afterwards, and you're good to
+    go.
+    
+
   - getData()
 
     Returns the data currently used. The data series returned are

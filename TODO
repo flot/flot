@@ -40,4 +40,4 @@ error margin indicators
 non-xy based graph types
   - figure out how to integrate them with the rest of the plugin
   - pie charts
-  - bar charts with keys instead of x values
+  - bar charts, keys instead of x values
