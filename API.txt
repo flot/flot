@@ -513,6 +513,37 @@ members:
   - getPlotOffset()
 
     Gets the offset that the grid has within the canvas as an object
-    with the members left, right, top, bottom. I.e., if you draw a
+    with the members "left", "right", "top", "bottom". I.e., if you draw a
     circle on the canvas with the center placed at (left, top), its
     center will be at the top-most, left corner of the grid.
+
+  - setData(data)
+
+    You can use this to reset the data used. Note that axis scaling,
+    ticks, legend etc. will not be recomputed (use setupGrid() to do
+    that). You'll probably want to call draw() afterwards.
+
+  - getData()
+
+    Returns the data currently used. The data series returned are
+    normalized with missing settings filled in. So for instance to
+    find out what color Flot has assigned to the data series, you
+    could do this:
+
+      var series = plot.getData();
+      for (var i = 0; i < series.length; ++i)
+        alert([i].color);
+
+  - setupGrid()
+
+    Recalculate and set axis scaling, ticks, legend etc.
+
+    Note that because of the drawing model of the canvas, this
+    function will immediately redraw (actually reinsert in the DOM)
+    the labels and the legend, but not the actual tick lines because
+    they're drawn on the canvas. You need to call draw() to get the
+    canvas redrawn.
+    
+  - draw()
+
+    Redraws the canvas.

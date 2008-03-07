@@ -20,6 +20,7 @@
        scaled.</p>
 
 <script id="source" language="javascript" type="text/javascript">
+    var plot;
 $(function () {
     var d1 = [];
     for (var i = 0; i < 14; i += 0.5)
@@ -30,7 +31,7 @@ $(function () {
     // a null signifies separate line segments
     var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
     
-    $.plot($("#placeholder"), [ d1, d2, d3 ]);
+    plot = $.plot($("#placeholder"), [ d1, d2, d3 ]);
 });
 </script>
 

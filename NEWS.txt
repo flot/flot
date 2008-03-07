@@ -15,6 +15,11 @@ Support for colored background areas via grid.coloredAreas. Specify an
 array of { x1, y1, x2, y2 } objects or a function that returns these
 given { xmin, xmax, ymin, ymax }.
 
+More members on the plot object (report by Chris Davies and others).
+"getData" for inspecting the assigned settings on data series (e.g.
+color) and "setData", "setupGrid" and "draw" for updating the contents
+without a total replot.
+
 The default number of ticks to aim for is now dependent on the size of
 the plot in pixels. Support for customizing tick interval sizes
 directly with axis.minTickSize and axis.tickSize.

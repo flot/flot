@@ -88,34 +88,34 @@
             yLabelMaxWidth = 0, yLabelMaxHeight = 0, xLabelBoxWidth = 0,
             canvasWidth = 0, canvasHeight = 0,
             plotWidth = 0, plotHeight = 0,
-            hozScale = 0, vertScale = 0;
-
-        // dedicated to storing data for buggy standard compliance cases
-        var workarounds = {};
+            hozScale = 0, vertScale = 0,
+            // dedicated to storing data for buggy standard compliance cases
+            workarounds = {};
         
-        // initialize
-        series = parseData(data_);
-        parseOptions(options_);
-        fillInSeriesOptions();
-
-        constructCanvas();
-        bindEvents();
-        findDataRanges();
-        setRange(xaxis, options.xaxis);
-        prepareTickGeneration(xaxis, options.xaxis);
-        setTicks(xaxis, options.xaxis);
-        extendXRangeIfNeededByBar();
-        setRange(yaxis, options.yaxis);
-        prepareTickGeneration(yaxis, options.yaxis);
-        setTicks(yaxis, options.yaxis);
-        setSpacing();
-        draw();
-        insertLegend();
-
-        this.getCanvas = function() { return canvas; };
-        this.getPlotOffset = function() { return plotOffset; };
+        this.setData = setData;
+        this.setupGrid = setupGrid;
+        this.draw = draw;
         this.clearSelection = clearSelection;
         this.setSelection = setSelection;
+        this.getCanvas = function() { return canvas; };
+        this.getPlotOffset = function() { return plotOffset; };
+        this.getData = function() { return series; };
+        this.getAxes = function() { return { xaxis: xaxis, yaxis: yaxis }; };
+        
+        // initialize
+        parseOptions(options_);
+        setData(data_);
+        constructCanvas();
+        setupGrid();
+        draw();
+
+
+        function setData(d) {
+            series = parseData(d);
+
+            fillInSeriesOptions();
+            processData();
+        }
         
         function parseData(d) {
             var res = [];
@@ -145,47 +145,80 @@
                 options.yaxis.ticks = options.yaxis.noTicks;
         }
 
-        function constructCanvas() {
-            canvasWidth = target.width();
-            canvasHeight = target.height();
-            target.html(""); // clear target
-            target.css("position", "relative"); // for positioning labels and overlay
-
-            if (canvasWidth <= 0 || canvasHeight <= 0)
-                throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
-
-            // the canvas
-            canvas = $('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-            if ($.browser.msie) // excanvas hack
-                canvas = window.G_vmlCanvasManager.initElement(canvas);
-            ctx = canvas.getContext("2d");
-
-            // overlay canvas for interactive features
-            overlay = $('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-            if ($.browser.msie) // excanvas hack
-                overlay = window.G_vmlCanvasManager.initElement(overlay);
-            octx = overlay.getContext("2d");
-
-            // we include the canvas in the event holder too, because IE 7
-            // sometimes has trouble with the stacking order
-            eventHolder = $([overlay, canvas]);
-        }
-
-        function bindEvents() {
-            if (options.selection.mode != null) {
-                eventHolder.mousedown(onMouseDown);
-                
-                // FIXME: temp. work-around until jQuery bug 1871 is fixed
-                eventHolder.each(function () {
-                    this.onmousemove = onMouseMove;
-                });
+        function fillInSeriesOptions() {
+            var i;
+            
+            // collect what we already got of colors
+            var neededColors = series.length;
+            var usedColors = [];
+            var assignedColors = [];
+            for (i = 0; i < series.length; ++i) {
+                var sc = series[i].color;
+                if (sc != null) {
+                    --neededColors;
+                    if (typeof sc == "number")
+                        assignedColors.push(sc);
+                    else
+                        usedColors.push(parseColor(series[i].color));
+                }
+            }
+            
+            // we might need to generate more colors if higher indices
+            // are assigned
+            for (i = 0; i < assignedColors.length; ++i) {
+                neededColors = Math.max(neededColors, assignedColors[i] + 1);
             }
 
-            if (options.grid.clickable)
-                eventHolder.click(onClick);
-        }
+            // produce colors as needed
+            var colors = [];
+            var variation = 0;
+            i = 0;
+            while (colors.length < neededColors) {
+                var c;
+                if (options.colors.length == i) // check degenerate case
+                    c = new Color(100, 100, 100);
+                else
+                    c = parseColor(options.colors[i]);
 
-        function findDataRanges() {
+                // vary color if needed
+                var sign = variation % 2 == 1 ? -1 : 1;
+                var factor = 1 + sign * Math.ceil(variation / 2) * 0.2;
+                c.scale(factor, factor, factor);
+
+                // FIXME: if we're getting to close to something else,
+                // we should probably skip this one
+                colors.push(c);
+                
+                ++i;
+                if (i >= options.colors.length) {
+                    i = 0;
+                    ++variation;
+                }
+            }
+
+            // fill in the options
+            var colori = 0, s;
+            for (i = 0; i < series.length; ++i) {
+                s = series[i];
+
+                // assign colors
+                if (s.color == null) {
+                    s.color = colors[colori].toString();
+                    ++colori;
+                }
+                else if (typeof s.color == "number")
+                    s.color = colors[s.color].toString();
+
+                // copy the rest
+                s.lines = $.extend(true, {}, options.lines, s.lines);
+                s.points = $.extend(true, {}, options.points, s.points);
+                s.bars = $.extend(true, {}, options.bars, s.bars);
+                if (s.shadowSize == null)
+                    s.shadowSize = options.shadowSize;
+            }
+        }
+        
+        function processData() {
             xaxis.datamin = yaxis.datamin = Number.MAX_VALUE;
             xaxis.datamax = yaxis.datamax = Number.MIN_VALUE;
 
@@ -224,6 +257,63 @@
                 yaxis.datamax = 1;
         }
 
+        function constructCanvas() {
+            canvasWidth = target.width();
+            canvasHeight = target.height();
+            target.html(""); // clear target
+            target.css("position", "relative"); // for positioning labels and overlay
+
+            if (canvasWidth <= 0 || canvasHeight <= 0)
+                throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
+
+            // the canvas
+            canvas = $('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
+            if ($.browser.msie) // excanvas hack
+                canvas = window.G_vmlCanvasManager.initElement(canvas);
+            ctx = canvas.getContext("2d");
+
+            // overlay canvas for interactive features
+            overlay = $('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
+            if ($.browser.msie) // excanvas hack
+                overlay = window.G_vmlCanvasManager.initElement(overlay);
+            octx = overlay.getContext("2d");
+
+            // we include the canvas in the event holder too, because IE 7
+            // sometimes has trouble with the stacking order
+            eventHolder = $([overlay, canvas]);
+
+            
+            // bind events
+            if (options.selection.mode != null) {
+                eventHolder.mousedown(onMouseDown);
+                
+                // FIXME: temp. work-around until jQuery bug 1871 is fixed
+                eventHolder.each(function () {
+                    this.onmousemove = onMouseMove;
+                });
+            }
+
+            if (options.grid.clickable)
+                eventHolder.click(onClick);
+        }
+
+        function setupGrid() {
+            // x axis
+            setRange(xaxis, options.xaxis);
+            prepareTickGeneration(xaxis, options.xaxis);
+            setTicks(xaxis, options.xaxis);
+            extendXRangeIfNeededByBar();
+
+            // y axis
+            setRange(yaxis, options.yaxis);
+            prepareTickGeneration(yaxis, options.yaxis);
+            setTicks(yaxis, options.yaxis);
+
+            setSpacing();
+            insertLabels();
+            insertLegend();
+        }
+        
         function setRange(axis, axisOptions) {
             var min = axisOptions.min != null ? axisOptions.min : axis.datamin;
             var max = axisOptions.max != null ? axisOptions.max : axis.datamax;
@@ -648,7 +738,6 @@
         
         function draw() {
             drawGrid();
-            drawLabels();
             for (var i = 0; i < series.length; i++) {
                 drawSeries(series[i]);
             }
@@ -666,6 +755,7 @@
             var i;
             
             ctx.save();
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             ctx.translate(plotOffset.left, plotOffset.top);
 
             // draw background, if any
@@ -749,9 +839,11 @@
             }
         }
         
-        function drawLabels() {
+        function insertLabels() {
+            target.find(".tickLabels").remove();
+            
             var i, tick;
-            var html = '<div style="font-size:smaller;color:' + options.grid.color + '">';
+            var html = '<div class="tickLabels" style="font-size:smaller;color:' + options.grid.color + '">';
             
             // do the x-axis
             for (i = 0; i < xaxis.ticks.length; ++i) {
@@ -774,79 +866,6 @@
             target.append(html);
         }
 
-        function fillInSeriesOptions() {
-            var i;
-            
-            // collect what we already got of colors
-            var neededColors = series.length;
-            var usedColors = [];
-            var assignedColors = [];
-            for (i = 0; i < series.length; ++i) {
-                var sc = series[i].color;
-                if (sc != null) {
-                    --neededColors;
-                    if (typeof sc == "number")
-                        assignedColors.push(sc);
-                    else
-                        usedColors.push(parseColor(series[i].color));
-                }
-            }
-            
-            // we might need to generate more colors if higher indices
-            // are assigned
-            for (i = 0; i < assignedColors.length; ++i) {
-                neededColors = Math.max(neededColors, assignedColors[i] + 1);
-            }
-
-            // produce colors as needed
-            var colors = [];
-            var variation = 0;
-            i = 0;
-            while (colors.length < neededColors) {
-                var c;
-                if (options.colors.length == i) // check degenerate case
-                    c = new Color(100, 100, 100);
-                else
-                    c = parseColor(options.colors[i]);
-
-                // vary color if needed
-                var sign = variation % 2 == 1 ? -1 : 1;
-                var factor = 1 + sign * Math.ceil(variation / 2) * 0.2;
-                c.scale(factor, factor, factor);
-
-                // FIXME: if we're getting to close to something else,
-                // we should probably skip this one
-                colors.push(c);
-                
-                ++i;
-                if (i >= options.colors.length) {
-                    i = 0;
-                    ++variation;
-                }
-            }
-
-            // fill in the options
-            var colori = 0;
-            for (i = 0; i < series.length; ++i) {
-                var s = series[i];
-
-                // assign colors
-                if (s.color == null) {
-                    s.color = colors[colori].toString();
-                    ++colori;
-                }
-                else if (typeof s.color == "number")
-                    s.color = colors[s.color].toString();
-
-                // copy the rest
-                s.lines = $.extend(true, {}, options.lines, s.lines);
-                s.points = $.extend(true, {}, options.points, s.points);
-                s.bars = $.extend(true, {}, options.bars, s.bars);
-                if (s.shadowSize == null)
-                    s.shadowSize = options.shadowSize;
-            }
-        }
-        
         function drawSeries(series) {
             if (series.lines.show || (!series.bars.show && !series.points.show))
                 drawSeriesLines(series);
@@ -1256,6 +1275,8 @@
         }
 
         function insertLegend() {
+            target.find(".legend").remove();
+
             if (!options.legend.show)
                 return;
             
@@ -1298,7 +1319,7 @@
                         pos += 'right:' + (m + plotOffset.right) + 'px;';
                     else if (p.charAt(1) == "w")
                         pos += 'left:' + (m + plotOffset.bottom) + 'px;';
-                    var div = $('<div class="legend" style="position:absolute;z-index:2;' + pos +'">' + table + '</div>').appendTo(target);
+                    var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(target);
                     if (options.legend.backgroundOpacity != 0.0) {
                         // put in the transparent background
                         // separately to avoid blended labels and
@@ -1309,10 +1330,11 @@
                             if (options.grid.backgroundColor != null)
                                 tmp = options.grid.backgroundColor;
                             else
-                                tmp = extractColor(div);
+                                tmp = extractColor(legend);
                             c = parseColor(tmp).adjust(null, null, null, 1).toString();
                         }
-                        $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').appendTo(target).css('opacity', options.legend.backgroundOpacity);
+                        var div = legend.children();
+                        $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
                         
                     }
                 }
