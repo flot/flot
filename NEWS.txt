@@ -1,4 +1,4 @@
-Flot x.x
+Flot 0.4
 --------
 
 API changes: deprecated axis.noTicks in favor of just specifying the
