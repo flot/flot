@@ -695,7 +695,7 @@
                 dummyDiv.remove();
             }
 
-            var maxOutset = options.grid.borderWidth;
+            var maxOutset = options.grid.borderWidth / 2;
             if (options.points.show)
                 maxOutset = Math.max(maxOutset, options.points.radius + options.points.lineWidth/2);
             for (i = 0; i < series.length; ++i) {
@@ -704,8 +704,9 @@
             }
 
             plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
-            
-            plotOffset.left += yLabelMaxWidth + options.grid.labelMargin;
+
+            if (yLabelMaxWidth > 0)
+                plotOffset.left += yLabelMaxWidth + options.grid.labelMargin;
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
 
             // set width for labels; to avoid measuring the widths of
@@ -730,7 +731,9 @@
                 dummyDiv.remove();
             }
 
-            plotOffset.bottom += xLabelMaxHeight + options.grid.labelMargin;
+            if (xLabelMaxHeight > 0)
+                plotOffset.bottom += xLabelMaxHeight + options.grid.labelMargin;
+            
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
             hozScale = plotWidth / (xaxis.max - xaxis.min);
             vertScale = plotHeight / (yaxis.max - yaxis.min);

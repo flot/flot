@@ -1,3 +1,9 @@
+Flot x.x
+--------
+
+Fixed a bug in calculating spacing around the plot (reported by timothytoe).
+
+
 Flot 0.4
 --------
 
