@@ -1,6 +1,10 @@
 Flot x.x
 --------
 
+Added support for specifying the size of tick labels (axis.labelWidth,
+axis.labelHeight). Useful for specifying a max label size to keep
+multiple plots aligned.
+
 Fixed a bug in calculating spacing around the plot (reported by timothytoe).
 
 

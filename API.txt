@@ -152,6 +152,9 @@ Customizing the axes
     min: null or number
     max: null or number
     autoscaleMargin: null or number
+    labelWidth: null or number
+    labelHeight: null or number
+
     ticks: null or number or ticks array or (fn: range -> ticks array)
     tickSize: number or array
     minTickSize: number or array
@@ -174,6 +177,10 @@ when a min or max value is not explicitly set. If a margin is
 specified, the plot will furthermore extend the axis end-point to the
 nearest whole tick. The default value is "null" for the x axis and
 0.02 for the y axis which seems appropriate for most cases.
+
+"labelWidth" and "labelHeight" specifies the maximum size of the tick
+labels in pixels. They're useful in case you need to align several
+plots.
 
 The rest of the options deal with the ticks.
 

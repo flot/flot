@@ -33,6 +33,8 @@
                 autoscaleMargin: null, // margin in % to add if auto-setting min/max
                 ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                 tickFormatter: null, // fn: number -> string
+                labelWidth: null, // size of tick labels in pixels
+                labelHeight: null,
                 
                 // mode specific options
                 tickDecimals: null, // no. of decimals, null means auto
@@ -85,7 +87,6 @@
             target = target_,
             xaxis = {}, yaxis = {},
             plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-            yLabelMaxWidth = 0, yLabelMaxHeight = 0, xLabelBoxWidth = 0,
             canvasWidth = 0, canvasHeight = 0,
             plotWidth = 0, plotHeight = 0,
             hozScale = 0, vertScale = 0,
@@ -621,6 +622,10 @@
                 axis.tickFormatter = function (v, axis) { return "" + axisOptions.tickFormatter(v, axis); };
             else
                 axis.tickFormatter = formatter;
+            if (axisOptions.labelWidth != null)
+                axis.labelWidth = axisOptions.labelWidth;
+            if (axisOptions.labelHeight != null)
+                axis.labelHeight = axisOptions.labelHeight;
         }
         
         function extendXRangeIfNeededByBar() {
@@ -679,22 +684,31 @@
         }
         
         function setSpacing() {
-            // calculate y label dimensions
             var i, labels = [], l;
-            for (i = 0; i < yaxis.ticks.length; ++i) {
-                l = yaxis.ticks[i].label;
-                if (l)
-                    labels.push('<div class="tickLabel">' + l + '</div>');
-            }
+            if (yaxis.labelWidth == null || yaxis.labelHeight == null) {
+                // calculate y label dimensions
+                for (i = 0; i < yaxis.ticks.length; ++i) {
+                    l = yaxis.ticks[i].label;
+                    if (l)
+                        labels.push('<div class="tickLabel">' + l + '</div>');
+                }
+                
+                if (labels.length > 0) {
+                    var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
+                                     + labels.join("") + '</div>').appendTo(target);
+                    if (yaxis.labelWidth == null)
+                        yaxis.labelWidth = dummyDiv.width();
+                    if (yaxis.labelHeight == null)
+                        yaxis.labelHeight = dummyDiv.find("div").height();
+                    dummyDiv.remove();
+                }
 
-            if (labels.length > 0) {
-                var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                 + labels.join("") + '</div>').appendTo(target);
-                yLabelMaxWidth = dummyDiv.width();
-                yLabelMaxHeight = dummyDiv.find("div").height();
-                dummyDiv.remove();
+                if (yaxis.labelWidth == null)
+                    yaxis.labelWidth = 0;
+                if (yaxis.labelHeight == null)
+                    yaxis.labelHeight = 0;
             }
-
+                
             var maxOutset = options.grid.borderWidth / 2;
             if (options.points.show)
                 maxOutset = Math.max(maxOutset, options.points.radius + options.points.lineWidth/2);
@@ -705,34 +719,37 @@
 
             plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
 
-            if (yLabelMaxWidth > 0)
-                plotOffset.left += yLabelMaxWidth + options.grid.labelMargin;
+            if (yaxis.labelWidth > 0)
+                plotOffset.left += yaxis.labelWidth + options.grid.labelMargin;
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
 
             // set width for labels; to avoid measuring the widths of
             // the labels, we construct fixed-size boxes and put the
             // labels inside them, the fixed-size boxes are easy to
             // mid-align
-            xLabelBoxWidth = plotWidth / 6;
-            
-            // measure x label heights
-            labels = [];
-            for (i = 0; i < xaxis.ticks.length; ++i) {
-                l = xaxis.ticks[i].label;
-                if (l)
-                    labels.push('<span class="tickLabel" width="' + xLabelBoxWidth + '">' + l + '</span>');
-            }
+            if (xaxis.labelWidth == null)
+                xaxis.labelWidth = plotWidth / 6;
 
-            var xLabelMaxHeight = 0;
-            if (labels.length > 0) {
-                var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                 + labels.join("") + '</div>').appendTo(target);
-                xLabelMaxHeight = dummyDiv.height();
-                dummyDiv.remove();
+            if (xaxis.labelHeight == null) {
+                // measure x label heights
+                labels = [];
+                for (i = 0; i < xaxis.ticks.length; ++i) {
+                    l = xaxis.ticks[i].label;
+                    if (l)
+                        labels.push('<span class="tickLabel" width="' + xaxis.labelWidth + '">' + l + '</span>');
+                }
+                
+                xaxis.labelHeight = 0;
+                if (labels.length > 0) {
+                    var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
+                                     + labels.join("") + '</div>').appendTo(target);
+                    xaxis.labelHeight = dummyDiv.height();
+                    dummyDiv.remove();
+                }
             }
-
-            if (xLabelMaxHeight > 0)
-                plotOffset.bottom += xLabelMaxHeight + options.grid.labelMargin;
+                
+            if (xaxis.labelHeight > 0)
+                plotOffset.bottom += xaxis.labelHeight + options.grid.labelMargin;
             
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
             hozScale = plotWidth / (xaxis.max - xaxis.min);
@@ -853,7 +870,7 @@
                 tick = xaxis.ticks[i];
                 if (!tick.label || tick.v < xaxis.min || tick.v > xaxis.max)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + tHoz(tick.v) - xLabelBoxWidth/2) + 'px;width:' + xLabelBoxWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + tHoz(tick.v) - xaxis.labelWidth/2) + 'px;width:' + xaxis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
             }
             
             // do the y-axis
@@ -861,7 +878,7 @@
                 tick = yaxis.ticks[i];
                 if (!tick.label || tick.v < yaxis.min || tick.v > yaxis.max)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + tVert(tick.v) - yLabelMaxHeight/2) + 'px;left:0;width:' + yLabelMaxWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + tVert(tick.v) - yaxis.labelHeight/2) + 'px;left:0;width:' + yaxis.labelWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
             }
 
             html += '</div>';
