@@ -220,8 +220,11 @@
         }
         
         function processData() {
-            xaxis.datamin = yaxis.datamin = Number.MAX_VALUE;
-            xaxis.datamax = yaxis.datamax = Number.MIN_VALUE;
+            var top_sentry = Number.POSITIVE_INFINITY,
+                bottom_sentry = Number.NEGATIVE_INFINITY;
+            
+            xaxis.datamin = yaxis.datamin = top_sentry;
+            xaxis.datamax = yaxis.datamax = bottom_sentry;
 
             for (var i = 0; i < series.length; ++i) {
                 var data = series[i].data;
@@ -248,13 +251,13 @@
                 }
             }
             
-            if (xaxis.datamin == Number.MAX_VALUE)
+            if (xaxis.datamin == top_sentry)
                 xaxis.datamin = 0;
-            if (yaxis.datamin == Number.MAX_VALUE)
+            if (yaxis.datamin == top_sentry)
                 yaxis.datamin = 0;
-            if (xaxis.datamax == Number.MIN_VALUE)
+            if (xaxis.datamax == bottom_sentry)
                 xaxis.datamax = 1;
-            if (yaxis.datamax == Number.MIN_VALUE)
+            if (yaxis.datamax == bottom_sentry)
                 yaxis.datamax = 1;
         }
 
@@ -501,8 +504,9 @@
                         d.setMonth(0);
 
 
-                    var carry = 0, v;
+                    var carry = 0, v = Number.NaN, prev;
                     do {
+                        prev = v;
                         v = d.getTime();
                         ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
                         if (unit == "month") {
@@ -526,7 +530,7 @@
                         }
                         else
                             d.setTime(v + step);
-                    } while (v < axis.max);
+                    } while (v < axis.max && v != prev);
 
                     return ticks;
                 };
@@ -602,12 +606,13 @@
                     var ticks = [];
                     var start = floorInBase(axis.min, axis.tickSize);
                     // then spew out all possible ticks
-                    var i = 0, v;
+                    var i = 0, v = Number.NaN, prev;
                     do {
+                        prev = v;
                         v = start + i * axis.tickSize;
                         ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
                         ++i;
-                    } while (v < axis.max);
+                    } while (v < axis.max && v != prev);
                     return ticks;
                 };
 
