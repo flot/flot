@@ -1297,7 +1297,14 @@
         function setFillStyle(obj, seriesColor) {
             var fill = obj.fill;
             if (fill) {
-                ctx.fillStyle = obj.fillColor ? obj.fillColor : parseColor(seriesColor).scale(null, null, null, typeof fill == "number" ? fill : 0.4).toString();
+                if (obj.fillColor)
+                    ctx.fillStyle = obj.fillColor;
+                else {
+                    var c = parseColor(seriesColor);
+                    c.a = typeof fill == "number" ? fill : 0.4;
+                    c.normalize();
+                    ctx.fillStyle = c.toString();
+                }
             }
             
         }
