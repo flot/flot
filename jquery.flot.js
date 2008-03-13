@@ -784,7 +784,7 @@
             ctx.translate(plotOffset.left, plotOffset.top);
 
             // draw background, if any
-            if (options.grid.backgroundColor != null) {
+            if (options.grid.backgroundColor) {
                 ctx.fillStyle = options.grid.backgroundColor;
                 ctx.fillRect(0, 0, plotWidth, plotHeight);
             }
@@ -1141,11 +1141,9 @@
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
-            if (series.lines.fill) {
-                ctx.fillStyle = series.lines.fillColor != null ? series.lines.fillColor : parseColor(series.color).scale(null, null, null, 0.4).toString();
+            setFillStyle(series.lines, series.color);
+            if (series.lines.fill)
                 plotLineArea(series.data, 0);
-            }
-
             plotLine(series.data, 0);
             ctx.restore();
         }
@@ -1200,7 +1198,7 @@
 
             ctx.lineWidth = series.points.lineWidth;
             ctx.strokeStyle = series.color;
-            ctx.fillStyle = series.points.fillColor != null ? series.points.fillColor : series.color;
+            setFillStyle(series.points, series.color);
             plotPoints(series.data, series.points.radius, series.points.fill);
             ctx.restore();
         }
@@ -1291,14 +1289,19 @@
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
-            if (series.bars.fill) {
-                ctx.fillStyle = series.bars.fillColor != null ? series.bars.fillColor : parseColor(series.color).scale(null, null, null, 0.4).toString();
-            }
-
+            setFillStyle(series.bars, series.color);
             plotBars(series.data, bw, 0, series.bars.fill);
             ctx.restore();
         }
 
+        function setFillStyle(obj, seriesColor) {
+            var fill = obj.fill;
+            if (fill) {
+                ctx.fillStyle = obj.fillColor ? obj.fillColor : parseColor(seriesColor).scale(null, null, null, typeof fill == "number" ? fill : 0.4).toString();
+            }
+            
+        }
+        
         function insertLegend() {
             target.find(".legend").remove();
 
@@ -1352,7 +1355,7 @@
                         var c = options.legend.backgroundColor;
                         if (c == null) {
                             var tmp;
-                            if (options.grid.backgroundColor != null)
+                            if (options.grid.backgroundColor)
                                 tmp = options.grid.backgroundColor;
                             else
                                 tmp = extractColor(legend);

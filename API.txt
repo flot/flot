@@ -348,10 +348,10 @@ Customizing the data series
 ===========================
 
   lines, points, bars: {
-    show: boolean,
-    lineWidth: number,
-    fill: boolean,
-    fillColor: color or null
+    show: boolean
+    lineWidth: number
+    fill: boolean or number
+    fillColor: color
   }
 
   points: {
@@ -376,14 +376,19 @@ and Flot will happily draw each of them in turn, e.g.
     points: { show: true, fill: false }
   };
 
-"lineWidth" is the thickness of the line or outline and "fill" is
-whether the shape should be filled. For lines, this produces area
-graphs. If "fillColor" is null (default), the color for the data
-series is used.
+"lineWidth" is the thickness of the line or outline in pixels.
 
-Note that the options that take numbers works in units of pixels, but
-"barWidth" is the width of the bars in units of the x axis (e.g. for
-time series it's in milliseconds).
+"fill" is whether the shape should be filled. For lines, this produces
+area graphs. You can use "fillColor" to specify the color of the fill.
+If "fillColor" evaluates to false (default for everything except
+points), the fill color is auto-set to the color of the data series.
+You can adjust the opacity of the fill by setting fill to a number
+between 0 (fully transparent) and 1 (fully opaque).
+
+"barWidth" is the width of the bars in units of the x axis, contrary
+to most other measures that are specified in pixels. For instance, for
+time series the unit is milliseconds so 24 * 60 * 60 * 1000 produces
+bars with the width of a day.
 
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
