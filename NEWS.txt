@@ -1,6 +1,14 @@
 Flot x.x
 --------
 
+API changes: timestamps in time mode are now displayed according to
+UTC instead of the time zone of the visitor. This affects the way the
+timestamps should be input; you'll probably have to offset the
+timestamps according to your local time zone. It also affects any
+custom date handling code (which basically now should use the
+equivalent UTC date mehods, e.g. .setUTCMonth() instead of
+.setMonth().
+
 Added support for specifying the size of tick labels (axis.labelWidth,
 axis.labelHeight). Useful for specifying a max label size to keep
 multiple plots aligned.

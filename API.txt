@@ -260,20 +260,45 @@ an example of a custom formatter:
 Time series data
 ================
 
+Time series are a bit more difficult than scalar data because
+calendars don't follow a simple base 10 system. For many cases, Flot
+abstracts most of this away, but it can still be a bit difficult to
+get the data into Flot. So we'll first discuss the data format.
+
 The time series support in Flot is based on Javascript timestamps,
 i.e. everywhere a time value is expected or handed over, a Javascript
-timestamp number is used. This is not the same as a Date object. A
+timestamp number is used. This is a number, not a Date object. A
 Javascript timestamp is the number of milliseconds since January 1,
 1970 00:00:00. This is almost the same as Unix timestamps, except it's
 in milliseconds, so remember to multiply by 1000!
 
-You can see a timestamp by outputting
+You can see a timestamp like this
 
-  (new Date()).getTime()
+  alert((new Date()).getTime())
+
+Normally you want the timestamps to be displayed according to a
+certain time zone, usually the time zone in which the data has been
+produced. However, Flot always displays timestamps according to UTC.
+It has to as the only alternative with core Javascript is to interpret
+the timestamps according to the time zone that the visitor is in,
+which means that the ticks will shift unpredictably with the time
+zone and daylight savings of each visitor.
+
+So given that there's no good support for custom time zones in
+Javascript, you'll have to take care of this server-side.
+
+The easiest way to think about it is to pretend that the data
+production time zone is UTC, even if it isn't. So if you have a
+datapoint at 2002-02-20 08:00, you can generate a timestamp for eight
+o'clock UTC even if it really happened eight o'clock UTC+0200. If
+you've already got the real UTC timestamp, it's too late to pretend -
+but you can fix it up by adding the time zone offset, e.g. for
+UTC+0200 you would add 2 hours to the timestamp. Then it'll look right
+on the plot.
 
 In PHP you can get an appropriate timestamp with
-'strtotime("2002-02-20") * 1000', in Python with
-'time.mktime(datetime_object.timetuple()) * 1000', in .NET with
+'strtotime("2002-02-20 UTC") * 1000', in Python with
+'calendar.timegm(datetime_object.timetuple()) * 1000', in .NET with
 something like:
 
   public static int GetJavascriptTimestamp(System.DateTime input)
@@ -283,13 +308,17 @@ something like:
     return (int)(time.Ticks / 10000);
   }
 
+Javascript also has some support for parsing date strings, so it is
+possible to generate the timestamps client-side if you need to.
+  
 Once you've got the timestamps into the data and specified "time" as
 the axis mode, Flot will automatically generate relevant ticks and
-format them. As always, you can tweak the ticks via the "ticks"
-option. Again the values should be timestamps, not Date objects!
+format them. As always, you can tweak the ticks via the "ticks" option
+- just remember that the values should be timestamps, not Date
+objects.
 
-Tick generation and formatting is controlled separately through the
-following axis options:
+Tick generation and formatting can also be controlled separately
+through the following axis options:
 
   xaxis, yaxis: {
     minTickSize
@@ -328,7 +357,7 @@ which will format December 24 as 24/12:
 
   tickFormatter: function (val, axis) {
     var d = new Date(val);
-    return d.getDate() + "/" + (d.getMonth() + 1);
+    return d.getUTCDate() + "/" + (d.getUTCMonth() + 1);
   }
 
 Note that for the time mode "tickSize" and "minTickSize" are a bit
