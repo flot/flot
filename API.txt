@@ -269,7 +269,7 @@ The time series support in Flot is based on Javascript timestamps,
 i.e. everywhere a time value is expected or handed over, a Javascript
 timestamp number is used. This is a number, not a Date object. A
 Javascript timestamp is the number of milliseconds since January 1,
-1970 00:00:00. This is almost the same as Unix timestamps, except it's
+1970 00:00:00 UTC. This is almost the same as Unix timestamps, except it's
 in milliseconds, so remember to multiply by 1000!
 
 You can see a timestamp like this
@@ -281,8 +281,8 @@ certain time zone, usually the time zone in which the data has been
 produced. However, Flot always displays timestamps according to UTC.
 It has to as the only alternative with core Javascript is to interpret
 the timestamps according to the time zone that the visitor is in,
-which means that the ticks will shift unpredictably with the time
-zone and daylight savings of each visitor.
+which means that the ticks will shift unpredictably with the time zone
+and daylight savings of each visitor.
 
 So given that there's no good support for custom time zones in
 Javascript, you'll have to take care of this server-side.
@@ -309,7 +309,7 @@ something like:
   }
 
 Javascript also has some support for parsing date strings, so it is
-possible to generate the timestamps client-side if you need to.
+possible to generate the timestamps manually client-side if you need.
   
 Once you've got the timestamps into the data and specified "time" as
 the axis mode, Flot will automatically generate relevant ticks and
