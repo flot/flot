@@ -860,8 +860,9 @@
                 ctx.strokeStyle = options.grid.color;
                 ctx.lineJoin = "round";
                 ctx.strokeRect(0, 0, plotWidth, plotHeight);
-                ctx.restore();
             }
+
+            ctx.restore();
         }
         
         function insertLabels() {
