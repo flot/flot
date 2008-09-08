@@ -1345,7 +1345,7 @@
             if (fragments.length > 0) {
                 var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
                 if (options.legend.container != null)
-                    options.legend.container.append(table);
+                    options.legend.container.html(table);
                 else {
                     var pos = "";
                     var p = options.legend.position, m = options.legend.margin;

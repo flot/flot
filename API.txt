@@ -140,7 +140,8 @@ background.
 
 If you want the legend to appear somewhere else in the DOM, you can
 specify "container" as a jQuery object to put the legend table into.
-The "position" and "margin" etc. options will then be ignored.
+The "position" and "margin" etc. options will then be ignored. Note
+that it will overwrite the contents of the container.
 
 
 
