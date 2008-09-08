@@ -1212,8 +1212,10 @@
                     
                     var x = data[i][0], y = data[i][1];
                     var drawLeft = true, drawTop = true, drawRight = true;
-                    var left = x, right = x + barWidth, bottom = 0, top = y;
 
+                    // determine the co-ordinates of the bar, account for negative bars having 
+                    // flipped top/bottom and draw/don't draw accordingly
+                    var left = x, right = x + barWidth, bottom = (y < 0 ? y : 0), top = (y < 0 ? 0 : y);
                     if (right < xaxis.min || left > xaxis.max || top < yaxis.min || bottom > yaxis.max)
                         continue;
 
