@@ -25,7 +25,8 @@ timothytoe). Fixed a bug in finding max values for all-negative data
 sets. Prevent the possibility of eternal looping in tick calculations.
 Fixed a bug when borderWidth is set to 0 (reported by
 Rob/sanchothefat). Fixed a bug with drawing bars extending below 0
-(reported by James Hewitt, convenient patch by Ryan Funduk).
+(reported by James Hewitt, convenient patch by Ryan Funduk). Fixed a
+bug with line widths of bars (reported by MikeM).
 
 
 Flot 0.4

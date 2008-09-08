@@ -1274,10 +1274,10 @@
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
 
-            var bw = series.bars.barWidth;
-            var lw = Math.min(series.bars.lineWidth, bw);
             // FIXME: figure out a way to add shadows
             /*
+            var bw = series.bars.barWidth;
+            var lw = series.bars.lineWidth;
             var sw = series.shadowSize;
             if (sw > 0) {
                 // draw shadow in two steps
@@ -1290,10 +1290,10 @@
                 plotBars(series.data, bw, lw/2 + ctx.lineWidth/2, false);
             }*/
 
-            ctx.lineWidth = lw;
+            ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
             setFillStyle(series.bars, series.color);
-            plotBars(series.data, bw, 0, series.bars.fill);
+            plotBars(series.data, series.bars.barWidth, 0, series.bars.fill);
             ctx.restore();
         }
 
