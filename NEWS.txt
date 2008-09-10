@@ -8,7 +8,8 @@ compatibility hooks are in place).
 
 Interactivity: added a new "plothover" event and this and the
 "plotclick" event now returns the closest data item (based on patch by
-/david).
+/david). See the revamped "interacting with the data" example for
+some hints on what you can do.
 
 Timestamps in time mode are now displayed according to
 UTC instead of the time zone of the visitor. This affects the way the

@@ -28,11 +28,12 @@ legend
 
 labels
   - labels on bars, data points
-  - plain "all points" option
-  - interactive "label this point" command
+  - interactive "label this point" command/tooltip support
 
 error margin indicators
   - for scientific/statistical purposes
+
+hi-low bars
 
 non-xy based graph types
   - figure out how to integrate them with the rest of the plugin

@@ -495,8 +495,9 @@ An example function might look like this:
 
 If you set "clickable" to true, the plot will listen for click events
 on the plot area and fire a "plotclick" event on the placeholder with
-a position and a nearby data item object as parameters. The returned
-coordinates are in the unit of the axes (not in pixels).
+a position and a nearby data item object as parameters. The coordinates
+are available both in the unit of the axes (not in pixels) and in
+global screen coordinates.
 
 If you set "hoverable" to true, the plot will listen for mouse move
 events on the plot area and fire a "plothover" event with the same
@@ -508,7 +509,8 @@ You can use "plotclick" and "plothover" events like this:
 
     $("#placeholder").bind("plotclick", function (event, pos, item) {
         alert("You clicked at " + pos.x + ", " + pos.y);
-        // secondary axis coordinates if present are in pos.x2, pos.y2
+        // secondary axis coordinates if present are in pos.x2, pos.y2,
+        // if you need global screen coordinates, they are pos.pageX, pos.pageY
     });
 
 The item object in this example is either null or a nearby object on the form:
@@ -518,6 +520,7 @@ The item object in this example is either null or a nearby object on the form:
       dataIndex: the index of the point in the data array
       series: the series object
       seriesIndex: the index of the series
+      pageX, pageY: the global screen coordinates of the point
   }
 
 For instance, if you have specified the data like this 

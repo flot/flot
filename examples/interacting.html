@@ -14,13 +14,15 @@
     <div id="placeholder" style="width:600px;height:300px"></div>
 
     <p>One of the goals of Flot is to support user interactions intelligently.
-    Try hovering over the graph above and clicking on the points (note that support for highlighting the points is still missing).</p>
+    Try hovering over the graph above and clicking on the points. A
+    tooltip is easy to build with a bit of jQuery code and the data returned
+    from the plot. Note that support for highlighting the points is
+    currently missing.</p>
 
     <p id="clickdata"></p>
 
     <p id="hoverdata" style="display:none">Mouse hovers at
-    (<span id="x"></span>, <span id="y"></span>).<br>
-    Nearby item: <span id="nearby"></span>.</p>
+    (<span id="x"></span>, <span id="y"></span>).</p>
 
 <script id="source" language="javascript" type="text/javascript">
 $(function () {
@@ -36,23 +38,46 @@ $(function () {
              points: { show: true },
              grid: { hoverable: true, clickable: true } });
 
+    function showTooltip(x, y, contents) {
+        $('<div id="tooltip">' + contents + '</div>').css( {
+            position: 'absolute',
+            display: 'none',
+            top: y + 5,
+            left: x + 5,
+            border: '1 px solid #fdd',
+            padding: '2px',
+            'background-color': '#fee',
+            opacity: 0.80
+        }).appendTo("body").fadeIn(200);
+    }
+
+    var previousPoint = null;
     $("#placeholder").bind("plothover", function (event, pos, item) {
         $("#x").text(pos.x.toFixed(2));
         $("#y").text(pos.y.toFixed(2));
-        
-        var nearby = "none";
-        if (item)
-            nearby = "point " + item.dataIndex + " in " + item.series.label + " at (" + item.datapoint[0].toFixed(2) + ", " + item.datapoint[1].toFixed(2) + ")";
-        $("#nearby").text(nearby);
-        
         $("#hoverdata").show();
+
+        if (item) {
+            if (previousPoint != item.datapoint) {
+                previousPoint = item.datapoint;
+                
+                $("#tooltip").remove();
+                var x = item.datapoint[0].toFixed(2),
+                    y = item.datapoint[1].toFixed(2);
+                
+                showTooltip(item.pageX, item.pageY,
+                            item.series.label + " of " + x + " = " + y);
+            }
+        }
+        else {
+            $("#tooltip").remove();
+            previousPoint = null;            
+        }
     });
 
     $("#placeholder").bind("plotclick", function (event, pos, item) {
         if (item) {
-            var x = item.datapoint[0].toFixed(2);
-            var y = item.datapoint[1].toFixed(2);
-            $("#clickdata").text(item.series.label + " of " + x + " = " + y);
+            $("#clickdata").text("You clicked point " + item.dataIndex + " in " + item.series.label);
         }
     });
 });

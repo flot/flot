@@ -1582,12 +1582,14 @@
             hoverTimeout = null;
         }
 
+        // trigger click or hover event (they send the same parameters
+        // so we share their code)
         function triggerClickHoverEvent(eventname, event) {
             var offset = eventHolder.offset(),
-                pos = {},
+                pos = { pageX: event.pageX, pageY: event.pageY },
                 canvasX = event.pageX - offset.left - plotOffset.left,
                 canvasY = event.pageY - offset.top - plotOffset.top;
-            
+
             if (xaxis.used)
                 pos.x = xaxis.c2p(canvasX);
             if (yaxis.used)
@@ -1598,6 +1600,11 @@
                 pos.y2 = y2axis.c2p(canvasY);
             
             item = findNearbyItem(canvasX, canvasY);
+
+            if (item) {
+                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left);
+                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top);
+            }
 
             target.trigger(eventname, [ pos, item ]);
         }
