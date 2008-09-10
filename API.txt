@@ -57,6 +57,8 @@ The format of a single series object is as follows:
     lines: specific lines options,
     bars: specific bars options,
     points: specific points options,
+    xaxis: 1 or 2,
+    yaxis: 1 or 2,
     shadowSize: number
   }
 
@@ -80,6 +82,11 @@ auto-generated colors to select, e.g. 0 will get color no. 0, etc.
 The latter is mostly useful if you let the user add and remove series,
 in which case you can hard-code the color index to prevent the colors
 from jumping around between the series.
+
+The "xaxis" and "yaxis" options specify which axis to use, specify 2
+to get the secondary axis (x axis at top or y axis to the right).
+E.g., you can use this to make a dual axis plot by specifying
+{ yaxis: 2 } for one data series.
 
 The rest of the options are all documented below as they are the same
 as the default options passed in via the options parameter in the plot
@@ -148,7 +155,7 @@ that it will overwrite the contents of the container.
 Customizing the axes
 ====================
 
-  xaxis, yaxis: {
+  xaxis, yaxis, x2axis, y2axis: {
     mode: null or "time"
     min: null or number
     max: null or number
@@ -163,7 +170,7 @@ Customizing the axes
     tickDecimals: null or number
   }
 
-The two axes have the same kind of options. The "mode" option
+The axes have the same kind of options. The "mode" option
 determines how the data is interpreted, the default of null means as
 decimal numbers. Use "time" for time series data, see the next section.
 
@@ -447,11 +454,11 @@ Customizing the grid
     clickable: boolean
   }
 
-The grid is the thing with the two axes and a number of ticks. "color"
+The grid is the thing with the axes and a number of ticks. "color"
 is the color of the grid itself whereas "backgroundColor" specifies
 the background color inside the grid area. The default value of null
 means that the background is transparent. You should only need to set
-backgroundColor if want the grid area to be a different color from the
+backgroundColor if you want the grid area to be a different color from the
 page color. Otherwise you might as well just set the background color
 of the page with CSS.
 
@@ -488,18 +495,42 @@ An example function might look like this:
 
 If you set "clickable" to true, the plot will listen for click events
 on the plot area and fire a "plotclick" event on the placeholder with
-an object { x: number, y: number } as parameter when one occurs. The
-returned coordinates will be in the unit of the plot (not in pixels).
-You can use it like this:
+a position and a nearby data item object as parameters. The returned
+coordinates are in the unit of the axes (not in pixels).
+
+If you set "hoverable" to true, the plot will listen for mouse move
+events on the plot area and fire a "plothover" event with the same
+parameters as the "plotclick" event.
+
+You can use "plotclick" and "plothover" events like this:
 
     $.plot($("#placeholder"), [ d ], { grid: { clickable: true } });
 
-    $("#placeholder").bind("plotclick", function (e, pos) {
-        // the values are in pos.x and pos.y
+    $("#placeholder").bind("plotclick", function (event, pos, item) {
+        alert("You clicked at " + pos.x + ", " + pos.y);
+        // secondary axis coordinates if present are in pos.x2, pos.y2
     });
 
-Support for hover indications or for associating the clicks with any
-specific data is still forthcoming.
+The item object in this example is either null or a nearby object on the form:
+
+  item: {
+      datapoint: the point as you specified it in the data, e.g. [0, 2]
+      dataIndex: the index of the point in the data array
+      series: the series object
+      seriesIndex: the index of the series
+  }
+
+For instance, if you have specified the data like this 
+
+    $.plot($("#placeholder"), [ { label: "Foo", data: [[0, 10], [7, 3]] } ], ...);
+
+and the mouse is near the point (7, 3), "datapoint" is the [7, 3] we
+specified, "dataIndex" will be 1, "series" is a normalized series
+object with among other things the "Foo" label in series.label and the
+color in series.color, and "seriesIndex" is 0.
+
+Note that the detection of nearby points is still limited to points,
+and support for highlighting the point or graph is still forthcoming.
 
 
 Customizing the selection
@@ -515,12 +546,15 @@ You enable selection support by setting the mode to one of "x", "y" or
 similarly for "y" mode. For "xy", the selection becomes a rectangle
 where both ranges can be specified. "color" is color of the selection.
 
-When selection support is enabled, a "selected" event will be emitted
+When selection support is enabled, a "plotselected" event will be emitted
 on the DOM element you passed into the plot function. The event
-handler gets one extra parameter with the area selected, like this:
+handler gets one extra parameter with the ranges selected on the axes,
+like this:
 
-  placeholder.bind("selected", function(event, area) {
-    // area selected is area.x1 to area.x2 and area.y1 to area.y2
+  placeholder.bind("plotselected", function(event, ranges) {
+    alert("You selected " + ranges.xaxis.from + " to " + ranges.xaxis.to)
+    // similar for yaxis, secondary axes are in x2axis
+    // and y2axis if present
   });
 
 
@@ -534,18 +568,20 @@ members:
 
     Clear the selection rectangle.
 
-  - setSelection(area)
+  - setSelection(ranges)
 
-    Set the selection rectangle. The passed in area should have the
-    members x1 and x2 if the selection mode is "x" and y1 and y2 if
-    the selection mode is "y" and both x1, x2 and y1, y2 if the
-    selection mode is "xy", like this:
+    Set the selection rectangle. The passed in ranges is on the same
+    form as returned in the "plotselected" event. If the selection
+    mode is "x", you should put in either an xaxis (or x2axis) object,
+    if the mode is "y" you need to put in an yaxis (or y2axis) object
+    and both xaxis/x2axis and yaxis/y2axis if the selection mode is
+    "xy", like this:
 
-      setSelection({ x1: 0, x2: 10, y1: 40, y2: 60});
+      setSelection({ xaxis: { from: 0, to: 10 }, yaxis: { from: 40, to: 60 } });
 
-    setSelection will trigger the "selected" event when called so you
+    setSelection will trigger the "plotselected" event when called so you
     may have to do a bit of shortcircuiting to prevent an eternal loop
-    if you invoke the method inside the "selected" handler.
+    if you invoke setSelection inside a "plotselected" handler.
 
   - getCanvas()
 
@@ -580,7 +616,7 @@ members:
 
       var series = plot.getData();
       for (var i = 0; i < series.length; ++i)
-        alert([i].color);
+        alert(series[i].color);
 
   - setupGrid()
 

@@ -67,25 +67,25 @@ $(function () {
     // now connect the two
     var internalSelection = false;
     
-    $("#placeholder").bind("selected", function (event, area) {
+    $("#placeholder").bind("plotselected", function (event, ranges) {
         // do the zooming
         plot = $.plot($("#placeholder"), [d],
                       $.extend(true, {}, options, {
-                          xaxis: { min: area.x1, max: area.x2 }
+                          xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }
                       }));
         
         if (internalSelection)
             return; // prevent eternal loop
         internalSelection = true;
-        overview.setSelection(area);
+        overview.setSelection(ranges);
         internalSelection = false;
     });
     
-    $("#overview").bind("selected", function (event, area) {
+    $("#overview").bind("plotselected", function (event, ranges) {
         if (internalSelection)
             return;
         internalSelection = true;
-        plot.setSelection(area);
+        plot.setSelection(ranges);
         internalSelection = false;
     });
 });

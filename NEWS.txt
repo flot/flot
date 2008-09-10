@@ -1,13 +1,30 @@
 Flot x.x
 --------
 
-API changes: timestamps in time mode are now displayed according to
+Backwards API change summary: Timestamps are now in UTC. Also
+"selected" event -> becomes "plotselected" with new data, the
+parameters for setSelection are now different (but backwards
+compatibility hooks are in place).
+
+Interactivity: added a new "plothover" event and this and the
+"plotclick" event now returns the closest data item (based on patch by
+/david).
+
+Timestamps in time mode are now displayed according to
 UTC instead of the time zone of the visitor. This affects the way the
 timestamps should be input; you'll probably have to offset the
 timestamps according to your local time zone. It also affects any
 custom date handling code (which basically now should use the
 equivalent UTC date mehods, e.g. .setUTCMonth() instead of
 .setMonth().
+
+Support for dual axis has been added (based on patch by someone who's
+annoyed and /david). For each data series you can specify which axes
+it belongs to, and there are two more axes, x2axis and y2axis, to
+customize. This affects the "selected" event which has been renamed to
+"plotselected" and spews out { xaxis: { from: -10, to: 20 } ... } and
+setSelection in which the parameters are on a new form (backwards
+compatible hooks are in place so old code shouldn't break).
 
 Added support for specifying the size of tick labels (axis.labelWidth,
 axis.labelHeight). Useful for specifying a max label size to keep
@@ -26,7 +43,8 @@ sets. Prevent the possibility of eternal looping in tick calculations.
 Fixed a bug when borderWidth is set to 0 (reported by
 Rob/sanchothefat). Fixed a bug with drawing bars extending below 0
 (reported by James Hewitt, convenient patch by Ryan Funduk). Fixed a
-bug with line widths of bars (reported by MikeM).
+bug with line widths of bars (reported by MikeM). Fixed a bug with
+'nw' and 'sw' legend positions.
 
 
 Flot 0.4
