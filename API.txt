@@ -564,12 +564,13 @@ like this:
 Plot Members
 ------------
 
-The Plot object returned from the plot function has the following
-members:
+The Plot object returned from the plot function has some members you
+can call:
 
   - clearSelection()
 
     Clear the selection rectangle.
+
 
   - setSelection(ranges)
 
@@ -586,17 +587,6 @@ members:
     may have to do a bit of shortcircuiting to prevent an eternal loop
     if you invoke setSelection inside a "plotselected" handler.
 
-  - getCanvas()
-
-    Returns the canvas used for drawing in case you need to hack on it
-    yourself. You'll probably need to get the plot offset too.
-  
-  - getPlotOffset()
-
-    Gets the offset that the grid has within the canvas as an object
-    with the members "left", "right", "top", "bottom". I.e., if you draw a
-    circle on the canvas with the center placed at (left, top), its
-    center will be at the top-most, left corner of the grid.
 
   - setData(data)
 
@@ -604,23 +594,12 @@ members:
     ticks, legend etc. will not be recomputed (use setupGrid() to do
     that). You'll probably want to call draw() afterwards.
 
-    You can use this function to speed up redrawing a plot if you now
-    that the axis won't change. Put in the new data with
+    You can use this function to speed up redrawing a plot if you know
+    that the axes won't change. Put in the new data with
     setData(newdata) and call draw() afterwards, and you're good to
     go.
+
     
-
-  - getData()
-
-    Returns the data currently used. The data series returned are
-    normalized with missing settings filled in. So for instance to
-    find out what color Flot has assigned to the data series, you
-    could do this:
-
-      var series = plot.getData();
-      for (var i = 0; i < series.length; ++i)
-        alert(series[i].color);
-
   - setupGrid()
 
     Recalculate and set axis scaling, ticks, legend etc.
@@ -634,3 +613,44 @@ members:
   - draw()
 
     Redraws the canvas.
+    
+
+There are also some members that let you peek inside the internal
+workings of Flot which in some case is useful. Note that if you change
+something in the objects returned, you're changing the objects used by
+Flot to keep track of its state, so be careful.
+
+  - getData()
+
+    Returns an array of the data series currently used on normalized
+    form with missing settings filled in according to the global
+    options. So for instance to find out what color Flot has assigned
+    to the data series, you could do this:
+
+      var series = plot.getData();
+      for (var i = 0; i < series.length; ++i)
+        alert(series[i].color);
+
+
+  - getAxes()
+
+    Gets an object with the axes settings as { xaxis, yaxis, x2axis,
+    y2axis }. Various things are stuffed inside an axis object, e.g.
+    you could use getAxes().xaxis.ticks to find out what the ticks are
+    for the xaxis.
+    
+
+  - getCanvas()
+
+    Returns the canvas used for drawing in case you need to hack on it
+    yourself. You'll probably need to get the plot offset too.
+
+  
+  - getPlotOffset()
+
+    Gets the offset that the grid has within the canvas as an object
+    with the members "left", "right", "top", "bottom". I.e., if you draw a
+    circle on the canvas with the center placed at (left, top), its
+    center will be at the top-most, left corner of the grid.
+
+
