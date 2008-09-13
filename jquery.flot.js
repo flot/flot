@@ -78,11 +78,13 @@
                 tickColor: "#dddddd", // color used for the ticks
                 labelMargin: 3, // in pixels
                 borderWidth: 2,
+                coloredAreas: null, // array of { x1, y1, x2, y2 } or fn: plot area -> areas
+                coloredAreasColor: "#f4f4f4",
+                // interactive stuff
                 clickable: false,
                 hoverable: false,
-                mouseCatchingArea: 30,
-                coloredAreas: null, // array of { x1, y1, x2, y2 } or fn: plot area -> areas
-                coloredAreasColor: "#f4f4f4"
+                mouseCatchingArea: 30, // FIXME
+                autoHighlight: true, // highlight in case mouse is near
             },
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
@@ -90,7 +92,9 @@
             },
             shadowSize: 4
         };
-        var canvas = null, overlay = null, eventHolder = null, 
+        var canvas = null,      // the canvas for the plot itself
+            overlay = null,     // canvas for interactive stuff on top of plot
+            eventHolder = null, // jQuery object that events should be bound to
             ctx = null, octx = null,
             target = target_,
             xaxis = {}, yaxis = {},
@@ -110,6 +114,8 @@
         this.getPlotOffset = function() { return plotOffset; };
         this.getData = function() { return series; };
         this.getAxes = function() { return { xaxis: xaxis, yaxis: yaxis, x2axis: x2axis, y2axis: y2axis }; };
+        this.highlight = highlight;
+        this.unhighlight = unhighlight;
         
         // initialize
         parseOptions(options_);
@@ -1475,11 +1481,17 @@
             }
         }
 
-        var lastMousePos = { pageX: null, pageY: null };
-        var selection = { first: { x: -1, y: -1}, second: { x: -1, y: -1} };
-        var prevSelection = null;
-        var selectionInterval = null;
-        var ignoreClick = false;
+
+        // interactive features
+        
+        var lastMousePos = { pageX: null, pageY: null },
+            selection = {
+                first: { x: -1, y: -1}, second: { x: -1, y: -1},
+                show: false, active: false },
+            highlights = [],
+            clickIsMouseUp = false,
+            redrawTimeout = null,
+            hoverTimeout = null;
         
         // Returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY) {
@@ -1492,6 +1504,7 @@
                     axisx = series[i].xaxis,
                     axisy = series[i].yaxis;
 
+                // precompute some stuff to make the loop fast
                 var mx = axisx.c2p(mouseX), my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
                     maxy = maxDistance / axisy.scale;
@@ -1499,14 +1512,15 @@
                     if (data[j] == null)
                         continue;
 
-                    // We have to calculate distances in pixels, not in
-                    // data units, because the scale of the axes may be different
+                    // first check whether we're too far away
                     var x = data[j][0], y = data[j][1];
                     if (x - mx > maxx || x - mx < -maxx)
-                        continue;       // Don't bother, we're too far
+                        continue;
                     if (y - my > maxy || y - my < -maxy)
                         continue;
 
+                    // We have to calculate distances in pixels, not in
+                    // data units, because the scale of the axes may be different
                     var dx = Math.abs(xaxis.p2c(x) - mouseX),
                         dy = Math.abs(yaxis.p2c(y) - mouseY);
                     var dist = dx * dx + dy * dy;
@@ -1523,8 +1537,6 @@
             return item;
         }
 
-        var hoverTimeout = null;
-        
         function onMouseMove(ev) {
             // FIXME: temp. work-around until jQuery bug 1871 is fixed
             var e = ev || window.event;
@@ -1539,7 +1551,10 @@
             }
             
             if (options.grid.hoverable && !hoverTimeout)
-                hoverTimeout = setTimeout(emitHoverEvent, 100);
+                hoverTimeout = setTimeout(onHover, 100);
+
+            if (selection.active)
+                updateSelection(lastMousePos);
         }
         
         function onMouseDown(e) {
@@ -1561,23 +1576,21 @@
             
             setSelectionPos(selection.first, e);
                 
-            if (selectionInterval != null)
-                clearInterval(selectionInterval);
             lastMousePos.pageX = null;
-            selectionInterval = setInterval(updateSelectionOnMouseMove, 200);
+            selection.active = true;
             $(document).one("mouseup", onSelectionMouseUp);
         }
 
         function onClick(e) {
-            if (ignoreClick) {
-                ignoreClick = false;
+            if (clickIsMouseUp) {
+                clickIsMouseUp = false;
                 return;
             }
 
             triggerClickHoverEvent("plotclick", e);
         }
         
-        function emitHoverEvent() {
+        function onHover() {
             triggerClickHoverEvent("plothover", lastMousePos);
             hoverTimeout = null;
         }
@@ -1602,33 +1615,118 @@
             item = findNearbyItem(canvasX, canvasY);
 
             if (item) {
+                // fill in mouse pos for any listeners out there
                 item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left);
                 item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top);
+
+                if (options.grid.autoHighlight) {
+                    for (var i = 0; i < highlights.length; ++i) {
+                        var h = highlights[i];
+                        if (h.auto)
+                            unhighlight(h.series, h.point);
+                    }
+                    
+                    highlight(item.series, item.datapoint, true);
+                }
             }
 
             target.trigger(eventname, [ pos, item ]);
         }
+
+        function triggerRedrawOverlay() {
+            if (!redrawTimeout)
+                redrawTimeout = setTimeout(redrawOverlay, 100);
+        }
+
+        function redrawOverlay() {
+            redrawTimeout = null;
+
+            // redraw highlights
+            octx.save();
+            octx.clearRect(0, 0, canvasWidth, canvasHeight);
+            octx.translate(plotOffset.left, plotOffset.top);
+            
+            var i, h; 
+            for (i = 0; i < highlights.length; ++i) {
+                h = highlights[i];
+                
+                drawPointHighlight(h.series, h.point);
+            }
+            octx.restore();
+
+            // redraw selection
+            if (selection.show && selectionIsSane()) {
+                octx.strokeStyle = parseColor(options.selection.color).scale(null, null, null, 0.8).toString();
+                octx.lineWidth = 1;
+                ctx.lineJoin = "round";
+                octx.fillStyle = parseColor(options.selection.color).scale(null, null, null, 0.4).toString();
+                
+                var x = Math.min(selection.first.x, selection.second.x),
+                    y = Math.min(selection.first.y, selection.second.y),
+                    w = Math.abs(selection.second.x - selection.first.x),
+                    h = Math.abs(selection.second.y - selection.first.y);
+                
+                octx.fillRect(x + plotOffset.left, y + plotOffset.top, w, h);
+                octx.strokeRect(x + plotOffset.left, y + plotOffset.top, w, h);
+            }
+        }
+        
+        function highlight(s, point, auto) {
+            if (typeof s == "number")
+                s = series[s];
+
+            var i = indexOfHighlight(s, point);
+            if (i == -1) {
+                highlights.push({ series: s, point: point, auto: auto });
+
+                triggerRedrawOverlay();
+            }
+        }
+            
+        function unhighlight(s, point) {
+            if (typeof s == "number")
+                s = series[s];
+
+            var i = indexOfHighlight(s, point);
+            if (i != -1) {
+                highlights.splice(i, 1);
+
+                triggerRedrawOverlay();
+            }
+        }
+        
+        function indexOfHighlight(s, p) {
+            for (var i = 0; i < highlights.length; ++i) {
+                var h = highlights[i];
+                if (h.series == s && h.point[0] == p[0]
+                    && h.point[1] == p[1])
+                    return i;
+            }
+            return -1;
+        }
+        
+        function drawPointHighlight(series, point) {
+            var x = point[0], y = point[1],
+                axisx = series.xaxis, axisy = series.yaxis;
+            
+            if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+                return;
+            
+
+            octx.lineWidth = series.points.lineWidth;
+            octx.strokeStyle = series.color;
+            var radius = series.points.lineWidth + series.points.radius;
+                    
+            octx.beginPath();
+            octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, true);
+            octx.stroke();
+        }
         
         function triggerSelectedEvent() {
-            var x1, x2, y1, y2;
-            
-            if (selection.first.x <= selection.second.x) {
-                x1 = selection.first.x;
-                x2 = selection.second.x;
-            }
-            else {
-                x1 = selection.second.x;
-                x2 = selection.first.x;
-            }
-
-            if (selection.first.y >= selection.second.y) {
-                y1 = selection.first.y;
-                y2 = selection.second.y;
-            }
-            else {
-                y1 = selection.second.y;
-                y2 = selection.first.y;
-            }
+            var x1 = Math.min(selection.first.x, selection.second.x),
+                x2 = Math.max(selection.first.x, selection.second.x),
+                y1 = Math.max(selection.first.y, selection.second.y),
+                y2 = Math.min(selection.first.y, selection.second.y);
 
             var r = {};
             if (xaxis.used)
@@ -1648,30 +1746,23 @@
         }
         
         function onSelectionMouseUp(e) {
+            // revert drag stuff for old-school browsers
             if (document.onselectstart !== undefined)
                 document.onselectstart = workarounds.onselectstart;
             if (document.ondrag !== undefined)
                 document.ondrag = workarounds.ondrag;
             
-            if (selectionInterval != null) {
-                clearInterval(selectionInterval);
-                selectionInterval = null;
-            }
-
-            setSelectionPos(selection.second, e);
-            clearSelection();
-            if (!selectionIsSane() || e.which != 1)
-                return false;
-            
-            drawSelection();
+            // no more draggy-dee-drag
+            selection.active = false;
+            updateSelection(e);
             triggerSelectedEvent();
-            ignoreClick = true;
-
+            clickIsMouseUp = true;
+            
             return false;
         }
 
         function setSelectionPos(pos, e) {
-            var offset = $(overlay).offset();
+            var offset = eventHolder.offset();
             if (options.selection.mode == "y") {
                 if (pos == selection.first)
                     pos.x = 0;
@@ -1695,36 +1786,27 @@
             }
         }
         
-        function updateSelectionOnMouseMove() {
-            if (lastMousePos.pageX == null)
+        function updateSelection(pos) {
+            if (pos.pageX == null)
                 return;
             
-            setSelectionPos(selection.second, lastMousePos);
-            clearSelection();
-            if (selectionIsSane())
-                drawSelection();
+            setSelectionPos(selection.second, pos);
+            if (selectionIsSane()) {
+                selection.show = true;
+                triggerRedrawOverlay();
+            }
+            else
+                clearSelection();
         }
 
         function clearSelection() {
-            if (prevSelection == null)
-                return;
-
-            var x = Math.min(prevSelection.first.x, prevSelection.second.x),
-                y = Math.min(prevSelection.first.y, prevSelection.second.y),
-                w = Math.abs(prevSelection.second.x - prevSelection.first.x),
-                h = Math.abs(prevSelection.second.y - prevSelection.first.y);
-            
-            octx.clearRect(x + plotOffset.left - octx.lineWidth,
-                           y + plotOffset.top - octx.lineWidth,
-                           w + octx.lineWidth*2,
-                           h + octx.lineWidth*2);
-            
-            prevSelection = null;
+            if (selection.show) {
+                selection.show = false;
+                triggerRedrawOverlay();
+            }
         }
         
         function setSelection(ranges) {
-            clearSelection();
-            
             var axis, from, to;
             
             if (options.selection.mode == "y") {
@@ -1779,37 +1861,11 @@
                 selection.second.y = axis.p2c(to);
             }
 
-            drawSelection();
+            selection.show = true;
+            triggerRedrawOverlay();
             triggerSelectedEvent();
         }
         
-        function drawSelection() {
-            if (prevSelection != null &&
-                selection.first.x == prevSelection.first.x &&
-                selection.first.y == prevSelection.first.y && 
-                selection.second.x == prevSelection.second.x &&
-                selection.second.y == prevSelection.second.y)
-                return;
-            
-            octx.strokeStyle = parseColor(options.selection.color).scale(null, null, null, 0.8).toString();
-            octx.lineWidth = 1;
-            ctx.lineJoin = "round";
-            octx.fillStyle = parseColor(options.selection.color).scale(null, null, null, 0.4).toString();
-
-            prevSelection = { first:  { x: selection.first.x,
-                                        y: selection.first.y },
-                              second: { x: selection.second.x,
-                                        y: selection.second.y } };
-
-            var x = Math.min(selection.first.x, selection.second.x),
-                y = Math.min(selection.first.y, selection.second.y),
-                w = Math.abs(selection.second.x - selection.first.x),
-                h = Math.abs(selection.second.y - selection.first.y);
-            
-            octx.fillRect(x + plotOffset.left, y + plotOffset.top, w, h);
-            octx.strokeRect(x + plotOffset.left, y + plotOffset.top, w, h);
-        }
-
         function selectionIsSane() {
             var minSize = 5;
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
