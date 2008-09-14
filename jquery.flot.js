@@ -83,7 +83,7 @@
                 // interactive stuff
                 clickable: false,
                 hoverable: false,
-                mouseCatchingArea: 30, // FIXME
+                mouseCatchingArea: 10, // FIXME
                 autoHighlight: true, // highlight in case mouse is near
             },
             selection: {
@@ -1496,7 +1496,7 @@
         // Returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY) {
             var maxDistance = options.grid.mouseCatchingArea;
-            var lowestDistance = maxDistance * maxDistance + 0.1,
+            var lowestDistance = maxDistance * maxDistance + 1,
                 item = null;
 
             for (var i = 0; i < series.length; ++i) {
@@ -1619,23 +1619,27 @@
                 item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left);
                 item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top);
 
-                if (options.grid.autoHighlight) {
-                    for (var i = 0; i < highlights.length; ++i) {
-                        var h = highlights[i];
-                        if (h.auto)
-                            unhighlight(h.series, h.point);
-                    }
                     
-                    highlight(item.series, item.datapoint, true);
-                }
             }
 
+            if (options.grid.autoHighlight) {
+                for (var i = 0; i < highlights.length; ++i) {
+                    var h = highlights[i];
+                    if (h.auto &&
+                        !(item && h.series == item.series && h.point == item.datapoint))
+                        unhighlight(h.series, h.point);
+                }
+                
+                if (item)
+                    highlight(item.series, item.datapoint, true);
+            }
+            
             target.trigger(eventname, [ pos, item ]);
         }
 
         function triggerRedrawOverlay() {
             if (!redrawTimeout)
-                redrawTimeout = setTimeout(redrawOverlay, 100);
+                redrawTimeout = setTimeout(redrawOverlay, 50);
         }
 
         function redrawOverlay() {
@@ -1681,6 +1685,8 @@
 
                 triggerRedrawOverlay();
             }
+            else if (!auto)
+                highlights[i].auto = false;
         }
             
         function unhighlight(s, point) {
@@ -1712,11 +1718,10 @@
             if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
                 return;
             
-
-            octx.lineWidth = series.points.lineWidth;
-            octx.strokeStyle = series.color;
-            var radius = series.points.lineWidth + series.points.radius;
-                    
+            var pointRadius = series.points.radius + series.points.lineWidth / 2;
+            octx.lineWidth = pointRadius;
+            octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.4).toString();
+            var radius = 1.5 * pointRadius;
             octx.beginPath();
             octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, true);
             octx.stroke();
@@ -1755,8 +1760,11 @@
             // no more draggy-dee-drag
             selection.active = false;
             updateSelection(e);
-            triggerSelectedEvent();
-            clickIsMouseUp = true;
+            
+            if (selectionIsSane()) {
+                triggerSelectedEvent();
+                clickIsMouseUp = true;
+            }
             
             return false;
         }
