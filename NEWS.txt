@@ -43,6 +43,9 @@ You can now specify a coordinate as null (like [2, null]) and Flot
 will take the other coordinate into account when scaling the axes
 (based on patch by joebno).
 
+New option for bars "align". Set it to "center" to center the bars on
+the value they represent.
+
 Using the "container" option in legend now overwrites the container
 element instead of just appending to it (fixes infinite legend bug,
 reported by several people, fix by Brad Dewey).

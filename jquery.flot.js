@@ -70,7 +70,8 @@
                 lineWidth: 2, // in pixels
                 barWidth: 1, // in units of the x axis
                 fill: true,
-                fillColor: null
+                fillColor: null,
+                align: "left" // or "center"
             },
             grid: {
                 color: "#545454", // primary color used for outline and labels
@@ -255,8 +256,10 @@
                     mindelta = 0, maxdelta = 0;
                 
                 // make sure we got room for the bar
-                if (series[i].bars.show)
-                    maxdelta = series[i].bars.barWidth;
+                if (series[i].bars.show) {
+                    var mindelta = series[i].bars.align == "left" ? 0 : -series[i].bars.barWidth/2;
+                    maxdelta = mindelta + series[i].bars.barWidth;
+                }
                 
                 axisx.used = axisy.used = true;
                 for (var j = 0; j < data.length; ++j) {
@@ -267,8 +270,8 @@
 
                     // convert to number
                     if (x != null && !isNaN(x = +x)) {
-                        if (x - mindelta < axisx.datamin)
-                            axisx.datamin = x - mindelta;
+                        if (x + mindelta < axisx.datamin)
+                            axisx.datamin = x + mindelta;
                         if (x + maxdelta > axisx.datamax)
                             axisx.datamax = x + maxdelta;
                     }
@@ -1291,7 +1294,7 @@
         }
 
         function drawSeriesBars(series) {
-            function plotBars(data, barWidth, offset, fill, axisx, axisy) {
+            function plotBars(data, deltaLeft, deltaRight, offset, fill, axisx, axisy) {
                 for (var i = 0; i < data.length; i++) {
                     if (data[i] == null)
                         continue;
@@ -1301,7 +1304,7 @@
 
                     // determine the co-ordinates of the bar, account for negative bars having 
                     // flipped top/bottom and draw/don't draw accordingly
-                    var left = x, right = x + barWidth, bottom = (y < 0 ? y : 0), top = (y < 0 ? 0 : y);
+                    var left = x + deltaLeft, right = x + deltaRight, bottom = (y < 0 ? y : 0), top = (y < 0 ? 0 : y);
                     if (right < axisx.min || left > axisx.max || top < axisy.min || bottom > axisy.max)
                         continue;
 
@@ -1379,7 +1382,8 @@
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
             setFillStyle(series.bars, series.color);
-            plotBars(series.data, series.bars.barWidth, 0, series.bars.fill, series.xaxis, series.yaxis);
+            var deltaLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+            plotBars(series.data, deltaLeft, deltaLeft + series.bars.barWidth, 0, series.bars.fill, series.xaxis, series.yaxis);
             ctx.restore();
         }
 

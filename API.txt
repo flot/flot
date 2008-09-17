@@ -397,6 +397,7 @@ Customizing the data series
 
   bars: {
     barWidth: number
+    align: "left" or "center"
   }
 
   colors: [ color1, color2, ... ]
@@ -425,7 +426,9 @@ between 0 (fully transparent) and 1 (fully opaque).
 "barWidth" is the width of the bars in units of the x axis, contrary
 to most other measures that are specified in pixels. For instance, for
 time series the unit is milliseconds so 24 * 60 * 60 * 1000 produces
-bars with the width of a day.
+bars with the width of a day. "align" specifies whether a bar should
+be left-aligned (default) or centered on top of the value it
+represents.
 
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
