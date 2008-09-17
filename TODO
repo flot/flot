@@ -18,10 +18,6 @@ interactive zooming
   - auto-zoom mode?
   - auto-margins
 
-support for highlighting stuff
-  - lines
-  - points
-
 legend
   - interactive auto-highlight of graph?
   - ability to specify noRows instead of just noColumns

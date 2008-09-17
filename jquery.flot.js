@@ -743,13 +743,13 @@
                     for (i = 0; i < axis.ticks.length; ++i) {
                         l = axis.ticks[i].label;
                         if (l)
-                            labels.push('<span class="tickLabel" width="' + axis.labelWidth + '">' + l + '</span>');
+                            labels.push('<div class="tickLabel" style="float:left;width:' + axis.labelWidth + 'px">' + l + '</div>');
                     }
                     
                     axis.labelHeight = 0;
                     if (labels.length > 0) {
-                        var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                         + labels.join("") + '</div>').appendTo(target);
+                        var dummyDiv = $('<div style="position:absolute;top:-10000px;width:10000px;font-size:smaller">'
+                                         + labels.join("") + '<div style="clear:left"></div></div>').appendTo(target);
                         axis.labelHeight = dummyDiv.height();
                         dummyDiv.remove();
                     }

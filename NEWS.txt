@@ -6,18 +6,15 @@ Backwards API change summary: Timestamps are now in UTC. Also
 parameters for setSelection are now different (but backwards
 compatibility hooks are in place).
 
+
 Interactivity: added a new "plothover" event and this and the
 "plotclick" event now returns the closest data item (based on patch by
 /david). See the revamped "interacting with the data" example for
 some hints on what you can do.
 
-Timestamps in time mode are now displayed according to
-UTC instead of the time zone of the visitor. This affects the way the
-timestamps should be input; you'll probably have to offset the
-timestamps according to your local time zone. It also affects any
-custom date handling code (which basically now should use the
-equivalent UTC date mehods, e.g. .setUTCMonth() instead of
-.setMonth().
+Highlighting: you can now highlight points and points are
+autohighlighted when you hover over them (if hovering is turned on).
+Note: bars haven't been special-cased, yet.
 
 Support for dual axis has been added (based on patch by someone who's
 annoyed and /david). For each data series you can specify which axes
@@ -27,12 +24,24 @@ customize. This affects the "selected" event which has been renamed to
 setSelection in which the parameters are on a new form (backwards
 compatible hooks are in place so old code shouldn't break).
 
+Timestamps in time mode are now displayed according to
+UTC instead of the time zone of the visitor. This affects the way the
+timestamps should be input; you'll probably have to offset the
+timestamps according to your local time zone. It also affects any
+custom date handling code (which basically now should use the
+equivalent UTC date mehods, e.g. .setUTCMonth() instead of
+.setMonth().
+
 Added support for specifying the size of tick labels (axis.labelWidth,
 axis.labelHeight). Useful for specifying a max label size to keep
 multiple plots aligned.
 
 The "fill" option can now be a number that specifies the opacity of
 the fill.
+
+You can now specify a coordinate as null (like [2, null]) and Flot
+will take the other coordinate into account when scaling the axes
+(based on patch by joebno).
 
 Using the "container" option in legend now overwrites the container
 element instead of just appending to it (fixes infinite legend bug,
@@ -45,7 +54,8 @@ Fixed a bug when borderWidth is set to 0 (reported by
 Rob/sanchothefat). Fixed a bug with drawing bars extending below 0
 (reported by James Hewitt, convenient patch by Ryan Funduk). Fixed a
 bug with line widths of bars (reported by MikeM). Fixed a bug with
-'nw' and 'sw' legend positions.
+'nw' and 'sw' legend positions. Improved the handling of axis
+auto-scaling with bars.
 
 
 Flot 0.4
