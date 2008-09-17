@@ -241,11 +241,11 @@
         }
         
         function processData() {
-            var top_sentry = Number.POSITIVE_INFINITY,
-                bottom_sentry = Number.NEGATIVE_INFINITY;
+            var topSentry = Number.POSITIVE_INFINITY,
+                bottomSentry = Number.NEGATIVE_INFINITY;
             
-            xaxis.datamin = yaxis.datamin = x2axis.datamin = y2axis.datamin = top_sentry;
-            xaxis.datamax = yaxis.datamax = x2axis.datamax = y2axis.datamax = bottom_sentry;
+            xaxis.datamin = yaxis.datamin = x2axis.datamin = y2axis.datamin = topSentry;
+            xaxis.datamax = yaxis.datamax = x2axis.datamax = y2axis.datamax = bottomSentry;
             xaxis.used = yaxis.used = x2axis.used = y2axis.used = false;
 
             for (var i = 0; i < series.length; ++i) {
@@ -253,6 +253,7 @@
                     axisx = series[i].xaxis,
                     axisy = series[i].yaxis;
                 
+                axisx.used = axisy.used = true;
                 for (var j = 0; j < data.length; ++j) {
                     if (data[j] == null)
                         continue;
@@ -260,27 +261,29 @@
                     var x = data[j][0], y = data[j][1];
 
                     // convert to number
-                    if (x == null || y == null || isNaN(x = +x) || isNaN(y = +y)) {
-                        data[j] = null; // mark this point as invalid
-                        continue;
+                    if (x != null && !isNaN(x = +x)) {
+                        if (x < axisx.datamin)
+                            axisx.datamin = x;
+                        if (x > axisx.datamax)
+                            axisx.datamax = x;
                     }
-
-                    if (x < axisx.datamin)
-                        axisx.datamin = x;
-                    if (x > axisx.datamax)
-                        axisx.datamax = x;
-                    if (y < axisy.datamin)
-                        axisy.datamin = y;
-                    if (y > axisy.datamax)
-                        axisy.datamax = y;
-                    axisx.used = axisy.used = true;
+                    
+                    if (y != null && !isNaN(y = +y)) {
+                        if (y < axisy.datamin)
+                            axisy.datamin = y;
+                        if (y > axisy.datamax)
+                            axisy.datamax = y;
+                    }
+                    
+                    if (x == null || y == null || isNaN(x) || isNaN(y))
+                        data[j] = null; // mark this point as invalid
                 }
             }
 
             function setDefaultMinMax(axis) {
-                if (axis.datamin == top_sentry)
+                if (axis.datamin == topSentry)
                     axis.datamin = 0;
-                if (axis.datamax == bottom_sentry)
+                if (axis.datamax == bottomSentry)
                     axis.datamax = 1;
             }
             

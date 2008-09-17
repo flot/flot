@@ -7,12 +7,12 @@ Consider a call to the plot function:
 
 The placeholder is a jQuery object that the plot will be put into.
 This placeholder needs to have its width and height set as explained
-in the README. The plot will modify some properties of the placeholder
-so it's recommended you simply pass in a div that you don't use for
-anything else.
+in the README (go read that now if you haven't, it's short). The plot
+will modify some properties of the placeholder so it's recommended you
+simply pass in a div that you don't use for anything else.
 
 The format of the data is documented below, as is the available
-options. The "plot" object returned has some members you can call.
+options. The "plot" object returned has some methods you can call.
 These are documented separately below.
 
 Note that in general Flot gives no guarantees if you change any of the
@@ -38,14 +38,14 @@ E.g.
 
 Note that to simplify the internal logic in Flot both the x and y
 values must be numbers, even if specifying time series (see below for
-how to do this). This is a common problem because you might
-accidentally retrieve data from the database and serialize them
-directly to JSON without noticing the wrong type.
+how to do this). This is a common problem because you might retrieve
+data from the database and serialize them directly to JSON without
+noticing the wrong type.
 
 If a null is specified as a point or if one of the coordinates is null
-or NaN or couldn't be converted to a number, the point is ignored. As
-a special case, a null value for lines is interpreted as a line
-segment end, i.e. the two points before and after the null value are
+or couldn't be converted to a number, the point is ignored when
+drawing. As a special case, a null value for lines is interpreted as a
+line segment end, i.e. the point before and after the null value are
 not connected.
 
 The format of a single series object is as follows:
