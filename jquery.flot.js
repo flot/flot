@@ -83,8 +83,8 @@
                 // interactive stuff
                 clickable: false,
                 hoverable: false,
-                mouseCatchingArea: 10, // FIXME
                 autoHighlight: true, // highlight in case mouse is near
+                mouseActiveRadius: 10, // how far the mouse can be away to activate an item
             },
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
@@ -164,9 +164,9 @@
             var i;
             
             // collect what we already got of colors
-            var neededColors = series.length;
-            var usedColors = [];
-            var assignedColors = [];
+            var neededColors = series.length,
+                usedColors = [],
+                assignedColors = [];
             for (i = 0; i < series.length; ++i) {
                 var sc = series[i].color;
                 if (sc != null) {
@@ -185,8 +185,7 @@
             }
 
             // produce colors as needed
-            var colors = [];
-            var variation = 0;
+            var colors = [], variation = 0;
             i = 0;
             while (colors.length < neededColors) {
                 var c;
@@ -661,9 +660,6 @@
                 generator = function (axis) {
                     var ticks = [];
 
-                    if (axis.min == null) // FIXME
-                        return ticks;
-                    
                     // spew out all possible ticks
                     var start = floorInBase(axis.min, axis.tickSize),
                         i = 0, v = Number.NaN, prev;
@@ -1491,7 +1487,7 @@
         
         // Returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY) {
-            var maxDistance = options.grid.mouseCatchingArea;
+            var maxDistance = options.grid.mouseActiveRadius;
             var lowestDistance = maxDistance * maxDistance + 1,
                 item = null;
 
@@ -1675,6 +1671,9 @@
             if (typeof s == "number")
                 s = series[s];
 
+            if (typeof point == "number")
+                point = s.data[point];
+
             var i = indexOfHighlight(s, point);
             if (i == -1) {
                 highlights.push({ series: s, point: point, auto: auto });
@@ -1688,6 +1687,9 @@
         function unhighlight(s, point) {
             if (typeof s == "number")
                 s = series[s];
+
+            if (typeof point == "number")
+                point = s.data[point];
 
             var i = indexOfHighlight(s, point);
             if (i != -1) {

@@ -452,6 +452,9 @@ Customizing the grid
     coloredAreasColor: color
     borderWidth: number
     clickable: boolean
+    hoverable: boolean
+    autoHighlight: boolean
+    mouseActiveRadius: number
   }
 
 The grid is the thing with the axes and a number of ticks. "color"
@@ -499,9 +502,12 @@ a position and a nearby data item object as parameters. The coordinates
 are available both in the unit of the axes (not in pixels) and in
 global screen coordinates.
 
-If you set "hoverable" to true, the plot will listen for mouse move
-events on the plot area and fire a "plothover" event with the same
-parameters as the "plotclick" event.
+Likewise, if you set "hoverable" to true, the plot will listen for
+mouse move events on the plot area and fire a "plothover" event with
+the same parameters as the "plotclick" event. If "autoHighlight" is
+true (the default), nearby data items are highlighted automatically.
+If needed, you can disable highlighting and control it yourself with
+the highlight/unhighlight plot methods described elsewhere.
 
 You can use "plotclick" and "plothover" events like this:
 
@@ -511,6 +517,11 @@ You can use "plotclick" and "plothover" events like this:
         alert("You clicked at " + pos.x + ", " + pos.y);
         // secondary axis coordinates if present are in pos.x2, pos.y2,
         // if you need global screen coordinates, they are pos.pageX, pos.pageY
+
+        if (item) {
+          highlight(item.series, item.datapoint);
+          alert("You clicked a point!");
+        }
     });
 
 The item object in this example is either null or a nearby object on the form:
@@ -532,8 +543,16 @@ specified, "dataIndex" will be 1, "series" is a normalized series
 object with among other things the "Foo" label in series.label and the
 color in series.color, and "seriesIndex" is 0.
 
-Note that the detection of nearby points is still limited to points,
-and support for highlighting the point or graph is still forthcoming.
+Note that the detection of nearby points is limited to points (bars
+aren't working) at the moment.
+
+If you use the above events to update some other information and want
+to clear out that info in case the mouse goes away, you'll probably
+also need to listen to "mouseout" events on the placeholder div.
+
+"mouseActiveRadius" specifies how far the mouse can be from an item
+and still activate it. If there are two or more points within this
+radius, Flot chooses the closest item.
 
 
 Customizing the selection
@@ -561,10 +580,10 @@ like this:
   });
 
 
-Plot Members
+Plot Methods
 ------------
 
-The Plot object returned from the plot function has some members you
+The Plot object returned from the plot function has some methods you
 can call:
 
   - clearSelection()
@@ -586,6 +605,19 @@ can call:
     setSelection will trigger the "plotselected" event when called so you
     may have to do a bit of shortcircuiting to prevent an eternal loop
     if you invoke setSelection inside a "plotselected" handler.
+
+
+  - highlight(series, datapoint)
+
+    Highlight a specific datapoint in the data series. You can either
+    specify the actual objects, e.g. if you got them from a
+    "plotclick" event, or you can specify the indices, e.g.
+    highlight(1, 3) to highlight the fourth point in the second series.
+
+  
+  - unhighlight(series, datapoint)
+
+    Remove the highlighting of the point, same parameters as highlight.
 
 
   - setData(data)
@@ -616,7 +648,7 @@ can call:
     
 
 There are also some members that let you peek inside the internal
-workings of Flot which in some case is useful. Note that if you change
+workings of Flot which in some cases is useful. Note that if you change
 something in the objects returned, you're changing the objects used by
 Flot to keep track of its state, so be careful.
 
@@ -649,8 +681,9 @@ Flot to keep track of its state, so be careful.
   - getPlotOffset()
 
     Gets the offset that the grid has within the canvas as an object
-    with the members "left", "right", "top", "bottom". I.e., if you draw a
-    circle on the canvas with the center placed at (left, top), its
-    center will be at the top-most, left corner of the grid.
+    with distances from the canvas edges as "left", "right", "top",
+    "bottom". I.e., if you draw a circle on the canvas with the center
+    placed at (left, top), its center will be at the top-most, left
+    corner of the grid.
 
 
