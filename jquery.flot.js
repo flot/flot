@@ -76,7 +76,7 @@
                 color: "#545454", // primary color used for outline and labels
                 backgroundColor: null, // null for transparent, else color
                 tickColor: "#dddddd", // color used for the ticks
-                labelMargin: 3, // in pixels
+                labelMargin: 5, // in pixels
                 borderWidth: 2,
                 coloredAreas: null, // array of { x1, y1, x2, y2 } or fn: plot area -> areas
                 coloredAreasColor: "#f4f4f4",
@@ -802,25 +802,21 @@
             // get the most space needed around the grid for things
             // that may stick out
             var maxOutset = options.grid.borderWidth / 2;
-            if (options.points.show)
-                maxOutset = Math.max(maxOutset, options.points.radius + options.points.lineWidth/2);
-            for (i = 0; i < series.length; ++i) {
-                if (series[i].points.show)
-                    maxOutset = Math.max(maxOutset, series[i].points.radius + series[i].points.lineWidth/2);
-            }
+            for (i = 0; i < series.length; ++i)
+                maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
 
             plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
 
             if (xaxis.labelHeight > 0)
-                plotOffset.bottom += xaxis.labelHeight + options.grid.labelMargin;
+                plotOffset.bottom = Math.max(maxOutset, xaxis.labelHeight + options.grid.labelMargin);
             if (yaxis.labelWidth > 0)
-                plotOffset.left += yaxis.labelWidth + options.grid.labelMargin;
+                plotOffset.left = Math.max(maxOutset, yaxis.labelWidth + options.grid.labelMargin);
 
             if (x2axis.labelHeight > 0)
-                plotOffset.top += x2axis.labelHeight + options.grid.labelMargin;
+                plotOffset.top = Math.max(maxOutset, x2axis.labelHeight + options.grid.labelMargin);
             
             if (y2axis.labelWidth > 0)
-                plotOffset.right += y2axis.labelWidth + options.grid.labelMargin;
+                plotOffset.right = Math.max(maxOutset, y2axis.labelWidth + options.grid.labelMargin);
 
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
@@ -966,7 +962,7 @@
                 tick = yaxis.ticks[i];
                 if (!tick.label || tick.v < yaxis.min || tick.v > yaxis.max)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + yaxis.p2c(tick.v) - yaxis.labelHeight/2) + 'px;left:0;width:' + yaxis.labelWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + yaxis.p2c(tick.v) - yaxis.labelHeight/2) + 'px;right:' + (plotOffset.right + plotWidth + options.grid.labelMargin) + 'px;width:' + yaxis.labelWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
             }
             
             // do the x2-axis
@@ -974,7 +970,7 @@
                 tick = x2axis.ticks[i];
                 if (!tick.label || tick.v < x2axis.min || tick.v > x2axis.max)
                     continue;
-                html += '<div style="position:absolute;top:0;left:' + (plotOffset.left + x2axis.p2c(tick.v) - x2axis.labelWidth/2) + 'px;width:' + x2axis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;bottom:' + (plotOffset.bottom + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + x2axis.p2c(tick.v) - x2axis.labelWidth/2) + 'px;width:' + x2axis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
             }
             
             // do the y2-axis
@@ -982,7 +978,7 @@
                 tick = y2axis.ticks[i];
                 if (!tick.label || tick.v < y2axis.min || tick.v > y2axis.max)
                     continue;
-                html += '<div style="position:absolute;top:' + (plotOffset.top + y2axis.p2c(tick.v) - y2axis.labelHeight/2) + 'px;left:' + (canvasWidth - y2axis.labelWidth) +'px;width:' + y2axis.labelWidth + 'px;text-align:left" class="tickLabel">' + tick.label + "</div>";
+                html += '<div style="position:absolute;top:' + (plotOffset.top + y2axis.p2c(tick.v) - y2axis.labelHeight/2) + 'px;left:' + (plotOffset.left + plotWidth + options.grid.labelMargin) +'px;width:' + y2axis.labelWidth + 'px;text-align:left" class="tickLabel">' + tick.label + "</div>";
             }
 
             html += '</div>';
@@ -1504,7 +1500,7 @@
                     axisx = series[i].xaxis,
                     axisy = series[i].yaxis;
 
-                // precompute some stuff to make the loop fast
+                // precompute some stuff to make the loop faster
                 var mx = axisx.c2p(mouseX), my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
                     maxy = maxDistance / axisy.scale;
@@ -1521,8 +1517,8 @@
 
                     // We have to calculate distances in pixels, not in
                     // data units, because the scale of the axes may be different
-                    var dx = Math.abs(xaxis.p2c(x) - mouseX),
-                        dy = Math.abs(yaxis.p2c(y) - mouseY);
+                    var dx = Math.abs(axisx.p2c(x) - mouseX),
+                        dy = Math.abs(axisy.p2c(y) - mouseY);
                     var dist = dx * dx + dy * dy;
                     if (dist < lowestDistance) {
                         lowestDistance = dist;
@@ -1720,7 +1716,7 @@
             
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
-            octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.4).toString();
+            octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
             var radius = 1.5 * pointRadius;
             octx.beginPath();
             octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, true);
