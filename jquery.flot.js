@@ -251,7 +251,12 @@
             for (var i = 0; i < series.length; ++i) {
                 var data = series[i].data,
                     axisx = series[i].xaxis,
-                    axisy = series[i].yaxis;
+                    axisy = series[i].yaxis,
+                    mindelta = 0, maxdelta = 0;
+                
+                // make sure we got room for the bar
+                if (series[i].bars.show)
+                    maxdelta = series[i].bars.barWidth;
                 
                 axisx.used = axisy.used = true;
                 for (var j = 0; j < data.length; ++j) {
@@ -262,10 +267,10 @@
 
                     // convert to number
                     if (x != null && !isNaN(x = +x)) {
-                        if (x < axisx.datamin)
-                            axisx.datamin = x;
-                        if (x > axisx.datamax)
-                            axisx.datamax = x;
+                        if (x - mindelta < axisx.datamin)
+                            axisx.datamin = x - mindelta;
+                        if (x + maxdelta > axisx.datamax)
+                            axisx.datamax = x + maxdelta;
                     }
                     
                     if (y != null && !isNaN(y = +y)) {
@@ -351,24 +356,9 @@
                 }
             }
 
-            function extendXRangeIfNeededByBar(axis, options) {
-                // extend x range so end bar graph won't be drawn on the chart border
-                if (options.max == null) {
-                    // great, we're autoscaling, check if we might need a bump
-                    
-                    var newmax = axis.max;
-                    for (var i = 0; i < series.length; ++i)
-                        if (series[i].bars.show && series[i].bars.barWidth + axis.datamax > newmax)
-                            newmax = axis.datamax + series[i].bars.barWidth;
-                    axis.max = newmax;
-                }
-            }
-            
             setupAxis(xaxis, options.xaxis);
-            extendXRangeIfNeededByBar(xaxis,options.xaxis);
             setupAxis(yaxis, options.yaxis);
             setupAxis(x2axis, options.x2axis);
-            extendXRangeIfNeededByBar(x2axis, options.x2axis);
             setupAxis(y2axis, options.y2axis);
 
             setSpacing();
