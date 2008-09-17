@@ -84,7 +84,7 @@
                 clickable: false,
                 hoverable: false,
                 autoHighlight: true, // highlight in case mouse is near
-                mouseActiveRadius: 10, // how far the mouse can be away to activate an item
+                mouseActiveRadius: 10 // how far the mouse can be away to activate an item
             },
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"

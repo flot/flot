@@ -55,7 +55,8 @@ Rob/sanchothefat). Fixed a bug with drawing bars extending below 0
 (reported by James Hewitt, convenient patch by Ryan Funduk). Fixed a
 bug with line widths of bars (reported by MikeM). Fixed a bug with
 'nw' and 'sw' legend positions. Improved the handling of axis
-auto-scaling with bars.
+auto-scaling with bars. Fixed a bug with multi-line x-axis tick
+labels (reported by Luca Ciano). IE-fix help by Savage Zhang.
 
 
 Flot 0.4
