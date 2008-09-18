@@ -240,10 +240,10 @@ axis for trigonometric functions:
 You can control how the ticks look like with "tickDecimals", the
 number of decimals to display (default is auto-detected).
 
-Alternatively, for ultimate control you can provide a function to
-"tickFormatter". The function is passed two parameters, the tick value
-and an "axis" object with information, and should return a string. The
-default formatter looks like this:
+Alternatively, for ultimate control over how ticks look like you can
+provide a function to "tickFormatter". The function is passed two
+parameters, the tick value and an "axis" object with information, and
+should return a string. The default formatter looks like this:
 
   function formatter(val, axis) {
     return val.toFixed(axis.tickDecimals);
@@ -298,11 +298,7 @@ Javascript, you'll have to take care of this server-side.
 The easiest way to think about it is to pretend that the data
 production time zone is UTC, even if it isn't. So if you have a
 datapoint at 2002-02-20 08:00, you can generate a timestamp for eight
-o'clock UTC even if it really happened eight o'clock UTC+0200. If
-you've already got the real UTC timestamp, it's too late to pretend -
-but you can fix it up by adding the time zone offset, e.g. for
-UTC+0200 you would add 2 hours to the timestamp. Then it'll look right
-on the plot.
+o'clock UTC even if it really happened eight o'clock UTC+0200.
 
 In PHP you can get an appropriate timestamp with
 'strtotime("2002-02-20 UTC") * 1000', in Python with
@@ -313,17 +309,24 @@ something like:
   {
     System.TimeSpan span = new System.TimeSpan(System.DateTime.Parse("1/1/1970").Ticks);
     System.DateTime time = input.Subtract(span);
-    return (int)(time.Ticks / 10000);
+    return (long)(time.Ticks / 10000);
   }
 
 Javascript also has some support for parsing date strings, so it is
-possible to generate the timestamps manually client-side if you need.
-  
+possible to generate the timestamps manually client-side.
+
+If you've already got the real UTC timestamp, it's too late to use the
+pretend trick described above. But you can fix up the timestamps by
+adding the time zone offset, e.g. for UTC+0200 you would add 2 hours
+to the UTC timestamp you got. Then it'll look right on the plot. Most
+programming environments have some means of getting the timezone
+offset for a specific date.
+
 Once you've got the timestamps into the data and specified "time" as
 the axis mode, Flot will automatically generate relevant ticks and
 format them. As always, you can tweak the ticks via the "ticks" option
-- just remember that the values should be timestamps, not Date
-objects.
+- just remember that the values should be timestamps (numbers), not
+Date objects.
 
 Tick generation and formatting can also be controlled separately
 through the following axis options:
