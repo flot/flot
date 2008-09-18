@@ -1600,8 +1600,8 @@
                 pos.x2 = x2axis.c2p(canvasX);
             if (y2axis.used)
                 pos.y2 = y2axis.c2p(canvasY);
-            
-            item = findNearbyItem(canvasX, canvasY);
+
+            var item = findNearbyItem(canvasX, canvasY);
 
             if (item) {
                 // fill in mouse pos for any listeners out there
