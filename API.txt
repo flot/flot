@@ -549,9 +549,6 @@ specified, "dataIndex" will be 1, "series" is a normalized series
 object with among other things the "Foo" label in series.label and the
 color in series.color, and "seriesIndex" is 0.
 
-Note that the detection of nearby points is limited to points (bars
-aren't working) at the moment.
-
 If you use the above events to update some other information and want
 to clear out that info in case the mouse goes away, you'll probably
 also need to listen to "mouseout" events on the placeholder div.

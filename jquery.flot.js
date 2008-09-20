@@ -1484,41 +1484,64 @@
         
         // Returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY) {
-            var maxDistance = options.grid.mouseActiveRadius;
-            var lowestDistance = maxDistance * maxDistance + 1,
-                item = null;
+            var maxDistance = options.grid.mouseActiveRadius,
+                lowestDistance = maxDistance * maxDistance + 1,
+                item = null, foundPoint = false;
 
+            function result(i, j) {
+                return { datapoint: series[i].data[j],
+                         dataIndex: j,
+                         series: series[i],
+                         seriesIndex: i }
+            }
+            
             for (var i = 0; i < series.length; ++i) {
                 var data = series[i].data,
                     axisx = series[i].xaxis,
-                    axisy = series[i].yaxis;
-
-                // precompute some stuff to make the loop faster
-                var mx = axisx.c2p(mouseX), my = axisy.c2p(mouseY),
+                    axisy = series[i].yaxis,
+                
+                    // precompute some stuff to make the loop faster
+                    mx = axisx.c2p(mouseX),
+                    my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
-                    maxy = maxDistance / axisy.scale;
+                    maxy = maxDistance / axisy.scale,
+                    checkbar = series[i].bars.show,
+                    checkpoint = !(series[i].bars.show && !(series[i].lines.show || series[i].points.show)),
+                    barLeft = series[i].bars.align == "left" ? 0 : -series[i].bars.barWidth/2,
+                    barRight = barLeft + series[i].bars.barWidth;
                 for (var j = 0; j < data.length; ++j) {
                     if (data[j] == null)
                         continue;
 
-                    // first check whether we're too far away
                     var x = data[j][0], y = data[j][1];
-                    if (x - mx > maxx || x - mx < -maxx)
-                        continue;
-                    if (y - my > maxy || y - my < -maxy)
-                        continue;
+  
+                    if (checkbar) {
+                        // For a bar graph, the cursor must be inside the bar
+                        // and no other point can be nearby
+                        if (!foundPoint && mx >= x + barLeft &&
+                              mx <= x + barRight && my <= y)
+                            item = result(i, j);
+                    }
+ 
+                    if (checkpoint) {
+                        // For points and lines, the cursor must be within a
+                        // certain distance to the data point
+ 
+                        // check bounding box first
+                        if ((x - mx > maxx || x - mx < -maxx) ||
+                            (y - my > maxy || y - my < -maxy))
+                            continue;
 
-                    // We have to calculate distances in pixels, not in
-                    // data units, because the scale of the axes may be different
-                    var dx = Math.abs(axisx.p2c(x) - mouseX),
-                        dy = Math.abs(axisy.p2c(y) - mouseY);
-                    var dist = dx * dx + dy * dy;
-                    if (dist < lowestDistance) {
-                        lowestDistance = dist;
-                        item = { datapoint: data[j],
-                                 dataIndex: j,
-                                 series: series[i],
-                                 seriesIndex: i };
+                        // We have to calculate distances in pixels, not in
+                        // data units, because the scale of the axes may be different
+                        var dx = Math.abs(axisx.p2c(x) - mouseX),
+                            dy = Math.abs(axisy.p2c(y) - mouseY),
+                            dist = dx * dx + dy * dy;
+                        if (dist < lowestDistance) {
+                            lowestDistance = dist;
+                            foundPoint = true;
+                            item = result(i, j);
+                        }
                     }
                 }
             }
