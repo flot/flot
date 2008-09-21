@@ -55,7 +55,7 @@ timothytoe). Fixed a bug in finding max values for all-negative data
 sets. Prevent the possibility of eternal looping in tick calculations.
 Fixed a bug when borderWidth is set to 0 (reported by
 Rob/sanchothefat). Fixed a bug with drawing bars extending below 0
-(reported by James Hewitt, convenient patch by Ryan Funduk). Fixed a
+(reported by James Hewitt, patch by Ryan Funduk). Fixed a
 bug with line widths of bars (reported by MikeM). Fixed a bug with
 'nw' and 'sw' legend positions. Improved the handling of axis
 auto-scaling with bars. Fixed a bug with multi-line x-axis tick

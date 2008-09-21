@@ -1299,16 +1299,25 @@
                     if (data[i] == null)
                         continue;
                     
-                    var x = data[i][0], y = data[i][1];
-                    var drawLeft = true, drawTop = true, drawRight = true;
+                    var x = data[i][0], y = data[i][1],
+                        drawLeft = true, drawRight = true,
+                        drawTop = true, drawBottom = false,
+                        left = x + deltaLeft, right = x + deltaRight,
+                        bottom = 0, top = y;
 
-                    // determine the co-ordinates of the bar, account for negative bars having 
-                    // flipped top/bottom and draw/don't draw accordingly
-                    var left = x + deltaLeft, right = x + deltaRight, bottom = (y < 0 ? y : 0), top = (y < 0 ? 0 : y);
-                    if (right < axisx.min || left > axisx.max || top < axisy.min || bottom > axisy.max)
-                        continue;
-
+                    // account for negative bars
+                    if (top < bottom) {
+                        top = 0;
+                        bottom = y
+                        drawBottom = true;
+                        drawTop = false;
+                    }
+                    
                     // clip
+                    if (right < axisx.min || left > axisx.max ||
+                        top < axisy.min || bottom > axisy.max)
+                        continue;
+                    
                     if (left < axisx.min) {
                         left = axisx.min;
                         drawLeft = false;
@@ -1319,9 +1328,11 @@
                         drawRight = false;
                     }
 
-                    if (bottom < axisy.min)
+                    if (bottom < axisy.min) {
                         bottom = axisy.min;
-
+                        drawBottom = false;
+                    }
+                    
                     if (top > axisy.max) {
                         top = axisy.max;
                         drawTop = false;
@@ -1338,7 +1349,7 @@
                     }
 
                     // draw outline
-                    if (drawLeft || drawRight || drawTop) {
+                    if (drawLeft || drawRight || drawTop || drawBottom) {
                         ctx.beginPath();
                         ctx.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
                         if (drawLeft)
@@ -1354,6 +1365,10 @@
                             ctx.lineTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
                         else
                             ctx.moveTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
+                        if (drawBottom)
+                            ctx.lineTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
+                        else
+                            ctx.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
                         ctx.stroke();
                     }
                 }
@@ -1519,7 +1534,8 @@
                         // For a bar graph, the cursor must be inside the bar
                         // and no other point can be nearby
                         if (!foundPoint && mx >= x + barLeft &&
-                              mx <= x + barRight && my <= y)
+                            mx <= x + barRight &&
+                            (y > 0 ? my >= 0 && my <= y : my <= 0 && my >= y))
                             item = result(i, j);
                     }
  
