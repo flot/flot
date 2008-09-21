@@ -555,7 +555,8 @@ also need to listen to "mouseout" events on the placeholder div.
 
 "mouseActiveRadius" specifies how far the mouse can be from an item
 and still activate it. If there are two or more points within this
-radius, Flot chooses the closest item.
+radius, Flot chooses the closest item. For bars, the top-most bar
+(from the latest specified data series) is chosen.
 
 
 Customizing the selection

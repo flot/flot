@@ -1293,84 +1293,90 @@
             ctx.restore();
         }
 
+        function drawBar(x, y, barLeft, barRight, offset, fill, axisx, axisy, c) {
+            var drawLeft = true, drawRight = true,
+                drawTop = true, drawBottom = false,
+                left = x + barLeft, right = x + barRight,
+                bottom = 0, top = y;
+
+            // account for negative bars
+            if (top < bottom) {
+                top = 0;
+                bottom = y
+                drawBottom = true;
+                drawTop = false;
+            }
+            
+            // clip
+            if (right < axisx.min || left > axisx.max ||
+                top < axisy.min || bottom > axisy.max)
+                return;
+            
+            if (left < axisx.min) {
+                left = axisx.min;
+                drawLeft = false;
+            }
+
+            if (right > axisx.max) {
+                right = axisx.max;
+                drawRight = false;
+            }
+
+            if (bottom < axisy.min) {
+                bottom = axisy.min;
+                drawBottom = false;
+            }
+            
+            if (top > axisy.max) {
+                top = axisy.max;
+                drawTop = false;
+            }
+
+            // fill the bar
+            if (fill) {
+                c.beginPath();
+                c.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
+                c.lineTo(axisx.p2c(left), axisy.p2c(top) + offset);
+                c.lineTo(axisx.p2c(right), axisy.p2c(top) + offset);
+                c.lineTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
+                c.fill();
+            }
+
+            // draw outline
+            if (drawLeft || drawRight || drawTop || drawBottom) {
+                c.beginPath();
+                left = axisx.p2c(left);
+                bottom = axisy.p2c(bottom);
+                right = axisx.p2c(right);
+                top = axisy.p2c(top);
+                
+                c.moveTo(left, bottom + offset);
+                if (drawLeft)
+                    c.lineTo(left, top + offset);
+                else
+                    c.moveTo(left, top + offset);
+                if (drawTop)
+                    c.lineTo(right, top + offset);
+                else
+                    c.moveTo(right, top + offset);
+                if (drawRight)
+                    c.lineTo(right, bottom + offset);
+                else
+                    c.moveTo(right, bottom + offset);
+                if (drawBottom)
+                    c.lineTo(left, bottom + offset);
+                else
+                    c.moveTo(left, bottom + offset);
+                c.stroke();
+            }
+        }
+        
         function drawSeriesBars(series) {
-            function plotBars(data, deltaLeft, deltaRight, offset, fill, axisx, axisy) {
+            function plotBars(data, barLeft, barRight, offset, fill, axisx, axisy) {
                 for (var i = 0; i < data.length; i++) {
                     if (data[i] == null)
                         continue;
-                    
-                    var x = data[i][0], y = data[i][1],
-                        drawLeft = true, drawRight = true,
-                        drawTop = true, drawBottom = false,
-                        left = x + deltaLeft, right = x + deltaRight,
-                        bottom = 0, top = y;
-
-                    // account for negative bars
-                    if (top < bottom) {
-                        top = 0;
-                        bottom = y
-                        drawBottom = true;
-                        drawTop = false;
-                    }
-                    
-                    // clip
-                    if (right < axisx.min || left > axisx.max ||
-                        top < axisy.min || bottom > axisy.max)
-                        continue;
-                    
-                    if (left < axisx.min) {
-                        left = axisx.min;
-                        drawLeft = false;
-                    }
-
-                    if (right > axisx.max) {
-                        right = axisx.max;
-                        drawRight = false;
-                    }
-
-                    if (bottom < axisy.min) {
-                        bottom = axisy.min;
-                        drawBottom = false;
-                    }
-                    
-                    if (top > axisy.max) {
-                        top = axisy.max;
-                        drawTop = false;
-                    }
-
-                    // fill the bar
-                    if (fill) {
-                        ctx.beginPath();
-                        ctx.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
-                        ctx.lineTo(axisx.p2c(left), axisy.p2c(top) + offset);
-                        ctx.lineTo(axisx.p2c(right), axisy.p2c(top) + offset);
-                        ctx.lineTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
-                        ctx.fill();
-                    }
-
-                    // draw outline
-                    if (drawLeft || drawRight || drawTop || drawBottom) {
-                        ctx.beginPath();
-                        ctx.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
-                        if (drawLeft)
-                            ctx.lineTo(axisx.p2c(left), axisy.p2c(top) + offset);
-                        else
-                            ctx.moveTo(axisx.p2c(left), axisy.p2c(top) + offset);
-
-                        if (drawTop)
-                            ctx.lineTo(axisx.p2c(right), axisy.p2c(top) + offset);
-                        else
-                            ctx.moveTo(axisx.p2c(right), axisy.p2c(top) + offset);
-                        if (drawRight)
-                            ctx.lineTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
-                        else
-                            ctx.moveTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
-                        if (drawBottom)
-                            ctx.lineTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
-                        else
-                            ctx.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
-                        ctx.stroke();
-                    }
+                    drawBar(data[i][0], data[i][1], barLeft, barRight, offset, fill, axisx, axisy, ctx);
                 }
             }
 
@@ -1397,24 +1403,24 @@
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
             setFillStyle(series.bars, series.color);
-            var deltaLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-            plotBars(series.data, deltaLeft, deltaLeft + series.bars.barWidth, 0, series.bars.fill, series.xaxis, series.yaxis);
+            var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+            plotBars(series.data, barLeft, barLeft + series.bars.barWidth, 0, series.bars.fill, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
         function setFillStyle(obj, seriesColor) {
             var fill = obj.fill;
-            if (fill) {
-                if (obj.fillColor)
-                    ctx.fillStyle = obj.fillColor;
-                else {
-                    var c = parseColor(seriesColor);
-                    c.a = typeof fill == "number" ? fill : 0.4;
-                    c.normalize();
-                    ctx.fillStyle = c.toString();
-                }
-            }
+            if (!fill)
+                return;
             
+            if (obj.fillColor)
+                ctx.fillStyle = obj.fillColor;
+            else {
+                var c = parseColor(seriesColor);
+                c.a = typeof fill == "number" ? fill : 0.4;
+                c.normalize();
+                ctx.fillStyle = c.toString();
+            }
         }
         
         function insertLegend() {
@@ -1535,7 +1541,7 @@
                         // and no other point can be nearby
                         if (!foundPoint && mx >= x + barLeft &&
                             mx <= x + barRight &&
-                            (y > 0 ? my >= 0 && my <= y : my <= 0 && my >= y))
+                            my >= Math.min(0, y) && my <= Math.max(0, y))
                             item = result(i, j);
                     }
  
@@ -1681,8 +1687,11 @@
             var i, h; 
             for (i = 0; i < highlights.length; ++i) {
                 h = highlights[i];
-                
-                drawPointHighlight(h.series, h.point);
+
+                if (h.series.bars.show)
+                    drawBarHighlight(h.series, h.point);
+                else
+                    drawPointHighlight(h.series, h.point);
             }
             octx.restore();
 
@@ -1759,6 +1768,16 @@
             octx.beginPath();
             octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, true);
             octx.stroke();
+        }
+
+        function drawBarHighlight(series, point) {
+            octx.lineJoin = "round";
+            octx.lineWidth = series.bars.lineWidth;
+            octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
+            octx.fillStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
+            var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+            drawBar(point[0], point[1], barLeft, barLeft + series.bars.barWidth,
+                    0, true, series.xaxis, series.yaxis, octx);
         }
         
         function triggerSelectedEvent() {

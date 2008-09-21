@@ -12,9 +12,8 @@ Interactivity: added a new "plothover" event and this and the
 /david, patch by Mark Byers for bar support). See the revamped
 "interacting with the data" example for some hints on what you can do.
 
-Highlighting: you can now highlight points and points are
+Highlighting: you can now highlight points and datapoints are
 autohighlighted when you hover over them (if hovering is turned on).
-Note: bars haven't been special-cased, yet.
 
 Support for dual axis has been added (based on patch by someone who's
 annoyed and /david). For each data series you can specify which axes
