@@ -38,9 +38,9 @@ axis.labelHeight). Useful for specifying a max label size to keep
 multiple plots aligned.
 
 Markings, previously coloredAreas, are now specified as ranges on the
-axes, like { xaxis: { from: 0, to: 10 }}. Furthermore you can now draw
-horizontal/vertical lines by setting from and to to the same
-coordinate (idea from line support patch by by Ryan Funduk).
+axes, like { xaxis: { from: 0, to: 10 }}. Furthermore with markings
+you can now draw horizontal/vertical lines by setting from and to to
+the same coordinate (idea from line support patch by by Ryan Funduk).
 
 The "fill" option can now be a number that specifies the opacity of
 the fill.
