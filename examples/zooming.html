@@ -63,7 +63,6 @@ $(function () {
     });
 
     // now connect the two
-    var internalSelection = false;
     
     $("#placeholder").bind("plotselected", function (event, ranges) {
         // clamp the zooming to prevent eternal zoom
@@ -79,18 +78,11 @@ $(function () {
                           yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
                       }));
         
-        if (internalSelection)
-            return; // prevent eternal loop
-        internalSelection = true;
-        overview.setSelection(ranges);
-        internalSelection = false;
+        // don't fire event on the overview to prevent eternal loop
+        overview.setSelection(ranges, true);
     });
     $("#overview").bind("plotselected", function (event, ranges) {
-        if (internalSelection)
-            return;
-        internalSelection = true;
         plot.setSelection(ranges);
-        internalSelection = false;
     });
 });
 </script>

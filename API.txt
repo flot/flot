@@ -454,8 +454,7 @@ Customizing the grid
     backgroundColor: color or null
     tickColor: color
     labelMargin: number
-    coloredAreas: array of areas or (fn: plot area -> array of areas)
-    coloredAreasColor: color
+    markings: array of markings or (fn: axes -> array of markings)
     borderWidth: number
     clickable: boolean
     hoverable: boolean
@@ -477,28 +476,37 @@ labels with CSS, e.g. to change the color. They have class "tickLabel".
 "borderWidth" is the width of the border around the plot. Set it to 0
 to disable the border.
 
-"coloredAreas" is an array of areas that will be drawn on top of the
-background. You can either specify an array of objects with { x1, y1,
-x2, y2 } or a function that returns such an array given the plot area
-as { xmin, xmax, ymin, ymax }. The default color of the areas are
-"coloredAreasColor". You can override the color of individual areas by
-specifying "color" in the area object.
+"markings" is used to draw simple lines and rectangular areas in the
+background of the plot. You can either specify an array of ranges on
+the form { xaxis: { from, to }, yaxis: { from, to } } (secondary axis
+coordinates with x2axis/y2axis) or with a function that returns such
+an array given the axes for the plot in an object as the first
+parameter.
 
-Here's an example array:
+You can set the color of markings by specifying "color" in the ranges
+object. Here's an example array:
 
-  coloredAreas: [ { x1: 0, y1: 10, x2: 2, y2: 15, color: "#bb0000" }, ... ]
+  markings: [ { xaxis: { from: 0, to: 2 }, yaxis: { from: 10, to: 10 }, color: "#bb0000" }, ... ]
 
 If you leave out one of the values, that value is assumed to go to the
-border of the plot. So for example { x1: 0, x2: 2 } means an area that
-extends from the top to the bottom of the plot in the x range 0-2.
+border of the plot. So for example if you only specify { xaxis: {
+from: 0, to: 2 } } it means an area that extends from the top to the
+bottom of the plot in the x range 0-2.
+
+A line is drawn if from and to are the same, e.g.
+
+  markings: [ { yaxis: { from: 1, to: 1 } }, ... ]
+
+would draw a line parallel to the x axis at y = 1. You can control the
+line width with "lineWidth" in the ranges objects.
 
 An example function might look like this:
 
-  coloredAreas: function (plotarea) {
-    var areas = [];
-    for (var x = Math.floor(plotarea.xmin); x < plotarea.xmax; x += 2)
-      areas.push({ x1: x, x2: x + 1 });
-    return areas;
+  markings: function (axes) {
+    var markings = [];
+    for (var x = Math.floor(axes.xaxis.min); x < axes.xaxis.max; x += 2)
+      markings.push({ xaxis: { from: x, to: x + 1 } });
+    return markings;
   }
 
 
@@ -595,7 +603,7 @@ can call:
     Clear the selection rectangle.
 
 
-  - setSelection(ranges)
+  - setSelection(ranges, preventEvent)
 
     Set the selection rectangle. The passed in ranges is on the same
     form as returned in the "plotselected" event. If the selection
@@ -606,10 +614,10 @@ can call:
 
       setSelection({ xaxis: { from: 0, to: 10 }, yaxis: { from: 40, to: 60 } });
 
-    setSelection will trigger the "plotselected" event when called so you
-    may have to do a bit of shortcircuiting to prevent an eternal loop
-    if you invoke setSelection inside a "plotselected" handler.
-
+    setSelection will trigger the "plotselected" event when called. If
+    you don't want that to happen, e.g. if you're inside a
+    "plotselected" handler, pass true as the second parameter.
+    
 
   - highlight(series, datapoint)
 
