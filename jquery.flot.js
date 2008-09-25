@@ -1,6 +1,6 @@
-/* Javascript plotting library for jQuery, v. 0.4.
+/* Javascript plotting library for jQuery, v. 0.5.
  *
- * Released under the MIT license by iola, December 2007.
+ * Released under the MIT license by IOLA, December 2007.
  *
  */
 
@@ -264,7 +264,7 @@
                 
                 // make sure we got room for the bar
                 if (series[i].bars.show) {
-                    var mindelta = series[i].bars.align == "left" ? 0 : -series[i].bars.barWidth/2;
+                    mindelta = series[i].bars.align == "left" ? 0 : -series[i].bars.barWidth/2;
                     maxdelta = mindelta + series[i].bars.barWidth;
                 }
                 
@@ -953,7 +953,7 @@
                 ctx.lineTo(plotWidth, Math.floor(axis.p2c(v)) + ctx.lineWidth/2);
             }
 
-            axis = axes.x2axis
+            axis = axes.x2axis;
             for (i = 0; i < axis.ticks.length; ++i) {
                 v = axis.ticks[i].v;
                 if (v <= axis.min || v >= axis.max)
@@ -1346,7 +1346,7 @@
             // account for negative bars
             if (top < bottom) {
                 top = 0;
-                bottom = y
+                bottom = y;
                 drawBottom = true;
                 drawTop = false;
             }
@@ -1557,7 +1557,7 @@
                 return { datapoint: series[i].data[j],
                          dataIndex: j,
                          series: series[i],
-                         seriesIndex: i }
+                         seriesIndex: i };
             }
             
             for (var i = 0; i < series.length; ++i) {
@@ -1728,14 +1728,14 @@
             octx.clearRect(0, 0, canvasWidth, canvasHeight);
             octx.translate(plotOffset.left, plotOffset.top);
             
-            var i, h; 
+            var i, hi; 
             for (i = 0; i < highlights.length; ++i) {
-                h = highlights[i];
+                hi = highlights[i];
 
-                if (h.series.bars.show)
-                    drawBarHighlight(h.series, h.point);
+                if (hi.series.bars.show)
+                    drawBarHighlight(hi.series, hi.point);
                 else
-                    drawPointHighlight(h.series, h.point);
+                    drawPointHighlight(hi.series, hi.point);
             }
             octx.restore();
 

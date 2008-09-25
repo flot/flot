@@ -1,4 +1,4 @@
-Flot x.x
+Flot 0.5
 --------
 
 Backwards API change summary: Timestamps are now in UTC. Also
