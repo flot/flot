@@ -1,3 +1,10 @@
+Flot 0.x
+--------
+
+Fixed two corner-case bugs when drawing filled curves (report and
+analysis by Joshua Varner).
+
+
 Flot 0.5
 --------
 

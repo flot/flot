@@ -1180,11 +1180,13 @@
                     if (y1 >= axisy.max && y2 >= axisy.max) {
                         ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
+                        lastX = x2;
                         continue;
                     }
                     else if (y1 <= axisy.min && y2 <= axisy.min) {
                         ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
+                        lastX = x2;
                         continue;
                     }
                     
@@ -1239,8 +1241,8 @@
                         else
                             top = axisy.max;
                         
-                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(top));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(top));
+                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(top));
                     }
 
                     lastX = Math.max(x2, x2old);
