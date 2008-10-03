@@ -31,8 +31,10 @@ $(function () {
     // setup plot
     function getData(x1, x2) {
         var d = [];
-        for (var i = x1; i < x2; i += (x2 - x1) / 100)
-            d.push([i, Math.sin(i * Math.sin(i))]);
+        for (var i = 0; i <= 100; ++i) {
+            var x = x1 + i * (x2 - x1) / 100;
+            d.push([x, Math.sin(x * Math.sin(x))]);
+        }
 
         return [
             { label: "sin(x sin(x))", data: d }
