@@ -2,7 +2,9 @@ Flot 0.x
 --------
 
 Fixed two corner-case bugs when drawing filled curves (report and
-analysis by Joshua Varner).
+analysis by Joshua Varner). Fix auto-adjustment code when setting min
+to 0 for an axis where the dataset is completely flat on that axis
+(report by chovy).
 
 
 Flot 0.5

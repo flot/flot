@@ -375,14 +375,14 @@
 
             if (max - min == 0.0) {
                 // degenerate case
-                var widen;
-                if (max == 0.0)
-                    widen = 1.0;
-                else
-                    widen = 0.01;
+                var widen = max == 0 ? 1 : 0.01;
 
-                min -= widen;
-                max += widen;
+                if (axisOptions.min == null)
+                    min -= widen;
+                // alway widen max if we couldn't widen min to ensure we
+                // don't fall into min == max which doesn't work
+                if (axisOptions.max == null || axisOptions.min != null)
+                    max += widen;
             }
             else {
                 // consider autoscaling
