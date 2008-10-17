@@ -4,7 +4,9 @@ Flot 0.x
 Fixed two corner-case bugs when drawing filled curves (report and
 analysis by Joshua Varner). Fix auto-adjustment code when setting min
 to 0 for an axis where the dataset is completely flat on that axis
-(report by chovy).
+(report by chovy). Fixed a bug with passing in data from getData to
+setData when the secondary axes are used (issue 65, reported by
+nperelman).
 
 
 Flot 0.5
