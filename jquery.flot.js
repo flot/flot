@@ -234,14 +234,22 @@
                 s.bars = $.extend(true, {}, options.bars, s.bars);
                 if (s.shadowSize == null)
                     s.shadowSize = options.shadowSize;
-                if (s.xaxis && s.xaxis == 2)
-                    s.xaxis = axes.x2axis;
-                else
+
+                if (!s.xaxis)
                     s.xaxis = axes.xaxis;
-                if (s.yaxis && s.yaxis == 2)
-                    s.yaxis = axes.y2axis;
-                else
+
+                if (s.xaxis == 1)
+                    s.xaxis = axes.xaxis;
+                else if (s.xaxis == 2)
+                    s.xaxis = axes.x2axis;
+
+                if (!s.yaxis)
                     s.yaxis = axes.yaxis;
+
+                if (s.yaxis == 1)
+                    s.yaxis = axes.yaxis;
+                else if (s.yaxis == 2)
+                    s.yaxis = axes.y2axis;
             }
         }
         
