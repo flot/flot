@@ -60,7 +60,8 @@
                     fillColor: "#ffffff"
                 },
                 lines: {
-                    show: false,
+                    // we don't put in show: false so we can see
+                    // whether the user actively disabled lines
                     lineWidth: 2, // in pixels
                     fill: false,
                     fillColor: null
@@ -232,6 +233,10 @@
                 s.lines = $.extend(true, {}, options.lines, s.lines);
                 s.points = $.extend(true, {}, options.points, s.points);
                 s.bars = $.extend(true, {}, options.bars, s.bars);
+
+                // turn on lines automatically in case nothing is set
+                if (s.lines.show == null && !s.bars.show && !s.points.show)
+                    s.lines.show = true;
                 if (s.shadowSize == null)
                     s.shadowSize = options.shadowSize;
 
@@ -1031,7 +1036,7 @@
         }
 
         function drawSeries(series) {
-            if (series.lines.show || (!series.bars.show && !series.points.show))
+            if (series.lines.show)
                 drawSeriesLines(series);
             if (series.bars.show)
                 drawSeriesBars(series);
@@ -1266,18 +1271,17 @@
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
 
-            var lw = series.lines.lineWidth;
-            var sw = series.shadowSize;
+            var lw = series.lines.lineWidth,
+                sw = series.shadowSize;
             // FIXME: consider another form of shadow when filling is turned on
-            if (sw > 0) {
+            if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
-                ctx.lineWidth = sw / 2;
+                var w = sw / 2;
+                ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotLine(series.data, lw/2 + sw/2 + ctx.lineWidth/2, series.xaxis, series.yaxis);
-
-                ctx.lineWidth = sw / 2;
+                plotLine(series.data, lw/2 + w + w/2, series.xaxis, series.yaxis);
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotLine(series.data, lw/2 + ctx.lineWidth/2, series.xaxis, series.yaxis);
+                plotLine(series.data, lw/2 + w/2, series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
@@ -1285,7 +1289,9 @@
             setFillStyle(series.lines, series.color);
             if (series.lines.fill)
                 plotLineArea(series.data, series.xaxis, series.yaxis);
-            plotLine(series.data, 0, series.xaxis, series.yaxis);
+
+            if (lw > 0)
+                plotLine(series.data, 0, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
@@ -1324,18 +1330,18 @@
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            var lw = series.lines.lineWidth;
-            var sw = series.shadowSize;
-            if (sw > 0) {
+            var lw = series.lines.lineWidth,
+                sw = series.shadowSize;
+            if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
-                ctx.lineWidth = sw / 2;
+                var w = sw / 2;
+                ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPointShadows(series.data, sw/2 + ctx.lineWidth/2,
+                plotPointShadows(series.data, w + w/2,
                                  series.points.radius, series.xaxis, series.yaxis);
 
-                ctx.lineWidth = sw / 2;
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPointShadows(series.data, ctx.lineWidth/2,
+                plotPointShadows(series.data, w/2,
                                  series.points.radius, series.xaxis, series.yaxis);
             }
 
