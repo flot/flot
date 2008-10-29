@@ -409,15 +409,20 @@ Customizing the data series
 
 The most important options are "lines", "points" and "bars" that
 specifies whether and how lines, points and bars should be shown for
-each data series. You can specify them independently of each other,
-and Flot will happily draw each of them in turn, e.g.
+each data series. In case you don't specify anything at all, Flot will
+default to showing lines (you can turn this off with
+lines: { show: false}). You can specify the various types
+independently of each other, and Flot will happily draw each of them
+in turn, e.g.
 
   var options = {
     lines: { show: true, fill: true, fillColor: "rgba(255, 255, 255, 0.8)" },
     points: { show: true, fill: false }
   };
 
-"lineWidth" is the thickness of the line or outline in pixels.
+"lineWidth" is the thickness of the line or outline in pixels. You can
+set it to 0 to prevent a line or outline from being drawn; this will
+also hide the shadow.
 
 "fill" is whether the shape should be filled. For lines, this produces
 area graphs. You can use "fillColor" to specify the color of the fill.
