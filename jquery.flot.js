@@ -383,8 +383,8 @@
         }
         
         function setRange(axis, axisOptions) {
-            var min = axisOptions.min != null ? axisOptions.min : axis.datamin;
-            var max = axisOptions.max != null ? axisOptions.max : axis.datamax;
+            var min = axisOptions.min != null ? +axisOptions.min : axis.datamin;
+            var max = axisOptions.max != null ? +axisOptions.max : axis.datamax;
 
             if (max - min == 0.0) {
                 // degenerate case

@@ -14,7 +14,7 @@ Vanderburg), and fixed so that setting lineWidth to 0 also hides the
 shadow (based on problem reported by Sergio Nunes). Updated mousemove
 position expression to the latest from jQuery (bug reported by
 meyuchas). Use borders instead of background in legend (fix printing
-issue 25 and 45).
+issue 25 and 45). Explicitly convert axis min/max to numbers.
 
 
 Flot 0.5
