@@ -1,6 +1,8 @@
 Flot 0.x
 --------
 
+Bug fixes:
+
 Fixed two corner-case bugs when drawing filled curves (report and
 analysis by Joshua Varner). Fix auto-adjustment code when setting min
 to 0 for an axis where the dataset is completely flat on that axis
@@ -11,7 +13,8 @@ other chart type is shown (based on problem reported by Glenn
 Vanderburg), and fixed so that setting lineWidth to 0 also hides the
 shadow (based on problem reported by Sergio Nunes). Updated mousemove
 position expression to the latest from jQuery (bug reported by
-meyuchas).
+meyuchas). Use borders instead of background in legend (fix printing
+issue 25 and 45).
 
 
 Flot 0.5
