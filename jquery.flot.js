@@ -1636,8 +1636,8 @@
             var e = ev || window.event;
             if (e.pageX == null && e.clientX != null) {
                 var de = document.documentElement, b = document.body;
-                lastMousePos.pageX = e.clientX + (de && de.scrollLeft || b.scrollLeft || 0);
-                lastMousePos.pageY = e.clientY + (de && de.scrollTop || b.scrollTop || 0);
+                lastMousePos.pageX = e.clientX + (de && de.scrollLeft || b.scrollLeft || 0) - (de.clientLeft || 0);
+                lastMousePos.pageY = e.clientY + (de && de.scrollTop || b.scrollTop || 0) - (de.clientTop || 0);
             }
             else {
                 lastMousePos.pageX = e.pageX;
