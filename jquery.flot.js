@@ -926,6 +926,7 @@
                     if (xrange.from == xrange.to || yrange.from == yrange.to) {
                         // draw line
                         ctx.strokeStyle = m.color || options.grid.markingsColor;
+                        ctx.beginPath();
                         ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
                         ctx.moveTo(Math.floor(xrange.from), Math.floor(yrange.from));
                         ctx.lineTo(Math.floor(xrange.to), Math.floor(yrange.to));

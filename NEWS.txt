@@ -3,18 +3,23 @@ Flot 0.x
 
 Bug fixes:
 
-Fixed two corner-case bugs when drawing filled curves (report and
-analysis by Joshua Varner). Fix auto-adjustment code when setting min
-to 0 for an axis where the dataset is completely flat on that axis
-(report by chovy). Fixed a bug with passing in data from getData to
-setData when the secondary axes are used (issue 65, reported by
-nperelman). Fixed so that it is possible to turn lines off when no
-other chart type is shown (based on problem reported by Glenn
-Vanderburg), and fixed so that setting lineWidth to 0 also hides the
-shadow (based on problem reported by Sergio Nunes). Updated mousemove
-position expression to the latest from jQuery (bug reported by
-meyuchas). Use borders instead of background in legend (fix printing
-issue 25 and 45). Explicitly convert axis min/max to numbers.
+- Fixed two corner-case bugs when drawing filled curves (report and
+  analysis by Joshua Varner).
+- Fix auto-adjustment code when setting min to 0 for an axis where the
+  dataset is completely flat on that axis (report by chovy).
+- Fixed a bug with passing in data from getData to setData when the
+  secondary axes are used (issue 65, reported by nperelman).
+- Fixed so that it is possible to turn lines off when no other chart
+  type is shown (based on problem reported by Glenn Vanderburg), and
+  fixed so that setting lineWidth to 0 also hides the shadow (based on
+  problem reported by Sergio Nunes).
+- Updated mousemove position expression to the latest from jQuery (bug
+  reported by meyuchas).
+- Use borders instead of background in legend (fix printing issue 25
+  and 45).
+- Explicitly convert axis min/max to numbers.
+- Fixed a bug with drawing marking lines with different colors
+  (reported by Khurram).
 
 
 Flot 0.5
