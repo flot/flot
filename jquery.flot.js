@@ -1726,7 +1726,6 @@
                 // clear auto-highlights
                 for (var i = 0; i < highlights.length; ++i) {
                     var h = highlights[i];
-                    console.log(h.auto, eventname)
                     if (h.auto == eventname &&
                         !(item && h.series == item.series && h.point == item.datapoint))
                         unhighlight(h.series, h.point);
