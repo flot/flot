@@ -1565,7 +1565,7 @@
             hoverTimeout = null;
         
         // Returns the data item the mouse is over, or null if none is found
-        function findNearbyItem(mouseX, mouseY) {
+        function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
                 lowestDistance = maxDistance * maxDistance + 1,
                 item = null, foundPoint = false;
@@ -1578,6 +1578,9 @@
             }
             
             for (var i = 0; i < series.length; ++i) {
+                if (!seriesFilter(series[i]))
+                    continue;
+                
                 var data = series[i].data,
                     axisx = series[i].xaxis,
                     axisy = series[i].yaxis,
@@ -1682,17 +1685,19 @@
                 return;
             }
 
-            triggerClickHoverEvent("plotclick", e);
+            triggerClickHoverEvent("plotclick", e,
+                                   function (s) { return s["clickable"] != false; });
         }
         
         function onHover() {
-            triggerClickHoverEvent("plothover", lastMousePos);
+            triggerClickHoverEvent("plothover", lastMousePos,
+                                   function (s) { return s["hoverable"] != false; });
             hoverTimeout = null;
         }
 
         // trigger click or hover event (they send the same parameters
         // so we share their code)
-        function triggerClickHoverEvent(eventname, event) {
+        function triggerClickHoverEvent(eventname, event, seriesFilter) {
             var offset = eventHolder.offset(),
                 pos = { pageX: event.pageX, pageY: event.pageY },
                 canvasX = event.pageX - offset.left - plotOffset.left,
@@ -1707,7 +1712,7 @@
             if (axes.y2axis.used)
                 pos.y2 = axes.y2axis.c2p(canvasY);
 
-            var item = findNearbyItem(canvasX, canvasY);
+            var item = findNearbyItem(canvasX, canvasY, seriesFilter);
 
             if (item) {
                 // fill in mouse pos for any listeners out there
@@ -1718,15 +1723,17 @@
             }
 
             if (options.grid.autoHighlight) {
+                // clear auto-highlights
                 for (var i = 0; i < highlights.length; ++i) {
                     var h = highlights[i];
-                    if (h.auto &&
+                    console.log(h.auto, eventname)
+                    if (h.auto == eventname &&
                         !(item && h.series == item.series && h.point == item.datapoint))
                         unhighlight(h.series, h.point);
                 }
                 
                 if (item)
-                    highlight(item.series, item.datapoint, true);
+                    highlight(item.series, item.datapoint, eventname);
             }
             
             target.trigger(eventname, [ pos, item ]);

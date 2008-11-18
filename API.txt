@@ -59,6 +59,8 @@ The format of a single series object is as follows:
     points: specific points options,
     xaxis: 1 or 2,
     yaxis: 1 or 2,
+    clickable: boolean
+    hoverable: boolean
     shadowSize: number
   }
 
@@ -87,6 +89,10 @@ The "xaxis" and "yaxis" options specify which axis to use, specify 2
 to get the secondary axis (x axis at top or y axis to the right).
 E.g., you can use this to make a dual axis plot by specifying
 { yaxis: 2 } for one data series.
+
+"clickable" and "hoverable" can be set to false to disable
+interactivity for specific series if interactivity is turned on in
+plot, see below.
 
 The rest of the options are all documented below as they are the same
 as the default options passed in via the options parameter in the plot
@@ -570,6 +576,10 @@ also need to listen to "mouseout" events on the placeholder div.
 and still activate it. If there are two or more points within this
 radius, Flot chooses the closest item. For bars, the top-most bar
 (from the latest specified data series) is chosen.
+
+If you want to disable interactivity for a specific data series, you
+can set "hoverable" and "clickable" to false in the options for that
+series, like this { data: [...], label: "Foo", clickable: false }.
 
 
 Customizing the selection

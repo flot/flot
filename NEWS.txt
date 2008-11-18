@@ -1,6 +1,12 @@
 Flot 0.x
 --------
 
+New features:
+
+- Added support for disabling interactivity for specific data series
+  (request from Ronald Schouten and Steve Upton).
+
+
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and
