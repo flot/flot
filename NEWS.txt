@@ -26,6 +26,8 @@ Bug fixes:
 - Explicitly convert axis min/max to numbers.
 - Fixed a bug with drawing marking lines with different colors
   (reported by Khurram).
+- Fixed a bug with returning y2 values in the selection event (fix
+  by exists, issue 75).
 
 
 Flot 0.5

@@ -1861,7 +1861,7 @@
             if (axes.yaxis.used)
                 r.yaxis = { from: axes.yaxis.c2p(y1), to: axes.yaxis.c2p(y2) };
             if (axes.y2axis.used)
-                r.yaxis = { from: axes.y2axis.c2p(y1), to: axes.y2axis.c2p(y2) };
+                r.y2axis = { from: axes.y2axis.c2p(y1), to: axes.y2axis.c2p(y2) };
             
             target.trigger("plotselected", [ r ]);
 
