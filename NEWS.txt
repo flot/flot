@@ -6,6 +6,9 @@ New features:
 - Added support for disabling interactivity for specific data series
   (request from Ronald Schouten and Steve Upton).
 
+- Added support for having the autoscale algorithm skip points outside
+  an axis range (autoscaleSkipPointsOutside on an axis).
+
 
 Bug fixes:
 
