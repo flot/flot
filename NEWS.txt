@@ -9,6 +9,9 @@ New features:
 - Added support for having the autoscale algorithm skip points outside
   an axis range (autoscaleSkipPointsOutside on an axis).
 
+- Flot now calls $() on the placeholder and optional legend container
+  passed in so you can specify DOM elements or CSS expressions to make
+  it easier to use Flot with libraries like Prototype or Mootools.
 
 Bug fixes:
 

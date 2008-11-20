@@ -5,11 +5,12 @@ Consider a call to the plot function:
 
    var plot = $.plot(placeholder, data, options)
 
-The placeholder is a jQuery object that the plot will be put into.
-This placeholder needs to have its width and height set as explained
-in the README (go read that now if you haven't, it's short). The plot
-will modify some properties of the placeholder so it's recommended you
-simply pass in a div that you don't use for anything else.
+The placeholder is a jQuery object or DOM element or jQuery expression
+that the plot will be put into. This placeholder needs to have its
+width and height set as explained in the README (go read that now if
+you haven't, it's short). The plot will modify some properties of the
+placeholder so it's recommended you simply pass in a div that you
+don't use for anything else.
 
 The format of the data is documented below, as is the available
 options. The "plot" object returned has some methods you can call.
@@ -131,7 +132,7 @@ Customizing the legend
     margin: number of pixels
     backgroundColor: null or color
     backgroundOpacity: number in 0.0 - 1.0
-    container: null or jQuery object
+    container: null or jQuery object/DOM element/jQuery expression
   }
 
 The legend is generated as a table with the data series labels and

@@ -13,21 +13,24 @@ Q: The bars are all tiny in time mode?
 
 A: It's not really possible to determine the bar width
 automatically. So you have to set the width with the barWidth option
-which it is NOT in pixels, but in the units of the x axis. For time
+which is NOT in pixels, but in the units of the x axis. For time
 mode that's milliseconds so the default value of 1 makes the bars 1
 millisecond wide.
 
 
 Q: Can I use Flot with libraries like Mootools or Prototype?
 
-A: Yes, and it's easy! In the API documentation and examples you
-simply replace $ with jQuery. Depending on how you include jQuery, you
-may have to do one more thing to prevent it from overwriting functions
-from the other libraries, see the documentation in jQuery ("Using
-jQuery with other libraries") for details.
+A: Yes, and it's easy! Call jQuery.plot instead of $.plot and put in
+DOM elements where the examples and the API documentation are using
+jQuery objects.
+
+Depending on how you include jQuery, you may have to do one more thing
+to prevent it from overwriting functions from the other libraries, see
+the documentation in jQuery ("Using jQuery with other libraries") for
+details.
 
 
-Q: Flot doesn't work with [framework xyz]!
+Q: Flot doesn't work with [widget or server-side framework xyz]!
 
 A: The problem is most likely within the framework, or your use of the
 framework.

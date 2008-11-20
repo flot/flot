@@ -100,7 +100,7 @@
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
-        target = target_,
+        target = $(target_),
         axes = { xaxis: {}, yaxis: {}, x2axis: {}, y2axis: {} },
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
         canvasWidth = 0, canvasHeight = 0,
@@ -1534,7 +1534,7 @@
 
             var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
             if (options.legend.container != null)
-                options.legend.container.html(table);
+                $(options.legend.container).html(table);
             else {
                 var pos = "";
                 var p = options.legend.position, m = options.legend.margin;
