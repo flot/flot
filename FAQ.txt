@@ -20,14 +20,16 @@ millisecond wide.
 
 Q: Can I use Flot with libraries like Mootools or Prototype?
 
-A: Yes, and it's easy! Call jQuery.plot instead of $.plot and put in
-DOM elements where the examples and the API documentation are using
-jQuery objects.
+A: Yes, Flot supports it out of the box and it's easy! Just use jQuery
+instead of $, e.g. call jQuery.plot instead of $.plot and use
+jQuery(something) instead of $(something). As a convenience, you can
+put in a DOM element for the graph placeholder where the examples and
+the API documentation are using jQuery objects.
 
-Depending on how you include jQuery, you may have to do one more thing
-to prevent it from overwriting functions from the other libraries, see
-the documentation in jQuery ("Using jQuery with other libraries") for
-details.
+Depending on how you include jQuery, you may have to add one line of
+code to prevent jQuery from overwriting functions from the other
+libraries, see the documentation in jQuery ("Using jQuery with other
+libraries") for details.
 
 
 Q: Flot doesn't work with [widget or server-side framework xyz]!
