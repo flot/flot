@@ -78,31 +78,3 @@ And if you look up "flot" in a Danish-to-English dictionary, some up
 the words that come up are "good-looking", "attractive", "stylish",
 "smart", "impressive", "extravagant". One of the main goals with Flot
 is pretty looks. Flot is supposed to be "flot".
-
-
-Frequently asked questions
---------------------------
-
-Q: Can I export the graph?
-
-A: This is a limitation of the canvas technology. There's a hook in
-the canvas object for getting an image out, but you won't get the tick
-labels. And it's not likely to be supported by IE. At this point, your
-best bet is probably taking a screenshot, e.g. with PrtScn.
-
-
-Q: Flot doesn't work with [framework xyz]!
-
-A: The problem is most likely within the framework, or your use of the
-framework.
-
-The only non-standard thing used by Flot is the canvas tag; otherwise
-it is simply a series of absolute positioned divs within the
-placeholder tag you put in. If this is not working, it's probably
-because the framework you're using is doing something weird with the
-DOM. As a last resort, you might try replotting and see if it helps.
-
-If you find there's a specific thing we can do to Flot to help, feel
-free to submit a bug report. Otherwise, you're welcome to ask for help
-on the mailing list, but please don't submit a bug report to Flot -
-try the framework instead.
