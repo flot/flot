@@ -94,6 +94,11 @@
                     mode: null, // one of null, "x", "y" or "xy"
                     color: "#e8cfac"
                 },
+                crosshair: {
+                    mode: null, // one of null, "x", "y" or "xy",
+                    extendBeyondGrid: null,
+                    color: "#aa0000"
+                },
                 shadowSize: 4
             },
         canvas = null,      // the canvas for the plot itself
@@ -117,6 +122,8 @@
         this.getPlotOffset = function() { return plotOffset; };
         this.getData = function() { return series; };
         this.getAxes = function() { return axes; };
+        this.setCrosshair = setCrosshair;
+        this.clearCrosshair = function () { setCrosshair(null); };
         this.highlight = highlight;
         this.unhighlight = unhighlight;
         
@@ -367,6 +374,9 @@
                     eventHolder.mousedown(onMouseDown);
             }
 
+            if (options.crosshair.mode != null)
+                eventHolder.mouseout(onMouseOut);
+            
             if (options.grid.clickable)
                 eventHolder.click(onClick);
         }
@@ -780,7 +790,7 @@
                     axis.labelHeight = 0;
                     if (labels.length > 0) {
                         var dummyDiv = $('<div style="position:absolute;top:-10000px;width:10000px;font-size:smaller">'
-                                         + labels.join("") + '<div style="clear:left"></div></div>').appendTo(target);
+                                         + labels.join("") + '<div style="clear:left"></div></div>').prependTo(target);
                         axis.labelHeight = dummyDiv.height();
                         dummyDiv.remove();
                     }
@@ -799,7 +809,7 @@
                     
                     if (labels.length > 0) {
                         var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                         + labels.join("") + '</div>').appendTo(target);
+                                         + labels.join("") + '</div>').prependTo(target);
                         if (axis.labelWidth == null)
                             axis.labelWidth = dummyDiv.width();
                         if (axis.labelHeight == null)
@@ -1048,7 +1058,7 @@
 
             html += '</div>';
             
-            target.append(html);
+            target.prepend(html);
         }
 
         function drawSeries(series) {
@@ -1574,6 +1584,7 @@
             selection = {
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
                 show: false, active: false },
+            crosshair = { pos: { x: -1, y: -1 } },
             highlights = [],
             clickIsMouseUp = false,
             redrawTimeout = null,
@@ -1663,17 +1674,20 @@
                 lastMousePos.pageY = e.pageY;
             }
             
-            if (options.grid.hoverable && !hoverTimeout)
-                hoverTimeout = setTimeout(onHover, 100);
+            if (options.grid.hoverable)
+                triggerClickHoverEvent("plothover", lastMousePos,
+                                       function (s) { return s["hoverable"] != false; });
+
+            if (options.crosshair.mode != null) {
+                setPositionFromEvent(crosshair.pos, e);
+                triggerRedrawOverlay();
+            }
 
             if (selection.active) {
-                var r = null;
-                if (selectionIsSane())
-                    r = getSelectionForEvent();
+                target.trigger("plotselecting", [ selectionIsSane() ? getSelectionForEvent() : null ]);
 
-                target.trigger("plotselecting", [ r ]);
-                
                 updateSelection(lastMousePos);
+                crosshair.pos.x = -1; // hide the crosshair while selecting
             }
         }
         
@@ -1701,6 +1715,13 @@
             $(document).one("mouseup", onSelectionMouseUp);
         }
 
+        function onMouseOut(ev) {
+            if (options.crosshair.mode != null && crosshair.pos.x != -1) {
+                crosshair.pos.x = -1;
+                triggerRedrawOverlay();
+            }
+        }
+        
         function onClick(e) {
             if (clickIsMouseUp) {
                 clickIsMouseUp = false;
@@ -1711,12 +1732,6 @@
                                    function (s) { return s["clickable"] != false; });
         }
         
-        function onHover() {
-            triggerClickHoverEvent("plothover", lastMousePos,
-                                   function (s) { return s["hoverable"] != false; });
-            hoverTimeout = null;
-        }
-
         // trigger click or hover event (they send the same parameters
         // so we share their code)
         function triggerClickHoverEvent(eventname, event, seriesFilter) {
@@ -1782,7 +1797,6 @@
                 else
                     drawPointHighlight(hi.series, hi.point);
             }
-            octx.restore();
 
             // redraw selection
             if (selection.show && selectionIsSane()) {
@@ -1796,9 +1810,23 @@
                     w = Math.abs(selection.second.x - selection.first.x),
                     h = Math.abs(selection.second.y - selection.first.y);
                 
-                octx.fillRect(x + plotOffset.left, y + plotOffset.top, w, h);
-                octx.strokeRect(x + plotOffset.left, y + plotOffset.top, w, h);
+                octx.fillRect(x, y, w, h);
+                octx.strokeRect(x, y, w, h);
             }
+
+            // redraw crosshair
+            if (options.crosshair.mode != null && crosshair.pos.x != -1) {
+                octx.strokeStyle = parseColor(options.crosshair.color).scale(null, null, null, 0.8).toString();
+                octx.lineWidth = 1;
+                ctx.lineJoin = "round";
+                var pos = crosshair.pos;
+                octx.beginPath();
+                octx.moveTo(pos.x, options.crosshair.extendBeyondGrid ? -plotOffset.top : 0);
+                octx.lineTo(pos.x, options.crosshair.extendBeyondGrid ? canvasHeight - plotOffset.top : plotHeight);
+                octx.stroke();
+                
+            }
+            octx.restore();
         }
         
         function highlight(s, point, auto) {
@@ -1869,6 +1897,22 @@
                     0, true, series.xaxis, series.yaxis, octx);
         }
 
+        function setPositionFromEvent(pos, e) {
+            var offset = eventHolder.offset();
+            pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plotWidth);
+            pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plotHeight);
+        }
+
+        function setCrosshair(pos) {
+            if (pos == null)
+                crosshair.pos.x = -1;
+            else {
+                crosshair.pos.x = clamp(0, pos.x != null ? axes.xaxis.p2c(pos.x) : axes.x2axis.p2c(pos.x2), plotWidth);
+                crosshair.pos.y = clamp(0, pos.y != null ? axes.yaxis.p2c(pos.y) : axes.y2axis.p2c(pos.y2), plotHeight);
+            }
+            triggerRedrawOverlay();
+        }
+
         function getSelectionForEvent() {
             var x1 = Math.min(selection.first.x, selection.second.x),
                 x2 = Math.max(selection.first.x, selection.second.x),
@@ -1920,16 +1964,13 @@
         }
 
         function setSelectionPos(pos, e) {
-            var offset = eventHolder.offset();
+            setPositionFromEvent(pos, e);
+            
             if (options.selection.mode == "y") {
                 if (pos == selection.first)
                     pos.x = 0;
                 else
                     pos.x = plotWidth;
-            }
-            else {
-                pos.x = e.pageX - offset.left - plotOffset.left;
-                pos.x = Math.min(Math.max(0, pos.x), plotWidth);
             }
 
             if (options.selection.mode == "x") {
@@ -1937,10 +1978,6 @@
                     pos.y = 0;
                 else
                     pos.y = plotHeight;
-            }
-            else {
-                pos.y = e.pageY - offset.top - plotOffset.top;
-                pos.y = Math.min(Math.max(0, pos.y), plotHeight);
             }
         }
 
@@ -2021,7 +2058,7 @@
     
     function clamp(min, value, max) {
         if (value < min)
-            return value;
+            return min;
         else if (value > max)
             return max;
         else
