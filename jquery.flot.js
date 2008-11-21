@@ -1666,8 +1666,15 @@
             if (options.grid.hoverable && !hoverTimeout)
                 hoverTimeout = setTimeout(onHover, 100);
 
-            if (selection.active)
+            if (selection.active) {
+                var r = null;
+                if (selectionIsSane())
+                    r = getSelectionForEvent();
+
+                target.trigger("plotselecting", [ r ]);
+                
                 updateSelection(lastMousePos);
+            }
         }
         
         function onMouseDown(e) {
@@ -1861,8 +1868,8 @@
             drawBar(point[0], point[1], barLeft, barLeft + series.bars.barWidth,
                     0, true, series.xaxis, series.yaxis, octx);
         }
-        
-        function triggerSelectedEvent() {
+
+        function getSelectionForEvent() {
             var x1 = Math.min(selection.first.x, selection.second.x),
                 x2 = Math.max(selection.first.x, selection.second.x),
                 y1 = Math.max(selection.first.y, selection.second.y),
@@ -1877,6 +1884,11 @@
                 r.yaxis = { from: axes.yaxis.c2p(y1), to: axes.yaxis.c2p(y2) };
             if (axes.y2axis.used)
                 r.y2axis = { from: axes.y2axis.c2p(y1), to: axes.y2axis.c2p(y2) };
+            return r;
+        }
+        
+        function triggerSelectedEvent() {
+            var r = getSelectionForEvent();
             
             target.trigger("plotselected", [ r ]);
 
@@ -1900,6 +1912,9 @@
                 triggerSelectedEvent();
                 clickIsMouseUp = true;
             }
+            else
+                // this counts as a clear
+                target.trigger("plotselecting", [ null ]);
             
             return false;
         }
@@ -1928,11 +1943,11 @@
                 pos.y = Math.min(Math.max(0, pos.y), plotHeight);
             }
         }
-        
+
         function updateSelection(pos) {
             if (pos.pageX == null)
                 return;
-            
+
             setSelectionPos(selection.second, pos);
             if (selectionIsSane()) {
                 selection.show = true;
