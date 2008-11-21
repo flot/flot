@@ -364,7 +364,8 @@
             eventHolder = $([overlay, canvas]);
 
             // bind events
-            if (options.selection.mode != null || options.grid.hoverable) {
+            if (options.selection.mode != null || options.crosshair.mode != null
+                || options.grid.hoverable) {
                 // FIXME: temp. work-around until jQuery bug 1871 is fixed
                 eventHolder.each(function () {
                     this.onmousemove = onMouseMove;
@@ -1679,15 +1680,15 @@
                                        function (s) { return s["hoverable"] != false; });
 
             if (options.crosshair.mode != null) {
-                setPositionFromEvent(crosshair.pos, e);
+                setPositionFromEvent(crosshair.pos, lastMousePos);
                 triggerRedrawOverlay();
             }
 
             if (selection.active) {
                 target.trigger("plotselecting", [ selectionIsSane() ? getSelectionForEvent() : null ]);
 
-                updateSelection(lastMousePos);
                 crosshair.pos.x = -1; // hide the crosshair while selecting
+                updateSelection(lastMousePos);
             }
         }
         
@@ -1731,6 +1732,18 @@
             triggerClickHoverEvent("plotclick", e,
                                    function (s) { return s["clickable"] != false; });
         }
+
+        /*
+        function userPositionInCanvasSpace(pos) {
+            return { x: parseInt(pos.x != null ? axes.xaxis.p2c(pos.x) : axes.x2axis.p2c(pos.x2)),
+                     y: parseInt(pos.y != null ? axes.yaxis.p2c(pos.y) : axes.y2axis.p2c(pos.y2)) };
+        }
+        
+        function positionInDivSpace(pos) {
+            var cpos = userPositionInCanvasSpace(pos);
+            return { x: cpos.x + plotOffset.left,
+                     y: cpos.y + plotOffset.top };
+        }*/
         
         // trigger click or hover event (they send the same parameters
         // so we share their code)
@@ -1755,8 +1768,6 @@
                 // fill in mouse pos for any listeners out there
                 item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left);
                 item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top);
-
-                    
             }
 
             if (options.grid.autoHighlight) {
@@ -1819,10 +1830,18 @@
                 octx.strokeStyle = parseColor(options.crosshair.color).scale(null, null, null, 0.8).toString();
                 octx.lineWidth = 1;
                 ctx.lineJoin = "round";
-                var pos = crosshair.pos;
+                var pos = crosshair.pos,
+                    extend = options.crosshair.extendBeyondGrid;
+
                 octx.beginPath();
-                octx.moveTo(pos.x, options.crosshair.extendBeyondGrid ? -plotOffset.top : 0);
-                octx.lineTo(pos.x, options.crosshair.extendBeyondGrid ? canvasHeight - plotOffset.top : plotHeight);
+                if (options.crosshair.mode.indexOf("x") != -1) {
+                    octx.moveTo(pos.x, extend ? -plotOffset.top : 0);
+                    octx.lineTo(pos.x, extend ? canvasHeight - plotOffset.top : plotHeight);
+                }
+                if (options.crosshair.mode.indexOf("y") != -1) {
+                    octx.moveTo(extend ? -plotOffset.left : 0, pos.y);
+                    octx.lineTo(extend ? canvasWidth - plotOffset.left : plotWidth, pos.y);
+                }
                 octx.stroke();
                 
             }

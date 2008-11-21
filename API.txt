@@ -334,7 +334,8 @@ pretend trick described above. But you can fix up the timestamps by
 adding the time zone offset, e.g. for UTC+0200 you would add 2 hours
 to the UTC timestamp you got. Then it'll look right on the plot. Most
 programming environments have some means of getting the timezone
-offset for a specific date.
+offset for a specific date (note that you need to get the offset for
+each individual timestamp to account for daylight savings).
 
 Once you've got the timestamps into the data and specified "time" as
 the axis mode, Flot will automatically generate relevant ticks and
@@ -614,17 +615,31 @@ like this:
     // and y2axis if present
   });
 
+The "plotselected" event is only fired when the user has finished
+making the selection. A "plotselecting" event is fired during the
+process with the same parameters as the "plotselected" event, in case
+you want to know what's happening while it's happening,
+
+
+Customizing the crosshair
+=========================
+
+  crosshair: {
+    mode: null or "x" or "y" or "xy"
+    color: color
+  }
+
+You can enable crosshairs, thin lines, that follow the mouse by
+setting the mode to one of "x", "y" or "xy". The "x" mode enables a
+vertical crosshair that lets you trace the values on the x axis, "y"
+enables a horizontal crosshair and "xy" enables them both.
+
 
 Plot Methods
 ------------
 
 The Plot object returned from the plot function has some methods you
 can call:
-
-  - clearSelection()
-
-    Clear the selection rectangle.
-
 
   - setSelection(ranges, preventEvent)
 
@@ -640,7 +655,26 @@ can call:
     setSelection will trigger the "plotselected" event when called. If
     you don't want that to happen, e.g. if you're inside a
     "plotselected" handler, pass true as the second parameter.
+
     
+  - clearSelection()
+
+    Clear the selection rectangle.
+
+
+  - setCrosshair(pos)
+
+    Set the position of the crosshair. Note that this is cleared if
+    the user moves the mouse. "pos" should be on the form { x: xpos,
+    y: ypos } (or x2 and y2 if you're using the secondary axes), which
+    is coincidentally the same format as what you get from a "plothover"
+    event. If "pos" is null, the crosshair is cleared.
+
+
+  - clearCrosshair()
+
+    Clear the crosshair.
+
 
   - highlight(series, datapoint)
 

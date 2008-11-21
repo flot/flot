@@ -1,7 +1,7 @@
 Flot 0.x
 --------
 
-New features:
+Changes:
 
 - Added support for disabling interactivity for specific data series
   (request from Ronald Schouten and Steve Upton).
@@ -12,6 +12,17 @@ New features:
 - Flot now calls $() on the placeholder and optional legend container
   passed in so you can specify DOM elements or CSS expressions to make
   it easier to use Flot with libraries like Prototype or Mootools.
+
+- A new "plotselecting" event is now emitted while the user is making
+  selection.
+
+- Added a new crosshairs feature for tracing the mouse position on the
+  axes, enable with crosshair { mode: "x"} (see the new tracking
+  example for a use).
+  
+- The "plothover" event is now emitted immediately instead of at most
+  10 times per second, you'll have to put in a setTimeout yourself if
+  you're doing something really expensive on this event.
 
 Bug fixes:
 
