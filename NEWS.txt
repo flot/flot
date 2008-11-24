@@ -24,6 +24,10 @@ Changes:
   10 times per second, you'll have to put in a setTimeout yourself if
   you're doing something really expensive on this event.
 
+- The built-in date formatter can now be accessed as
+  $.plot.formatDate(...) (suggestion by Matt Manela) and even
+  replaced.
+
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and

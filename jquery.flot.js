@@ -461,44 +461,6 @@
             if (axisOptions.mode == "time") {
                 // pretty handling of time
                 
-                function formatDate(d, fmt, monthNames) {
-                    var leftPad = function(n) {
-                        n = "" + n;
-                        return n.length == 1 ? "0" + n : n;
-                    };
-                    
-                    var r = [];
-                    var escape = false;
-                    if (monthNames == null)
-                        monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                    for (var i = 0; i < fmt.length; ++i) {
-                        var c = fmt.charAt(i);
-                        
-                        if (escape) {
-                            switch (c) {
-                            case 'h': c = "" + d.getUTCHours(); break;
-                            case 'H': c = leftPad(d.getUTCHours()); break;
-                            case 'M': c = leftPad(d.getUTCMinutes()); break;
-                            case 'S': c = leftPad(d.getUTCSeconds()); break;
-                            case 'd': c = "" + d.getUTCDate(); break;
-                            case 'm': c = "" + (d.getUTCMonth() + 1); break;
-                            case 'y': c = "" + d.getUTCFullYear(); break;
-                            case 'b': c = "" + monthNames[d.getUTCMonth()]; break;
-                            }
-                            r.push(c);
-                            escape = false;
-                        }
-                        else {
-                            if (c == "%")
-                                escape = true;
-                            else
-                                r.push(c);
-                        }
-                    }
-                    return r.join("");
-                }
-                
-                    
                 // map of app. size of time units in milliseconds
                 var timeUnitSize = {
                     "second": 1000,
@@ -630,7 +592,7 @@
 
                     // first check global format
                     if (axisOptions.timeformat != null)
-                        return formatDate(d, axisOptions.timeformat, axisOptions.monthNames);
+                        return $.plot.formatDate(d, axisOptions.timeformat, axisOptions.monthNames);
                     
                     var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
                     var span = axis.max - axis.min;
@@ -654,7 +616,7 @@
                     else
                         fmt = "%y";
                     
-                    return formatDate(d, fmt, axisOptions.monthNames);
+                    return $.plot.formatDate(d, fmt, axisOptions.monthNames);
                 };
             }
             else {
@@ -2068,6 +2030,44 @@
         else
             alert(tstr);*/
         return plot;
+    };
+
+    // returns a string with the date d formatted according to fmt
+    $.plot.formatDate = function(d, fmt, monthNames) {
+        var leftPad = function(n) {
+            n = "" + n;
+            return n.length == 1 ? "0" + n : n;
+        };
+        
+        var r = [];
+        var escape = false;
+        if (monthNames == null)
+            monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        for (var i = 0; i < fmt.length; ++i) {
+            var c = fmt.charAt(i);
+            
+            if (escape) {
+                switch (c) {
+                case 'h': c = "" + d.getUTCHours(); break;
+                case 'H': c = leftPad(d.getUTCHours()); break;
+                case 'M': c = leftPad(d.getUTCMinutes()); break;
+                case 'S': c = leftPad(d.getUTCSeconds()); break;
+                case 'd': c = "" + d.getUTCDate(); break;
+                case 'm': c = "" + (d.getUTCMonth() + 1); break;
+                case 'y': c = "" + d.getUTCFullYear(); break;
+                case 'b': c = "" + monthNames[d.getUTCMonth()]; break;
+                }
+                r.push(c);
+                escape = false;
+            }
+            else {
+                if (c == "%")
+                    escape = true;
+                else
+                    r.push(c);
+            }
+        }
+        return r.join("");
     };
     
     // round to nearby lower multiple of base

@@ -347,7 +347,7 @@ Tick generation and formatting can also be controlled separately
 through the following axis options:
 
   xaxis, yaxis: {
-    minTickSize
+    minTickSize: array
     timeformat: null or format string
     monthNames: null or array of size 12 of strings
   }
@@ -356,7 +356,7 @@ Here "timeformat" is a format string to use. You might use it like
 this:
 
   xaxis: {
-    mode: "time",
+    mode: "time"
     timeformat: "%y/%m/%d"
   }
   
@@ -376,6 +376,13 @@ You can customize the month names with the "monthNames" option. For
 instance, for Danish you might specify:
 
   monthName: ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
+
+The format string and month names are used by a very simple built-in
+format function that takes a date object, a format string (and
+optionally an array of month names) and returns the formatted string.
+If needed, you can access it as $.plot.formatDate(date, formatstring,
+monthNames) or even replace it with another more advanced function
+from a date library if you're feeling adventurous.
 
 If everything else fails, you can control the formatting by specifying
 a custom tick formatter function as usual. Here's a simple example
