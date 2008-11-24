@@ -1,6 +1,15 @@
 Frequently asked questions
 --------------------------
 
+Q: Flot isn't working when I'm using JSON data as source!
+
+A: Actually, Flot loves JSON data, you just got the format wrong.
+Double check that you're not inputting strings instead of numbers,
+like [["0", "-2.13"], ["5", "4.3"]]. This is most common mistake, and
+the error might not show up immediately because Javascript can do some
+conversion automatically.
+
+
 Q: Can I export the graph?
 
 A: This is a limitation of the canvas technology. There's a hook in
@@ -32,7 +41,7 @@ libraries, see the documentation in jQuery ("Using jQuery with other
 libraries") for details.
 
 
-Q: Flot doesn't work with [widget or server-side framework xyz]!
+Q: Flot doesn't work with [widget framework xyz]!
 
 A: The problem is most likely within the framework, or your use of the
 framework.
