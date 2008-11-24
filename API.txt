@@ -41,7 +41,8 @@ Note that to simplify the internal logic in Flot both the x and y
 values must be numbers, even if specifying time series (see below for
 how to do this). This is a common problem because you might retrieve
 data from the database and serialize them directly to JSON without
-noticing the wrong type.
+noticing the wrong type. If you're getting mysterious errors, double
+check that you're inputting numbers and not strings.
 
 If a null is specified as a point or if one of the coordinates is null
 or couldn't be converted to a number, the point is ignored when
