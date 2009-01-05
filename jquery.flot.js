@@ -96,7 +96,6 @@
                 },
                 crosshair: {
                     mode: null, // one of null, "x", "y" or "xy",
-                    extendBeyondGrid: null,
                     color: "#aa0000"
                 },
                 shadowSize: 4
@@ -753,7 +752,7 @@
                     axis.labelHeight = 0;
                     if (labels.length > 0) {
                         var dummyDiv = $('<div style="position:absolute;top:-10000px;width:10000px;font-size:smaller">'
-                                         + labels.join("") + '<div style="clear:left"></div></div>').prependTo(target);
+                                         + labels.join("") + '<div style="clear:left"></div></div>').appendTo(target);
                         axis.labelHeight = dummyDiv.height();
                         dummyDiv.remove();
                     }
@@ -772,7 +771,7 @@
                     
                     if (labels.length > 0) {
                         var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                         + labels.join("") + '</div>').prependTo(target);
+                                         + labels.join("") + '</div>').appendTo(target);
                         if (axis.labelWidth == null)
                             axis.labelWidth = dummyDiv.width();
                         if (axis.labelHeight == null)
@@ -1021,7 +1020,7 @@
 
             html += '</div>';
             
-            target.prepend(html);
+            target.append(html);
         }
 
         function drawSeries(series) {
@@ -1642,14 +1641,17 @@
                                        function (s) { return s["hoverable"] != false; });
 
             if (options.crosshair.mode != null) {
-                setPositionFromEvent(crosshair.pos, lastMousePos);
-                triggerRedrawOverlay();
+                if (!selection.active) {
+                    setPositionFromEvent(crosshair.pos, lastMousePos);
+                    triggerRedrawOverlay();
+                }
+                else
+                    crosshair.pos.x = -1; // hide the crosshair while selecting
             }
 
             if (selection.active) {
                 target.trigger("plotselecting", [ selectionIsSane() ? getSelectionForEvent() : null ]);
 
-                crosshair.pos.x = -1; // hide the crosshair while selecting
                 updateSelection(lastMousePos);
             }
         }
@@ -1792,17 +1794,16 @@
                 octx.strokeStyle = parseColor(options.crosshair.color).scale(null, null, null, 0.8).toString();
                 octx.lineWidth = 1;
                 ctx.lineJoin = "round";
-                var pos = crosshair.pos,
-                    extend = options.crosshair.extendBeyondGrid;
+                var pos = crosshair.pos;
 
                 octx.beginPath();
                 if (options.crosshair.mode.indexOf("x") != -1) {
-                    octx.moveTo(pos.x, extend ? -plotOffset.top : 0);
-                    octx.lineTo(pos.x, extend ? canvasHeight - plotOffset.top : plotHeight);
+                    octx.moveTo(pos.x, 0);
+                    octx.lineTo(pos.x, plotHeight);
                 }
                 if (options.crosshair.mode.indexOf("y") != -1) {
-                    octx.moveTo(extend ? -plotOffset.left : 0, pos.y);
-                    octx.lineTo(extend ? canvasWidth - plotOffset.left : plotWidth, pos.y);
+                    octx.moveTo(0, pos.y);
+                    octx.lineTo(plotWidth, pos.y);
                 }
                 octx.stroke();
                 
@@ -2130,10 +2131,10 @@
         };
 
         this.normalize = function() {
-            this.r = limit(parseInt(this.r), 0, 255);
-            this.g = limit(parseInt(this.g), 0, 255);
-            this.b = limit(parseInt(this.b), 0, 255);
-            this.a = limit(this.a, 0, 1);
+            this.r = clamp(0, parseInt(this.r), 255);
+            this.g = clamp(0, parseInt(this.g), 255);
+            this.b = clamp(0, parseInt(this.b), 255);
+            this.a = clamp(0, this.a, 1);
             return this;
         };
 
@@ -2198,7 +2199,7 @@
         } while (!$.nodeName(elem.get(0), "body"));
 
         // catch Safari's way of signalling transparent
-        if (color == "rgba(0, 0, 0, 0)") 
+        if (color == "rgba(0, 0, 0, 0)")
             return "transparent";
         
         return color;
