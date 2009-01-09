@@ -870,8 +870,8 @@
             }
 
             // draw markings
-            if (options.grid.markings) {
-                var markings = options.grid.markings;
+            var markings = options.grid.markings;
+            if (markings) {
                 if ($.isFunction(markings))
                     // xmin etc. are backwards-compatible, to be removed in future
                     markings = markings({ xmin: axes.xaxis.min, xmax: axes.xaxis.max, ymin: axes.yaxis.min, ymax: axes.yaxis.max, xaxis: axes.xaxis, yaxis: axes.yaxis, x2axis: axes.x2axis, y2axis: axes.y2axis });
@@ -1752,7 +1752,7 @@
 
         function triggerRedrawOverlay() {
             if (!redrawTimeout)
-                redrawTimeout = setTimeout(redrawOverlay, 50);
+                redrawTimeout = setTimeout(redrawOverlay, 30);
         }
 
         function redrawOverlay() {

@@ -31,20 +31,26 @@ $(function () {
     }
 
     var plot = $.plot($("#placeholder"),
-           [ { data: sin, label: "sin(x)"}, { data: cos, label: "cos(x)" } ],
+           [ { data: sin, label: "sin(x) = -0.00"}, { data: cos, label: "cos(x) = -0.00" } ],
            { lines: { show: true },
              crosshair: { mode: "x" },
              grid: { hoverable: true, autoHighlight: false },
              yaxis: { min: -1.2, max: 1.2 }
              });
-
     var legends = $("#placeholder .legendLabel");
     legends.each(function () {
         // fix the widths so they don't jump around
-        $(this).css('width', $(this).width() + 30);
+        $(this).css('width', $(this).width());
     });
+
+    var updateLegendTimeout = null;
+    var latestPosition = null;
     
-    $("#placeholder").bind("plothover", function (event, pos, item) {
+    function updateLegend() {
+        updateLegendTimeout = null;
+        
+        var pos = latestPosition;
+        
         var axes = plot.getAxes();
         if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
             pos.y < axes.yaxis.min || pos.y > axes.yaxis.max)
@@ -68,8 +74,14 @@ $(function () {
             else
                 y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
             
-            legends.eq(i).text(series.label + " = " + y.toFixed(2));
+            legends.eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(2)));
         }
+    }
+    
+    $("#placeholder").bind("plothover",  function (event, pos, item) {
+        latestPosition = pos;
+        if (!updateLegendTimeout)
+            updateLegendTimeout = setTimeout(updateLegend, 50);
     });
 });
 </script>
