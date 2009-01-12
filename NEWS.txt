@@ -25,6 +25,8 @@ Changes:
   $.plot.formatDate(...) (suggestion by Matt Manela) and even
   replaced.
 
+- Added "borderColor" option to the grid (patch from achamayou).
+  
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and

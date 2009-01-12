@@ -79,7 +79,8 @@
                     backgroundColor: null, // null for transparent, else color
                     tickColor: "#dddddd", // color used for the ticks
                     labelMargin: 5, // in pixels
-                    borderWidth: 2,
+                    borderWidth: 2, // in pixels
+                    borderColor: null, // set if different from the grid color
                     markings: null, // array of ranges or fn: axes -> array of ranges
                     markingsColor: "#f4f4f4",
                     markingsLineWidth: 2,
@@ -967,7 +968,7 @@
             if (options.grid.borderWidth) {
                 // draw border
                 ctx.lineWidth = options.grid.borderWidth;
-                ctx.strokeStyle = options.grid.color;
+                ctx.strokeStyle = options.grid.borderColor ? options.grid.borderColor : options.grid.color;
                 ctx.lineJoin = "round";
                 ctx.strokeRect(0, 0, plotWidth, plotHeight);
             }
