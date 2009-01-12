@@ -25,7 +25,8 @@ Changes:
   $.plot.formatDate(...) (suggestion by Matt Manela) and even
   replaced.
 
-- Added "borderColor" option to the grid (patch from achamayou).
+- Added "borderColor" option to the grid (patch from achamayou and
+  patch from Mike R. Williamson).
   
 Bug fixes:
 

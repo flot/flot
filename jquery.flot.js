@@ -13,8 +13,8 @@
         
         var series = [],
             options = {
-            // the color theme used for graphs
-            colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
+                // the color theme used for graphs
+                colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
                 legend: {
                     show: true,
                     noColumns: 1, // number of colums in legend table
@@ -161,7 +161,8 @@
         
         function parseOptions(o) {
             $.extend(true, options, o);
-
+            if (options.grid.borderColor == null)
+                options.grid.borderColor = options.grid.color
             // backwards compatibility, to be removed in future
             if (options.xaxis.noTicks && options.xaxis.ticks == null)
                 options.xaxis.ticks = options.xaxis.noTicks;
@@ -969,7 +970,7 @@
             if (options.grid.borderWidth) {
                 // draw border
                 ctx.lineWidth = options.grid.borderWidth;
-                ctx.strokeStyle = options.grid.borderColor ? options.grid.borderColor : options.grid.color;
+                ctx.strokeStyle = options.grid.borderColor;
                 ctx.lineJoin = "round";
                 ctx.strokeRect(0, 0, plotWidth, plotHeight);
             }
