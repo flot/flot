@@ -48,6 +48,8 @@ Bug fixes:
   (reported by Khurram).
 - Fixed a bug with returning y2 values in the selection event (fix
   by exists, issue 75).
+- Only set position relative on placeholder if it hasn't already a
+  position different from static (reported by kyberneticist, issue 95).
 
 
 Flot 0.5

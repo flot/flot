@@ -330,7 +330,8 @@
             canvasWidth = target.width();
             canvasHeight = target.height();
             target.html(""); // clear target
-            target.css("position", "relative"); // for positioning labels and overlay
+            if (target.css("position") == 'static')
+                target.css("position", "relative"); // for positioning labels and overlay
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
