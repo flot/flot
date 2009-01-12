@@ -168,7 +168,6 @@ Customizing the axes
     min: null or number
     max: null or number
     autoscaleMargin: null or number
-    autoscaleSkipPointsOutside: boolean
     labelWidth: null or number
     labelHeight: null or number
 
@@ -194,12 +193,6 @@ when a min or max value is not explicitly set. If a margin is
 specified, the plot will furthermore extend the axis end-point to the
 nearest whole tick. The default value is "null" for the x axis and
 0.02 for the y axis which seems appropriate for most cases.
-
-If you set a range on an axis with min/max and then set
-"autoscaleSkipPointsOutside" to true, the autoscale algorithm will
-skip points that are outside this range when computing the scale for
-the other axis. Otherwise all points input to Flot are always
-considered.
 
 "labelWidth" and "labelHeight" specifies the maximum size of the tick
 labels in pixels. They're useful in case you need to align several

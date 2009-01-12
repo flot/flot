@@ -31,7 +31,6 @@
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
-                    autoscaleSkipPointsOutside: null,
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
@@ -275,7 +274,6 @@
                 axes[axis].datamax = bottomSentry;
                 axes[axis].min = options[axis].min;
                 axes[axis].max = options[axis].max;
-                axes[axis].skipoutside = options[axis].autoscaleSkipPointsOutside;
                 axes[axis].used = false;
             }
             
@@ -285,13 +283,14 @@
                     axisy = series[i].yaxis,
                     mindelta = 0, maxdelta = 0;
                 
-                // make sure we got room for the bar
                 if (series[i].bars.show) {
+                    // make sure we got room for the bar
                     mindelta = series[i].bars.align == "left" ? 0 : -series[i].bars.barWidth/2;
                     maxdelta = mindelta + series[i].bars.barWidth;
                 }
 
                 axisx.used = axisy.used = true;
+                
                 for (var j = 0; j < data.length; ++j) {
                     if (data[j] == null)
                         continue;
@@ -300,12 +299,6 @@
 
                     // convert to number
                     if (x != null && !isNaN(x = +x)) {
-                        if (axisx.skipoutside &&
-                            ((axisx.min != null && x + mindelta < axisx.min) ||
-                             (axisx.max != null && x + maxdelta > axisx.max))) {
-                            continue;
-                        }
-                        
                         if (x + mindelta < axisx.datamin)
                             axisx.datamin = x + mindelta;
                         if (x + maxdelta > axisx.datamax)
@@ -313,11 +306,6 @@
                     }
                     
                     if (y != null && !isNaN(y = +y)) {
-                        if (axisy.skipoutside && 
-                            ((axisy.min != null && y < axisy.min) ||
-                             (axisy.max != null && y > axisy.max)))
-                            continue;
-                        
                         if (y < axisy.datamin)
                             axisy.datamin = y;
                         if (y > axisy.datamax)
