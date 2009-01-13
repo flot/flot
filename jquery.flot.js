@@ -784,22 +784,24 @@
 
             // get the most space needed around the grid for things
             // that may stick out
-            var maxOutset = options.grid.borderWidth / 2;
+            var maxOutset = options.grid.borderWidth;
             for (i = 0; i < series.length; ++i)
                 maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
 
             plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
 
+            var margin = options.grid.labelMargin + options.grid.borderWidth;
+            
             if (axes.xaxis.labelHeight > 0)
-                plotOffset.bottom = Math.max(maxOutset, axes.xaxis.labelHeight + options.grid.labelMargin);
+                plotOffset.bottom = Math.max(maxOutset, axes.xaxis.labelHeight + margin);
             if (axes.yaxis.labelWidth > 0)
-                plotOffset.left = Math.max(maxOutset, axes.yaxis.labelWidth + options.grid.labelMargin);
+                plotOffset.left = Math.max(maxOutset, axes.yaxis.labelWidth + margin);
 
             if (axes.x2axis.labelHeight > 0)
-                plotOffset.top = Math.max(maxOutset, axes.x2axis.labelHeight + options.grid.labelMargin);
+                plotOffset.top = Math.max(maxOutset, axes.x2axis.labelHeight + margin);
             
             if (axes.y2axis.labelWidth > 0)
-                plotOffset.right = Math.max(maxOutset, axes.y2axis.labelWidth + options.grid.labelMargin);
+                plotOffset.right = Math.max(maxOutset, axes.y2axis.labelWidth + margin);
 
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
@@ -970,10 +972,10 @@
             
             if (options.grid.borderWidth) {
                 // draw border
-                ctx.lineWidth = options.grid.borderWidth;
+                var bw = options.grid.borderWidth;
+                ctx.lineWidth = bw;
                 ctx.strokeStyle = options.grid.borderColor;
-                ctx.lineJoin = "round";
-                ctx.strokeRect(0, 0, plotWidth, plotHeight);
+                ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
             }
 
             ctx.restore();
@@ -992,22 +994,24 @@
                     html += labelGenerator(tick, axis);
                 }
             }
+
+            var margin = options.grid.labelMargin + options.grid.borderWidth;
             
             addLabels(axes.xaxis, function (tick, axis) {
-                return '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + axis.p2c(tick.v) - axis.labelWidth/2) + 'px;width:' + axis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
+                return '<div style="position:absolute;top:' + (plotOffset.top + plotHeight + margin) + 'px;left:' + (plotOffset.left + axis.p2c(tick.v) - axis.labelWidth/2) + 'px;width:' + axis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
             });
             
             
             addLabels(axes.yaxis, function (tick, axis) {
-                return '<div style="position:absolute;top:' + (plotOffset.top + axis.p2c(tick.v) - axis.labelHeight/2) + 'px;right:' + (plotOffset.right + plotWidth + options.grid.labelMargin) + 'px;width:' + axis.labelWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
+                return '<div style="position:absolute;top:' + (plotOffset.top + axis.p2c(tick.v) - axis.labelHeight/2) + 'px;right:' + (plotOffset.right + plotWidth + margin) + 'px;width:' + axis.labelWidth + 'px;text-align:right" class="tickLabel">' + tick.label + "</div>";
             });
             
             addLabels(axes.x2axis, function (tick, axis) {
-                return '<div style="position:absolute;bottom:' + (plotOffset.bottom + plotHeight + options.grid.labelMargin) + 'px;left:' + (plotOffset.left + axis.p2c(tick.v) - axis.labelWidth/2) + 'px;width:' + axis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
+                return '<div style="position:absolute;bottom:' + (plotOffset.bottom + plotHeight + margin) + 'px;left:' + (plotOffset.left + axis.p2c(tick.v) - axis.labelWidth/2) + 'px;width:' + axis.labelWidth + 'px;text-align:center" class="tickLabel">' + tick.label + "</div>";
             });
             
             addLabels(axes.y2axis, function (tick, axis) {
-                return '<div style="position:absolute;top:' + (plotOffset.top + axis.p2c(tick.v) - axis.labelHeight/2) + 'px;left:' + (plotOffset.left + plotWidth + options.grid.labelMargin) +'px;width:' + axis.labelWidth + 'px;text-align:left" class="tickLabel">' + tick.label + "</div>";
+                return '<div style="position:absolute;top:' + (plotOffset.top + axis.p2c(tick.v) - axis.labelHeight/2) + 'px;left:' + (plotOffset.left + plotWidth + margin) +'px;width:' + axis.labelWidth + 'px;text-align:left" class="tickLabel">' + tick.label + "</div>";
             });
 
             html += '</div>';
