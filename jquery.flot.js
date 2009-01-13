@@ -906,17 +906,18 @@
                         ctx.strokeStyle = m.color || options.grid.markingsColor;
                         ctx.beginPath();
                         ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
-                        ctx.moveTo(Math.floor(xrange.from), Math.floor(yrange.from));
-                        ctx.lineTo(Math.floor(xrange.to), Math.floor(yrange.to));
+                        //ctx.moveTo(Math.floor(xrange.from), yrange.from);
+                        //ctx.lineTo(Math.floor(xrange.to), yrange.to);
+                        ctx.moveTo(xrange.from, yrange.from);
+                        ctx.lineTo(xrange.to, yrange.to);
                         ctx.stroke();
                     }
                     else {
                         // fill area
                         ctx.fillStyle = m.color || options.grid.markingsColor;
-                        ctx.fillRect(Math.floor(xrange.from),
-                                     Math.floor(yrange.to),
-                                     Math.floor(xrange.to - xrange.from),
-                                     Math.floor(yrange.from - yrange.to));
+                        ctx.fillRect(xrange.from, yrange.to,
+                                     xrange.to - xrange.from,
+                                     yrange.from - yrange.to);
                     }
                 }
             }

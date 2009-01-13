@@ -51,6 +51,8 @@ Bug fixes:
   by exists, issue 75).
 - Only set position relative on placeholder if it hasn't already a
   position different from static (reported by kyberneticist, issue 95).
+- Don't round markings to prevent sub-pixel problems (reported by Dan
+  Lipsitt).
 
 
 Flot 0.5
