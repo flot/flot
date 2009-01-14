@@ -621,6 +621,9 @@ making the selection. A "plotselecting" event is fired during the
 process with the same parameters as the "plotselected" event, in case
 you want to know what's happening while it's happening,
 
+A "plotunselected" event with no arguments is emitted when the user
+clicks the mouse to remove the selection.
+
 
 Customizing the crosshair
 =========================
@@ -676,9 +679,10 @@ can call:
     "plotselected" handler, pass true as the second parameter.
 
     
-  - clearSelection()
+  - clearSelection(preventEvent)
 
-    Clear the selection rectangle.
+    Clear the selection rectangle. Pass in true to avoid getting a
+    "plotunselected" event.
 
 
   - setCrosshair(pos)

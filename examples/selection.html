@@ -90,6 +90,10 @@ $(function () {
                               xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }
                           }));
     });
+
+    placeholder.bind("plotunselected", function (event) {
+        $("#selection").text("");
+    });
     
     var plot = $.plot(placeholder, data, options);
 

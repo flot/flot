@@ -1934,9 +1934,11 @@
                 triggerSelectedEvent();
                 clickIsMouseUp = true;
             }
-            else
+            else {
                 // this counts as a clear
+                target.trigger("plotunselected", [ ]);
                 target.trigger("plotselecting", [ null ]);
+            }
             
             return false;
         }
@@ -1969,13 +1971,15 @@
                 triggerRedrawOverlay();
             }
             else
-                clearSelection();
+                clearSelection(true);
         }
 
-        function clearSelection() {
+        function clearSelection(preventEvent) {
             if (selection.show) {
                 selection.show = false;
                 triggerRedrawOverlay();
+                if (!preventEvent)
+                    target.trigger("plotunselected", [ ]);
             }
         }
 
