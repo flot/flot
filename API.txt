@@ -472,7 +472,7 @@ Customizing the grid
 
   grid: {
     color: color
-    backgroundColor: color or null
+    backgroundColor: color/gradient or null
     tickColor: color
     labelMargin: number
     markings: array of markings or (fn: axes -> array of markings)
@@ -484,13 +484,11 @@ Customizing the grid
     mouseActiveRadius: number
   }
 
-The grid is the thing with the axes and a number of ticks. "color"
-is the color of the grid itself whereas "backgroundColor" specifies
-the background color inside the grid area. The default value of null
-means that the background is transparent. You should only need to set
-backgroundColor if you want the grid area to be a different color from the
-page color. Otherwise you might as well just set the background color
-of the page with CSS.
+The grid is the thing with the axes and a number of ticks. "color" is
+the color of the grid itself whereas "backgroundColor" specifies the
+background color inside the grid area. The default value of null means
+that the background is transparent. You can also set a gradient, see
+the gradient documentation below.
 
 "tickColor" is the color of the ticks and "labelMargin" is the spacing
 between tick labels and the grid. Note that you can style the tick
@@ -636,6 +634,24 @@ You can enable crosshairs, thin lines, that follow the mouse by
 setting the mode to one of "x", "y" or "xy". The "x" mode enables a
 vertical crosshair that lets you trace the values on the x axis, "y"
 enables a horizontal crosshair and "xy" enables them both.
+
+
+Specifying gradients
+====================
+
+A gradient is specified like this:
+
+  { colors: [ color1, color2, ... ] }
+
+For instance, you might specify a background on the grid going from
+black to gray like this:
+
+  grid: {
+    backgroundColor: { colors: ["#000", "#999"] }
+  }
+
+Flot currently only supports vertical gradients drawn from top to
+bottom because that's what works with IE.
 
 
 Plot Methods

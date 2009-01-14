@@ -858,7 +858,7 @@
 
             // draw background, if any
             if (options.grid.backgroundColor) {
-                ctx.fillStyle = options.grid.backgroundColor;
+                ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor);
                 ctx.fillRect(0, 0, plotWidth, plotHeight);
             }
 
@@ -1522,7 +1522,7 @@
                     var c = options.legend.backgroundColor;
                     if (c == null) {
                         var tmp;
-                        if (options.grid.backgroundColor)
+                        if (options.grid.backgroundColor && typeof options.grid.backgroundColor == "string")
                             tmp = options.grid.backgroundColor;
                         else
                             tmp = extractColor(legend);
@@ -2014,6 +2014,22 @@
             var minSize = 5;
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
                 Math.abs(selection.second.y - selection.first.y) >= minSize;
+        }
+        
+        function getColorOrGradient(spec) {
+            if (typeof spec == "string")
+                return spec;
+            else {
+                // assume this is a gradient spec; IE currently only
+                // supports a simple vertical gradient properly, so that's
+                // what we support too
+                var gradient = ctx.createLinearGradient(0, 0, 0, plotHeight);
+                
+                for (var i = 0, l = spec.colors.length; i < l; ++i)
+                    gradient.addColorStop(i / (l - 1), spec.colors[i]);
+                
+                return gradient;
+            }
         }
     }
     
