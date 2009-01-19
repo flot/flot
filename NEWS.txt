@@ -35,6 +35,9 @@ Changes:
 - Added a "plotunselected" event which is triggered when the selection
   is removed, see "selection" example (suggestion by Meda Ugo);
 
+- The option legend.margin can now specify horizontal and vertical
+  margins independently (suggestion by someone who's annoyed).
+
   
 Bug fixes:
 

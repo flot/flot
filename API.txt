@@ -130,9 +130,9 @@ Customizing the legend
     labelBoxBorderColor: color
     noColumns: number
     position: "ne" or "nw" or "se" or "sw"
-    margin: number of pixels
+    margin: number of pixels or [x margin, y margin]
     backgroundColor: null or color
-    backgroundOpacity: number in 0.0 - 1.0
+    backgroundOpacity: number between 0 and 1
     container: null or jQuery object/DOM element/jQuery expression
   }
 
@@ -149,14 +149,16 @@ clickable:
 "noColumns" is the number of columns to divide the legend table into.
 "position" specifies the overall placement of the legend within the
 plot (top-right, top-left, etc.) and margin the distance to the plot
-edge. "backgroundColor" and "backgroundOpacity" specifies the
+edge (this can be either a number or an array of two numbers like [x,
+y]). "backgroundColor" and "backgroundOpacity" specifies the
 background. The default is a partly transparent auto-detected
 background.
 
 If you want the legend to appear somewhere else in the DOM, you can
-specify "container" as a jQuery object to put the legend table into.
-The "position" and "margin" etc. options will then be ignored. Note
-that it will overwrite the contents of the container.
+specify "container" as a jQuery object/expression to put the legend
+table into. The "position" and "margin" etc. options will then be
+ignored. Note that Flot will overwrite the contents of the container.
+Most of the above settings do not apply
 
 
 
