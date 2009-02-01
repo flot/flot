@@ -409,7 +409,7 @@ Customizing the data series
     show: boolean
     lineWidth: number
     fill: boolean or number
-    fillColor: color
+    fillColor: null or color/gradient
   }
 
   points: {
@@ -449,12 +449,13 @@ points), the fill color is auto-set to the color of the data series.
 You can adjust the opacity of the fill by setting fill to a number
 between 0 (fully transparent) and 1 (fully opaque).
 
-"barWidth" is the width of the bars in units of the x axis, contrary
-to most other measures that are specified in pixels. For instance, for
-time series the unit is milliseconds so 24 * 60 * 60 * 1000 produces
-bars with the width of a day. "align" specifies whether a bar should
-be left-aligned (default) or centered on top of the value it
-represents.
+For bars, fillColor can be a gradient, see the gradient documentation
+below. "barWidth" is the width of the bars in units of the x axis,
+contrary to most other measures that are specified in pixels. For
+instance, for time series the unit is milliseconds so 24 * 60 * 60 *
+1000 produces bars with the width of a day. "align" specifies whether
+a bar should be left-aligned (default) or centered on top of the value
+it represents.
 
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
@@ -655,6 +656,15 @@ black to gray like this:
     backgroundColor: { colors: ["#000", "#999"] }
   }
 
+For the series you can specify the gradient as an object that
+specifies the scaling of the brightness and the opacity of the series
+color, e.g.
+
+  { colors: [{ opacity: 0.8 }, { brightness: 0.6, opacity: 0.8 } ]
+
+where the first color simply has its alpha scaled, whereas the second
+is also darkened.
+  
 Flot currently only supports vertical gradients drawn from top to
 bottom because that's what works with IE.
 

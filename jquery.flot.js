@@ -858,7 +858,7 @@
 
             // draw background, if any
             if (options.grid.backgroundColor) {
-                ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor);
+                ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor, plotHeight);
                 ctx.fillRect(0, 0, plotWidth, plotHeight);
             }
 
@@ -1270,9 +1270,11 @@
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
-            setFillStyle(series.lines, series.color);
-            if (series.lines.fill)
+            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
+            if (fillStyle) {
+                ctx.fillStyle = fillStyle;
                 plotLineArea(series.data, series.xaxis, series.yaxis);
+            }
 
             if (lw > 0)
                 plotLine(series.data, 0, series.xaxis, series.yaxis);
@@ -1280,7 +1282,7 @@
         }
 
         function drawSeriesPoints(series) {
-            function plotPoints(data, radius, fill, axisx, axisy) {
+            function plotPoints(data, radius, fillStyle, axisx, axisy) {
                 for (var i = 0; i < data.length; ++i) {
                     if (data[i] == null)
                         continue;
@@ -1291,8 +1293,10 @@
                     
                     ctx.beginPath();
                     ctx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, true);
-                    if (fill)
+                    if (fillStyle) {
+                        ctx.fillStyle = fillStyle;
                         ctx.fill();
+                    }
                     ctx.stroke();
                 }
             }
@@ -1331,13 +1335,13 @@
 
             ctx.lineWidth = series.points.lineWidth;
             ctx.strokeStyle = series.color;
-            setFillStyle(series.points, series.color);
-            plotPoints(series.data, series.points.radius, series.points.fill,
+            plotPoints(series.data, series.points.radius,
+                       getFillStyle(series.points, series.color),
                        series.xaxis, series.yaxis);
             ctx.restore();
         }
 
-        function drawBar(x, y, barLeft, barRight, offset, fill, axisx, axisy, c) {
+        function drawBar(x, y, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c) {
             var drawLeft = true, drawRight = true,
                 drawTop = true, drawBottom = false,
                 left = x + barLeft, right = x + barRight,
@@ -1376,24 +1380,27 @@
                 drawTop = false;
             }
 
+            left = axisx.p2c(left);
+            bottom = axisy.p2c(bottom);
+            right = axisx.p2c(right);
+            top = axisy.p2c(top);
+            
             // fill the bar
-            if (fill) {
+            if (fillStyleCallback) {
                 c.beginPath();
-                c.moveTo(axisx.p2c(left), axisy.p2c(bottom) + offset);
-                c.lineTo(axisx.p2c(left), axisy.p2c(top) + offset);
-                c.lineTo(axisx.p2c(right), axisy.p2c(top) + offset);
-                c.lineTo(axisx.p2c(right), axisy.p2c(bottom) + offset);
+                c.moveTo(left, bottom);
+                c.lineTo(left, top);
+                c.lineTo(right, top);
+                c.lineTo(right, bottom);
+                ctx.fillStyle = fillStyleCallback(bottom, top);
                 c.fill();
             }
 
             // draw outline
             if (drawLeft || drawRight || drawTop || drawBottom) {
                 c.beginPath();
-                left = axisx.p2c(left);
-                bottom = axisy.p2c(bottom);
-                right = axisx.p2c(right);
-                top = axisy.p2c(top);
-                
+
+                // FIXME: inline moveTo is buggy with excanvas
                 c.moveTo(left, bottom + offset);
                 if (drawLeft)
                     c.lineTo(left, top + offset);
@@ -1416,11 +1423,11 @@
         }
         
         function drawSeriesBars(series) {
-            function plotBars(data, barLeft, barRight, offset, fill, axisx, axisy) {
+            function plotBars(data, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
                 for (var i = 0; i < data.length; i++) {
                     if (data[i] == null)
                         continue;
-                    drawBar(data[i][0], data[i][1], barLeft, barRight, offset, fill, axisx, axisy, ctx);
+                    drawBar(data[i][0], data[i][1], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx);
                 }
             }
 
@@ -1428,7 +1435,7 @@
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
 
-            // FIXME: figure out a way to add shadows
+            // FIXME: figure out a way to add shadows (for instance along the right edge)
             /*
             var bw = series.bars.barWidth;
             var lw = series.bars.lineWidth;
@@ -1446,25 +1453,24 @@
 
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
-            setFillStyle(series.bars, series.color);
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-            plotBars(series.data, barLeft, barLeft + series.bars.barWidth, 0, series.bars.fill, series.xaxis, series.yaxis);
+            var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
+            plotBars(series.data, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
-        function setFillStyle(obj, seriesColor) {
-            var fill = obj.fill;
+        function getFillStyle(filloptions, seriesColor, bottom, top) {
+            var fill = filloptions.fill;
             if (!fill)
-                return;
+                return null;
+
+            if (filloptions.fillColor)
+                return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
             
-            if (obj.fillColor)
-                ctx.fillStyle = obj.fillColor;
-            else {
-                var c = parseColor(seriesColor);
-                c.a = typeof fill == "number" ? fill : 0.4;
-                c.normalize();
-                ctx.fillStyle = c.toString();
-            }
+            var c = parseColor(seriesColor);
+            c.a = typeof fill == "number" ? fill : 0.4;
+            c.normalize();
+            return c.toString();
         }
         
         function insertLegend() {
@@ -1872,10 +1878,10 @@
             octx.lineJoin = "round";
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
-            octx.fillStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
+            var fillStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             drawBar(point[0], point[1], barLeft, barLeft + series.bars.barWidth,
-                    0, true, series.xaxis, series.yaxis, octx);
+                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx);
         }
 
         function setPositionFromEvent(pos, e) {
@@ -2023,17 +2029,19 @@
                 Math.abs(selection.second.y - selection.first.y) >= minSize;
         }
         
-        function getColorOrGradient(spec) {
+        function getColorOrGradient(spec, bottom, top, defaultColor) {
             if (typeof spec == "string")
                 return spec;
             else {
                 // assume this is a gradient spec; IE currently only
                 // supports a simple vertical gradient properly, so that's
                 // what we support too
-                var gradient = ctx.createLinearGradient(0, 0, 0, plotHeight);
+                var gradient = ctx.createLinearGradient(0, top, 0, bottom);
                 
-                for (var i = 0, l = spec.colors.length; i < l; ++i)
-                    gradient.addColorStop(i / (l - 1), spec.colors[i]);
+                for (var i = 0, l = spec.colors.length; i < l; ++i) {
+                    var c = spec.colors[i];
+                    gradient.addColorStop(i / (l - 1), typeof c == "string" ? c : parseColor(defaultColor).scale(c.brightness, c.brightness, c.brightness, c.opacity));
+                }
                 
                 return gradient;
             }
