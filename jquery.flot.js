@@ -1392,7 +1392,7 @@
                 c.lineTo(left, top);
                 c.lineTo(right, top);
                 c.lineTo(right, bottom);
-                ctx.fillStyle = fillStyleCallback(bottom, top);
+                c.fillStyle = fillStyleCallback(bottom, top);
                 c.fill();
             }
 
