@@ -348,10 +348,8 @@
 
             // the canvas
             canvas = $(makeCanvas(canvasWidth, canvasHeight)).appendTo(target).get(0);
-            
             ctx = canvas.getContext("2d");
 
-//            overlay = $('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
             // overlay canvas for interactive features
             overlay = $(makeCanvas(canvasWidth, canvasHeight)).css({ position: 'absolute', left: 0, top: 0 }).appendTo(target).get(0);
             octx = overlay.getContext("2d");
