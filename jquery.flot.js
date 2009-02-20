@@ -328,6 +328,15 @@
         }
 
         function constructCanvas() {
+            function makeCanvas(width, height) {
+                var c = document.createElement('canvas');
+                c.width = width;
+                c.height = height;
+                if ($.browser.msie) // excanvas hack
+                    c = window.G_vmlCanvasManager.initElement(c);
+                return c;
+            }
+            
             canvasWidth = target.width();
             canvasHeight = target.height();
             target.html(""); // clear target
@@ -338,15 +347,13 @@
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
 
             // the canvas
-            canvas = $('<canvas width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-            if ($.browser.msie) // excanvas hack
-                canvas = window.G_vmlCanvasManager.initElement(canvas);
+            canvas = $(makeCanvas(canvasWidth, canvasHeight)).appendTo(target).get(0);
+            
             ctx = canvas.getContext("2d");
 
+//            overlay = $('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
             // overlay canvas for interactive features
-            overlay = $('<canvas style="position:absolute;left:0px;top:0px;" width="' + canvasWidth + '" height="' + canvasHeight + '"></canvas>').appendTo(target).get(0);
-            if ($.browser.msie) // excanvas hack
-                overlay = window.G_vmlCanvasManager.initElement(overlay);
+            overlay = $(makeCanvas(canvasWidth, canvasHeight)).css({ position: 'absolute', left: 0, top: 0 }).appendTo(target).get(0);
             octx = overlay.getContext("2d");
 
             // we include the canvas in the event holder too, because IE 7
