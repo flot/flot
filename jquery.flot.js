@@ -858,7 +858,7 @@
 
             // draw background, if any
             if (options.grid.backgroundColor) {
-                ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor, plotHeight);
+                ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor, plotHeight, 0, "rgba(255, 255, 255, 0)");
                 ctx.fillRect(0, 0, plotWidth, plotHeight);
             }
 
