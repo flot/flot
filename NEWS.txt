@@ -39,7 +39,12 @@ Changes:
 
 - The option legend.margin can now specify horizontal and vertical
   margins independently (suggestion by someone who's annoyed).
-  
+
+- Data passed into Flot is now copied to enable further processing
+  before it hits the drawing routines. As a side-effect, this should
+  make Flot more robust in the face of bad data (and fixes issue 112).
+
+
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and
