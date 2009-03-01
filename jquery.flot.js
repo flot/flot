@@ -99,7 +99,7 @@
                     mode: null, // one of null, "x", "y" or "xy",
                     color: "#aa0000"
                 },
-                shadowSize: 4
+                shadowSize: 3
             },
         canvas = null,      // the canvas for the plot itself
         overlay = null,     // canvas for interactive stuff on top of plot
@@ -335,6 +335,26 @@
                     points[k + 1] = y;
                     points[k] = x;
                 }
+
+                s.bars.datapoints = s.lines.datapoints = s.points.datapoints = s.datapoints;
+                if (s.lines.show && s.lines.steps) {
+                    var p = [];
+                    // copy, inserting extra points to make steps
+                    for (j = k = 0; j < points.length; j += incr, k += incr) {
+                        if (j > 0
+                            && points[j - incr] != null
+                            && points[j] != null
+                            && points[j - incr + 1] != points[j + 1]) {
+                            p[k] = points[j];
+                            p[k + 1] = points[j - incr + 1];
+                            k += incr;
+                        }
+                        
+                        p[k] = points[j];
+                        p[k + 1] = points[j + 1];
+                    }
+                    s.lines.datapoints.points = p;
+                }
                 
                 if (s.bars.show) {
                     // make sure we got room for the bar
@@ -347,6 +367,7 @@
                 axisx.datamax = Math.max(axisx.datamax, xmax);
                 axisy.datamin = Math.min(axisy.datamin, ymin);
                 axisy.datamax = Math.max(axisy.datamax, ymax);
+
             }
         }
 
@@ -1018,14 +1039,14 @@
         function insertLabels() {
             target.find(".tickLabels").remove();
             
-            var html = '<div class="tickLabels" style="font-size:smaller;color:' + options.grid.color + '">';
+            var html = ['<div class="tickLabels" style="font-size:smaller;color:' + options.grid.color + '">'];
 
             function addLabels(axis, labelGenerator) {
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
-                    html += labelGenerator(tick, axis);
+                    html.push(labelGenerator(tick, axis));
                 }
             }
 
@@ -1048,9 +1069,9 @@
                 return '<div style="position:absolute;top:' + (plotOffset.top + axis.p2c(tick.v) - axis.labelHeight/2) + 'px;left:' + (plotOffset.left + plotWidth + margin) +'px;width:' + axis.labelWidth + 'px;text-align:left" class="tickLabel">' + tick.label + "</div>";
             });
 
-            html += '</div>';
+            html.push('</div>');
             
-            target.append(html);
+            target.append(html.join(""));
         }
 
         function drawSeries(series) {
@@ -1063,9 +1084,9 @@
         }
         
         function drawSeriesLines(series) {
-            function plotLine(datapoints, offset, axisx, axisy) {
+            function plotLine(datapoints, xoffset, yoffset, axisx, axisy) {
                 var points = datapoints.points, incr = datapoints.incr,
-                    drawx = null, drawy = null;
+                    prevx = null, prevy = null;
                 
                 ctx.beginPath();
                 for (var i = incr; i < points.length; i += incr) {
@@ -1132,12 +1153,12 @@
                         x2 = axisx.max;
                     }
 
-                    if (drawx != axisx.p2c(x1) || drawy != axisy.p2c(y1) + offset)
-                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(y1) + offset);
+                    if (x1 != prevx || y1 != prevy)
+                        ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
                     
-                    drawx = axisx.p2c(x2);
-                    drawy = axisy.p2c(y2) + offset;
-                    ctx.lineTo(drawx, drawy);
+                    prevx = x2;
+                    prevy = y2;
+                    ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
                 }
                 ctx.stroke();
             }
@@ -1285,13 +1306,13 @@
                 sw = series.shadowSize;
             // FIXME: consider another form of shadow when filling is turned on
             if (lw > 0 && sw > 0) {
-                // draw shadow in two steps
-                var w = sw / 2;
-                ctx.lineWidth = w;
+                // draw shadow as a thick and thin line with transparency
+                ctx.lineWidth = sw;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotLine(series.datapoints, lw/2 + w + w/2, series.xaxis, series.yaxis);
-                ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotLine(series.datapoints, lw/2 + w/2, series.xaxis, series.yaxis);
+                var xoffset = 1;
+                plotLine(series.lines.datapoints, xoffset, Math.sqrt((lw/2 + sw/2)*(lw/2 + sw/2) - xoffset*xoffset), series.xaxis, series.yaxis);
+                ctx.lineWidth = sw/2;
+                plotLine(series.lines.datapoints, xoffset, Math.sqrt((lw/2 + sw/4)*(lw/2 + sw/4) - xoffset*xoffset), series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
@@ -1299,11 +1320,11 @@
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(series.datapoints, series.xaxis, series.yaxis);
+                plotLineArea(series.lines.datapoints, series.xaxis, series.yaxis);
             }
 
             if (lw > 0)
-                plotLine(series.datapoints, 0, series.xaxis, series.yaxis);
+                plotLine(series.lines.datapoints, 0, 0, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
@@ -1337,17 +1358,17 @@
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, null, w + w/2, 2 * Math.PI,
+                plotPoints(series.points.datapoints, radius, null, w + w/2, 2 * Math.PI,
                            series.xaxis, series.yaxis);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, null, w/2, 2 * Math.PI,
+                plotPoints(series.points.datapoints, radius, null, w/2, 2 * Math.PI,
                            series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
-            plotPoints(series.datapoints, radius,
+            plotPoints(series.points.datapoints, radius,
                        getFillStyle(series.points, series.color), 0, 2 * Math.PI,
                        series.xaxis, series.yaxis);
             ctx.restore();
@@ -1454,7 +1475,7 @@
             ctx.strokeStyle = series.color;
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
+            plotBars(series.points.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
@@ -1538,7 +1559,6 @@
                     }
                     var div = legend.children();
                     $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
-                    
                 }
             }
         }
@@ -1567,42 +1587,25 @@
                     continue;
                 
                 var s = series[i],
-                    points = s.datapoints.points,
-                    incr = s.datapoints.incr,
                     axisx = s.xaxis,
                     axisy = s.yaxis,
-                
-                    // precompute some stuff to make the loop faster
-                    mx = axisx.c2p(mouseX),
+                    points = s.points.datapoints.points,
+                    incr = s.points.datapoints.incr,
+                    mx = axisx.c2p(mouseX), // precompute some stuff to make the loop faster
                     my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
-                    maxy = maxDistance / axisy.scale,
-                    checkbar = s.bars.show,
-                    checkpoint = !s.bars.show || s.lines.show || s.points.show,
-                    barLeft = s.bars.align == "left" ? 0 : -s.bars.barWidth/2,
-                    barRight = barLeft + s.bars.barWidth;
-                
-                for (j = 0; j < points.length; j += incr) {
-                    var x = points[j], y = points[j + 1];
-                    if (x == null)
-                        continue;
-  
-                    if (checkbar) {
-                        // For a bar graph, the cursor must be inside the bar
-                        // and no other point can be nearby
-                        if (!foundPoint && mx >= x + barLeft &&
-                            mx <= x + barRight &&
-                            my >= Math.min(0, y) && my <= Math.max(0, y))
-                            item = [i, j / incr];
-                    }
- 
-                    if (checkpoint) {
+                    maxy = maxDistance / axisy.scale;
+
+                if (s.lines.show || s.points.show) {
+                    for (j = 0; j < points.length; j += incr) {
+                        var x = points[j], y = points[j + 1];
+                        if (x == null)
+                            continue;
+                        
                         // For points and lines, the cursor must be within a
                         // certain distance to the data point
- 
-                        // check bounding box first
-                        if ((x - mx > maxx || x - mx < -maxx) ||
-                            (y - my > maxy || y - my < -maxy))
+                        if (x - mx > maxx || x - mx < -maxx ||
+                            y - my > maxy || y - my < -maxy)
                             continue;
 
                         // We have to calculate distances in pixels, not in
@@ -1612,9 +1615,27 @@
                             dist = dx * dx + dy * dy; // no idea in taking sqrt
                         if (dist < lowestDistance) {
                             lowestDistance = dist;
-                            foundPoint = true;
                             item = [i, j / incr];
                         }
+                    }
+                }
+                    
+                if (s.bars.show && !item) { // no other point can be nearby
+                    points = s.bars.datapoints.points;
+                    incr = s.bars.datapoints.incr;
+                    
+                    var barLeft = s.bars.align == "left" ? 0 : -s.bars.barWidth/2,
+                        barRight = barLeft + s.bars.barWidth;
+                    
+                    for (j = 0; j < points.length; j += incr) {
+                        var x = points[j], y = points[j + 1];
+                        if (x == null)
+                            continue;
+  
+                        // For a bar graph, the cursor must be inside the bar
+                        if (mx >= x + barLeft && mx <= x + barRight &&
+                            my >= Math.min(0, y) && my <= Math.max(0, y))
+                            item = [i, j / incr];
                     }
                 }
             }

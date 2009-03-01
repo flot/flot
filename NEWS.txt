@@ -40,10 +40,14 @@ Changes:
 - The option legend.margin can now specify horizontal and vertical
   margins independently (suggestion by someone who's annoyed).
 
-- Data passed into Flot is now copied to enable further processing
-  before it hits the drawing routines. As a side-effect, this should
-  make Flot more robust in the face of bad data (and fixes issue 112).
+- Data passed into Flot is now copied to a new canonical format to
+  enable further processing before it hits the drawing routines. As a
+  side-effect, this should make Flot more robust in the face of bad
+  data (and fixes issue 112).
 
+- Step-wise charting: line charts have a new option "steps" that when
+  set to true connects the points with steps instead of diagonal lines. 
+  
 
 Bug fixes:
 
@@ -77,6 +81,9 @@ Bug fixes:
 - Imported SVN version of excanvas and fixed an issue with the newer
   version. Hopefully, this will make Flot work with IE8 (nudge by
   Fabien Menager).
+- Changed the shadow code for lines to hopefully look a bit better
+  with vertical lines.
+
 
 Flot 0.5
 --------
