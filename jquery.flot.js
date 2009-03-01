@@ -75,6 +75,7 @@
                     fillColor: null,
                     align: "left" // or "center"
                 },
+                threshold: null, // or { below: number, color: color spec}
                 grid: {
                     color: "#545454", // primary color used for outline and labels
                     backgroundColor: null, // null for transparent, else color
@@ -264,6 +265,10 @@
                     s.yaxis = axes.yaxis;
                 else if (s.yaxis == 2)
                     s.yaxis = axes.y2axis;
+
+                if (!s.threshold)
+                    s.threshold = options.threshold;
+                s.subseries = null;
             }
         }
         
@@ -290,12 +295,13 @@
                     incr = s.datapoints.incr,
                     axisx = s.xaxis, axisy = s.yaxis,
                     xmin = topSentry, xmax = bottomSentry,
-                    ymin = topSentry, ymax = bottomSentry;
+                    ymin = topSentry, ymax = bottomSentry,
+                    x, y, p;
 
+                /*
                 // determine the increment
 
                 // examine data to find out how to copy
-                /*
                 for (j = 0; j < data.length; ++j) {
                 }*/
                 
@@ -303,7 +309,8 @@
                 axisx.used = axisy.used = true;
                 
                 for (j = k = 0; j < data.length; ++j, k += incr) {
-                    var x = null, y = null;
+                    x = null;
+                    y = null;
 
                     if (data[j] != null) {
                         x = data[j][0];
@@ -336,26 +343,6 @@
                     points[k] = x;
                 }
 
-                s.bars.datapoints = s.lines.datapoints = s.points.datapoints = s.datapoints;
-                if (s.lines.show && s.lines.steps) {
-                    var p = [];
-                    // copy, inserting extra points to make steps
-                    for (j = k = 0; j < points.length; j += incr, k += incr) {
-                        if (j > 0
-                            && points[j - incr] != null
-                            && points[j] != null
-                            && points[j - incr + 1] != points[j + 1]) {
-                            p[k] = points[j];
-                            p[k + 1] = points[j - incr + 1];
-                            k += incr;
-                        }
-                        
-                        p[k] = points[j];
-                        p[k + 1] = points[j + 1];
-                    }
-                    s.lines.datapoints.points = p;
-                }
-                
                 if (s.bars.show) {
                     // make sure we got room for the bar
                     var delta = s.bars.align == "left" ? 0 : -s.bars.barWidth/2;
@@ -368,6 +355,96 @@
                 axisy.datamin = Math.min(axisy.datamin, ymin);
                 axisy.datamax = Math.max(axisy.datamax, ymax);
 
+                
+                // step charts
+                if (s.lines.show && s.lines.steps) {
+                    p = [];
+                    // copy, inserting extra points to make steps
+                    for (j = k = 0; j < points.length; j += incr, k += incr) {
+                        x = points[j];
+                        y = points[j + 1];
+                        if (j > 0
+                            && points[j - incr] != null
+                            && x != null
+                            && points[j - incr + 1] != y) {
+                            p[k] = x;
+                            p[k + 1] = points[j - incr + 1];
+                            k += incr;
+                        }
+                        
+                        p[k] = x;
+                        p[k + 1] = y;
+                    }
+                    s.datapoints.linespoints = p;
+                }
+
+                // possibly split data points because of threshold
+                if (s.threshold) {
+                    var orig = $.extend({}, s), thresholded = $.extend({}, s);
+                    orig.datapoints = { points: [], incr: incr };
+                    thresholded.datapoints = { points: [], incr: incr };
+                    
+                    thresholded.color = s.threshold.color;
+
+                    var below = s.threshold.below,
+                        origpoints = orig.datapoints.points,
+                        threspoints = thresholded.datapoints.points;
+
+                    // ordinary points
+                    for (j = 0; j < points.length; j += incr) {
+                        x = points[j];
+                        y = points[j + 1];
+
+                        if (y < below)
+                            p = threspoints;
+                        else
+                            p = origpoints;
+
+                        p.push(x);
+                        p.push(y);
+                    }
+
+                    // possibly split lines
+                    if (s.lines.show) {
+                        var lp = s.datapoints.linespoints || points;
+                        
+                        origpoints = [];
+                        threspoints = [];
+                        p = origpoints;
+                        
+                        for (j = 0; j < lp.length; j += incr) {
+                            x = lp[j];
+                            y = lp[j + 1];
+
+                            var prevp = p;
+                            if (y != null) {
+                                if (y < below)
+                                    p = threspoints;
+                                else
+                                    p = origpoints;
+                            }
+
+                            if (p != prevp && x != null && j > 0 && lp[j - incr] != null) {
+                                // find intersection and add it to both
+                                k = (x - lp[j - incr]) / (y - lp[j - incr + 1]) * (below - y) + x;
+                                prevp.push(k);
+                                prevp.push(below);
+                                p.push(null); // start new segment
+                                p.push(null);
+                                p.push(k);
+                                p.push(below);
+                            }
+                            
+                            p.push(x);
+                            p.push(y);
+                        }
+
+                        orig.datapoints.linespoints = origpoints
+                        thresholded.datapoints.linespoints = threspoints;
+                    }
+
+                    s.subseries = [orig, thresholded];
+                }
             }
         }
 
@@ -870,8 +947,13 @@
         
         function draw() {
             drawGrid();
-            for (var i = 0; i < series.length; i++) {
-                drawSeries(series[i]);
+            for (var i = 0; i < series.length; ++i) {
+                var s = series[i];
+                if (s.subseries)
+                    for (var j = 0; j < s.subseries.length; ++j)
+                        drawSeries(s.subseries[j]);
+                else
+                    drawSeries(s);
             }
         }
 
@@ -1085,7 +1167,8 @@
         
         function drawSeriesLines(series) {
             function plotLine(datapoints, xoffset, yoffset, axisx, axisy) {
-                var points = datapoints.points, incr = datapoints.incr,
+                var points = datapoints.linespoints || datapoints.points,
+                    incr = datapoints.incr,
                     prevx = null, prevy = null;
                 
                 ctx.beginPath();
@@ -1164,7 +1247,8 @@
             }
 
             function plotLineArea(datapoints, axisx, axisy) {
-                var points = datapoints.points, incr = datapoints.incr,
+                var points = datapoints.linespoints || datapoints.points,
+                    incr = datapoints.incr,
                     bottom = Math.min(Math.max(0, axisy.min), axisy.max),
                     top, lastX = 0, areaOpen = false;
                 
@@ -1310,9 +1394,9 @@
                 ctx.lineWidth = sw;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
                 var xoffset = 1;
-                plotLine(series.lines.datapoints, xoffset, Math.sqrt((lw/2 + sw/2)*(lw/2 + sw/2) - xoffset*xoffset), series.xaxis, series.yaxis);
+                plotLine(series.datapoints, xoffset, Math.sqrt((lw/2 + sw/2)*(lw/2 + sw/2) - xoffset*xoffset), series.xaxis, series.yaxis);
                 ctx.lineWidth = sw/2;
-                plotLine(series.lines.datapoints, xoffset, Math.sqrt((lw/2 + sw/4)*(lw/2 + sw/4) - xoffset*xoffset), series.xaxis, series.yaxis);
+                plotLine(series.datapoints, xoffset, Math.sqrt((lw/2 + sw/4)*(lw/2 + sw/4) - xoffset*xoffset), series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
@@ -1320,11 +1404,11 @@
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(series.lines.datapoints, series.xaxis, series.yaxis);
+                plotLineArea(series.datapoints, series.xaxis, series.yaxis);
             }
 
             if (lw > 0)
-                plotLine(series.lines.datapoints, 0, 0, series.xaxis, series.yaxis);
+                plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
@@ -1358,17 +1442,17 @@
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.points.datapoints, radius, null, w + w/2, 2 * Math.PI,
+                plotPoints(series.datapoints, radius, null, w + w/2, 2 * Math.PI,
                            series.xaxis, series.yaxis);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.points.datapoints, radius, null, w/2, 2 * Math.PI,
+                plotPoints(series.datapoints, radius, null, w/2, 2 * Math.PI,
                            series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
-            plotPoints(series.points.datapoints, radius,
+            plotPoints(series.datapoints, radius,
                        getFillStyle(series.points, series.color), 0, 2 * Math.PI,
                        series.xaxis, series.yaxis);
             ctx.restore();
@@ -1475,7 +1559,7 @@
             ctx.strokeStyle = series.color;
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
-            plotBars(series.points.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
+            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
@@ -1589,8 +1673,8 @@
                 var s = series[i],
                     axisx = s.xaxis,
                     axisy = s.yaxis,
-                    points = s.points.datapoints.points,
-                    incr = s.points.datapoints.incr,
+                    points = s.datapoints.points,
+                    incr = s.datapoints.incr,
                     mx = axisx.c2p(mouseX), // precompute some stuff to make the loop faster
                     my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
@@ -1621,9 +1705,6 @@
                 }
                     
                 if (s.bars.show && !item) { // no other point can be nearby
-                    points = s.bars.datapoints.points;
-                    incr = s.bars.datapoints.incr;
-                    
                     var barLeft = s.bars.align == "left" ? 0 : -s.bars.barWidth/2,
                         barRight = barLeft + s.bars.barWidth;
                     

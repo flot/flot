@@ -53,14 +53,15 @@ not connected.
 The format of a single series object is as follows:
 
   {
-    color: color or number,
-    data: rawdata,
-    label: string,
-    lines: specific lines options,
-    bars: specific bars options,
-    points: specific points options,
-    xaxis: 1 or 2,
-    yaxis: 1 or 2,
+    color: color or number
+    data: rawdata
+    label: string
+    lines: specific lines options
+    bars: specific bars options
+    points: specific points options
+    threshold: specific threshold options
+    xaxis: 1 or 2
+    yaxis: 1 or 2
     clickable: boolean
     hoverable: boolean
     shadowSize: number
@@ -429,6 +430,11 @@ Customizing the data series
 
   shadowSize: number
 
+  threshold: {
+    below: number
+    color: color
+  }
+
 The most important options are "lines", "points" and "bars" that
 specifies whether and how lines, points and bars should be shown for
 each data series. In case you don't specify anything at all, Flot will
@@ -476,6 +482,10 @@ extra colors by lightening and darkening colors in the theme.
 
 "shadowSize" is the default size of shadows in pixels. Set it to 0 to
 remove shadows.
+
+"threshold" specifies that the data points below "below" should be
+drawn with the specified color. This makes it easy to mark points
+below 0, e.g. for budget data.
 
 
 Customizing the grid

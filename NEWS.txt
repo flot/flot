@@ -46,7 +46,12 @@ Changes:
   data (and fixes issue 112).
 
 - Step-wise charting: line charts have a new option "steps" that when
-  set to true connects the points with steps instead of diagonal lines. 
+  set to true connects the points with horizontal/vertical steps
+  instead of diagonal lines.
+
+- Thresholding: you can set a threshold and a color, and the data
+  points below that threshold will then get the color. Useful for
+  marking data below 0, for instance.
   
 
 Bug fixes:
