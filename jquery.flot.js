@@ -276,7 +276,7 @@
         function processData() {
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
-                axis, i, j, k;
+                axis, i, j, k, m, s;
 
             for (axis in axes) {
                 axes[axis].datamin = topSentry;
@@ -287,35 +287,39 @@
             }
             
             for (i = 0; i < series.length; ++i) {
-                var s = series[i];
-                
+                s = series[i];
                 s.datapoints = { points: [], incr: 2 };
                 
                 var data = s.data,
                     points = s.datapoints.points,
-                    incr = s.datapoints.incr,
                     axisx = s.xaxis, axisy = s.yaxis,
                     xmin = topSentry, xmax = bottomSentry,
                     ymin = topSentry, ymax = bottomSentry,
-                    x, y, p;
+                    x, y, p, incr, format = [];
+
+                // determine the increment
+                if (s.bars.show) {
+                    s.datapoints.incr = 3;
+                    format.push({ default: 0 });
+                }
 
                 /*
-                // determine the increment
-
                 // examine data to find out how to copy
                 for (j = 0; j < data.length; ++j) {
                 }*/
                 
                 
                 axisx.used = axisy.used = true;
+                incr = s.datapoints.incr;
                 
                 for (j = k = 0; j < data.length; ++j, k += incr) {
+                    p = data[j];
                     x = null;
                     y = null;
 
                     if (data[j] != null) {
-                        x = data[j][0];
-                        y = data[j][1];
+                        x = p[0];
+                        y = p[1];
                     }
                     
                     // convert to number
@@ -339,6 +343,9 @@
 
                     if (x == null || y == null)
                         x = y = null; // make sure everything is cleared
+
+                    for (m = 2; m < incr; ++m)
+                        points[k + m] = p[m] == null ? format[m-2].default : p[m];
 
                     points[k + 1] = y;
                     points[k] = x;
@@ -1465,22 +1472,24 @@
             ctx.restore();
         }
 
-        function drawBar(x, y, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal) {
+        function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal) {
             var left, right, bottom, top,
-                drawLeft, drawRight, drawTop, drawBottom;
+                drawLeft, drawRight, drawTop, drawBottom,
+                tmp;
 
             if (horizontal) {
                 drawBottom = drawRight = drawTop = true;
                 drawLeft = false;
-                left = 0;
+                left = b;
                 right = x;
                 top = y + barLeft;
                 bottom = y + barRight;
 
                 // account for negative bars
                 if (right < left) {
-                    right = 0;
-                    left = x;
+                    tmp = right;
+                    right = left;
+                    left = tmp;
                     drawLeft = true;
                     drawRight = false;
                 }
@@ -1490,13 +1499,14 @@
                 drawBottom = false;
                 left = x + barLeft;
                 right = x + barRight;
-                bottom = 0;
+                bottom = b;
                 top = y;
 
                 // account for negative bars
                 if (top < bottom) {
-                    top = 0;
-                    bottom = y;
+                    tmp = top;
+                    top = bottom;
+                    bottom = tmp;
                     drawBottom = true;
                     drawTop = false;
                 }
@@ -1576,13 +1586,12 @@
                 for (var i = 0; i < points.length; i += incr) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal);
+                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal);
                 }
             }
 
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
-            ctx.lineJoin = "round";
 
             // FIXME: figure out a way to add shadows (for instance along the right edge)
             ctx.lineWidth = series.bars.lineWidth;
@@ -1740,16 +1749,16 @@
                         barRight = barLeft + s.bars.barWidth;
                     
                     for (j = 0; j < points.length; j += incr) {
-                        var x = points[j], y = points[j + 1];
+                        var x = points[j], y = points[j + 1], b = points[j + 2];
                         if (x == null)
                             continue;
   
                         // for a bar graph, the cursor must be inside the bar
                         if (series[i].bars.horizontal ? 
-                            (mx <= Math.max(0, x) && mx >= Math.min(0, x) && 
+                            (mx <= Math.max(b, x) && mx >= Math.min(b, x) && 
                              my >= y + barLeft && my <= y + barRight) :
                             (mx >= x + barLeft && mx <= x + barRight &&
-                             my >= Math.min(0, y) && my <= Math.max(0, y)))
+                             my >= Math.min(b, y) && my <= Math.max(b, y)))
                                 item = [i, j / incr];
                     }
                 }
@@ -1908,7 +1917,7 @@
             octx.clearRect(0, 0, canvasWidth, canvasHeight);
             octx.translate(plotOffset.left, plotOffset.top);
             
-            var i, hi; 
+            var i, hi;
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];
 
@@ -1935,18 +1944,18 @@
             }
 
             // redraw crosshair
-            if (options.crosshair.mode != null && crosshair.pos.x != -1) {
+            var pos = crosshair.pos, mode = options.crosshair.mode;
+            if (mode != null && pos.x != -1) {
                 octx.strokeStyle = parseColor(options.crosshair.color).scale(null, null, null, 0.8).toString();
                 octx.lineWidth = 1;
                 ctx.lineJoin = "round";
-                var pos = crosshair.pos;
 
                 octx.beginPath();
-                if (options.crosshair.mode.indexOf("x") != -1) {
+                if (mode.indexOf("x") != -1) {
                     octx.moveTo(pos.x, 0);
                     octx.lineTo(pos.x, plotHeight);
                 }
-                if (options.crosshair.mode.indexOf("y") != -1) {
+                if (mode.indexOf("y") != -1) {
                     octx.moveTo(0, pos.y);
                     octx.lineTo(plotWidth, pos.y);
                 }
@@ -2015,12 +2024,11 @@
         }
 
         function drawBarHighlight(series, point) {
-            octx.lineJoin = "round";
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
             var fillStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-            drawBar(point[0], point[1], barLeft, barLeft + series.bars.barWidth,
+            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                     0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal);
         }
 

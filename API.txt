@@ -50,6 +50,9 @@ drawing. As a special case, a null value for lines is interpreted as a
 line segment end, i.e. the point before and after the null value are
 not connected.
 
+Lines and points take two coordinates. For bars, you can specify a
+third coordinate which is the bottom of the bar (defaults to 0).
+
 The format of a single series object is as follows:
 
   {
@@ -182,7 +185,7 @@ Customizing the axes
     tickDecimals: null or number
   }
 
-The axes have the same kind of options. The "mode" option
+All axes have the same kind of options. The "mode" option
 determines how the data is interpreted, the default of null means as
 decimal numbers. Use "time" for time series data, see the next section.
 
@@ -212,8 +215,8 @@ round tick interval size. Then it generates the ticks.
 You can specify how many ticks the algorithm aims for by setting
 "ticks" to a number. The algorithm always tries to generate reasonably
 round tick values so even if you ask for three ticks, you might get
-five if that fits better with the rounding. If you don't want ticks,
-set "ticks" to 0 or an empty array.
+five if that fits better with the rounding. If you don't want any
+ticks at all, set "ticks" to 0 or an empty array.
 
 Another option is to skip the rounding part and directly set the tick
 interval size with "tickSize". If you set it to 2, you'll get ticks at
@@ -335,8 +338,8 @@ programming environments have some means of getting the timezone
 offset for a specific date (note that you need to get the offset for
 each individual timestamp to account for daylight savings).
 
-Once you've got the timestamps into the data and specified "time" as
-the axis mode, Flot will automatically generate relevant ticks and
+Once you've gotten the timestamps into the data and specified "time"
+as the axis mode, Flot will automatically generate relevant ticks and
 format them. As always, you can tweak the ticks via the "ticks" option
 - just remember that the values should be timestamps (numbers), not
 Date objects.
@@ -344,11 +347,9 @@ Date objects.
 Tick generation and formatting can also be controlled separately
 through the following axis options:
 
-  xaxis, yaxis: {
-    minTickSize: array
-    timeformat: null or format string
-    monthNames: null or array of size 12 of strings
-  }
+  minTickSize: array
+  timeformat: null or format string
+  monthNames: null or array of size 12 of strings
 
 Here "timeformat" is a format string to use. You might use it like
 this:

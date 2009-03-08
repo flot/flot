@@ -58,6 +58,10 @@ Changes:
 
 - Horizontal bars (based on patch by Jason LeBrun).
 
+- Support for partial bars by specifying a third coordinate, i.e. they
+  don't have to start from the axis. This can be used to make stacked
+  bars.
+
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and
