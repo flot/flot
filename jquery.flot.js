@@ -73,7 +73,8 @@
                     barWidth: 1, // in units of the x axis
                     fill: true,
                     fillColor: null,
-                    align: "left" // or "center"
+                    align: "left", // or "center" 
+                    horizontal: false // when horizontal, left is now top
                 },
                 threshold: null, // or { below: number, color: color spec}
                 grid: {
@@ -344,10 +345,16 @@
                 }
 
                 if (s.bars.show) {
-                    // make sure we got room for the bar
+                    // make sure we got room for the bar on the dancing floor
                     var delta = s.bars.align == "left" ? 0 : -s.bars.barWidth/2;
-                    xmin += delta;
-                    xmax += delta + s.bars.barWidth;
+                    if(s.bars.horizontal) {
+                        ymin += delta;
+                        ymax += delta + s.bars.barWidth;
+                    }
+                    else {
+                        xmin += delta;
+                        xmax += delta + s.bars.barWidth;
+                    }
                 }
                 
                 axisx.datamin = Math.min(axisx.datamin, xmin);
@@ -1458,20 +1465,43 @@
             ctx.restore();
         }
 
-        function drawBar(x, y, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c) {
-            var drawLeft = true, drawRight = true,
-                drawTop = true, drawBottom = false,
-                left = x + barLeft, right = x + barRight,
-                bottom = 0, top = y;
+        function drawBar(x, y, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal) {
+            var left, right, bottom, top,
+                drawLeft, drawRight, drawTop, drawBottom;
 
-            // account for negative bars
-            if (top < bottom) {
-                top = 0;
-                bottom = y;
-                drawBottom = true;
-                drawTop = false;
+            if (horizontal) {
+                drawBottom = drawRight = drawTop = true;
+                drawLeft = false;
+                left = 0;
+                right = x;
+                top = y + barLeft;
+                bottom = y + barRight;
+
+                // account for negative bars
+                if (right < left) {
+                    right = 0;
+                    left = x;
+                    drawLeft = true;
+                    drawRight = false;
+                }
             }
-            
+            else {
+                drawLeft = drawRight = drawTop = true;
+                drawBottom = false;
+                left = x + barLeft;
+                right = x + barRight;
+                bottom = 0;
+                top = y;
+
+                // account for negative bars
+                if (top < bottom) {
+                    top = 0;
+                    bottom = y;
+                    drawBottom = true;
+                    drawTop = false;
+                }
+            }
+           
             // clip
             if (right < axisx.min || left > axisx.max ||
                 top < axisy.min || bottom > axisy.max)
@@ -1546,7 +1576,7 @@
                 for (var i = 0; i < points.length; i += incr) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx);
+                    drawBar(points[i], points[i + 1], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal);
                 }
             }
 
@@ -1714,10 +1744,13 @@
                         if (x == null)
                             continue;
   
-                        // For a bar graph, the cursor must be inside the bar
-                        if (mx >= x + barLeft && mx <= x + barRight &&
-                            my >= Math.min(0, y) && my <= Math.max(0, y))
-                            item = [i, j / incr];
+                        // for a bar graph, the cursor must be inside the bar
+                        if (series[i].bars.horizontal ? 
+                            (mx <= Math.max(0, x) && mx >= Math.min(0, x) && 
+                             my >= y + barLeft && my <= y + barRight) :
+                            (mx >= x + barLeft && mx <= x + barRight &&
+                             my >= Math.min(0, y) && my <= Math.max(0, y)))
+                                item = [i, j / incr];
                     }
                 }
             }
@@ -1988,7 +2021,7 @@
             var fillStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             drawBar(point[0], point[1], barLeft, barLeft + series.bars.barWidth,
-                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx);
+                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal);
         }
 
         function setPositionFromEvent(pos, e) {
