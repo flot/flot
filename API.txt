@@ -127,7 +127,7 @@ Customizing the legend
 
   legend: {
     show: boolean
-    labelFormatter: null or (fn: string -> string)
+    labelFormatter: null or (fn: string, series object -> string)
     labelBoxBorderColor: color
     noColumns: number
     position: "ne" or "nw" or "se" or "sw"
@@ -143,8 +143,9 @@ the labels in some way, e.g. make them to links, you can pass in a
 function for "labelFormatter". Here's an example that makes them
 clickable:
 
-  labelFormatter: function(label) {
-    return '<a href="' + label + '">' + label + '</a>';
+  labelFormatter: function(label, series) {
+    // series is the series object for the label
+    return '<a href="#' + label + '">' + label + '</a>';
   }
 
 "noColumns" is the number of columns to divide the legend table into.

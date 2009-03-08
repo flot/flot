@@ -1583,10 +1583,12 @@
             if (!options.legend.show)
                 return;
             
-            var fragments = [];
-            var rowStarted = false;
+            var fragments = [], rowStarted = false,
+                lf = options.legend.labelFormatter, s, label;
             for (i = 0; i < series.length; ++i) {
-                if (!series[i].label)
+                s = series[i];
+                label = s.label;
+                if (!label)
                     continue;
                 
                 if (i % options.legend.noColumns == 0) {
@@ -1596,12 +1598,11 @@
                     rowStarted = true;
                 }
 
-                var label = series[i].label;
-                if (options.legend.labelFormatter != null)
-                    label = options.legend.labelFormatter(label);
+                if (lf)
+                    label = lf(label, s);
                 
                 fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + series[i].color + ';overflow:hidden"></div></div></td>' +
+                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
                     '<td class="legendLabel">' + label + '</td>');
             }
             if (rowStarted)

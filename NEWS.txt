@@ -52,7 +52,9 @@ Changes:
 - Thresholding: you can set a threshold and a color, and the data
   points below that threshold will then get the color. Useful for
   marking data below 0, for instance.
-  
+
+- The legend labelFormatter now passes the series in addition to just
+  the label (suggestion by Vincent Lemeltier).
 
 Bug fixes:
 
