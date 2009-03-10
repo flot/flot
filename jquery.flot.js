@@ -300,7 +300,7 @@
                 // determine the increment
                 if (s.bars.show) {
                     s.datapoints.incr = 3;
-                    format.push({ default: 0 });
+                    format.push({ d: 0 });
                 }
 
                 /*
@@ -345,7 +345,7 @@
                         x = y = null; // make sure everything is cleared
 
                     for (m = 2; m < incr; ++m)
-                        points[k + m] = p[m] == null ? format[m-2].default : p[m];
+                        points[k + m] = p[m] == null ? format[m-2].d : p[m];
 
                     points[k + 1] = y;
                     points[k] = x;
