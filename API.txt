@@ -10,7 +10,9 @@ that the plot will be put into. This placeholder needs to have its
 width and height set as explained in the README (go read that now if
 you haven't, it's short). The plot will modify some properties of the
 placeholder so it's recommended you simply pass in a div that you
-don't use for anything else.
+don't use for anything else. Make sure you check any fancy styling
+you apply to the div, e.g. background images have been reported to be a
+problem on IE 7.
 
 The format of the data is documented below, as is the available
 options. The "plot" object returned has some methods you can call.
