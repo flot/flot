@@ -96,6 +96,8 @@ Bug fixes:
   Fabien Menager).
 - Changed the shadow code for lines to hopefully look a bit better
   with vertical lines.
+- Round tick positions to avoid possible problems with fractions
+  (suggestion by Fred, issue 130).
 
 
 Flot 0.5
