@@ -496,7 +496,7 @@
             // bind events
             if (options.selection.mode != null || options.crosshair.mode != null
                 || options.grid.hoverable) {
-                // FIXME: temp. work-around until jQuery bug 1871 is fixed
+                // FIXME: temp. work-around until jQuery bug 4398 is fixed
                 eventHolder.each(function () {
                     this.onmousemove = onMouseMove;
                 });
@@ -1778,7 +1778,7 @@
         }
 
         function onMouseMove(ev) {
-            // FIXME: temp. work-around until jQuery bug 1871 is fixed
+            // FIXME: temp. work-around until jQuery bug 4398 is fixed
             var e = ev || window.event;
             if (e.pageX == null && e.clientX != null) {
                 var de = document.documentElement, b = document.body;
