@@ -232,10 +232,12 @@ an array for "ticks", either like this:
 
   ticks: [0, 1.2, 2.4]
 
-Or like this (you can mix the two if you like):
+Or like this where the labels are also customized:
 
   ticks: [[0, "zero"], [1.2, "one mark"], [2.4, "two marks"]]
 
+You can mix the two if you like.
+  
 For extra flexibility you can specify a function as the "ticks"
 parameter. The function will be called with an object with the axis
 min and max and should return a ticks array. Here's a simplistic tick
