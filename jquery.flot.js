@@ -481,6 +481,9 @@
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
 
+            if ($.browser.msie) // excanvas hack
+                window.G_vmlCanvasManager.init_(document); // make sure everything is setup
+            
             // the canvas
             canvas = $(makeCanvas(canvasWidth, canvasHeight)).appendTo(target).get(0);
             ctx = canvas.getContext("2d");

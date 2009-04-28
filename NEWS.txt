@@ -91,9 +91,9 @@ Bug fixes:
   prevent it from overlapping the plot itself. This also fixes a
   problem with anti-aliasing when the width is 1 pixel (reported by
   Anthony Ettinger).
-- Imported SVN version of excanvas and fixed an issue with the newer
+- Imported version 3 of excanvas and fixed two issues with the newer
   version. Hopefully, this will make Flot work with IE8 (nudge by
-  Fabien Menager).
+  Fabien Menager, further analysis by Booink, issue 133).
 - Changed the shadow code for lines to hopefully look a bit better
   with vertical lines.
 - Round tick positions to avoid possible problems with fractions
