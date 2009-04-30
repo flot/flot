@@ -1,6 +1,19 @@
 Frequently asked questions
 --------------------------
 
+Q: How much data can Flot cope with?
+
+A: Flot will happily draw everything you send to it so the answer
+depends on the browser. The excanvas emulation used for IE (built with
+VML) makes IE by far the slowest browser so be sure to test with that
+if IE users are in your target group.
+
+1000 points is not a problem, but as soon as you start having more
+points than the pixel width, you should probably start thinking about
+downsampling/aggregation as this is near the resolution limit of the
+chart anyway. If you downsample server-side, you also save bandwidth.
+
+
 Q: Flot isn't working when I'm using JSON data as source!
 
 A: Actually, Flot loves JSON data, you just got the format wrong.
