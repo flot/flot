@@ -418,7 +418,7 @@
                         p.push(y);
                         
                         for (m = 2; m < incr; ++m)
-                            p[j + m] = points[j + m];
+                            p.push(points[j + m]);
                     }
 
                     // possibly split lines
