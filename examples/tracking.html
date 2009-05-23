@@ -18,7 +18,7 @@
 
     <p>If you combine it with listening on hover events, you can use
     it to track the intersection on the curves by interpolating
-    the data points.</p>
+    the data points (look at the legend).</p>
 
     <p id="hoverdata"></p>
 
@@ -31,12 +31,15 @@ $(function () {
     }
 
     var plot = $.plot($("#placeholder"),
-           [ { data: sin, label: "sin(x) = -0.00"}, { data: cos, label: "cos(x) = -0.00" } ],
-           { lines: { show: true },
-             crosshair: { mode: "x" },
-             grid: { hoverable: true, autoHighlight: false },
-             yaxis: { min: -1.2, max: 1.2 }
-             });
+                      [ { data: sin, label: "sin(x) = -0.00"},
+                        { data: cos, label: "cos(x) = -0.00" } ], {
+                            series: {
+                                lines: { show: true }
+                            },
+                            crosshair: { mode: "x" },
+                            grid: { hoverable: true, autoHighlight: false },
+                            yaxis: { min: -1.2, max: 1.2 }
+                        });
     var legends = $("#placeholder .legendLabel");
     legends.each(function () {
         // fix the widths so they don't jump around
@@ -73,7 +76,7 @@ $(function () {
                 y = p1[1];
             else
                 y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
-            
+
             legends.eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(2)));
         }
     }

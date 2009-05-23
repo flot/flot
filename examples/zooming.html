@@ -26,7 +26,7 @@
       the small overview plot to the right has been connected to the large
       plot. Try selecting a rectangle on either of them.</p>
 
-<script id="source" language="javascript" type="text/javascript">
+<script id="source">
 $(function () {
     // setup plot
     function getData(x1, x2) {
@@ -43,8 +43,10 @@ $(function () {
 
     var options = {
         legend: { show: false },
-        lines: { show: true },
-        points: { show: true },
+        series: {
+            lines: { show: true },
+            points: { show: true }
+        },
         yaxis: { ticks: 10 },
         selection: { mode: "xy" }
     };
@@ -56,8 +58,10 @@ $(function () {
     // setup overview
     var overview = $.plot($("#overview"), startData, {
         legend: { show: true, container: $("#overviewLegend") },
-        lines: { show: true, lineWidth: 1 },
-        shadowSize: 0,
+        series: {
+            lines: { show: true, lineWidth: 1 },
+            shadowSize: 0
+        },
         xaxis: { ticks: 4 },
         yaxis: { ticks: 3, min: -2, max: 2 },
         grid: { color: "#999" },

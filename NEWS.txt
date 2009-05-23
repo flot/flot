@@ -1,6 +1,26 @@
 Flot 0.x
 --------
 
+API changes:
+
+In the global options specified in the $.plot command,
+"lines", "points", "bars" and "shadowSize" have been moved to a
+sub-object called "series", i.e.
+
+  $.plot(placeholder, data, { lines: { show: true }})
+
+becomes
+
+  $.plot(placeholder, data, { series: { lines: { show: true }}})
+
+All future series-specific options will go into this sub-object (to
+simplify plugin writing). Backward-compatibility hooks are in place,
+so old code should not break.
+
+"plothover" no longer provides the original data point, but instead a
+normalized one, since there may be no corresponding original point.
+
+
 Changes:
 
 - Added support for disabling interactivity for specific data series
@@ -8,10 +28,11 @@ Changes:
 
 - Flot now calls $() on the placeholder and optional legend container
   passed in so you can specify DOM elements or CSS expressions to make
-  it easier to use Flot with libraries like Prototype or Mootools.
+  it easier to use Flot with libraries like Prototype or Mootools or
+  through raw JSON from Ajax responses.
 
 - A new "plotselecting" event is now emitted while the user is making
-  selection.
+  a selection.
 
 - Added a new crosshairs feature for tracing the mouse position on the
   axes, enable with crosshair { mode: "x"} (see the new tracking
@@ -49,10 +70,6 @@ Changes:
   set to true connects the points with horizontal/vertical steps
   instead of diagonal lines.
 
-- Thresholding: you can set a threshold and a color, and the data
-  points below that threshold will then get the color. Useful for
-  marking data below 0, for instance.
-
 - The legend labelFormatter now passes the series in addition to just
   the label (suggestion by Vincent Lemeltier).
 
@@ -61,6 +78,22 @@ Changes:
 - Support for partial bars by specifying a third coordinate, i.e. they
   don't have to start from the axis. This can be used to make stacked
   bars.
+
+- Plugin system: register an init method in the $.flot.plugins array
+  to get started, see PLUGINS.txt for details on how to write plugins.
+
+- Hooks: you can register functions that are called while Flot is
+  crunching the data and doing the plot. This can be used to modify
+  Flot without changing the source, useful for writing plugins. At
+  this point only a few hooks are defined.
+  
+- Threshold plugin: you can set a threshold and a color, and the data
+  points below that threshold will then get the color. Useful for
+  marking data below 0, for instance.
+
+- Stack plugin: you can specify a stack key for each series to have
+  them summed. This is useful for drawing additive/cumulative graphs
+  with bars and (currently unfilled) lines.
 
 Bug fixes:
 

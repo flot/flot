@@ -33,12 +33,14 @@ $(function () {
     }
 
     var plot = $.plot($("#placeholder"),
-           [ { data: sin, label: "sin(x)"}, { data: cos, label: "cos(x)" } ],
-           { lines: { show: true },
-             points: { show: true },
-             selection: { mode: "xy" },
-             grid: { hoverable: true, clickable: true },
-             yaxis: { min: -1.2, max: 1.2 }
+           [ { data: sin, label: "sin(x)"}, { data: cos, label: "cos(x)" } ], {
+               series: {
+                   lines: { show: true },
+                   points: { show: true }
+               },
+               selection: { mode: "xy" },
+               grid: { hoverable: true, clickable: true },
+               yaxis: { min: -1.2, max: 1.2 }
              });
 
     function showTooltip(x, y, contents) {

@@ -40,7 +40,7 @@ E.g.
   [ [1, 3], [2, 14.01], [3.5, 3.14] ]
 
 Note that to simplify the internal logic in Flot both the x and y
-values must be numbers, even if specifying time series (see below for
+values must be numbers (even if specifying time series, see below for
 how to do this). This is a common problem because you might retrieve
 data from the database and serialize them directly to JSON without
 noticing the wrong type. If you're getting mysterious errors, double
@@ -49,7 +49,7 @@ check that you're inputting numbers and not strings.
 If a null is specified as a point or if one of the coordinates is null
 or couldn't be converted to a number, the point is ignored when
 drawing. As a special case, a null value for lines is interpreted as a
-line segment end, i.e. the point before and after the null value are
+line segment end, i.e. the points before and after the null value are
 not connected.
 
 Lines and points take two coordinates. For bars, you can specify a
@@ -64,7 +64,6 @@ The format of a single series object is as follows:
     lines: specific lines options
     bars: specific bars options
     points: specific points options
-    threshold: specific threshold options
     xaxis: 1 or 2
     yaxis: 1 or 2
     clickable: boolean
@@ -100,7 +99,7 @@ E.g., you can use this to make a dual axis plot by specifying
 
 "clickable" and "hoverable" can be set to false to disable
 interactivity for specific series if interactivity is turned on in
-plot, see below.
+the plot, see below.
 
 The rest of the options are all documented below as they are the same
 as the default options passed in via the options parameter in the plot
@@ -120,8 +119,10 @@ All options are completely optional. They are documented individually
 below, to change them you just specify them in an object, e.g.
 
   var options = {
-    lines: { show: true },
-    points: { show: true }
+    series: {
+      lines: { show: true },
+      points: { show: true }
+    }
   };
 
   $.plot(placeholder, data, options);
@@ -412,47 +413,51 @@ been produced with two days in-between.
 Customizing the data series
 ===========================
 
-  lines, points, bars: {
-    show: boolean
-    lineWidth: number
-    fill: boolean or number
-    fillColor: null or color/gradient
-  }
+  series: {
+    lines, points, bars: {
+      show: boolean
+      lineWidth: number
+      fill: boolean or number
+      fillColor: null or color/gradient
+    }
 
-  points: {
-    radius: number
-  }
+    points: {
+      radius: number
+    }
 
-  bars: {
-    barWidth: number
-    align: "left" or "center"
-    horizontal: boolean
-  }
+    bars: {
+      barWidth: number
+      align: "left" or "center"
+      horizontal: boolean
+    }
 
-  lines: {
-    steps: boolean
-  }
+    lines: {
+      steps: boolean
+    }
 
+    shadowSize: number
+  }
+  
   colors: [ color1, color2, ... ]
 
-  shadowSize: number
-
-  threshold: {
-    below: number
-    color: color
-  }
-
+The options inside "series: {}" are copied to each of the series. So
+you can specify that all series should have bars by putting it in the
+global options, or override it for individual series by specifying
+bars in a particular the series object in the array of data.
+  
 The most important options are "lines", "points" and "bars" that
-specifies whether and how lines, points and bars should be shown for
+specify whether and how lines, points and bars should be shown for
 each data series. In case you don't specify anything at all, Flot will
 default to showing lines (you can turn this off with
 lines: { show: false}). You can specify the various types
 independently of each other, and Flot will happily draw each of them
-in turn, e.g.
+in turn (this is probably only useful for lines and points), e.g.
 
   var options = {
-    lines: { show: true, fill: true, fillColor: "rgba(255, 255, 255, 0.8)" },
-    points: { show: true, fill: false }
+    series: {
+      lines: { show: true, fill: true, fillColor: "rgba(255, 255, 255, 0.8)" },
+      points: { show: true, fill: false }
+    }
   };
 
 "lineWidth" is the thickness of the line or outline in pixels. You can
@@ -481,7 +486,11 @@ bars first.
 
 For lines, "steps" specifies whether two adjacent data points are
 connected with a straight (possibly diagonal) line or with first a
-horizontal and then a vertical line.
+horizontal and then a vertical line. Note that this transforms the
+data by adding extra points.
+
+"shadowSize" is the default size of shadows in pixels. Set it to 0 to
+remove shadows.
 
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
@@ -491,13 +500,6 @@ this:
 
 If there are more data series than colors, Flot will try to generate
 extra colors by lightening and darkening colors in the theme.
-
-"shadowSize" is the default size of shadows in pixels. Set it to 0 to
-remove shadows.
-
-"threshold" specifies that the data points below "below" should be
-drawn with the specified color. This makes it easy to mark points
-below 0, e.g. for budget data.
 
 
 Customizing the grid
@@ -595,7 +597,7 @@ You can use "plotclick" and "plothover" events like this:
 The item object in this example is either null or a nearby object on the form:
 
   item: {
-      datapoint: the point as you specified it in the data, e.g. [0, 2]
+      datapoint: the point, e.g. [0, 2]
       dataIndex: the index of the point in the data array
       series: the series object
       seriesIndex: the index of the series
@@ -606,10 +608,12 @@ For instance, if you have specified the data like this
 
     $.plot($("#placeholder"), [ { label: "Foo", data: [[0, 10], [7, 3]] } ], ...);
 
-and the mouse is near the point (7, 3), "datapoint" is the [7, 3] we
-specified, "dataIndex" will be 1, "series" is a normalized series
-object with among other things the "Foo" label in series.label and the
-color in series.color, and "seriesIndex" is 0.
+and the mouse is near the point (7, 3), "datapoint" is [7, 3],
+"dataIndex" will be 1, "series" is a normalized series object with
+among other things the "Foo" label in series.label and the color in
+series.color, and "seriesIndex" is 0. Note that plugins and options
+that transform the data can shift the indexes from what you specified
+in the original data array.
 
 If you use the above events to update some other information and want
 to clear out that info in case the mouse goes away, you'll probably
@@ -746,12 +750,17 @@ can call:
     Highlight a specific datapoint in the data series. You can either
     specify the actual objects, e.g. if you got them from a
     "plotclick" event, or you can specify the indices, e.g.
-    highlight(1, 3) to highlight the fourth point in the second series.
+    highlight(1, 3) to highlight the fourth point in the second series
+    (remember, zero-based indexing).
 
   
-  - unhighlight(series, datapoint)
+  - unhighlight(series, datapoint) or unhighlight()
 
-    Remove the highlighting of the point, same parameters as highlight.
+    Remove the highlighting of the point, same parameters as
+    highlight.
+
+    If you call unhighlight with no parameters, e.g. as
+    plot.unhighlight(), all current highlights are removed.
 
 
   - setData(data)
@@ -788,7 +797,7 @@ Flot to keep track of its state, so be careful.
 
   - getData()
 
-    Returns an array of the data series currently used on normalized
+    Returns an array of the data series currently used in normalized
     form with missing settings filled in according to the global
     options. So for instance to find out what color Flot has assigned
     to the data series, you could do this:
@@ -797,6 +806,10 @@ Flot to keep track of its state, so be careful.
       for (var i = 0; i < series.length; ++i)
         alert(series[i].color);
 
+    A notable other interesting field besides color is datapoints
+    which has a field "points" with the normalized data points in a
+    flat array.
+  
 
   - getAxes()
 
@@ -804,7 +817,7 @@ Flot to keep track of its state, so be careful.
     y2axis }. Various things are stuffed inside an axis object, e.g.
     you could use getAxes().xaxis.ticks to find out what the ticks are
     for the xaxis.
-    
+ 
 
   - getCanvas()
 
@@ -820,4 +833,100 @@ Flot to keep track of its state, so be careful.
     placed at (left, top), its center will be at the top-most, left
     corner of the grid.
 
+  - getOptions()
 
+    Gets the options for the plot, in a normalized format with default
+    values filled in.
+
+
+Hooks
+=====
+
+In addition to the public methods, the Plot object also has some hooks
+that can be used to modify the plotting process. You can install a
+callback function at various points in the process, the function then
+gets access to the internal data structures in Flot.
+
+Here's an overview of the phases Flot goes through:
+
+  1. Plugin initialization, parsing options
+  
+  2. Constructing the canvas used for drawing
+
+  3. Set data: parsing data specification, calculating colors,
+     copying raw data points into internal format,
+     normalizing them, finding max/min for axis auto-scaling
+
+  4. Grid setup: calculating axis spacing, ticks, inserting tick
+     labels, the legend
+
+  5. Draw: drawing the grid, drawing each of the series in turn
+
+  6. Setting up event handling for interactive features
+
+  7. Responding to events, if any
+
+The hooks are simple arrays. They are available on the "hooks"
+sub-object on the Plot object with the names mentioned below, e.g.
+
+  var plot = $.plot(...);
+
+  function f() { alert("hello!")};
+  
+  plot.hooks.processDatapoints.push(f);
+
+All hooks get the plot object as first parameter.
+
+Currently available hooks (when in doubt, check the Flot source):
+
+ - processOptions  [phase 1]
+
+   function(plot, options)
+   
+   Called after Flot has parsed and merged options. Rarely useful, but
+   does allow customizations beyond simple merging of default values.
+ 
+ - processRawData  [phase 3]
+
+   function(plot, series, data, datapoints)
+ 
+   Called before Flot copies and normalizes the raw data for the given
+   series. If the function fills in datapoints.points with normalized
+   points and sets datapoints.pointsize to the size of the points,
+   Flot will skip the copying/normalization step for this series.
+
+ - processDatapoints  [phase 3]
+
+   function(plot, series, datapoints)
+ 
+   Called after normalization of the given series but before finding
+   min/max of the data points. This hook is useful for implementing data
+   transformations. "datapoints" contains the normalized data points in
+   a flat array as datapoints.points with the size of a single point
+   given in datapoints.pointsize. Here's a simple transform that
+   multiplies all y coordinates by 2:
+
+     function multiply(plot, series, datapoints) {
+         var points = datapoints.points, ps = datapoints.pointsize;
+         for (var i = 0; i < points.length; i += ps)
+             points[i + 1] *= 2;
+     }
+
+   Note that you must leave datapoints in a good condition as Flot
+   doesn't check it or do any normalization on it afterwards.
+ 
+
+Plugins
+-------
+
+Plugins extend the functionality of Flot. To use a plugin, simply
+include its Javascript file after Flot in the HTML page.
+
+The plugin registers itself in the global array $.plot.plugins. When
+you make a new plot object with $.plot, Flot goes through this array
+calling the "init" function of each plugin and merging default options
+from its "option" attribute. The init function gets a reference to the
+plot object created and uses this to register hooks and add new public
+methods if needed.
+
+See the PLUGINS.txt file for details on how to write a plugin.

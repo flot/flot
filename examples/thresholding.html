@@ -7,15 +7,17 @@
     <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
     <script language="javascript" type="text/javascript" src="../jquery.js"></script>
     <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.threshold.js"></script>
  </head>
     <body>
     <h1>Flot Examples</h1>
 
     <div id="placeholder" style="width:600px;height:300px;"></div>
 
-    <p>You can apply a specific color to the part of a data series
-    below a threshold. This is can be useful for highlighting negative
-    values, e.g. when displaying net results or what's in stock.</p>
+    <p>With the threshold plugin, you can apply a specific color to
+    the part of a data series below a threshold. This is can be useful
+    for highlighting negative values, e.g. when displaying net results
+    or what's in stock.</p>
 
     <p class="controls">
     <input type="button" value="Threshold at 5">
@@ -29,7 +31,7 @@ $(function () {
     for (var i = 0; i <= 60; i += 1)
         d1.push([i, parseInt(Math.random() * 30 - 10)]);
 
-    function doPlot(t) {
+    function plotWithOptions(t) {
         $.plot($("#placeholder"), [ {
             data: d1,
             color: "rgb(30, 180, 20)",
@@ -38,12 +40,12 @@ $(function () {
         } ]);
     }
 
-    doPlot(0);
+    plotWithOptions(0);
     
     $(".controls input").click(function (e) {
         e.preventDefault();
         var t = parseFloat($(this).val().replace('Threshold at ', ''));
-        doPlot(t);
+        plotWithOptions(t);
     });
 });
 </script>

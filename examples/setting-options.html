@@ -42,8 +42,10 @@ $(function () {
         { label: "cos(x)",  data: d2},
         { label: "tan(x)",  data: d3}
     ], {
-        lines: { show: true },
-        points: { show: true },
+        series: {
+            lines: { show: true },
+            points: { show: true }
+        },
         xaxis: {
             ticks: [0, [Math.PI/2, "\u03c0/2"], [Math.PI, "\u03c0"], [Math.PI * 3/2, "3\u03c0/2"], [Math.PI * 2, "2\u03c0"]]
         },
