@@ -28,7 +28,7 @@ support for VML which excanvas is relying on. It appears that some
 stripped down versions used for test environments on virtual machines
 lack the VML support.
   
-Also note that you need at least jQuery 1.2.1.
+Also note that you need at least jQuery 1.2.6.
 
 
 Basic usage
