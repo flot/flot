@@ -204,7 +204,7 @@ specified, the plot will furthermore extend the axis end-point to the
 nearest whole tick. The default value is "null" for the x axis and
 0.02 for the y axis which seems appropriate for most cases.
 
-"labelWidth" and "labelHeight" specifies the maximum size of the tick
+"labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several
 plots.
 
@@ -662,20 +662,6 @@ A "plotunselected" event with no arguments is emitted when the user
 clicks the mouse to remove the selection.
 
 
-Customizing the crosshair
-=========================
-
-  crosshair: {
-    mode: null or "x" or "y" or "xy"
-    color: color
-  }
-
-You can enable crosshairs, thin lines, that follow the mouse by
-setting the mode to one of "x", "y" or "xy". The "x" mode enables a
-vertical crosshair that lets you trace the values on the x axis, "y"
-enables a horizontal crosshair and "xy" enables them both.
-
-
 Specifying gradients
 ====================
 
@@ -730,20 +716,12 @@ can call:
     Clear the selection rectangle. Pass in true to avoid getting a
     "plotunselected" event.
 
+  - getSelection()
 
-  - setCrosshair(pos)
-
-    Set the position of the crosshair. Note that this is cleared if
-    the user moves the mouse. "pos" should be on the form { x: xpos,
-    y: ypos } (or x2 and y2 if you're using the secondary axes), which
-    is coincidentally the same format as what you get from a "plothover"
-    event. If "pos" is null, the crosshair is cleared.
-
-
-  - clearCrosshair()
-
-    Clear the crosshair.
-
+    Returns the current selection in the same format as the
+    "plotselected" event. If there's currently no selection, it
+    returns null.
+    
 
   - highlight(series, datapoint)
 
@@ -787,7 +765,28 @@ can call:
     
   - draw()
 
-    Redraws the canvas.
+    Redraws the plot canvas.
+
+  - triggerRedrawOverlay()
+
+    Schedules an update of an overlay canvas used for drawing
+    interactive things like the selection and point highlights. This
+    is mostly useful for writing plugins. The redraw doesn't happen
+    immediately, instead a timer is set to catch multiple successive
+    redraws (e.g. from a mousemove).
+
+  - width()/height()
+
+    Gets the width and height of the plotting area inside the grid.
+    This is smaller than the canvas or placeholder dimensions as some
+    extra space is needed (e.g. for labels).
+
+  - offset()
+
+    Returns the offset of the plotting area inside the grid relative
+    to the document, useful for instance for calculating mouse
+    positions (event.pageX/Y minus this offset is the pixel position
+    inside the plot).
     
 
 There are also some members that let you peek inside the internal
@@ -837,7 +836,7 @@ Flot to keep track of its state, so be careful.
 
     Gets the options for the plot, in a normalized format with default
     values filled in.
-
+    
 
 Hooks
 =====
@@ -851,7 +850,7 @@ Here's an overview of the phases Flot goes through:
 
   1. Plugin initialization, parsing options
   
-  2. Constructing the canvas used for drawing
+  2. Constructing the canvases used for drawing
 
   3. Set data: parsing data specification, calculating colors,
      copying raw data points into internal format,
@@ -871,7 +870,7 @@ sub-object on the Plot object with the names mentioned below, e.g.
 
   var plot = $.plot(...);
 
-  function f() { alert("hello!")};
+  function f(plot, series, datapoints) { alert("hello!")};
   
   plot.hooks.processDatapoints.push(f);
 
@@ -885,6 +884,7 @@ Currently available hooks (when in doubt, check the Flot source):
    
    Called after Flot has parsed and merged options. Rarely useful, but
    does allow customizations beyond simple merging of default values.
+
  
  - processRawData  [phase 3]
 
@@ -894,6 +894,7 @@ Currently available hooks (when in doubt, check the Flot source):
    series. If the function fills in datapoints.points with normalized
    points and sets datapoints.pointsize to the size of the points,
    Flot will skip the copying/normalization step for this series.
+
 
  - processDatapoints  [phase 3]
 
@@ -914,7 +915,52 @@ Currently available hooks (when in doubt, check the Flot source):
 
    Note that you must leave datapoints in a good condition as Flot
    doesn't check it or do any normalization on it afterwards.
+
  
+ - bindEvents  [phase 6]
+
+   function(plot, eventHolder)
+
+   Called after Flot has setup its event handlers. Should set any
+   necessary event handlers on eventHolder, a jQuery object with the
+   canvas, e.g.
+
+     function (plot, eventHolder) {
+         eventHolder.mousedown(function (e) {
+             alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
+         });
+     }
+
+   Interesting events include click, mousemove, mouseup/down. You can
+   use all jQuery events. Usually, the event handlers will update the
+   state by drawing something (add a drawOverlay hook and call
+   triggerRedrawOverlay) or firing an externally visible event for
+   user code. See the crosshair plugin for an example.
+     
+   Currently, eventHolder actually contains both the static canvas
+   used for the plot itself and the overlay canvas used for
+   interactive features because some versions of IE get the stacking
+   order wrong. The hook only gets one event, though (either for the
+   overlay or for the static canvas).
+
+
+ - drawOverlay  [phase 7]
+
+   function (plot, canvascontext)
+
+   The drawOverlay hook is used for interactive things that need a
+   canvas to draw on. The model currently used by Flot works the way
+   that an extra overlay canvas is positioned on top of the static
+   canvas. This overlay is cleared and then completely redrawn
+   whenever something interesting happens. This hook is called when
+   the overlay canvas is to be redrawn.
+
+   "canvascontext" is the 2D context of the overlay canvas. You can
+   use this to draw things. You'll most likely need some of the
+   metrics computed by Flot, e.g. plot.width()/plot.height(). See the
+   crosshair plugin for an example.
+
+
 
 Plugins
 -------

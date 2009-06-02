@@ -98,10 +98,6 @@
                 selection: {
                     mode: null, // one of null, "x", "y" or "xy"
                     color: "#e8cfac"
-                },
-                crosshair: {
-                    mode: null, // one of null, "x", "y" or "xy",
-                    color: "#aa0000"
                 }
             },
         canvas = null,      // the canvas for the plot itself
@@ -115,7 +111,9 @@
         hooks = {
             processOptions: [],
             processRawData: [],
-            processDatapoints: []
+            processDatapoints: [],
+            bindEvents: [],
+            drawOverlay: []
         },
         plot = this,
         // dedicated to storing data for buggy standard compliance cases
@@ -127,15 +125,23 @@
         plot.draw = draw;
         plot.clearSelection = clearSelection;
         plot.setSelection = setSelection;
+        plot.getSelection = getSelection;
         plot.getCanvas = function() { return canvas; };
         plot.getPlotOffset = function() { return plotOffset; };
+        plot.width = function () { return plotWidth; }
+        plot.height = function () { return plotHeight; }
+        plot.offset = function () {
+            var o = eventHolder.offset();
+            o.left += plotOffset.left;
+            o.top += plotOffset.top;
+            return o;
+        };
         plot.getData = function() { return series; };
         plot.getAxes = function() { return axes; };
         plot.getOptions = function() { return options; };
-        plot.setCrosshair = setCrosshair;
-        plot.clearCrosshair = function () { setCrosshair(null); };
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
+        plot.triggerRedrawOverlay = triggerRedrawOverlay;
 
         // public attributes
         plot.hooks = hooks;
@@ -494,6 +500,7 @@
             // overlay canvas for interactive features
             overlay = $(makeCanvas(canvasWidth, canvasHeight)).css({ position: 'absolute', left: 0, top: 0 }).appendTo(target).get(0);
             octx = overlay.getContext("2d");
+            octx.stroke();
         }
 
         function bindEvents() {
@@ -502,22 +509,17 @@
             eventHolder = $([overlay, canvas]);
 
             // bind events
-            if (options.selection.mode != null || options.crosshair.mode != null
-                || options.grid.hoverable) {
-                // FIXME: temp. work-around until jQuery bug 4398 is fixed
-                eventHolder.each(function () {
-                    this.onmousemove = onMouseMove;
-                });
+            if (options.selection.mode != null
+                || options.grid.hoverable)
+                eventHolder.mousemove(onMouseMove);
 
-                if (options.selection.mode != null)
-                    eventHolder.mousedown(onMouseDown);
-            }
+            if (options.selection.mode != null)
+                eventHolder.mousedown(onMouseDown);
 
-            if (options.crosshair.mode != null)
-                eventHolder.mouseout(onMouseOut);
-            
             if (options.grid.clickable)
                 eventHolder.click(onClick);
+
+            executeHooks(hooks.bindEvents, [eventHolder]);
         }
 
         function setupGrid() {
@@ -1695,8 +1697,9 @@
         var lastMousePos = { pageX: null, pageY: null },
             selection = {
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
-                show: false, active: false },
-            crosshair = { pos: { x: -1, y: -1 } },
+                show: false,
+                active: false
+            },
             highlights = [],
             clickIsMouseUp = false,
             redrawTimeout = null,
@@ -1779,34 +1782,16 @@
             return null;
         }
 
-        function onMouseMove(ev) {
-            // FIXME: temp. work-around until jQuery bug 4398 is fixed
-            var e = ev || window.event;
-            if (e.pageX == null && e.clientX != null) {
-                var de = document.documentElement, b = document.body;
-                lastMousePos.pageX = e.clientX + (de && de.scrollLeft || b.scrollLeft || 0) - (de.clientLeft || 0);
-                lastMousePos.pageY = e.clientY + (de && de.scrollTop || b.scrollTop || 0) - (de.clientTop || 0);
-            }
-            else {
-                lastMousePos.pageX = e.pageX;
-                lastMousePos.pageY = e.pageY;
-            }
+        function onMouseMove(e) {
+            lastMousePos.pageX = e.pageX;
+            lastMousePos.pageY = e.pageY;
             
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", lastMousePos,
                                        function (s) { return s["hoverable"] != false; });
 
-            if (options.crosshair.mode != null) {
-                if (!selection.active) {
-                    setPositionFromEvent(crosshair.pos, lastMousePos);
-                    triggerRedrawOverlay();
-                }
-                else
-                    crosshair.pos.x = -1; // hide the crosshair while selecting
-            }
-
             if (selection.active) {
-                target.trigger("plotselecting", [ selectionIsSane() ? getSelectionForEvent() : null ]);
+                target.trigger("plotselecting", [ getSelection() ]);
 
                 updateSelection(lastMousePos);
             }
@@ -1836,13 +1821,6 @@
             $(document).one("mouseup", onSelectionMouseUp);
         }
 
-        function onMouseOut(ev) {
-            if (options.crosshair.mode != null && crosshair.pos.x != -1) {
-                crosshair.pos.x = -1;
-                triggerRedrawOverlay();
-            }
-        }
-        
         function onClick(e) {
             if (clickIsMouseUp) {
                 clickIsMouseUp = false;
@@ -1908,13 +1886,13 @@
 
         function triggerRedrawOverlay() {
             if (!redrawTimeout)
-                redrawTimeout = setTimeout(redrawOverlay, 30);
+                redrawTimeout = setTimeout(drawOverlay, 30);
         }
 
-        function redrawOverlay() {
+        function drawOverlay() {
             redrawTimeout = null;
 
-            // redraw highlights
+            // draw highlights
             octx.save();
             octx.clearRect(0, 0, canvasWidth, canvasHeight);
             octx.translate(plotOffset.left, plotOffset.top);
@@ -1929,7 +1907,7 @@
                     drawPointHighlight(hi.series, hi.point);
             }
 
-            // redraw selection
+            // draw selection
             if (selection.show && selectionIsSane()) {
                 octx.strokeStyle = parseColor(options.selection.color).scale(null, null, null, 0.8).toString();
                 octx.lineWidth = 1;
@@ -1944,27 +1922,9 @@
                 octx.fillRect(x, y, w, h);
                 octx.strokeRect(x, y, w, h);
             }
-
-            // redraw crosshair
-            var pos = crosshair.pos, mode = options.crosshair.mode;
-            if (mode != null && pos.x != -1) {
-                octx.strokeStyle = parseColor(options.crosshair.color).scale(null, null, null, 0.8).toString();
-                octx.lineWidth = 1;
-                ctx.lineJoin = "round";
-
-                octx.beginPath();
-                if (mode.indexOf("x") != -1) {
-                    octx.moveTo(pos.x, 0);
-                    octx.lineTo(pos.x, plotHeight);
-                }
-                if (mode.indexOf("y") != -1) {
-                    octx.moveTo(0, pos.y);
-                    octx.lineTo(plotWidth, pos.y);
-                }
-                octx.stroke();
-                
-            }
             octx.restore();
+            
+            executeHooks(hooks.drawOverlay, [octx]);
         }
         
         function highlight(s, point, auto) {
@@ -2039,23 +1999,10 @@
                     0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal);
         }
 
-        function setPositionFromEvent(pos, e) {
-            var offset = eventHolder.offset();
-            pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plotWidth);
-            pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plotHeight);
-        }
-
-        function setCrosshair(pos) {
-            if (pos == null)
-                crosshair.pos.x = -1;
-            else {
-                crosshair.pos.x = clamp(0, pos.x != null ? axes.xaxis.p2c(pos.x) : axes.x2axis.p2c(pos.x2), plotWidth);
-                crosshair.pos.y = clamp(0, pos.y != null ? axes.yaxis.p2c(pos.y) : axes.y2axis.p2c(pos.y2), plotHeight);
-            }
-            triggerRedrawOverlay();
-        }
-
-        function getSelectionForEvent() {
+        function getSelection() {
+            if (!selectionIsSane())
+                return null;
+            
             var x1 = Math.min(selection.first.x, selection.second.x),
                 x2 = Math.max(selection.first.x, selection.second.x),
                 y1 = Math.max(selection.first.y, selection.second.y),
@@ -2074,7 +2021,7 @@
         }
         
         function triggerSelectedEvent() {
-            var r = getSelectionForEvent();
+            var r = getSelection();
             
             target.trigger("plotselected", [ r ]);
 
@@ -2108,7 +2055,9 @@
         }
 
         function setSelectionPos(pos, e) {
-            setPositionFromEvent(pos, e);
+            var offset = eventHolder.offset();
+            pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plotWidth);
+            pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plotHeight);
             
             if (options.selection.mode == "y") {
                 if (pos == selection.first)
@@ -2205,7 +2154,7 @@
 
     $.plot = function(target, data, options) {
         var plot = new Plot($(target), data, options, $.plot.plugins);
-        /*var t0 = new Date();     
+        /*var t0 = new Date();
         var t1 = new Date();
         var tstr = "time used (msecs): " + (t1.getTime() - t0.getTime())
         if (window.console)

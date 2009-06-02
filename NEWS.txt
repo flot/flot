@@ -34,10 +34,6 @@ Changes:
 - A new "plotselecting" event is now emitted while the user is making
   a selection.
 
-- Added a new crosshairs feature for tracing the mouse position on the
-  axes, enable with crosshair { mode: "x"} (see the new tracking
-  example for a use).
-  
 - The "plothover" event is now emitted immediately instead of at most
   10 times per second, you'll have to put in a setTimeout yourself if
   you're doing something really expensive on this event.
@@ -95,6 +91,10 @@ Changes:
   them summed. This is useful for drawing additive/cumulative graphs
   with bars and (currently unfilled) lines.
 
+- Crosshairs plugin: trace the mouse position on the axes, enable with
+  crosshair: { mode: "x"} (see the new tracking example for a use).
+  
+  
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and

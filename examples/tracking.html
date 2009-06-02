@@ -7,6 +7,7 @@
     <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
     <script language="javascript" type="text/javascript" src="../jquery.js"></script>
     <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.crosshair.js"></script>
  </head>
     <body>
     <h1>Flot Examples</h1>
@@ -23,6 +24,7 @@
     <p id="hoverdata"></p>
 
 <script id="source" language="javascript" type="text/javascript">
+var plot;
 $(function () {
     var sin = [], cos = [];
     for (var i = 0; i < 14; i += 0.1) {
@@ -30,7 +32,7 @@ $(function () {
         cos.push([i, Math.cos(i)]);
     }
 
-    var plot = $.plot($("#placeholder"),
+    plot = $.plot($("#placeholder"),
                       [ { data: sin, label: "sin(x) = -0.00"},
                         { data: cos, label: "cos(x) = -0.00" } ], {
                             series: {
