@@ -412,7 +412,7 @@
                     }
 
                     for (m = 2; m < ps; ++m)
-                        points[k + m] = p[m] == null ? format[m-2].d : p[m];
+                        points[k + m] = p == null || p[m] == null ? format[m-2].d : p[m];
                     
                     points[k] = x;
                     points[k + 1] = y;
