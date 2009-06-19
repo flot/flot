@@ -1442,7 +1442,7 @@
                         continue;
                     
                     ctx.beginPath();
-                    ctx.arc(axisx.p2c(x), axisy.p2c(y) + offset, radius, 0, circumference, true);
+                    ctx.arc(axisx.p2c(x), axisy.p2c(y) + offset, radius, 0, circumference, false);
                     if (fillStyle) {
                         ctx.fillStyle = fillStyle;
                         ctx.fill();
@@ -1462,11 +1462,11 @@
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, null, w + w/2, 2 * Math.PI,
+                plotPoints(series.datapoints, radius, null, w + w/2, Math.PI,
                            series.xaxis, series.yaxis);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, null, w/2, 2 * Math.PI,
+                plotPoints(series.datapoints, radius, null, w/2, Math.PI,
                            series.xaxis, series.yaxis);
             }
 
@@ -1988,7 +1988,7 @@
             octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
             var radius = 1.5 * pointRadius;
             octx.beginPath();
-            octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, true);
+            octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, false);
             octx.stroke();
         }
 
