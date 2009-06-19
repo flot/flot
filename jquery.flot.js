@@ -313,7 +313,7 @@
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 i, j, k, m, length,
-                s, points, ps, x, y;
+                s, points, ps, x, y, axis;
 
             for (axis in axes) {
                 axes[axis].datamin = topSentry;
@@ -469,6 +469,13 @@
                 updateAxis(s.xaxis, xmin, xmax);
                 updateAxis(s.yaxis, ymin, ymax);
             }
+
+            for (axis in axes) {
+                if (axes[axis].datamin == topSentry)
+                    axes[axis].datamin = null;
+                if (axes[axis].datamax == bottomSentry)
+                    axes[axis].datamax = null;
+            }
         }
 
         function constructCanvas() {
@@ -527,6 +534,7 @@
                 setRange(axis, options);
                 prepareTickGeneration(axis, options);
                 setTicks(axis, options);
+            
                 // add transformation helpers
                 if (axis == axes.xaxis || axis == axes.x2axis) {
                     // data point to canvas coordinate
@@ -549,15 +557,9 @@
         }
         
         function setRange(axis, axisOptions) {
-            var min = axisOptions.min != null ? +axisOptions.min : axis.datamin,
-                max = axisOptions.max != null ? +axisOptions.max : axis.datamax;
+            var min = +(axisOptions.min != null ? axisOptions.min : axis.datamin),
+                max = +(axisOptions.max != null ? axisOptions.max : axis.datamax);
 
-            // degenerate case
-            if (min == Number.POSITIVE_INFINITY)
-                min = 0;
-            if (max == Number.NEGATIVE_INFINITY)
-                max = 1;
-            
             if (max - min == 0.0) {
                 // degenerate case
                 var widen = max == 0 ? 1 : 0.01;
@@ -577,12 +579,12 @@
                         min -= (max - min) * margin;
                         // make sure we don't go below zero if all values
                         // are positive
-                        if (min < 0 && axis.datamin >= 0)
+                        if (min < 0 && axis.datamin != null && axis.datamin >= 0)
                             min = 0;
                     }
                     if (axisOptions.max == null) {
                         max += (max - min) * margin;
-                        if (max > 0 && axis.datamax <= 0)
+                        if (max > 0 && axis.datamax != null && axis.datamax <= 0)
                             max = 0;
                     }
                 }
