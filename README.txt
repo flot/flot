@@ -16,9 +16,8 @@ Installation
 
 Just include the Javascript file after you've included jQuery.
 
-Note that you need to get a version of Excanvas (I currently suggest
-you take the one bundled with Flot as it contains a bugfix for drawing
-filled shapes) which is canvas emulation on Internet Explorer. You can
+Note that you need to get a version of Excanvas (e.g. the one bundled
+with Flot) which is canvas emulation on Internet Explorer. You can
 include the excanvas script like this:
 
   <!--[if IE]><script language="javascript" type="text/javascript" src="excanvas.pack.js"></script><![endif]-->
@@ -28,9 +27,9 @@ support for VML which excanvas is relying on. It appears that some
 stripped down versions used for test environments on virtual machines
 lack the VML support.
   
-Also note that you need at least jQuery 1.2.6 (but at least 1.3.2 is
-recommended for interactive charts because of performance improvements
-in event handling).
+Also note that you need at least jQuery 1.2.6 (but at least jQuery
+1.3.2 is recommended for interactive charts because of performance
+improvements in event handling).
 
 
 Basic usage
