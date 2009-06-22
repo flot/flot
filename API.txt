@@ -473,16 +473,16 @@ setting fill to a number between 0 (fully transparent) and 1 (fully
 opaque).
 
 For bars, fillColor can be a gradient, see the gradient documentation
-below. "barWidth" is the width of the bars in units of the x axis,
-contrary to most other measures that are specified in pixels. For
-instance, for time series the unit is milliseconds so 24 * 60 * 60 *
-1000 produces bars with the width of a day. "align" specifies whether
-a bar should be left-aligned (default) or centered on top of the value
-it represents. When "horizontal" is on, the bars are drawn
-horizontally, i.e. from the y axis instead of the x axis; note that
-the bar end points are still defined in the same way so you'll
-probably want to swap the coordinates if you've been plotting vertical
-bars first.
+below. "barWidth" is the width of the bars in units of the x axis (or
+the y axis if "horizontal" is true), contrary to most other measures
+that are specified in pixels. For instance, for time series the unit
+is milliseconds so 24 * 60 * 60 * 1000 produces bars with the width of
+a day. "align" specifies whether a bar should be left-aligned
+(default) or centered on top of the value it represents. When
+"horizontal" is on, the bars are drawn horizontally, i.e. from the y
+axis instead of the x axis; note that the bar end points are still
+defined in the same way so you'll probably want to swap the
+coordinates if you've been plotting vertical bars first.
 
 For lines, "steps" specifies whether two adjacent data points are
 connected with a straight (possibly diagonal) line or with first a
