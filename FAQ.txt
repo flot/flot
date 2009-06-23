@@ -33,11 +33,11 @@ best bet is probably taking a screenshot, e.g. with PrtScn.
 
 Q: The bars are all tiny in time mode?
 
-A: It's not really possible to determine the bar width
-automatically. So you have to set the width with the barWidth option
-which is NOT in pixels, but in the units of the x axis. For time
-mode that's milliseconds so the default value of 1 makes the bars 1
-millisecond wide.
+A: It's not really possible to determine the bar width automatically.
+So you have to set the width with the barWidth option which is NOT in
+pixels, but in the units of the x axis (or the y axis for horizontal
+bars). For time mode that's milliseconds so the default value of 1
+makes the bars 1 millisecond wide.
 
 
 Q: Can I use Flot with libraries like Mootools or Prototype?
