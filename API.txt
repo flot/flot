@@ -923,6 +923,16 @@ Currently available hooks (when in doubt, check the Flot source):
    Note that you must leave datapoints in a good condition as Flot
    doesn't check it or do any normalization on it afterwards.
 
+
+ - draw  [phase 5]
+
+   function(plot, canvascontext)
+ 
+   Hook for drawing on the canvas. Called after the grid is drawn
+   (unless it's disabled) and the series have been plotted (in case
+   any points, lines or bars have been turned on). For examples of how
+   to draw things, look at the source code.
+   
  
  - bindEvents  [phase 6]
 

@@ -113,6 +113,7 @@
             processOptions: [],
             processRawData: [],
             processDatapoints: [],
+            draw: [],
             bindEvents: [],
             drawOverlay: []
         },
@@ -994,8 +995,11 @@
         function draw() {
             if (options.grid.show)
                 drawGrid();
+
             for (var i = 0; i < series.length; ++i)
                 drawSeries(series[i]);
+
+            executeHooks(hooks.draw, [ctx]);
         }
 
         function extractRange(ranges, coord) {
