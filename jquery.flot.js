@@ -1439,10 +1439,11 @@
                 // draw shadow as a thick and thin line with transparency
                 ctx.lineWidth = sw;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                var xoffset = 1;
-                plotLine(series.datapoints, xoffset, Math.sqrt((lw/2 + sw/2)*(lw/2 + sw/2) - xoffset*xoffset), series.xaxis, series.yaxis);
+                // position shadow at angle from the mid of line
+                var angle = Math.PI/18;
+                plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/2), Math.cos(angle) * (lw/2 + sw/2), series.xaxis, series.yaxis);
                 ctx.lineWidth = sw/2;
-                plotLine(series.datapoints, xoffset, Math.sqrt((lw/2 + sw/4)*(lw/2 + sw/4) - xoffset*xoffset), series.xaxis, series.yaxis);
+                plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/4), Math.cos(angle) * (lw/2 + sw/4), series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
