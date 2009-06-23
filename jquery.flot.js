@@ -80,6 +80,7 @@
                     shadowSize: 3
                 },
                 grid: {
+                    show: true,
                     color: "#545454", // primary color used for outline and labels
                     backgroundColor: null, // null for transparent, else color
                     tickColor: "#dddddd", // color used for the ticks
@@ -530,29 +531,54 @@
         }
 
         function setupGrid() {
-            function setupAxis(axis, options) {
-                setRange(axis, options);
-                prepareTickGeneration(axis, options);
-                setTicks(axis, options);
-            
+            function setTransformationHelpers(axis) {
+                var s, m;
+                    
                 // add transformation helpers
                 if (axis == axes.xaxis || axis == axes.x2axis) {
+                    // precompute how much the axis is scaling a point
+                    // in canvas space
+                    s = axis.scale = plotWidth / (axis.max - axis.min);
+                    m = axis.min;
+                    
                     // data point to canvas coordinate
-                    axis.p2c = function (p) { return (p - axis.min) * axis.scale; };
+                    axis.p2c = function (p) { return (p - m) * s; };
                     // canvas coordinate to data point 
-                    axis.c2p = function (c) { return axis.min + c / axis.scale; };
+                    axis.c2p = function (c) { return m + c / s; };
                 }
                 else {
-                    axis.p2c = function (p) { return (axis.max - p) * axis.scale; };
-                    axis.c2p = function (p) { return axis.max - p / axis.scale; };
+                    s = axis.scale = plotHeight / (axis.max - axis.min)
+                    m = axis.max;
+                    
+                    axis.p2c = function (p) { return (m - p) * s; };
+                    axis.c2p = function (p) { return m - p / s; };
                 }
             }
 
-            for (var axis in axes)
-                setupAxis(axes[axis], options[axis]);
+            var axis;
+            for (axis in axes)
+                setRange(axes[axis], options[axis]);
+            
+            if (options.grid.show) {
+                for (axis in axes) {
+                    prepareTickGeneration(axes[axis], options[axis]);
+                    setTicks(axes[axis], options[axis]);
+                }                    
 
-            setSpacing();
-            insertLabels();
+                setGridSpacing();
+            }
+            else {
+                plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = 0;
+                plotWidth = canvasWidth;
+                plotHeight = canvasHeight;
+            }
+            
+            for (axis in axes)
+                setTransformationHelpers(axes[axis]);
+
+            if (options.grid.show)
+                insertLabels();
+            
             insertLegend();
         }
         
@@ -880,7 +906,7 @@
             }
         }
         
-        function setSpacing() {
+        function setGridSpacing() {
             function measureXLabels(axis) {
                 // to avoid measuring the widths of the labels, we
                 // construct fixed-size boxes and put the labels inside
@@ -934,45 +960,40 @@
                         axis.labelHeight = 0;
                 }
             }
-            
-            measureXLabels(axes.xaxis);
-            measureYLabels(axes.yaxis);
-            measureXLabels(axes.x2axis);
-            measureYLabels(axes.y2axis);
 
             // get the most space needed around the grid for things
             // that may stick out
             var maxOutset = options.grid.borderWidth;
             for (i = 0; i < series.length; ++i)
                 maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
-
+            
             plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
-
+            
             var margin = options.grid.labelMargin + options.grid.borderWidth;
+            
+            measureXLabels(axes.xaxis);
+            measureYLabels(axes.yaxis);
+            measureXLabels(axes.x2axis);
+            measureYLabels(axes.y2axis);
             
             if (axes.xaxis.labelHeight > 0)
                 plotOffset.bottom = Math.max(maxOutset, axes.xaxis.labelHeight + margin);
             if (axes.yaxis.labelWidth > 0)
-                plotOffset.left = Math.max(maxOutset, axes.yaxis.labelWidth + margin);
-
+                    plotOffset.left = Math.max(maxOutset, axes.yaxis.labelWidth + margin);
+            
             if (axes.x2axis.labelHeight > 0)
                 plotOffset.top = Math.max(maxOutset, axes.x2axis.labelHeight + margin);
             
             if (axes.y2axis.labelWidth > 0)
                 plotOffset.right = Math.max(maxOutset, axes.y2axis.labelWidth + margin);
-
+            
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
-
-            // precompute how much the axis is scaling a point in canvas space
-            axes.xaxis.scale = plotWidth / (axes.xaxis.max - axes.xaxis.min);
-            axes.yaxis.scale = plotHeight / (axes.yaxis.max - axes.yaxis.min);
-            axes.x2axis.scale = plotWidth / (axes.x2axis.max - axes.x2axis.min);
-            axes.y2axis.scale = plotHeight / (axes.y2axis.max - axes.y2axis.min);
         }
         
         function draw() {
-            drawGrid();
+            if (options.grid.show)
+                drawGrid();
             for (var i = 0; i < series.length; ++i)
                 drawSeries(series[i]);
         }

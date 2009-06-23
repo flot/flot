@@ -75,6 +75,8 @@ Changes:
   don't have to start from the axis. This can be used to make stacked
   bars.
 
+- New option to disable the (grid.show).
+  
 - Plugin system: register an init method in the $.flot.plugins array
   to get started, see PLUGINS.txt for details on how to write plugins.
 

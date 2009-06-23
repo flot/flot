@@ -506,6 +506,7 @@ Customizing the grid
 ====================
 
   grid: {
+    show: boolean
     color: color
     backgroundColor: color/gradient or null
     tickColor: color
@@ -523,7 +524,8 @@ The grid is the thing with the axes and a number of ticks. "color" is
 the color of the grid itself whereas "backgroundColor" specifies the
 background color inside the grid area. The default value of null means
 that the background is transparent. You can also set a gradient, see
-the gradient documentation below.
+the gradient documentation below. You can turn off the whole grid
+including tick labels by setting "show" to false.
 
 "tickColor" is the color of the ticks and "labelMargin" is the spacing
 between tick labels and the grid. Note that you can style the tick
@@ -747,10 +749,11 @@ can call:
     ticks, legend etc. will not be recomputed (use setupGrid() to do
     that). You'll probably want to call draw() afterwards.
 
-    You can use this function to speed up redrawing a plot if you know
-    that the axes won't change. Put in the new data with
-    setData(newdata) and call draw() afterwards, and you're good to
-    go.
+    You can use this function to speed up redrawing a small plot if
+    you know that the axes won't change. Put in the new data with
+    setData(newdata), call draw(), and you're good to go. Note that
+    for large datasets, almost all the time is consumed in draw()
+    plotting the data so in this case don't bother.
 
     
   - setupGrid()
@@ -807,7 +810,9 @@ Flot to keep track of its state, so be careful.
 
     A notable other interesting field besides color is datapoints
     which has a field "points" with the normalized data points in a
-    flat array.
+    flat array (the field "pointsize" is the increment in the flat
+    array to get to the next point so for a dataset consisting only of
+    (x,y) pairs it would be 2).
   
 
   - getAxes()
@@ -882,8 +887,10 @@ Currently available hooks (when in doubt, check the Flot source):
 
    function(plot, options)
    
-   Called after Flot has parsed and merged options. Rarely useful, but
-   does allow customizations beyond simple merging of default values.
+   Called after Flot has parsed and merged options. Useful in the
+   instance where customizations beyond simple merging of default
+   values is needed. A plugin might use it to detect that it has been
+   enabled and then turn on or off other options.
 
  
  - processRawData  [phase 3]
