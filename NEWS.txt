@@ -20,6 +20,9 @@ so old code should not break.
 "plothover" no longer provides the original data point, but instead a
 normalized one, since there may be no corresponding original point.
 
+Due to a bug in previous versions of jQuery, you now need at least
+jQuery 1.2.6.
+
 
 Changes:
 
