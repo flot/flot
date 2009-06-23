@@ -76,6 +76,9 @@ Changes:
   bars.
 
 - New option to disable the (grid.show).
+
+- Added pointOffset method for converting a point in data space to an
+  offset within the placeholder.
   
 - Plugin system: register an init method in the $.flot.plugins array
   to get started, see PLUGINS.txt for details on how to write plugins.
@@ -83,7 +86,7 @@ Changes:
 - Hooks: you can register functions that are called while Flot is
   crunching the data and doing the plot. This can be used to modify
   Flot without changing the source, useful for writing plugins. At
-  this point only a few hooks are defined.
+  this point only some hooks are defined.
   
 - Threshold plugin: you can set a threshold and a color, and the data
   points below that threshold will then get the color. Useful for

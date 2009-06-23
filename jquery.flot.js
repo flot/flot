@@ -144,6 +144,11 @@
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
         plot.triggerRedrawOverlay = triggerRedrawOverlay;
+        plot.pointOffset = function(point) {
+            return { left: parseInt(axisSpecToRealAxis(point, "xaxis").p2c(+point.x) + plotOffset.left),
+                     top: parseInt(axisSpecToRealAxis(point, "yaxis").p2c(+point.y) + plotOffset.top) };
+        }
+        
 
         // public attributes
         plot.hooks = hooks;
@@ -225,6 +230,15 @@
             return res;
         }
         
+        function axisSpecToRealAxis(obj, attr) {
+            var a = obj[attr];
+            if (!a || a == 1)
+                return axes[attr];
+            if (typeof a == "number")
+                return axes[attr.charAt(0) + a + attr.slice(1)];
+            return a; // assume it's OK
+        }
+        
         function fillInSeriesOptions() {
             var i;
             
@@ -293,21 +307,8 @@
                     s.lines.show = true;
 
                 // setup axes
-                if (!s.xaxis)
-                    s.xaxis = axes.xaxis;
-
-                if (s.xaxis == 1)
-                    s.xaxis = axes.xaxis;
-                else if (s.xaxis == 2)
-                    s.xaxis = axes.x2axis;
-
-                if (!s.yaxis)
-                    s.yaxis = axes.yaxis;
-
-                if (s.yaxis == 1)
-                    s.yaxis = axes.yaxis;
-                else if (s.yaxis == 2)
-                    s.yaxis = axes.y2axis;
+                s.xaxis = axisSpecToRealAxis(s, "xaxis");
+                s.yaxis = axisSpecToRealAxis(s, "yaxis");
             }
         }
         
@@ -1162,7 +1163,7 @@
 
             ctx.restore();
         }
-        
+
         function insertLabels() {
             target.find(".tickLabels").remove();
             
@@ -1858,18 +1859,6 @@
                                    function (s) { return s["clickable"] != false; });
         }
 
-        /*
-        function userPositionInCanvasSpace(pos) {
-            return { x: parseInt(pos.x != null ? axes.xaxis.p2c(pos.x) : axes.x2axis.p2c(pos.x2)),
-                     y: parseInt(pos.y != null ? axes.yaxis.p2c(pos.y) : axes.y2axis.p2c(pos.y2)) };
-        }
-        
-        function positionInDivSpace(pos) {
-            var cpos = userPositionInCanvasSpace(pos);
-            return { x: cpos.x + plotOffset.left,
-                     y: cpos.y + plotOffset.top };
-        }*/
-        
         // trigger click or hover event (they send the same parameters
         // so we share their code)
         function triggerClickHoverEvent(eventname, event, seriesFilter) {

@@ -556,7 +556,7 @@ A line is drawn if from and to are the same, e.g.
   markings: [ { yaxis: { from: 1, to: 1 } }, ... ]
 
 would draw a line parallel to the x axis at y = 1. You can control the
-line width with "lineWidth" in the ranges objects.
+line width with "lineWidth" in the range object.
 
 An example function might look like this:
 
@@ -790,10 +790,19 @@ can call:
     to the document, useful for instance for calculating mouse
     positions (event.pageX/Y minus this offset is the pixel position
     inside the plot).
-    
+
+  - pointOffset({ x: xpos, y: ypos })
+
+    Returns the calculated offset of the data point at (x, y) in data
+    space within the placeholder div. If you are working with dual axes, you
+    can specify the x and y axis references, e.g. 
+
+      o = pointOffset({ x: xpos, y: ypos, xaxis: 2, yaxis: 2 })
+      // o.left and o.top now contains the offset within the div
+  
 
 There are also some members that let you peek inside the internal
-workings of Flot which in some cases is useful. Note that if you change
+workings of Flot which is useful in some cases. Note that if you change
 something in the objects returned, you're changing the objects used by
 Flot to keep track of its state, so be careful.
 
@@ -818,9 +827,13 @@ Flot to keep track of its state, so be careful.
   - getAxes()
 
     Gets an object with the axes settings as { xaxis, yaxis, x2axis,
-    y2axis }. Various things are stuffed inside an axis object, e.g.
-    you could use getAxes().xaxis.ticks to find out what the ticks are
-    for the xaxis.
+    y2axis }.
+
+    Various things are stuffed inside an axis object, e.g. you could
+    use getAxes().xaxis.ticks to find out what the ticks are for the
+    xaxis. Two other useful attributes are p2c and c2p, functions for
+    transforming from data point space to the canvas plot space and
+    back. Both returns values that are offset with the plot offset.
  
 
   - getCanvas()
