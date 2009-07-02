@@ -21,7 +21,8 @@ so old code should not break.
 normalized one, since there may be no corresponding original point.
 
 Due to a bug in previous versions of jQuery, you now need at least
-jQuery 1.2.6.
+jQuery 1.2.6. But if you can, try jQuery 1.3.2 as it got some
+improvements in event handling speed.
 
 
 Changes:
