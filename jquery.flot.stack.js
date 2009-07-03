@@ -57,7 +57,7 @@ also adjusted.
                 otherps = other.datapoints.pointsize,
                 otherpoints = other.datapoints.points,
                 newpoints = [],
-                px, py, intery, qx, qy,
+                px, py, intery, qx, qy, bottom,
                 withlines = s.lines.show, withbars = s.bars.show,
                 withsteps = withlines && s.lines.steps,
                 i = 0, j = 0, l;
@@ -82,13 +82,15 @@ also adjusted.
                     py = points[i + 1];
                     qx = otherpoints[j];
                     qy = otherpoints[j + 1];
+                    bottom = 0;
 
                     if (px == qx) {
                         for (m = 0; m < ps; ++m)
                             newpoints.push(points[i + m]);
 
                         newpoints[l + 1] += qy;
-
+                        bottom = qy;
+                        
                         i += ps;
                         j += otherps;
                     }
@@ -101,6 +103,7 @@ also adjusted.
                             newpoints.push(intery + qy)
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
+                            bottom = qy; 
                         }
 
                         j += otherps;
@@ -111,17 +114,16 @@ also adjusted.
                         
                         // we might be able to interpolate a point below,
                         // this can give us a better y
-                        if (withlines && j > 0 && otherpoints[j - ps] != null) {
-                            intery = qy + (otherpoints[j - ps + 1] - qy) * (px - qx) / (otherpoints[j - ps] - qx);
+                        if (withlines && j > 0 && otherpoints[j - ps] != null)
+                            bottom = qy + (otherpoints[j - ps + 1] - qy) * (px - qx) / (otherpoints[j - ps] - qx);
 
-                            newpoints[l + 1] += intery;
-                        }
+                        newpoints[l + 1] += bottom;
                         
                         i += ps;
                     }
                     
                     if (l != newpoints.length && withbars)
-                        newpoints[l + 2] += qy;
+                        newpoints[l + 2] += bottom;
                 }
 
                 // maintain the line steps invariant
