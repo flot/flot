@@ -581,6 +581,87 @@
                 }
             }
 
+            function measureLabels(axis, axisOptions) {
+                var i, labels = [], l;
+                
+                axis.labelWidth = axisOptions.labelWidth;
+                axis.labelHeight = axisOptions.labelHeight;
+
+                if (axis == axes.xaxis || axis == axes.x2axis) {
+                    // to avoid measuring the widths of the labels, we
+                    // construct fixed-size boxes and put the labels inside
+                    // them, we don't need the exact figures and the
+                    // fixed-size box content is easy to center
+                    if (axis.labelWidth == null)
+                        axis.labelWidth = canvasWidth / 6;
+
+                    // measure x label heights
+                    if (axis.labelHeight == null) {
+                        labels = [];
+                        for (i = 0; i < axis.ticks.length; ++i) {
+                            l = axis.ticks[i].label;
+                            if (l)
+                                labels.push('<div class="tickLabel" style="float:left;width:' + axis.labelWidth + 'px">' + l + '</div>');
+                        }
+                        
+                        if (labels.length > 0) {
+                            var dummyDiv = $('<div style="position:absolute;top:-10000px;width:10000px;font-size:smaller">'
+                                             + labels.join("") + '<div style="clear:left"></div></div>').appendTo(target);
+                            axis.labelHeight = dummyDiv.height();
+                            dummyDiv.remove();
+                        }
+                    }
+                }
+                else if (axis.labelWidth == null || axis.labelHeight == null) {
+                    // calculate y label dimensions
+                    for (i = 0; i < axis.ticks.length; ++i) {
+                        l = axis.ticks[i].label;
+                        if (l)
+                            labels.push('<div class="tickLabel">' + l + '</div>');
+                    }
+                    
+                    if (labels.length > 0) {
+                        var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
+                                         + labels.join("") + '</div>').appendTo(target);
+                        if (axis.labelWidth == null)
+                            axis.labelWidth = dummyDiv.width();
+                        if (axis.labelHeight == null)
+                            axis.labelHeight = dummyDiv.find("div").height();
+                        dummyDiv.remove();
+                    }
+                    
+                }
+
+                if (axis.labelWidth == null)
+                    axis.labelWidth = 0;
+                if (axis.labelHeight == null)
+                    axis.labelHeight = 0;
+            }
+            
+            function setGridSpacing() {
+                // get the most space needed around the grid for things
+                // that may stick out
+                var maxOutset = options.grid.borderWidth;
+                for (i = 0; i < series.length; ++i)
+                    maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
+                
+                plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
+                
+                var margin = options.grid.labelMargin + options.grid.borderWidth;
+                
+                if (axes.xaxis.labelHeight > 0)
+                    plotOffset.bottom = Math.max(maxOutset, axes.xaxis.labelHeight + margin);
+                if (axes.yaxis.labelWidth > 0)
+                    plotOffset.left = Math.max(maxOutset, axes.yaxis.labelWidth + margin);
+                if (axes.x2axis.labelHeight > 0)
+                    plotOffset.top = Math.max(maxOutset, axes.x2axis.labelHeight + margin);
+                if (axes.y2axis.labelWidth > 0)
+                    plotOffset.right = Math.max(maxOutset, axes.y2axis.labelWidth + margin);
+            
+                plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
+                plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
+            }
+            
             var axis;
             for (axis in axes)
                 setRange(axes[axis], options[axis]);
@@ -589,7 +670,8 @@
                 for (axis in axes) {
                     prepareTickGeneration(axes[axis], options[axis]);
                     setTicks(axes[axis], options[axis]);
-                }                    
+                    measureLabels(axes[axis], options[axis]);
+                }
 
                 setGridSpacing();
             }
@@ -882,10 +964,6 @@
                 axis.tickFormatter = function (v, axis) { return "" + axisOptions.tickFormatter(v, axis); };
             else
                 axis.tickFormatter = formatter;
-            if (axisOptions.labelWidth != null)
-                axis.labelWidth = axisOptions.labelWidth;
-            if (axisOptions.labelHeight != null)
-                axis.labelHeight = axisOptions.labelHeight;
         }
         
         function setTicks(axis, axisOptions) {
@@ -933,92 +1011,7 @@
                     axis.max = Math.min(axis.max, axis.ticks[axis.ticks.length - 1].v);
             }
         }
-        
-        function setGridSpacing() {
-            function measureXLabels(axis) {
-                // to avoid measuring the widths of the labels, we
-                // construct fixed-size boxes and put the labels inside
-                // them, we don't need the exact figures and the
-                // fixed-size box content is easy to center
-                if (axis.labelWidth == null)
-                    axis.labelWidth = canvasWidth / 6;
-
-                // measure x label heights
-                if (axis.labelHeight == null) {
-                    labels = [];
-                    for (i = 0; i < axis.ticks.length; ++i) {
-                        l = axis.ticks[i].label;
-                        if (l)
-                            labels.push('<div class="tickLabel" style="float:left;width:' + axis.labelWidth + 'px">' + l + '</div>');
-                    }
-                    
-                    axis.labelHeight = 0;
-                    if (labels.length > 0) {
-                        var dummyDiv = $('<div style="position:absolute;top:-10000px;width:10000px;font-size:smaller">'
-                                         + labels.join("") + '<div style="clear:left"></div></div>').appendTo(target);
-                        axis.labelHeight = dummyDiv.height();
-                        dummyDiv.remove();
-                    }
-                }
-            }
-            
-            function measureYLabels(axis) {
-                if (axis.labelWidth == null || axis.labelHeight == null) {
-                    var i, labels = [], l;
-                    // calculate y label dimensions
-                    for (i = 0; i < axis.ticks.length; ++i) {
-                        l = axis.ticks[i].label;
-                        if (l)
-                            labels.push('<div class="tickLabel">' + l + '</div>');
-                    }
-                    
-                    if (labels.length > 0) {
-                        var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                         + labels.join("") + '</div>').appendTo(target);
-                        if (axis.labelWidth == null)
-                            axis.labelWidth = dummyDiv.width();
-                        if (axis.labelHeight == null)
-                            axis.labelHeight = dummyDiv.find("div").height();
-                        dummyDiv.remove();
-                    }
-                    
-                    if (axis.labelWidth == null)
-                        axis.labelWidth = 0;
-                    if (axis.labelHeight == null)
-                        axis.labelHeight = 0;
-                }
-            }
-
-            // get the most space needed around the grid for things
-            // that may stick out
-            var maxOutset = options.grid.borderWidth;
-            for (i = 0; i < series.length; ++i)
-                maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
-            
-            plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
-            
-            var margin = options.grid.labelMargin + options.grid.borderWidth;
-            
-            measureXLabels(axes.xaxis);
-            measureYLabels(axes.yaxis);
-            measureXLabels(axes.x2axis);
-            measureYLabels(axes.y2axis);
-            
-            if (axes.xaxis.labelHeight > 0)
-                plotOffset.bottom = Math.max(maxOutset, axes.xaxis.labelHeight + margin);
-            if (axes.yaxis.labelWidth > 0)
-                    plotOffset.left = Math.max(maxOutset, axes.yaxis.labelWidth + margin);
-            
-            if (axes.x2axis.labelHeight > 0)
-                plotOffset.top = Math.max(maxOutset, axes.x2axis.labelHeight + margin);
-            
-            if (axes.y2axis.labelWidth > 0)
-                plotOffset.right = Math.max(maxOutset, axes.y2axis.labelWidth + margin);
-            
-            plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
-            plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
-        }
-        
+      
         function draw() {
             if (options.grid.show)
                 drawGrid();
