@@ -361,7 +361,7 @@
                     format.push({ y: true, number: true, required: true })
 
                     if (s.bars.show)
-                        format.push({ y: true, number: true, required: false, default: 0 });
+                        format.push({ y: true, number: true, required: false, defaultValue: 0 });
                     
                     s.datapoints.format = format;
                 }
@@ -405,8 +405,8 @@
                                         nullify = true;
                                     }
                                     
-                                    if (f.default != null)
-                                        val = f.default;
+                                    if (f.defaultValue != null)
+                                        val = f.defaultValue;
                                 }
                             }
                             

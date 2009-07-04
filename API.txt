@@ -930,10 +930,10 @@ Currently available hooks (when in doubt, check the Flot source):
    taken into account when scaling the x axis, that it must be a
    number, and that it is required - so if it is null or cannot be
    converted to a number, the whole point will be zeroed out with
-   nulls. Beyond these you can also specify "default". If the
-   coordinate is null and default is set, then default is used for the
-   value. This is for instance handy for bars where we can omit the
-   third coordinate (the bottom of the bar) which then defaults to 0.
+   nulls. Beyond these you can also specify "defaultValue", a value to
+   use if the coordinate is null. This is for instance handy for bars
+   where one can omit the third coordinate (the bottom of the bar)
+   which then defaults to 0.
 
 
  - processDatapoints  [phase 3]
