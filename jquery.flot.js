@@ -303,8 +303,16 @@
                     s.color = colors[s.color].toString();
 
                 // turn on lines automatically in case nothing is set
-                if (s.lines.show == null && !s.bars.show && !s.points.show)
-                    s.lines.show = true;
+                if (s.lines.show == null) {
+                    var v, show = true;
+                    for (var v in s)
+                        if (s[v].show) {
+                            show = false;
+                            break;
+                        }
+                    if (show)
+                        s.lines.show = true;
+                }
 
                 // setup axes
                 s.xaxis = axisSpecToRealAxis(s, "xaxis");
@@ -316,7 +324,7 @@
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 i, j, k, m, length,
-                s, points, ps, x, y, axis;
+                s, points, ps, x, y, axis, val, f, p;
 
             for (axis in axes) {
                 axes[axis].datamin = topSentry;
@@ -344,23 +352,25 @@
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
 
+                var data = s.data, format = s.datapoints.format;
+
+                if (!format) {
+                    format = []
+                    // find out how to copy
+                    format.push({ x: true, number: true, required: true })
+                    format.push({ y: true, number: true, required: true })
+
+                    if (s.bars.show)
+                        format.push({ y: true, number: true, required: false, default: 0 });
+                    
+                    s.datapoints.format = format;
+                }
+
                 if (s.datapoints.pointsize != null)
                     continue; // already filled in
 
-                var data = s.data, format = [], p;
-
-                // determine the point size
-                if (s.bars.show) {
-                    s.datapoints.pointsize = 3;
-                    format.push({ d: 0 });
-                }
-                else
-                    s.datapoints.pointsize = 2;
-                
-                /*
-                // examine data to find out how to copy
-                for (j = 0; j < data.length; ++j) {
-                }*/
+                if (s.datapoints.pointsize == null)
+                    s.datapoints.pointsize = format.length;
                 
                 ps = s.datapoints.pointsize;
                 points = s.datapoints.points;
@@ -371,54 +381,62 @@
                 for (j = k = 0; j < data.length; ++j, k += ps) {
                     p = data[j];
 
-                    if (p != null) {
-                        x = p[0];
-                        y = p[1];
-                    }
-                    else
-                        y = x = null;
+                    var nullify = p == null;
+                    if (!nullify) {
+                        for (m = 0; m < ps; ++m) {
+                            val = p[m];
+                            f = format[m];
 
-                    if (x != null) {
-                        x = +x; // convert to number
-                        if (isNaN(x))
-                            x = null;
-                    }
+                            if (f) {
+                                if (f.number && val != null) {
+                                    val = +val; // convert to number
+                                    if (isNaN(val))
+                                        val = null;
+                                }
 
-                    if (y != null) {
-                        y = +y; // convert to number
-                        if (isNaN(y))
-                            y = null;
-                    }
-
-                    // check validity of point, making sure both are cleared
-                    if (x == null && y != null) {
-                        // extract min/max info before we whack
-                        updateAxis(s.yaxis, y, y);
-                        y = null;
-                    }
-
-                    if (y == null && x != null) {
-                        updateAxis(s.xaxis, x, x);
-                        x = null;
-                    }
-                    
-                    if (insertSteps && x != null && k > 0
-                        && points[k - ps] != null
-                        && points[k - ps] != x && points[k - ps + 1] != y) {
-                        points[k + 1] = points[k - ps + 1];
-                        points[k] = x;
+                                if (val == null) {
+                                    if (f.required) {
+                                        // extract min/max info before we whack it
+                                        if (f.x)
+                                            updateAxis(s.xaxis, val, val)
+                                        if (f.y)
+                                            updateAxis(s.yaxis, val, val)
+                                        val = null;
+                                        nullify = true;
+                                    }
+                                    
+                                    if (f.default != null)
+                                        val = f.default;
+                                }
+                            }
                             
-                        // copy the remainding from real point
-                        for (m = 2; m < ps; ++m)
-                            points[k + m] = p[m] == null ? format[m-2].d : p[m];
-                        k += ps;
+                            points[k + m] = val;
+                        }
                     }
-
-                    for (m = 2; m < ps; ++m)
-                        points[k + m] = p == null || p[m] == null ? format[m-2].d : p[m];
                     
-                    points[k] = x;
-                    points[k + 1] = y;
+                    if (nullify) {
+                        for (m = 0; m < ps; ++m)
+                            points[k + m] = null;
+                    }
+                    else {
+                        // a little bit of line specific stuff that
+                        // perhaps shouldn't be here, but lacking
+                        // better means...
+                        if (insertSteps && k > 0
+                            && points[k - ps] != null
+                            && points[k - ps] != points[k]
+                            && points[k - ps + 1] != points[k + 1]) {
+                            // copy the point to make room for a middle point
+                            for (m = 0; m < ps; ++m)
+                                points[k + ps + m] = points[k + m];
+
+                            // middle point has same y
+                            points[k + 1] = points[k - ps + 1];
+
+                            // we've added a point, better reflect that
+                            k += ps;
+                        }
+                    }
                 }
             }
 
@@ -438,22 +456,28 @@
                     xmax = bottomSentry, ymax = bottomSentry;
                 
                 for (j = 0; j < points.length; j += ps) {
-                    x = points[j];
-
-                    if (x == null)
+                    if (points[j] == null)
                         continue;
 
-                    if (x < xmin)
-                        xmin = x;
-                    if (x > xmax)
-                        xmax = x;
-
-                    y = points[j + 1];
-
-                    if (y < ymin)
-                        ymin = y;
-                    if (y > ymax)
-                        ymax = y;
+                    for (m = 0; m < ps; ++m) {
+                        val = points[j + m];
+                        f = format[m];
+                        if (!f)
+                            continue
+                        
+                        if (f.x) {
+                            if (val < xmin)
+                                xmin = val;
+                            if (val > xmax)
+                                xmax = val;
+                        }
+                        if (f.y) {
+                            if (val < ymin)
+                                ymin = val;
+                            if (val > ymax)
+                                ymax = val;
+                        }
+                    }
                 }
                 
                 if (s.bars.show) {
@@ -627,12 +651,14 @@
             if (typeof axisOptions.ticks == "number" && axisOptions.ticks > 0)
                 noTicks = axisOptions.ticks;
             else if (axis == axes.xaxis || axis == axes.x2axis)
-                noTicks = canvasWidth / 100;
+                 // heuristic based on the model a*sqrt(x) fitted to
+                 // some reasonable data points
+                noTicks = 0.3 * Math.sqrt(canvasWidth);
             else
-                noTicks = canvasHeight / 60;
+                noTicks = 0.3 * Math.sqrt(canvasHeight);
             
-            var delta = (axis.max - axis.min) / noTicks;
-            var size, generator, unit, formatter, i, magn, norm;
+            var delta = (axis.max - axis.min) / noTicks,
+                size, generator, unit, formatter, i, magn, norm;
 
             if (axisOptions.mode == "time") {
                 // pretty handling of time
@@ -801,7 +827,7 @@
                 var dec = -Math.floor(Math.log(delta) / Math.LN10);
                 if (maxDec != null && dec > maxDec)
                     dec = maxDec;
-                
+
                 magn = Math.pow(10, -dec);
                 norm = delta / magn; // norm is between 1.0 and 10.0
                 
@@ -827,9 +853,9 @@
 
                 if (axisOptions.tickSize != null)
                     size = axisOptions.tickSize;
-                
+
                 axis.tickDecimals = Math.max(0, (maxDec != null) ? maxDec : dec);
-                
+
                 generator = function (axis) {
                     var ticks = [];
 
@@ -2274,10 +2300,6 @@
 
         this.clone = function() {
             return new Color(this.r, this.b, this.g, this.a);
-        };
-
-        var limit = function(val,minVal,maxVal) {
-            return Math.max(Math.min(val, maxVal), minVal);
         };
 
         this.normalize = function() {

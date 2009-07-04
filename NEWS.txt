@@ -89,8 +89,8 @@ Changes:
 
 - Hooks: you can register functions that are called while Flot is
   crunching the data and doing the plot. This can be used to modify
-  Flot without changing the source, useful for writing plugins. At
-  this point only some hooks are defined.
+  Flot without changing the source, useful for writing plugins. Some
+  hooks are defined, more are likely to come.
   
 - Threshold plugin: you can set a threshold and a color, and the data
   points below that threshold will then get the color. Useful for
@@ -102,7 +102,9 @@ Changes:
 
 - Crosshairs plugin: trace the mouse position on the axes, enable with
   crosshair: { mode: "x"} (see the new tracking example for a use).
-  
+
+- Image plugin: plot prerendered images.
+
   
 Bug fixes:
 
@@ -140,6 +142,8 @@ Bug fixes:
   with vertical lines.
 - Round tick positions to avoid possible problems with fractions
   (suggestion by Fred, issue 130).
+- Made the heuristic for determining how many ticks to aim for a bit
+  smarter.
 
 
 Flot 0.5
