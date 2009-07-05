@@ -822,7 +822,6 @@ Flot to keep track of its state, so be careful.
     flat array (the field "pointsize" is the increment in the flat
     array to get to the next point so for a dataset consisting only of
     (x,y) pairs it would be 2).
-  
 
   - getAxes()
 
@@ -835,12 +834,15 @@ Flot to keep track of its state, so be careful.
     transforming from data point space to the canvas plot space and
     back. Both returns values that are offset with the plot offset.
  
+  - getPlaceholder()
+
+    Returns placeholder that the plot was put into. This can be useful
+    for plugins for adding DOM elements or firing events.
 
   - getCanvas()
 
     Returns the canvas used for drawing in case you need to hack on it
     yourself. You'll probably need to get the plot offset too.
-
   
   - getPlotOffset()
 

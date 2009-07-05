@@ -5,7 +5,7 @@
  */
 
 (function($) {
-    function Plot(target, data_, options_, plugins) {
+    function Plot(placeholder, data_, options_, plugins) {
         // data is on the form:
         //   [ series1, series2 ... ]
         // where series is either just the data as [ [x1, y1], [x2, y2], ... ]
@@ -128,6 +128,7 @@
         plot.clearSelection = clearSelection;
         plot.setSelection = setSelection;
         plot.getSelection = getSelection;
+        plot.getPlaceholder = function() { return placeholder; };
         plot.getCanvas = function() { return canvas; };
         plot.getPlotOffset = function() { return plotOffset; };
         plot.width = function () { return plotWidth; }
@@ -515,11 +516,11 @@
                 return c;
             }
             
-            canvasWidth = target.width();
-            canvasHeight = target.height();
-            target.html(""); // clear target
-            if (target.css("position") == 'static')
-                target.css("position", "relative"); // for positioning labels and overlay
+            canvasWidth = placeholder.width();
+            canvasHeight = placeholder.height();
+            placeholder.html(""); // clear placeholder
+            if (placeholder.css("position") == 'static')
+                placeholder.css("position", "relative"); // for positioning labels and overlay
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
@@ -528,11 +529,11 @@
                 window.G_vmlCanvasManager.init_(document); // make sure everything is setup
             
             // the canvas
-            canvas = $(makeCanvas(canvasWidth, canvasHeight)).appendTo(target).get(0);
+            canvas = $(makeCanvas(canvasWidth, canvasHeight)).appendTo(placeholder).get(0);
             ctx = canvas.getContext("2d");
 
             // overlay canvas for interactive features
-            overlay = $(makeCanvas(canvasWidth, canvasHeight)).css({ position: 'absolute', left: 0, top: 0 }).appendTo(target).get(0);
+            overlay = $(makeCanvas(canvasWidth, canvasHeight)).css({ position: 'absolute', left: 0, top: 0 }).appendTo(placeholder).get(0);
             octx = overlay.getContext("2d");
             octx.stroke();
         }
@@ -606,7 +607,7 @@
                         
                         if (labels.length > 0) {
                             var dummyDiv = $('<div style="position:absolute;top:-10000px;width:10000px;font-size:smaller">'
-                                             + labels.join("") + '<div style="clear:left"></div></div>').appendTo(target);
+                                             + labels.join("") + '<div style="clear:left"></div></div>').appendTo(placeholder);
                             axis.labelHeight = dummyDiv.height();
                             dummyDiv.remove();
                         }
@@ -622,7 +623,7 @@
                     
                     if (labels.length > 0) {
                         var dummyDiv = $('<div style="position:absolute;top:-10000px;font-size:smaller">'
-                                         + labels.join("") + '</div>').appendTo(target);
+                                         + labels.join("") + '</div>').appendTo(placeholder);
                         if (axis.labelWidth == null)
                             axis.labelWidth = dummyDiv.width();
                         if (axis.labelHeight == null)
@@ -1184,7 +1185,7 @@
         }
 
         function insertLabels() {
-            target.find(".tickLabels").remove();
+            placeholder.find(".tickLabels").remove();
             
             var html = ['<div class="tickLabels" style="font-size:smaller;color:' + options.grid.color + '">'];
 
@@ -1218,7 +1219,7 @@
 
             html.push('</div>');
             
-            target.append(html.join(""));
+            placeholder.append(html.join(""));
         }
 
         function drawSeries(series) {
@@ -1669,7 +1670,7 @@
         }
         
         function insertLegend() {
-            target.find(".legend").remove();
+            placeholder.find(".legend").remove();
 
             if (!options.legend.show)
                 return;
@@ -1719,7 +1720,7 @@
                     pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
                 else if (p.charAt(1) == "w")
                     pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
-                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(target);
+                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
                 if (options.legend.backgroundOpacity != 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
@@ -1839,7 +1840,7 @@
                                        function (s) { return s["hoverable"] != false; });
 
             if (selection.active) {
-                target.trigger("plotselecting", [ getSelection() ]);
+                placeholder.trigger("plotselecting", [ getSelection() ]);
 
                 updateSelection(lastMousePos);
             }
@@ -1917,7 +1918,7 @@
                     highlight(item.series, item.datapoint, eventname);
             }
             
-            target.trigger(eventname, [ pos, item ]);
+            placeholder.trigger(eventname, [ pos, item ]);
         }
 
         function triggerRedrawOverlay() {
@@ -2059,11 +2060,11 @@
         function triggerSelectedEvent() {
             var r = getSelection();
             
-            target.trigger("plotselected", [ r ]);
+            placeholder.trigger("plotselected", [ r ]);
 
             // backwards-compat stuff, to be removed in future
             if (axes.xaxis.used && axes.yaxis.used)
-                target.trigger("selected", [ { x1: r.xaxis.from, y1: r.yaxis.from, x2: r.xaxis.to, y2: r.yaxis.to } ]);
+                placeholder.trigger("selected", [ { x1: r.xaxis.from, y1: r.yaxis.from, x2: r.xaxis.to, y2: r.yaxis.to } ]);
         }
         
         function onSelectionMouseUp(e) {
@@ -2083,8 +2084,8 @@
             }
             else {
                 // this counts as a clear
-                target.trigger("plotunselected", [ ]);
-                target.trigger("plotselecting", [ null ]);
+                placeholder.trigger("plotunselected", [ ]);
+                placeholder.trigger("plotselecting", [ null ]);
             }
             
             return false;
@@ -2128,7 +2129,7 @@
                 selection.show = false;
                 triggerRedrawOverlay();
                 if (!preventEvent)
-                    target.trigger("plotunselected", [ ]);
+                    placeholder.trigger("plotunselected", [ ]);
             }
         }
 
@@ -2188,8 +2189,8 @@
         }
     }
 
-    $.plot = function(target, data, options) {
-        var plot = new Plot($(target), data, options, $.plot.plugins);
+    $.plot = function(placeholder, data, options) {
+        var plot = new Plot($(placeholder), data, options, $.plot.plugins);
         /*var t0 = new Date();
         var t1 = new Date();
         var tstr = "time used (msecs): " + (t1.getTime() - t0.getTime())
