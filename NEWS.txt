@@ -107,6 +107,8 @@ Changes:
 
 - Image plugin: plot prerendered images.
 
+- Navigation plugin for panning and zooming a plot.
+
   
 Bug fixes:
 
