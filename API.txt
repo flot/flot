@@ -1020,7 +1020,14 @@ Plugins
 Plugins extend the functionality of Flot. To use a plugin, simply
 include its Javascript file after Flot in the HTML page.
 
-The plugin registers itself in the global array $.plot.plugins. When
+If you're worried about download size/latency, you can concatenate all
+the plugins you use and Flot itself for that matter into one big file
+(make sure you get the order right), then optionally run it through a
+Javascript minifier such as YUI Compressor.
+
+Here's a brief explanation of how the plugin plumbings work:
+
+Each plugin registers itself in the global array $.plot.plugins. When
 you make a new plot object with $.plot, Flot goes through this array
 calling the "init" function of each plugin and merging default options
 from its "option" attribute. The init function gets a reference to the
