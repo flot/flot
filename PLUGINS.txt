@@ -32,16 +32,15 @@ how much info to output:
     function init(plot) {
       var debugLevel = 1;
     
-      function checkDebugEnabled(args) {
-        if (args.options.debug) {
-          debugLevel = args.options.debug;
+      function checkDebugEnabled(plot, options) {
+        if (options.debug) {
+          debugLevel = options.debug;
             
           plot.hooks.processDatapoints.push(alertSeries);
         }
       }
 
-      function alertSeries(args) {
-        var series = args.series;
+      function alertSeries(plot, series, datapoints) {
         var msg = "series " + series.label;
         if (debugLevel > 1)
           msg += " with " + series.data.length + " points";
@@ -71,7 +70,7 @@ HTML page and then it can be used with:
 
 This simple plugin illustrates a couple of points:
 
- - It uses the anonymous function trick to ensure no namespace pollution.
+ - It uses the anonymous function trick to avoid name pollution.
  - It can be enabled/disabled through an option.
  - Variables in the init function can be used to store plot-specific
    state between the hooks.
@@ -103,4 +102,4 @@ than on per default, just like most of the powerful features in Flot.
 
 Think hard and long about naming the options. These names are going to
 be public API, and code is going to depend on them if the plugin is
-succesful.
+successful.
