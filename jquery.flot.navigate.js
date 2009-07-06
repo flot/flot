@@ -1,11 +1,11 @@
 /*
 Flot plugin for adding panning and zooming capabilities to a plot.
 
-The default behaviour is double click to zoom in, drag to pan. The
-plugin defines plot.zoom({ center }), plot.zoomOut() and
-plot.pan(offset) so you easily can add custom controls. It also fires
-a "plotpan" and "plotzoom" event when something happens, useful for
-synchronizing plots.
+The default behaviour is double click and scrollwheel up/down to zoom
+in, drag to pan. The plugin defines plot.zoom({ center }),
+plot.zoomOut() and plot.pan(offset) so you easily can add custom
+controls. It also fires a "plotpan" and "plotzoom" event when
+something happens, useful for synchronizing plots.
 
 Example usage:
 
@@ -52,12 +52,32 @@ panRange: [-10, 20] panning stops at -10 in one end and at 20 in the
 other. Either can be null.
 */
 
+
+// First two dependencies, jquery.event.drag.js and
+// jquery.mousewheel.js, we put them inline here to save people the
+// effort of downloading them.
+
 /*
-First an inline dependency:
 jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)  
 Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-LICENSE.txt
 */
 (function(E){E.fn.drag=function(L,K,J){if(K){this.bind("dragstart",L)}if(J){this.bind("dragend",J)}return !L?this.trigger("drag"):this.bind("drag",K?K:L)};var A=E.event,B=A.special,F=B.drag={not:":input",distance:0,which:1,dragging:false,setup:function(J){J=E.extend({distance:F.distance,which:F.which,not:F.not},J||{});J.distance=I(J.distance);A.add(this,"mousedown",H,J);if(this.attachEvent){this.attachEvent("ondragstart",D)}},teardown:function(){A.remove(this,"mousedown",H);if(this===F.dragging){F.dragging=F.proxy=false}G(this,true);if(this.detachEvent){this.detachEvent("ondragstart",D)}}};B.dragstart=B.dragend={setup:function(){},teardown:function(){}};function H(L){var K=this,J,M=L.data||{};if(M.elem){K=L.dragTarget=M.elem;L.dragProxy=F.proxy||K;L.cursorOffsetX=M.pageX-M.left;L.cursorOffsetY=M.pageY-M.top;L.offsetX=L.pageX-L.cursorOffsetX;L.offsetY=L.pageY-L.cursorOffsetY}else{if(F.dragging||(M.which>0&&L.which!=M.which)||E(L.target).is(M.not)){return }}switch(L.type){case"mousedown":E.extend(M,E(K).offset(),{elem:K,target:L.target,pageX:L.pageX,pageY:L.pageY});A.add(document,"mousemove mouseup",H,M);G(K,false);F.dragging=null;return false;case !F.dragging&&"mousemove":if(I(L.pageX-M.pageX)+I(L.pageY-M.pageY)<M.distance){break}L.target=M.target;J=C(L,"dragstart",K);if(J!==false){F.dragging=K;F.proxy=L.dragProxy=E(J||K)[0]}case"mousemove":if(F.dragging){J=C(L,"drag",K);if(B.drop){B.drop.allowed=(J!==false);B.drop.handler(L)}if(J!==false){break}L.type="mouseup"}case"mouseup":A.remove(document,"mousemove mouseup",H);if(F.dragging){if(B.drop){B.drop.handler(L)}C(L,"dragend",K)}G(K,true);F.dragging=F.proxy=M.elem=false;break}return true}function C(M,K,L){M.type=K;var J=E.event.handle.call(L,M);return J===false?false:J||M.result}function I(J){return Math.pow(J,2)}function D(){return(F.dragging===false)}function G(K,J){if(!K){return }K.unselectable=J?"off":"on";K.onselectstart=function(){return J};if(K.style){K.style.MozUserSelect=J?"":"none"}}})(jQuery);
+
+
+/* jquery.mousewheel.min.js
+ * Copyright (c) 2009 Brandon Aaron (http://brandonaaron.net)
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+ * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+ * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
+ * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
+ *
+ * Version: 3.0.2
+ * 
+ * Requires: 1.2.2+
+ */
+(function(c){var a=["DOMMouseScroll","mousewheel"];c.event.special.mousewheel={setup:function(){if(this.addEventListener){for(var d=a.length;d;){this.addEventListener(a[--d],b,false)}}else{this.onmousewheel=b}},teardown:function(){if(this.removeEventListener){for(var d=a.length;d;){this.removeEventListener(a[--d],b,false)}}else{this.onmousewheel=null}}};c.fn.extend({mousewheel:function(d){return d?this.bind("mousewheel",d):this.trigger("mousewheel")},unmousewheel:function(d){return this.unbind("mousewheel",d)}});function b(f){var d=[].slice.call(arguments,1),g=0,e=true;f=c.event.fix(f||window.event);f.type="mousewheel";if(f.wheelDelta){g=f.wheelDelta/120}if(f.detail){g=-f.detail/3}d.unshift(f,g);return c.event.handle.apply(this,d)}})(jQuery);
+
+
 
 
 (function ($) {
@@ -81,14 +101,23 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
-            if (o.zoom.interactive)
-                eventHolder[o.zoom.trigger](function (e) {
+            if (o.zoom.interactive) {
+                function clickHandler(e) {
                     prevPoint = plot.offset();
                     prevPoint.left = e.pageX - prevPoint.left;
                     prevPoint.top = e.pageY - prevPoint.top;
                     plot.zoom({ center: prevPoint });
-                });
+                }
+                
+                eventHolder[o.zoom.trigger](clickHandler);
 
+                eventHolder.mousewheel(function (e, delta) {
+                    if (delta > 0)
+                        clickHandler(e);
+                    else
+                        plot.zoomOut();
+                });
+            }
             if (o.pan.interactive) {
                 var prevCursor = 'default', pageX = 0, pageY = 0;
                 
