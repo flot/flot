@@ -140,6 +140,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         plot.zoomOut = function (args) {
+            if (!args)
+                args = {};
+            
             if (!args.amount)
                 args.amount = plot.getOptions().zoom.amount
 
@@ -148,6 +151,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
         
         plot.zoom = function (args) {
+            if (!args)
+                args = {};
+            
             var axes = plot.getAxes(),
                 options = plot.getOptions(),
                 c = args.center,
