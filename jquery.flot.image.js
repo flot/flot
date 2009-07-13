@@ -166,15 +166,15 @@ images (like Google Maps).
                 }
 
                 if (y1 < yaxis.min) {
-                    sy1 += (sy2 - sy1) * (yaxis.min - y1) / (y2 - y1);
+                    sy2 += (sy1 - sy2) * (yaxis.min - y1) / (y2 - y1);
                     y1 = yaxis.min;
                 }
 
                 if (y2 > yaxis.max) {
-                    sy2 += (sy2 - sy1) * (yaxis.max - y2) / (y2 - y1);
+                    sy1 += (sy1 - sy2) * (yaxis.max - y2) / (y2 - y1);
                     y2 = yaxis.max;
                 }
-
+                
                 x1 = xaxis.p2c(x1);
                 x2 = xaxis.p2c(x2);
                 y1 = yaxis.p2c(y1);
