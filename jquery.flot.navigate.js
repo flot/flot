@@ -15,7 +15,7 @@ Example usage:
   plot.zoom({ center: { left: 10, top: 20 } });
 
   // zoom out again
-  plot.zoomOut();
+  plot.zoomOut({ center: { left: 10, top: 20 } });
 
   // pan 100 pixels to the left and 20 down
   plot.pan({ left: -100, top: 20 })
@@ -97,25 +97,23 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     };
 
     function init(plot) {
-        var prevPoint = null;
-        
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
-                function clickHandler(e) {
-                    prevPoint = plot.offset();
-                    prevPoint.left = e.pageX - prevPoint.left;
-                    prevPoint.top = e.pageY - prevPoint.top;
-                    plot.zoom({ center: prevPoint });
+                function clickHandler(e, zoomOut) {
+                    var c = plot.offset();
+                    c.left = e.pageX - c.left;
+                    c.top = e.pageY - c.top;
+                    if (zoomOut)
+                        plot.zoomOut({ center: c });
+                    else
+                        plot.zoom({ center: c });
                 }
                 
                 eventHolder[o.zoom.trigger](clickHandler);
 
                 eventHolder.mousewheel(function (e, delta) {
-                    if (delta > 0)
-                        clickHandler(e);
-                    else
-                        plot.zoomOut();
+                    clickHandler(e, delta < 0);
                 });
             }
             if (o.pan.interactive) {
@@ -141,15 +139,18 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
         }
 
-        plot.zoomOut = function () {
-            plot.zoom({ amount: 1 / plot.getOptions().zoom.amount });
-            prevPoint = null;
+        plot.zoomOut = function (args) {
+            if (!args.amount)
+                args.amount = plot.getOptions().zoom.amount
+
+            args.amount = 1 / args.amount;
+            plot.zoom(args);
         }
         
         plot.zoom = function (args) {
             var axes = plot.getAxes(),
                 options = plot.getOptions(),
-                c = args.center ? args.center : prevPoint,
+                c = args.center,
                 amount = args.amount ? args.amount : options.zoom.amount,
                 w = plot.width(), h = plot.height();
 
@@ -259,6 +260,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         init: init,
         options: options,
         name: 'navigate',
-        version: '1.0'
+        version: '1.1'
     });
 })(jQuery);
