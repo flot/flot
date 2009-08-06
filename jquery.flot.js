@@ -693,9 +693,10 @@
         
         function setRange(axis, axisOptions) {
             var min = +(axisOptions.min != null ? axisOptions.min : axis.datamin),
-                max = +(axisOptions.max != null ? axisOptions.max : axis.datamax);
+                max = +(axisOptions.max != null ? axisOptions.max : axis.datamax),
+                delta = max - min;
 
-            if (max - min == 0.0) {
+            if (delta == 0.0) {
                 // degenerate case
                 var widen = max == 0 ? 1 : 0.01;
 
@@ -711,14 +712,14 @@
                 var margin = axisOptions.autoscaleMargin;
                 if (margin != null) {
                     if (axisOptions.min == null) {
-                        min -= (max - min) * margin;
+                        min -= delta * margin;
                         // make sure we don't go below zero if all values
                         // are positive
                         if (min < 0 && axis.datamin != null && axis.datamin >= 0)
                             min = 0;
                     }
                     if (axisOptions.max == null) {
-                        max += (max - min) * margin;
+                        max += delta * margin;
                         if (max > 0 && axis.datamax != null && axis.datamax <= 0)
                             max = 0;
                     }
@@ -1009,7 +1010,7 @@
                 if (axisOptions.min == null)
                     axis.min = Math.min(axis.min, axis.ticks[0].v);
                 if (axisOptions.max == null && axis.ticks.length > 1)
-                    axis.max = Math.min(axis.max, axis.ticks[axis.ticks.length - 1].v);
+                    axis.max = Math.max(axis.max, axis.ticks[axis.ticks.length - 1].v);
             }
         }
       
