@@ -109,6 +109,8 @@ Changes:
 
 - Navigation plugin for panning and zooming a plot.
 
+- More configurable grid.
+
   
 Bug fixes:
 
@@ -149,7 +151,7 @@ Bug fixes:
 - Made the heuristic for determining how many ticks to aim for a bit
   smarter.
 - Fix for uneven axis margins (report and patch by Paul Kienzle) and
-  snapping to ticks.
+  snapping to ticks (concurrent report and patch by lifthrasiir).
 
 Flot 0.5
 --------

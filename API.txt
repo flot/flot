@@ -507,6 +507,7 @@ Customizing the grid
 
   grid: {
     show: boolean
+    aboveData: boolean
     color: color
     backgroundColor: color/gradient or null
     tickColor: color
@@ -524,8 +525,11 @@ The grid is the thing with the axes and a number of ticks. "color" is
 the color of the grid itself whereas "backgroundColor" specifies the
 background color inside the grid area. The default value of null means
 that the background is transparent. You can also set a gradient, see
-the gradient documentation below. You can turn off the whole grid
-including tick labels by setting "show" to false.
+the gradient documentation below.
+
+You can turn off the whole grid including tick labels by setting
+"show" to false. "aboveData" determines whether the grid is drawn on
+above the data or below (below is default).
 
 "tickColor" is the color of the ticks and "labelMargin" is the spacing
 between tick labels and the grid. Note that you can style the tick
@@ -1013,7 +1017,7 @@ Currently available hooks (when in doubt, check the Flot source):
    crosshair plugin for an example.
 
 
-
+   
 Plugins
 -------
 

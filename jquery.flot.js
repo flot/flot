@@ -81,9 +81,10 @@
                 },
                 grid: {
                     show: true,
+                    aboveData: false,
                     color: "#545454", // primary color used for outline and labels
                     backgroundColor: null, // null for transparent, else color
-                    tickColor: "#dddddd", // color used for the ticks
+                    tickColor: "rgba(0,0,0,0.15)", // color used for the ticks
                     labelMargin: 5, // in pixels
                     borderWidth: 2, // in pixels
                     borderColor: null, // set if different from the grid color
@@ -1015,13 +1016,20 @@
         }
       
         function draw() {
-            if (options.grid.show)
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            var grid = options.grid;
+            
+            if (grid.show && !grid.aboveData)
                 drawGrid();
 
             for (var i = 0; i < series.length; ++i)
                 drawSeries(series[i]);
 
             executeHooks(hooks.draw, [ctx]);
+            
+            if (grid.show && grid.aboveData)
+                drawGrid();
         }
 
         function extractRange(ranges, coord) {
@@ -1057,7 +1065,6 @@
             var i;
             
             ctx.save();
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             ctx.translate(plotOffset.left, plotOffset.top);
 
             // draw background, if any
