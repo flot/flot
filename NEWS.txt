@@ -148,7 +148,8 @@ Bug fixes:
   (suggestion by Fred, issue 130).
 - Made the heuristic for determining how many ticks to aim for a bit
   smarter.
-
+- Fix for uneven axis margins (report and patch by Paul Kienzle) and
+  snapping to ticks.
 
 Flot 0.5
 --------
