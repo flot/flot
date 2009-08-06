@@ -28,6 +28,7 @@ Options for the plugin are
       images: {
           show: boolean
           anchor: "corner" or "center"
+          alpha: [0,1]
       }
   }
 
@@ -39,8 +40,8 @@ Note that because the data format is different from usual data points,
 you can't use images with anything else in a specific data series.
 
 Setting "anchor" to "center" causes the pixels in the image to be
-anchored at the pixel centers inside of at the corners, effectively
-letting half a pixel stick out as border.
+anchored at the corner pixel centers inside of at the pixel corners,
+effectively letting half a pixel stick out to each side in the plot.
 
 
 A possible future direction could be support for tiling for large
@@ -53,6 +54,7 @@ images (like Google Maps).
         series: {
             images: {
                 show: false,
+                alpha: 1,
                 anchor: "corner" // or "center"
             }
         }
@@ -140,7 +142,18 @@ images (like Google Maps).
                     y2 = y1;
                     y1 = tmp;
                 }
-
+                
+                // if the anchor is at the center of the pixel, expand the 
+                // image by 1/2 pixel in each direction
+                if (series.images.anchor == "center") {
+                    tmp = 0.5 * (x2-x1) / (img.width - 1);
+                    x1 -= tmp;
+                    x2 += tmp;
+                    tmp = 0.5 * (y2-y1) / (img.height - 1);
+                    y1 -= tmp;
+                    y2 += tmp;
+                }
+                
                 // clip
                 if (x1 == x2 || y1 == y2 ||
                     x1 >= xaxis.max || x2 <= xaxis.min ||
@@ -148,13 +161,6 @@ images (like Google Maps).
                     continue;
 
                 var sx1 = 0, sy1 = 0, sx2 = img.width, sy2 = img.height;
-                if (series.images.anchor == "center") {
-                    sx1 += 0.5;
-                    sy1 += 0.5;
-                    sx2 -= 0.5;
-                    sy2 -= 0.5;
-                }
-
                 if (x1 < xaxis.min) {
                     sx1 += (sx2 - sx1) * (xaxis.min - x1) / (x2 - x1);
                     x1 = xaxis.min;
@@ -192,10 +198,13 @@ images (like Google Maps).
                     y1 = tmp;
                 }
 
+                tmp = ctx.globalAlpha;
+                ctx.globalAlpha *= series.images.alpha;
                 ctx.drawImage(img,
                               sx1, sy1, sx2 - sx1, sy2 - sy1,
                               x1 + plotOffset.left, y1 + plotOffset.top,
                               x2 - x1, y2 - y1);
+                ctx.globalAlpha = tmp;
             }
         });
     }
@@ -223,6 +232,6 @@ images (like Google Maps).
         init: init,
         options: options,
         name: 'image',
-        version: '1.0'
+        version: '1.1'
     });
 })(jQuery);
