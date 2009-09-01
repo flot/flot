@@ -359,8 +359,8 @@
                 if (!format) {
                     format = []
                     // find out how to copy
-                    format.push({ x: true, number: true, required: true })
-                    format.push({ y: true, number: true, required: true })
+                    format.push({ x: true, number: true, required: true });
+                    format.push({ y: true, number: true, required: true });
 
                     if (s.bars.show)
                         format.push({ y: true, number: true, required: false, defaultValue: 0 });
@@ -397,15 +397,8 @@
                                 }
 
                                 if (val == null) {
-                                    if (f.required) {
-                                        // extract min/max info before we whack it
-                                        if (f.x)
-                                            updateAxis(s.xaxis, val, val)
-                                        if (f.y)
-                                            updateAxis(s.yaxis, val, val)
-                                        val = null;
+                                    if (f.required)
                                         nullify = true;
-                                    }
                                     
                                     if (f.defaultValue != null)
                                         val = f.defaultValue;
@@ -417,8 +410,18 @@
                     }
                     
                     if (nullify) {
-                        for (m = 0; m < ps; ++m)
+                        for (m = 0; m < ps; ++m) {
+                            val = points[k + m];
+                            if (val != null) {
+                                f = format[m];
+                                // extract min/max info
+                                if (f.x)
+                                    updateAxis(s.xaxis, val, val);
+                                if (f.y)
+                                    updateAxis(s.yaxis, val, val);
+                            }
                             points[k + m] = null;
+                        }
                     }
                     else {
                         // a little bit of line specific stuff that
@@ -442,6 +445,7 @@
                 }
             }
 
+            // give the hooks a chance to run
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 
