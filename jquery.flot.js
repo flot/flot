@@ -331,8 +331,6 @@
             for (axis in axes) {
                 axes[axis].datamin = topSentry;
                 axes[axis].datamax = bottomSentry;
-                axes[axis].min = options[axis].min;
-                axes[axis].max = options[axis].max;
                 axes[axis].used = false;
             }
 
