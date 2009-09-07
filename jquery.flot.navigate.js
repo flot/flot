@@ -114,6 +114,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 eventHolder.mousewheel(function (e, delta) {
                     clickHandler(e, delta < 0);
+                    return false;
                 });
             }
             if (o.pan.interactive) {
