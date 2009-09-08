@@ -28,6 +28,8 @@
                 },
                 xaxis: {
                     mode: null, // null or "time"
+                    transform: null, // null or f: number -> number to transform axis
+                    inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
@@ -561,27 +563,42 @@
         }
 
         function setupGrid() {
-            function setTransformationHelpers(axis) {
-                var s, m;
+            function setTransformationHelpers(axis, o) {
+                function identity(x) { return x; }
+                
+                var s, m, t = o.transform || identity,
+                    it = o.inverseTransform;
                     
                 // add transformation helpers
                 if (axis == axes.xaxis || axis == axes.x2axis) {
                     // precompute how much the axis is scaling a point
                     // in canvas space
-                    s = axis.scale = plotWidth / (axis.max - axis.min);
-                    m = axis.min;
-                    
+                    s = axis.scale = plotWidth / (t(axis.max) - t(axis.min));
+                    m = t(axis.min);
+
                     // data point to canvas coordinate
-                    axis.p2c = function (p) { return (p - m) * s; };
-                    // canvas coordinate to data point 
-                    axis.c2p = function (c) { return m + c / s; };
+                    if (t === identity) // slight optimization
+                        axis.p2c = function (p) { return (p - m) * s; };
+                    else
+                        axis.p2c = function (p) { return (t(p) - m) * s; };
+                    // canvas coordinate to data point
+                    if (!it)
+                        axis.c2p = function (c) { return m + c / s; };
+                    else
+                        axis.c2p = function (c) { return it(m + c / s); };
                 }
                 else {
-                    s = axis.scale = plotHeight / (axis.max - axis.min)
-                    m = axis.max;
+                    s = axis.scale = plotHeight / (t(axis.max) - t(axis.min));
+                    m = t(axis.max);
                     
-                    axis.p2c = function (p) { return (m - p) * s; };
-                    axis.c2p = function (p) { return m - p / s; };
+                    if (t === identity)
+                        axis.p2c = function (p) { return (m - p) * s; };
+                    else
+                        axis.p2c = function (p) { return (m - t(p)) * s; };
+                    if (!it)
+                        axis.c2p = function (c) { return m - c / s; };
+                    else
+                        axis.c2p = function (c) { return it(m - c / s); };
                 }
             }
 
@@ -686,7 +703,7 @@
             }
             
             for (axis in axes)
-                setTransformationHelpers(axes[axis]);
+                setTransformationHelpers(axes[axis], options[axis]);
 
             if (options.grid.show)
                 insertLabels();

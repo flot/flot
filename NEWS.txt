@@ -111,6 +111,8 @@ Changes:
 
 - More configurable grid.
 
+- Axis transformation support, useful for non-linear plots, e.g. log
+  axes and compressed time axes (like omitting weekends).
   
 Bug fixes:
 

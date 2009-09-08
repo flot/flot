@@ -166,8 +166,6 @@ If you want the legend to appear somewhere else in the DOM, you can
 specify "container" as a jQuery object/expression to put the legend
 table into. The "position" and "margin" etc. options will then be
 ignored. Note that Flot will overwrite the contents of the container.
-Most of the above settings do not apply
-
 
 
 Customizing the axes
@@ -178,9 +176,13 @@ Customizing the axes
     min: null or number
     max: null or number
     autoscaleMargin: null or number
+    
     labelWidth: null or number
     labelHeight: null or number
 
+    transform: null or fn: number -> number
+    inverseTransform: null or fn: number -> number
+    
     ticks: null or number or ticks array or (fn: range -> ticks array)
     tickSize: number or array
     minTickSize: number or array
@@ -207,6 +209,29 @@ nearest whole tick. The default value is "null" for the x axis and
 "labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several
 plots.
+
+"transform" and "inverseTransform" are callbacks you can put in to
+change the way the data is drawn. You can design a function to
+compress or expand certain parts of the axis non-linearly, e.g.
+suppress weekends or compress far away points with a logarithm or some
+other means. When Flot draws the plot, each value is first put through
+the transform function. Here's an example, the x axis can be turned
+into a natural logarithm axis with the following code:
+
+  xaxis: {
+    transform: function (v) { return Math.log(v); },
+    inverseTransform: function (v) { return Math.exp(v); }
+  }
+
+Note that for finding extrema, Flot assumes that the transform
+function does not reorder values (monotonicity is assumed).
+
+The inverseTransform is simply the inverse of the transform function
+(so v == inverseTransform(transform(v)) for all relevant v). It is
+required for converting from canvas coordinates to data coordinates,
+e.g. for a mouse interaction where a certain pixel is clicked. If you
+don't use any interactive features of Flot, you may not need it.
+
 
 The rest of the options deal with the ticks.
 
