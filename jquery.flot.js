@@ -134,8 +134,8 @@
         plot.getPlaceholder = function() { return placeholder; };
         plot.getCanvas = function() { return canvas; };
         plot.getPlotOffset = function() { return plotOffset; };
-        plot.width = function () { return plotWidth; }
-        plot.height = function () { return plotHeight; }
+        plot.width = function () { return plotWidth; };
+        plot.height = function () { return plotHeight; };
         plot.offset = function () {
             var o = eventHolder.offset();
             o.left += plotOffset.left;
@@ -151,7 +151,7 @@
         plot.pointOffset = function(point) {
             return { left: parseInt(axisSpecToRealAxis(point, "xaxis").p2c(+point.x) + plotOffset.left),
                      top: parseInt(axisSpecToRealAxis(point, "yaxis").p2c(+point.y) + plotOffset.top) };
-        }
+        };
         
 
         // public attributes
@@ -185,7 +185,7 @@
         function parseOptions(opts) {
             $.extend(true, options, opts);
             if (options.grid.borderColor == null)
-                options.grid.borderColor = options.grid.color
+                options.grid.borderColor = options.grid.color;
             // backwards compatibility, to be removed in future
             if (options.xaxis.noTicks && options.xaxis.ticks == null)
                 options.xaxis.ticks = options.xaxis.noTicks;
@@ -309,7 +309,7 @@
                 // turn on lines automatically in case nothing is set
                 if (s.lines.show == null) {
                     var v, show = true;
-                    for (var v in s)
+                    for (v in s)
                         if (s[v].show) {
                             show = false;
                             break;
@@ -357,7 +357,7 @@
                 var data = s.data, format = s.datapoints.format;
 
                 if (!format) {
-                    format = []
+                    format = [];
                     // find out how to copy
                     format.push({ x: true, number: true, required: true });
                     format.push({ y: true, number: true, required: true });
@@ -469,7 +469,7 @@
                         val = points[j + m];
                         f = format[m];
                         if (!f)
-                            continue
+                            continue;
                         
                         if (f.x) {
                             if (val < xmin)
@@ -577,7 +577,7 @@
                     m = t(axis.min);
 
                     // data point to canvas coordinate
-                    if (t === identity) // slight optimization
+                    if (t == identity) // slight optimization
                         axis.p2c = function (p) { return (p - m) * s; };
                     else
                         axis.p2c = function (p) { return (t(p) - m) * s; };
@@ -591,7 +591,7 @@
                     s = axis.scale = plotHeight / (t(axis.max) - t(axis.min));
                     m = t(axis.max);
                     
-                    if (t === identity)
+                    if (t == identity)
                         axis.p2c = function (p) { return (m - p) * s; };
                     else
                         axis.p2c = function (p) { return (m - t(p)) * s; };
@@ -1787,7 +1787,7 @@
                 lowestDistance = maxDistance * maxDistance + 1,
                 item = null, foundPoint = false, i, j;
 
-            for (var i = 0; i < series.length; ++i) {
+            for (i = 0; i < series.length; ++i) {
                 if (!seriesFilter(series[i]))
                     continue;
                 
