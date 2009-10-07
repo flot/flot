@@ -154,6 +154,7 @@ Bug fixes:
   smarter.
 - Fix for uneven axis margins (report and patch by Paul Kienzle) and
   snapping to ticks (concurrent report and patch by lifthrasiir).
+- Fixed bug with slicing in findNearbyItems (patch by zollman).
 
 Flot 0.5
 --------

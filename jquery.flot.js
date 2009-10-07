@@ -1848,6 +1848,7 @@
             if (item) {
                 i = item[0];
                 j = item[1];
+                ps = series[i].datapoints.pointsize;
                 
                 return { datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
                          dataIndex: j,
