@@ -43,7 +43,8 @@
                     tickSize: null, // number or [number, "unit"]
                     minTickSize: null, // number or [number, "unit"]
                     monthNames: null, // list of names of months
-                    timeformat: null // format string to use
+                    timeformat: null, // format string to use
+                    twelveHourClock: false // 12 or 24 time in time mode
                 },
                 yaxis: {
                     autoscaleMargin: 0.02
@@ -902,14 +903,15 @@
                     
                     var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
                     var span = axis.max - axis.min;
+                    var suffix = (axisOptions.twelveHourClock) ? " %p" : "";
                     
                     if (t < timeUnitSize.minute)
-                        fmt = "%h:%M:%S";
+                        fmt = "%h:%M:%S" + suffix;
                     else if (t < timeUnitSize.day) {
                         if (span < 2 * timeUnitSize.day)
-                            fmt = "%h:%M";
+                            fmt = "%h:%M" + suffix;
                         else
-                            fmt = "%b %d %h:%M";
+                            fmt = "%b %d %h:%M" + suffix;
                     }
                     else if (t < timeUnitSize.month)
                         fmt = "%b %d";
@@ -2240,21 +2242,33 @@
         
         var r = [];
         var escape = false;
+        var hours = d.getUTCHours();
+        var isAM = hours < 12;
         if (monthNames == null)
             monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        if (fmt.search(/%p|%P/) != -1) {
+            if (hours > 12) {
+                hours = hours - 12;
+            } else if (hours == 0) {
+                hours = 12;
+            }
+        }
         for (var i = 0; i < fmt.length; ++i) {
             var c = fmt.charAt(i);
             
             if (escape) {
                 switch (c) {
-                case 'h': c = "" + d.getUTCHours(); break;
-                case 'H': c = leftPad(d.getUTCHours()); break;
+                case 'h': c = "" + hours; break;
+                case 'H': c = leftPad(hours); break;
                 case 'M': c = leftPad(d.getUTCMinutes()); break;
                 case 'S': c = leftPad(d.getUTCSeconds()); break;
                 case 'd': c = "" + d.getUTCDate(); break;
                 case 'm': c = "" + (d.getUTCMonth() + 1); break;
                 case 'y': c = "" + d.getUTCFullYear(); break;
                 case 'b': c = "" + monthNames[d.getUTCMonth()]; break;
+                case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
+                case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
                 }
                 r.push(c);
                 escape = false;

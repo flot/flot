@@ -113,6 +113,8 @@ Changes:
 
 - Axis transformation support, useful for non-linear plots, e.g. log
   axes and compressed time axes (like omitting weekends).
+
+- Support for twelve-hour date formatting (patch by Forrest Aldridge).
   
 Bug fixes:
 
