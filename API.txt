@@ -920,17 +920,15 @@ Here's an overview of the phases Flot goes through:
   7. Responding to events, if any
 
 The hooks are simple arrays. They are available on the "hooks"
-sub-object on the Plot object with the names mentioned below, e.g.
+object on the Plot object, e.g.
 
   var plot = $.plot(...);
 
-  function f(plot, series, datapoints) { alert("hello!")};
+  function f(plot, canvascontext) { alert("hello!")};
   
-  plot.hooks.processDatapoints.push(f);
+  plot.hooks.draw.push(f); // add f to the array of "draw" hooks
 
-All hooks get the plot object as first parameter.
-
-Currently available hooks (when in doubt, check the Flot source):
+The hooks get the plot object as first parameter. Currently available hooks:
 
  - processOptions  [phase 1]
 
