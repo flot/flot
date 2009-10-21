@@ -103,7 +103,8 @@
                 selection: {
                     mode: null, // one of null, "x", "y" or "xy"
                     color: "#e8cfac"
-                }
+                },
+                hooks: {}
             },
         canvas = null,      // the canvas for the plot itself
         overlay = null,     // canvas for interactive stuff on top of plot
@@ -204,6 +205,10 @@
                 $.extend(true, options.series.bars, options.bars);
             if (options.shadowSize)
                 options.series.shadowSize = options.shadowSize;
+
+            for (var n in hooks)
+                if (options.hooks[n] && options.hooks[n].length)
+                    hooks[n] = hooks[n].concat(options.hooks[n]);
 
             executeHooks(hooks.processOptions, [options]);
         }

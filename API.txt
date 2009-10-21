@@ -919,16 +919,23 @@ Here's an overview of the phases Flot goes through:
 
   7. Responding to events, if any
 
-The hooks are simple arrays. They are available on the "hooks"
-object on the Plot object, e.g.
+Each hook is simply a function which is put in the appropriate array.
+You can add them through the "hooks" option, and they are also available
+after the plot is constructed as the "hooks" attribute on the returned
+plot object, e.g.
 
-  var plot = $.plot(...);
+  // define a simple draw hook
+  function hellohook(plot, canvascontext) { alert("hello!"); };
 
-  function f(plot, canvascontext) { alert("hello!")};
-  
-  plot.hooks.draw.push(f); // add f to the array of "draw" hooks
+  // pass it in, in an array since we might want to specify several
+  var plot = $.plot(placeholder, data, { hooks: { draw: [hellohook] } });
 
-The hooks get the plot object as first parameter. Currently available hooks:
+  // we can now find it again in plot.hooks.draw[0] unless a plugin
+  // has added other hooks
+
+The available hooks are described below. All hook callbacks get the
+plot object as first parameter. You can find some examples of defined
+hooks in the plugins bundled with Flot.
 
  - processOptions  [phase 1]
 
@@ -1053,7 +1060,7 @@ Plugins extend the functionality of Flot. To use a plugin, simply
 include its Javascript file after Flot in the HTML page.
 
 If you're worried about download size/latency, you can concatenate all
-the plugins you use and Flot itself for that matter into one big file
+the plugins you use, and Flot itself for that matter, into one big file
 (make sure you get the order right), then optionally run it through a
 Javascript minifier such as YUI Compressor.
 
@@ -1066,4 +1073,5 @@ from its "option" attribute. The init function gets a reference to the
 plot object created and uses this to register hooks and add new public
 methods if needed.
 
-See the PLUGINS.txt file for details on how to write a plugin.
+See the PLUGINS.txt file for details on how to write a plugin. As the
+above description hints, it's actually pretty easy.
