@@ -5,12 +5,14 @@ over the plot.
   crosshair: {
     mode: null or "x" or "y" or "xy"
     color: color
+    lineWidth: number
   }
 
 Set the mode to one of "x", "y" or "xy". The "x" mode enables a
 vertical crosshair that lets you trace the values on the x axis, "y"
 enables a horizontal crosshair and "xy" enables them both. "color" is
-the color of the crosshair (default is "rgba(170, 0, 0, 0.80)")
+the color of the crosshair (default is "rgba(170, 0, 0, 0.80)"),
+"lineWidth" is the width of the drawn lines (default is 1).
 
 The plugin also adds two public methods:
 
@@ -32,7 +34,8 @@ The plugin also adds two public methods:
     var options = {
         crosshair: {
             mode: null, // one of null, "x", "y" or "xy",
-            color: "rgba(170, 0, 0, 0.80)"
+            color: "rgba(170, 0, 0, 0.80)",
+            lineWidth: 1
         }
     };
     
@@ -90,7 +93,7 @@ The plugin also adds two public methods:
 
             if (crosshair.x != -1) {
                 ctx.strokeStyle = c.color;
-                ctx.lineWidth = 1;
+                ctx.lineWidth = c.lineWidth;
                 ctx.lineJoin = "round";
 
                 ctx.beginPath();
