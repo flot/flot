@@ -1137,8 +1137,8 @@
                     
                     if (xrange.from == xrange.to || yrange.from == yrange.to) {
                         // draw line
-                        ctx.strokeStyle = m.color || options.grid.markingsColor;
                         ctx.beginPath();
+                        ctx.strokeStyle = m.color || options.grid.markingsColor;
                         ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
                         //ctx.moveTo(Math.floor(xrange.from), yrange.from);
                         //ctx.lineTo(Math.floor(xrange.to), yrange.to);
