@@ -1791,7 +1791,7 @@
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
-                lowestDistance = maxDistance * maxDistance + 1,
+                smallestDistance = maxDistance * maxDistance + 1,
                 item = null, foundPoint = false, i, j;
 
             for (i = 0; i < series.length; ++i) {
@@ -1824,9 +1824,12 @@
                         // data units, because the scales of the axes may be different
                         var dx = Math.abs(axisx.p2c(x) - mouseX),
                             dy = Math.abs(axisy.p2c(y) - mouseY),
-                            dist = dx * dx + dy * dy; // no idea in taking sqrt
-                        if (dist < lowestDistance) {
-                            lowestDistance = dist;
+                            dist = dx * dx + dy * dy; // we save the sqrt
+
+                        // use <= to ensure last point takes precedence
+                        // (last generally means on top of)
+                        if (dist <= smallestDistance) {
+                            smallestDistance = dist;
                             item = [i, j / ps];
                         }
                     }
