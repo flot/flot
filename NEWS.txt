@@ -159,6 +159,8 @@ Bug fixes:
 - Fixed bug with slicing in findNearbyItems (patch by zollman).
 - Make heuristic for x axis label widths more dynamic (patch by
   rickinhethuis).
+- Make sure points on top take precedence when finding nearby points
+  when hovering (reported by didroe, issue 224).
 
 Flot 0.5
 --------
