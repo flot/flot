@@ -157,6 +157,8 @@ Bug fixes:
 - Fix for uneven axis margins (report and patch by Paul Kienzle) and
   snapping to ticks (concurrent report and patch by lifthrasiir).
 - Fixed bug with slicing in findNearbyItems (patch by zollman).
+- Make heuristic for x axis label widths more dynamic (patch by
+  rickinhethuis).
 
 Flot 0.5
 --------

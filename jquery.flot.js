@@ -620,7 +620,7 @@
                     // them, we don't need the exact figures and the
                     // fixed-size box content is easy to center
                     if (axis.labelWidth == null)
-                        axis.labelWidth = canvasWidth / 6;
+                        axis.labelWidth = canvasWidth / (axis.ticks.length > 0 ? axis.ticks.length : 1);
 
                     // measure x label heights
                     if (axis.labelHeight == null) {
