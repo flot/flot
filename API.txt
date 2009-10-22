@@ -716,10 +716,18 @@ For the series you can specify the gradient as an object that
 specifies the scaling of the brightness and the opacity of the series
 color, e.g.
 
-  { colors: [{ opacity: 0.8 }, { brightness: 0.6, opacity: 0.8 } ]
+  { colors: [{ opacity: 0.8 }, { brightness: 0.6, opacity: 0.8 } ] }
 
 where the first color simply has its alpha scaled, whereas the second
-is also darkened.
+is also darkened. For instance, for bars the following makes the bars
+gradually disappear, without outline:
+
+  bars: {
+      show: true,
+      lineWidth: 0,
+      fill: true,
+      fillColor: { colors: [ { opacity: 0.8 }, { opacity: 0.1 } ] }
+  }
   
 Flot currently only supports vertical gradients drawn from top to
 bottom because that's what works with IE.
