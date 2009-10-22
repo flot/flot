@@ -64,7 +64,7 @@ in the file "API.txt". Here's a quick example that'll draw a line from
 
   $.plot($("#placeholder"), [ [[0, 0], [1, 1]] ], { yaxis: { max: 1 } });
 
-The plot function immediately draws the chart and then returns a Plot
+The plot function immediately draws the chart and then returns a plot
 object with a couple of methods.
 
 
@@ -73,9 +73,9 @@ What's with the name?
 
 First: it's pronounced with a short o, like "plot". Not like "flawed".
 
-So "Flot" is like "Plot".
+So "Flot" rhymes with "plot".
 
 And if you look up "flot" in a Danish-to-English dictionary, some up
 the words that come up are "good-looking", "attractive", "stylish",
 "smart", "impressive", "extravagant". One of the main goals with Flot
-is pretty looks. Flot is supposed to be "flot".
+is pretty looks.
