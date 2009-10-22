@@ -102,16 +102,18 @@ The plugin also adds four public methods:
             });
             
             eventHolder.mousemove(function (e) {
-                if (!plot.getSelection()) {
-                    if (!crosshair.locked) {
-                        var offset = plot.offset();
-                        crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
-                        crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
-                        plot.triggerRedrawOverlay();
-                    }
-                }
-                else
+                if (plot.getSelection && plot.getSelection()) {
                     crosshair.x = -1; // hide the crosshair while selecting
+                    return;
+                }
+                
+                if (crosshair.locked)
+                    return;
+                
+                var offset = plot.offset();
+                crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
+                crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+                plot.triggerRedrawOverlay();
             });
         });
 

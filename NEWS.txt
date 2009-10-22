@@ -1,26 +1,32 @@
-Flot 0.x
+Flot 0.6
 --------
 
 API changes:
 
-1. In the global options specified in the $.plot command,
+1. Selection support has been moved to a plugin. Thus if you're
+passing selection: { mode: something }, you MUST include the file
+jquery.flot.selection.js after jquery.flot.js. This reduces the size
+of base Flot and makes it easier to customize the selection as well as
+improving code clarity. The change is based on patch from andershol.
+
+2. In the global options specified in the $.plot command,
 "lines", "points", "bars" and "shadowSize" have been moved to a
 sub-object called "series", i.e.
 
   $.plot(placeholder, data, { lines: { show: true }})
 
-becomes
+should be changed to
 
   $.plot(placeholder, data, { series: { lines: { show: true }}})
 
 All future series-specific options will go into this sub-object to
-simplify plugin writing. Backward-compatibility hooks are in place,
-so old code should not break.
+simplify plugin writing. Backward-compatibility code is in place, so
+old code should not break.
 
-2. "plothover" no longer provides the original data point, but instead
+3. "plothover" no longer provides the original data point, but instead
 a normalized one, since there may be no corresponding original point.
 
-3. Due to a bug in previous versions of jQuery, you now need at least
+4. Due to a bug in previous versions of jQuery, you now need at least
 jQuery 1.2.6. But if you can, try jQuery 1.3.2 as it got some
 improvements in event handling speed.
 
@@ -85,9 +91,9 @@ Changes:
   offset within the placeholder.
   
 - Plugin system: register an init method in the $.flot.plugins array
-  to get started, see PLUGINS.txt for details on how to write plugins.
-  There are also some extra methods to enable access to internal
-  state.
+  to get started, see PLUGINS.txt for details on how to write plugins
+  (it's easy). There are also some extra methods to enable access to
+  internal state.
 
 - Hooks: you can register functions that are called while Flot is
   crunching the data and doing the plot. This can be used to modify
@@ -115,7 +121,12 @@ Changes:
   axes and compressed time axes (like omitting weekends).
 
 - Support for twelve-hour date formatting (patch by Forrest Aldridge).
-  
+
+- The color parsing code in Flot has been cleaned up and split out so
+  it's now available as a separate jQuery plugin. It's included inline
+  in the Flot source to make dependency managing easier. This also
+  makes it really easy to use the color helpers in Flot plugins.
+
 Bug fixes:
 
 - Fixed two corner-case bugs when drawing filled curves (report and
@@ -130,7 +141,7 @@ Bug fixes:
   problem reported by Sergio Nunes).
 - Updated mousemove position expression to the latest from jQuery (bug
   reported by meyuchas).
-- Use borders instead of background in legend (fix printing issue 25
+- Use CSS borders instead of background in legend (fix printing issue 25
   and 45).
 - Explicitly convert axis min/max to numbers.
 - Fixed a bug with drawing marking lines with different colors

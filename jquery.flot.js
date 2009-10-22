@@ -1,9 +1,33 @@
-/* Javascript plotting library for jQuery, v. 0.5.
+/* Javascript plotting library for jQuery, v. 0.6.
  *
  * Released under the MIT license by IOLA, December 2007.
  *
  */
 
+// first an inline dependency, jquery.colorhelpers.js, we inline it here
+// for convenience
+
+/* Plugin for jQuery for working with colors.
+ * 
+ * Version 1.0.
+ * 
+ * Inspiration from jQuery color animation plugin by John Resig.
+ *
+ * Released under the MIT license by Ole Laursen, October 2009.
+ *
+ * Examples:
+ *
+ *   $.color.parse("#fff").scale('rgb', 0.25).add('a', -0.5).toString()
+ *   var c = $.color.extract($("#mydiv"), 'background-color');
+ *   console.log(c.r, c.g, c.b, c.a);
+ *   $.color.make(100, 50, 25, 0.4).toString() // returns "rgba(100,50,25,0.4)"
+ *
+ * Note that .scale() and .add() work in-place instead of returning
+ * new objects.
+ */ 
+(function(){jQuery.color={};jQuery.color.make=function(E,D,B,C){var F={};F.r=E||0;F.g=D||0;F.b=B||0;F.a=C!=null?C:1;F.add=function(I,H){for(var G=0;G<I.length;++G){F[I.charAt(G)]+=H}return F.normalize()};F.scale=function(I,H){for(var G=0;G<I.length;++G){F[I.charAt(G)]*=H}return F.normalize()};F.toString=function(){if(F.a>=1){return"rgb("+[F.r,F.g,F.b].join(",")+")"}else{return"rgba("+[F.r,F.g,F.b,F.a].join(",")+")"}};F.normalize=function(){function G(I,J,H){return J<I?I:(J>H?H:J)}F.r=G(0,parseInt(F.r),255);F.g=G(0,parseInt(F.g),255);F.b=G(0,parseInt(F.b),255);F.a=G(0,F.a,1);return F};F.clone=function(){return jQuery.color.make(F.r,F.b,F.g,F.a)};return F.normalize()};jQuery.color.extract=function(C,B){var D;do{D=C.css(B).toLowerCase();if(D!=""&&D!="transparent"){break}C=C.parent()}while(!jQuery.nodeName(C.get(0),"body"));if(D=="rgba(0, 0, 0, 0)"){D="transparent"}return jQuery.color.parse(D)};jQuery.color.parse=function(E){var D,B=jQuery.color.make;if(D=/rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(E)){return B(parseInt(D[1],10),parseInt(D[2],10),parseInt(D[3],10))}if(D=/rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(E)){return B(parseInt(D[1],10),parseInt(D[2],10),parseInt(D[3],10),parseFloat(D[4]))}if(D=/rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(E)){return B(parseFloat(D[1])*2.55,parseFloat(D[2])*2.55,parseFloat(D[3])*2.55)}if(D=/rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(E)){return B(parseFloat(D[1])*2.55,parseFloat(D[2])*2.55,parseFloat(D[3])*2.55,parseFloat(D[4]))}if(D=/#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(E)){return B(parseInt(D[1],16),parseInt(D[2],16),parseInt(D[3],16))}if(D=/#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(E)){return B(parseInt(D[1]+D[1],16),parseInt(D[2]+D[2],16),parseInt(D[3]+D[3],16))}var C=jQuery.trim(E).toLowerCase();if(C=="transparent"){return B(255,255,255,0)}else{D=A[C];return B(D[0],D[1],D[2])}};var A={aqua:[0,255,255],azure:[240,255,255],beige:[245,245,220],black:[0,0,0],blue:[0,0,255],brown:[165,42,42],cyan:[0,255,255],darkblue:[0,0,139],darkcyan:[0,139,139],darkgrey:[169,169,169],darkgreen:[0,100,0],darkkhaki:[189,183,107],darkmagenta:[139,0,139],darkolivegreen:[85,107,47],darkorange:[255,140,0],darkorchid:[153,50,204],darkred:[139,0,0],darksalmon:[233,150,122],darkviolet:[148,0,211],fuchsia:[255,0,255],gold:[255,215,0],green:[0,128,0],indigo:[75,0,130],khaki:[240,230,140],lightblue:[173,216,230],lightcyan:[224,255,255],lightgreen:[144,238,144],lightgrey:[211,211,211],lightpink:[255,182,193],lightyellow:[255,255,224],lime:[0,255,0],magenta:[255,0,255],maroon:[128,0,0],navy:[0,0,128],olive:[128,128,0],orange:[255,165,0],pink:[255,192,203],purple:[128,0,128],violet:[128,0,128],red:[255,0,0],silver:[192,192,192],white:[255,255,255],yellow:[255,255,0]}})();
+
+// the actual Flot code
 (function($) {
     function Plot(placeholder, data_, options_, plugins) {
         // data is on the form:
@@ -100,10 +124,6 @@
                     autoHighlight: true, // highlight in case mouse is near
                     mouseActiveRadius: 10 // how far the mouse can be away to activate an item
                 },
-                selection: {
-                    mode: null, // one of null, "x", "y" or "xy"
-                    color: "#e8cfac"
-                },
                 hooks: {}
             },
         canvas = null,      // the canvas for the plot itself
@@ -122,17 +142,12 @@
             bindEvents: [],
             drawOverlay: []
         },
-        plot = this,
-        // dedicated to storing data for buggy standard compliance cases
-        workarounds = {};
+        plot = this;
 
         // public functions
         plot.setData = setData;
         plot.setupGrid = setupGrid;
         plot.draw = draw;
-        plot.clearSelection = clearSelection;
-        plot.setSelection = setSelection;
-        plot.getSelection = getSelection;
         plot.getPlaceholder = function() { return placeholder; };
         plot.getCanvas = function() { return canvas; };
         plot.getPlotOffset = function() { return plotOffset; };
@@ -263,7 +278,7 @@
                     if (typeof sc == "number")
                         assignedColors.push(sc);
                     else
-                        usedColors.push(parseColor(series[i].color));
+                        usedColors.push($.color.parse(series[i].color));
                 }
             }
             
@@ -279,14 +294,13 @@
             while (colors.length < neededColors) {
                 var c;
                 if (options.colors.length == i) // check degenerate case
-                    c = new Color(100, 100, 100);
+                    c = $.color.make(100, 100, 100);
                 else
-                    c = parseColor(options.colors[i]);
+                    c = $.color.parse(options.colors[i]);
 
                 // vary color if needed
                 var sign = variation % 2 == 1 ? -1 : 1;
-                var factor = 1 + sign * Math.ceil(variation / 2) * 0.2;
-                c.scale(factor, factor, factor);
+                c.scale('rgb', 1 + sign * Math.ceil(variation / 2) * 0.2)
 
                 // FIXME: if we're getting to close to something else,
                 // we should probably skip this one
@@ -555,12 +569,8 @@
             eventHolder = $([overlay, canvas]);
 
             // bind events
-            if (options.selection.mode != null
-                || options.grid.hoverable)
+            if (options.grid.hoverable)
                 eventHolder.mousemove(onMouseMove);
-
-            if (options.selection.mode != null)
-                eventHolder.mousedown(onMouseDown);
 
             if (options.grid.clickable)
                 eventHolder.click(onClick);
@@ -1697,7 +1707,7 @@
             if (filloptions.fillColor)
                 return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
             
-            var c = parseColor(seriesColor);
+            var c = $.color.parse(seriesColor);
             c.a = typeof fill == "number" ? fill : 0.4;
             c.normalize();
             return c.toString();
@@ -1761,12 +1771,13 @@
                     // label boxes
                     var c = options.legend.backgroundColor;
                     if (c == null) {
-                        var tmp;
-                        if (options.grid.backgroundColor && typeof options.grid.backgroundColor == "string")
-                            tmp = options.grid.backgroundColor;
+                        c = options.grid.backgroundColor;
+                        if (c && typeof c == "string")
+                            c = $.color.parse(c);
                         else
-                            tmp = extractColor(legend);
-                        c = parseColor(tmp).adjust(null, null, null, 1).toString();
+                            c = $.color.extract(legend, 'background-color');
+                        c.a = 1;
+                        c = c.toString();
                     }
                     var div = legend.children();
                     $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
@@ -1777,16 +1788,8 @@
 
         // interactive features
         
-        var lastMousePos = { pageX: null, pageY: null },
-            selection = {
-                first: { x: -1, y: -1}, second: { x: -1, y: -1},
-                show: false,
-                active: false
-            },
-            highlights = [],
-            clickIsMouseUp = false,
-            redrawTimeout = null,
-            hoverTimeout = null;
+        var highlights = [],
+            redrawTimeout = null;
         
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
@@ -1870,50 +1873,12 @@
         }
 
         function onMouseMove(e) {
-            lastMousePos.pageX = e.pageX;
-            lastMousePos.pageY = e.pageY;
-            
             if (options.grid.hoverable)
-                triggerClickHoverEvent("plothover", lastMousePos,
+                triggerClickHoverEvent("plothover", e,
                                        function (s) { return s["hoverable"] != false; });
-
-            if (selection.active) {
-                placeholder.trigger("plotselecting", [ getSelection() ]);
-
-                updateSelection(lastMousePos);
-            }
         }
         
-        function onMouseDown(e) {
-            if (e.which != 1)  // only accept left-click
-                return;
-            
-            // cancel out any text selections
-            document.body.focus();
-
-            // prevent text selection and drag in old-school browsers
-            if (document.onselectstart !== undefined && workarounds.onselectstart == null) {
-                workarounds.onselectstart = document.onselectstart;
-                document.onselectstart = function () { return false; };
-            }
-            if (document.ondrag !== undefined && workarounds.ondrag == null) {
-                workarounds.ondrag = document.ondrag;
-                document.ondrag = function () { return false; };
-            }
-            
-            setSelectionPos(selection.first, e);
-                
-            lastMousePos.pageX = null;
-            selection.active = true;
-            $(document).one("mouseup", onSelectionMouseUp);
-        }
-
         function onClick(e) {
-            if (clickIsMouseUp) {
-                clickIsMouseUp = false;
-                return;
-            }
-
             triggerClickHoverEvent("plotclick", e,
                                    function (s) { return s["clickable"] != false; });
         }
@@ -1981,22 +1946,6 @@
                 else
                     drawPointHighlight(hi.series, hi.point);
             }
-
-            // draw selection
-            if (selection.show && selectionIsSane()) {
-                octx.strokeStyle = parseColor(options.selection.color).scale(null, null, null, 0.8).toString();
-                octx.lineWidth = 1;
-                ctx.lineJoin = "round";
-                octx.fillStyle = parseColor(options.selection.color).scale(null, null, null, 0.4).toString();
-                
-                var x = Math.min(selection.first.x, selection.second.x),
-                    y = Math.min(selection.first.y, selection.second.y),
-                    w = Math.abs(selection.second.x - selection.first.x),
-                    h = Math.abs(selection.second.y - selection.first.y);
-                
-                octx.fillRect(x, y, w, h);
-                octx.strokeRect(x, y, w, h);
-            }
             octx.restore();
             
             executeHooks(hooks.drawOverlay, [octx]);
@@ -2058,7 +2007,7 @@
             
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
-            octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
+            octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
             var radius = 1.5 * pointRadius;
             octx.beginPath();
             octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, false);
@@ -2067,147 +2016,13 @@
 
         function drawBarHighlight(series, point) {
             octx.lineWidth = series.bars.lineWidth;
-            octx.strokeStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
-            var fillStyle = parseColor(series.color).scale(1, 1, 1, 0.5).toString();
+            octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
+            var fillStyle = $.color.parse(series.color).scale('a', 0.5).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                     0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal);
         }
 
-        function getSelection() {
-            if (!selectionIsSane())
-                return null;
-            
-            var x1 = Math.min(selection.first.x, selection.second.x),
-                x2 = Math.max(selection.first.x, selection.second.x),
-                y1 = Math.max(selection.first.y, selection.second.y),
-                y2 = Math.min(selection.first.y, selection.second.y);
-
-            var r = {};
-            if (axes.xaxis.used)
-                r.xaxis = { from: axes.xaxis.c2p(x1), to: axes.xaxis.c2p(x2) };
-            if (axes.x2axis.used)
-                r.x2axis = { from: axes.x2axis.c2p(x1), to: axes.x2axis.c2p(x2) };
-            if (axes.yaxis.used)
-                r.yaxis = { from: axes.yaxis.c2p(y1), to: axes.yaxis.c2p(y2) };
-            if (axes.y2axis.used)
-                r.y2axis = { from: axes.y2axis.c2p(y1), to: axes.y2axis.c2p(y2) };
-            return r;
-        }
-        
-        function triggerSelectedEvent() {
-            var r = getSelection();
-            
-            placeholder.trigger("plotselected", [ r ]);
-
-            // backwards-compat stuff, to be removed in future
-            if (axes.xaxis.used && axes.yaxis.used)
-                placeholder.trigger("selected", [ { x1: r.xaxis.from, y1: r.yaxis.from, x2: r.xaxis.to, y2: r.yaxis.to } ]);
-        }
-        
-        function onSelectionMouseUp(e) {
-            // revert drag stuff for old-school browsers
-            if (document.onselectstart !== undefined)
-                document.onselectstart = workarounds.onselectstart;
-            if (document.ondrag !== undefined)
-                document.ondrag = workarounds.ondrag;
-            
-            // no more draggy-dee-drag
-            selection.active = false;
-            updateSelection(e);
-            
-            if (selectionIsSane()) {
-                triggerSelectedEvent();
-                clickIsMouseUp = true;
-            }
-            else {
-                // this counts as a clear
-                placeholder.trigger("plotunselected", [ ]);
-                placeholder.trigger("plotselecting", [ null ]);
-            }
-            
-            return false;
-        }
-
-        function setSelectionPos(pos, e) {
-            var offset = eventHolder.offset();
-            pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plotWidth);
-            pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plotHeight);
-            
-            if (options.selection.mode == "y") {
-                if (pos == selection.first)
-                    pos.x = 0;
-                else
-                    pos.x = plotWidth;
-            }
-
-            if (options.selection.mode == "x") {
-                if (pos == selection.first)
-                    pos.y = 0;
-                else
-                    pos.y = plotHeight;
-            }
-        }
-
-        function updateSelection(pos) {
-            if (pos.pageX == null)
-                return;
-
-            setSelectionPos(selection.second, pos);
-            if (selectionIsSane()) {
-                selection.show = true;
-                triggerRedrawOverlay();
-            }
-            else
-                clearSelection(true);
-        }
-
-        function clearSelection(preventEvent) {
-            if (selection.show) {
-                selection.show = false;
-                triggerRedrawOverlay();
-                if (!preventEvent)
-                    placeholder.trigger("plotunselected", [ ]);
-            }
-        }
-
-        function setSelection(ranges, preventEvent) {
-            var range;
-            
-            if (options.selection.mode == "y") {
-                selection.first.x = 0;
-                selection.second.x = plotWidth;
-            }
-            else {
-                range = extractRange(ranges, "x");
-                
-                selection.first.x = range.axis.p2c(range.from);
-                selection.second.x = range.axis.p2c(range.to);
-            }
-            
-            if (options.selection.mode == "x") {
-                selection.first.y = 0;
-                selection.second.y = plotHeight;
-            }
-            else {
-                range = extractRange(ranges, "y");
-                
-                selection.first.y = range.axis.p2c(range.from);
-                selection.second.y = range.axis.p2c(range.to);
-            }
-
-            selection.show = true;
-            triggerRedrawOverlay();
-            if (!preventEvent)
-                triggerSelectedEvent();
-        }
-        
-        function selectionIsSane() {
-            var minSize = 5;
-            return Math.abs(selection.second.x - selection.first.x) >= minSize &&
-                Math.abs(selection.second.y - selection.first.y) >= minSize;
-        }
-        
         function getColorOrGradient(spec, bottom, top, defaultColor) {
             if (typeof spec == "string")
                 return spec;
@@ -2219,7 +2034,12 @@
                 
                 for (var i = 0, l = spec.colors.length; i < l; ++i) {
                     var c = spec.colors[i];
-                    gradient.addColorStop(i / (l - 1), typeof c == "string" ? c : parseColor(defaultColor).scale(c.brightness, c.brightness, c.brightness, c.opacity));
+                    if (typeof c != "string") {
+                        c = $.color.parse(defaultColor).scale('rgb', c.brightness);
+                        c.a *= c.opacity;
+                        c = c.toString();
+                    }
+                    gradient.addColorStop(i / (l - 1), c);
                 }
                 
                 return gradient;
@@ -2296,167 +2116,4 @@
         return base * Math.floor(n / base);
     }
     
-    function clamp(min, value, max) {
-        if (value < min)
-            return min;
-        else if (value > max)
-            return max;
-        else
-            return value;
-    }
-    
-    // color helpers, inspiration from the jquery color animation
-    // plugin by John Resig
-    function Color (r, g, b, a) {
-       
-        var rgba = ['r','g','b','a'];
-        var x = 4; //rgba.length
-       
-        while (-1<--x) {
-            this[rgba[x]] = arguments[x] || ((x==3) ? 1.0 : 0);
-        }
-       
-        this.toString = function() {
-            if (this.a >= 1.0) {
-                return "rgb("+[this.r,this.g,this.b].join(",")+")";
-            } else {
-                return "rgba("+[this.r,this.g,this.b,this.a].join(",")+")";
-            }
-        };
-
-        this.scale = function(rf, gf, bf, af) {
-            x = 4; //rgba.length
-            while (-1<--x) {
-                if (arguments[x] != null)
-                    this[rgba[x]] *= arguments[x];
-            }
-            return this.normalize();
-        };
-
-        this.adjust = function(rd, gd, bd, ad) {
-            x = 4; //rgba.length
-            while (-1<--x) {
-                if (arguments[x] != null)
-                    this[rgba[x]] += arguments[x];
-            }
-            return this.normalize();
-        };
-
-        this.clone = function() {
-            return new Color(this.r, this.b, this.g, this.a);
-        };
-
-        this.normalize = function() {
-            this.r = clamp(0, parseInt(this.r), 255);
-            this.g = clamp(0, parseInt(this.g), 255);
-            this.b = clamp(0, parseInt(this.b), 255);
-            this.a = clamp(0, this.a, 1);
-            return this;
-        };
-
-        this.normalize();
-    }
-    
-    var lookupColors = {
-        aqua:[0,255,255],
-        azure:[240,255,255],
-        beige:[245,245,220],
-        black:[0,0,0],
-        blue:[0,0,255],
-        brown:[165,42,42],
-        cyan:[0,255,255],
-        darkblue:[0,0,139],
-        darkcyan:[0,139,139],
-        darkgrey:[169,169,169],
-        darkgreen:[0,100,0],
-        darkkhaki:[189,183,107],
-        darkmagenta:[139,0,139],
-        darkolivegreen:[85,107,47],
-        darkorange:[255,140,0],
-        darkorchid:[153,50,204],
-        darkred:[139,0,0],
-        darksalmon:[233,150,122],
-        darkviolet:[148,0,211],
-        fuchsia:[255,0,255],
-        gold:[255,215,0],
-        green:[0,128,0],
-        indigo:[75,0,130],
-        khaki:[240,230,140],
-        lightblue:[173,216,230],
-        lightcyan:[224,255,255],
-        lightgreen:[144,238,144],
-        lightgrey:[211,211,211],
-        lightpink:[255,182,193],
-        lightyellow:[255,255,224],
-        lime:[0,255,0],
-        magenta:[255,0,255],
-        maroon:[128,0,0],
-        navy:[0,0,128],
-        olive:[128,128,0],
-        orange:[255,165,0],
-        pink:[255,192,203],
-        purple:[128,0,128],
-        violet:[128,0,128],
-        red:[255,0,0],
-        silver:[192,192,192],
-        white:[255,255,255],
-        yellow:[255,255,0]
-    };    
-
-    function extractColor(element) {
-        var color, elem = element;
-        do {
-            color = elem.css("background-color").toLowerCase();
-            // keep going until we find an element that has color, or
-            // we hit the body
-            if (color != '' && color != 'transparent')
-                break;
-            elem = elem.parent();
-        } while (!$.nodeName(elem.get(0), "body"));
-
-        // catch Safari's way of signalling transparent
-        if (color == "rgba(0, 0, 0, 0)")
-            return "transparent";
-        
-        return color;
-    }
-    
-    // parse string, returns Color
-    function parseColor(str) {
-        var result;
-
-        // Look for rgb(num,num,num)
-        if (result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str))
-            return new Color(parseInt(result[1], 10), parseInt(result[2], 10), parseInt(result[3], 10));
-        
-        // Look for rgba(num,num,num,num)
-        if (result = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
-            return new Color(parseInt(result[1], 10), parseInt(result[2], 10), parseInt(result[3], 10), parseFloat(result[4]));
-            
-        // Look for rgb(num%,num%,num%)
-        if (result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str))
-            return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55);
-
-        // Look for rgba(num%,num%,num%,num)
-        if (result = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
-            return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55, parseFloat(result[4]));
-        
-        // Look for #a0b1c2
-        if (result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str))
-            return new Color(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16));
-
-        // Look for #fff
-        if (result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(str))
-            return new Color(parseInt(result[1]+result[1], 16), parseInt(result[2]+result[2], 16), parseInt(result[3]+result[3], 16));
-
-        // Otherwise, we're most likely dealing with a named color
-        var name = $.trim(str).toLowerCase();
-        if (name == "transparent")
-            return new Color(255, 255, 255, 0);
-        else {
-            result = lookupColors[name];
-            return new Color(result[0], result[1], result[2]);
-        }
-    }
-        
 })(jQuery);

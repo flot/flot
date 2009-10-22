@@ -7,6 +7,7 @@
     <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
     <script language="javascript" type="text/javascript" src="../jquery.js"></script>
     <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.selection.js"></script>
  </head>
     <body>
     <h1>Flot Examples</h1>
@@ -15,23 +16,23 @@
 
     <p>1000 kg. CO<sub>2</sub> emissions per year per capita for various countries (source: <a href="http://en.wikipedia.org/wiki/List_of_countries_by_carbon_dioxide_emissions_per_capita">Wikipedia</a>).</p>
 
-    <p>Flot supports selections. You can enable
-       rectangular selection
+    <p>Flot supports selections through the selection plugin.
+       You can enable rectangular selection
        or one-dimensional selection if the user should only be able to
-       select on one axis. Try left-clicking and drag on the plot above
+       select on one axis. Try left-click and drag on the plot above
        where selection on the x axis is enabled.</p>
 
     <p>You selected: <span id="selection"></span></p>
 
-    <p>The plot command returns a Plot object you can use to control
-       the selection. Try clicking the buttons below.</p>
+    <p>The plot command returns a plot object you can use to control
+       the selection. Click the buttons below.</p>
 
     <p><input id="clearSelection" type="button" value="Clear selection" />
        <input id="setSelection" type="button" value="Select year 1994" /></p>
 
     <p>Selections are really useful for zooming. Just replot the
        chart with min and max values for the axes set to the values
-       in the "plotselected" event triggered. Try enabling the checkbox
+       in the "plotselected" event triggered. Enable the checkbox
        below and select a region again.</p>
 
     <p><input id="zoom" type="checkbox">Zoom to selection.</input></p>

@@ -28,7 +28,8 @@ $(function () {
     $.plot($("#placeholder"),
            [ { data: oilprices, label: "Oil price ($)" },
              { data: exchangerates, label: "USD/EUR exchange rate", yaxis: 2 }],
-           { xaxis: { mode: 'time' },
+           { 
+             xaxis: { mode: 'time' },
              yaxis: { min: 0 },
              y2axis: { tickFormatter: function (v, axis) { return v.toFixed(axis.tickDecimals) +"€" }},
              legend: { position: 'sw' } });
