@@ -879,7 +879,7 @@ if (!document.createElement('canvas').getContext) {
     // Divide the shape into chunks if it's too long because IE has a limit
     // somewhere for how long a VML shape can be. This simple division does
     // not work with fills, only strokes, unfortunately.
-    var chunkSize = 9000;
+    var chunkSize = 5000;
 
     var min = {x: null, y: null};
     var max = {x: null, y: null};
