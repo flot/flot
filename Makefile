@@ -8,7 +8,7 @@ YUICOMPRESSOR_PATH=../yuicompressor-2.3.5.jar
 
 .PHONY: all
 
-# we cheat and process all .js files instead of listing them
+# we cheat and process all .js files instead of an exhaustive list
 all: $(patsubst %.js,%.min.js,$(filter-out %.min.js,$(wildcard *.js)))
 
 %.min.js: %.js

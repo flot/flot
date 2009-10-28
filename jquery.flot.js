@@ -1797,7 +1797,7 @@
                 smallestDistance = maxDistance * maxDistance + 1,
                 item = null, foundPoint = false, i, j;
 
-            for (i = 0; i < series.length; ++i) {
+            for (i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(series[i]))
                     continue;
                 
@@ -1831,7 +1831,7 @@
 
                         // use <= to ensure last point takes precedence
                         // (last generally means on top of)
-                        if (dist <= smallestDistance) {
+                        if (dist < smallestDistance) {
                             smallestDistance = dist;
                             item = [i, j / ps];
                         }

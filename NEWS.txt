@@ -1,3 +1,13 @@
+Flot x.x
+--------
+
+
+Bug fixes:
+
+- Fixed problem with findNearbyItem and bars on top of each other
+  (reported by ragingchikn, issue 242).
+
+
 Flot 0.6
 --------
 
