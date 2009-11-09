@@ -6,6 +6,8 @@ Bug fixes:
 
 - Fixed problem with findNearbyItem and bars on top of each other
   (reported by ragingchikn, issue 242).
+- Fixed problem with ticks and the border (based on patch from
+  ultimatehustler69, issue 236).
 
 
 Flot 0.6
@@ -17,7 +19,7 @@ API changes:
 passing selection: { mode: something }, you MUST include the file
 jquery.flot.selection.js after jquery.flot.js. This reduces the size
 of base Flot and makes it easier to customize the selection as well as
-improving code clarity. The change is based on patch from andershol.
+improving code clarity. The change is based on a patch from andershol.
 
 2. In the global options specified in the $.plot command,
 "lines", "points", "bars" and "shadowSize" have been moved to a

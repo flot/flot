@@ -1175,11 +1175,13 @@
             ctx.lineWidth = 1;
             ctx.strokeStyle = options.grid.tickColor;
             ctx.beginPath();
-            var v, axis = axes.xaxis;
+            var v, axis = axes.xaxis,
+                bw = options.grid.borderWidth;
             for (i = 0; i < axis.ticks.length; ++i) {
                 v = axis.ticks[i].v;
-                if (v <= axis.min || v >= axes.xaxis.max)
-                    continue;   // skip those lying on the axes
+                if (v < axis.min || v > axis.max ||
+                    (bw > 0 && (v == axis.min || v == axis.max)))
+                    continue;   // skip those lying on the axes if we got a border
 
                 ctx.moveTo(Math.floor(axis.p2c(v)) + ctx.lineWidth/2, 0);
                 ctx.lineTo(Math.floor(axis.p2c(v)) + ctx.lineWidth/2, plotHeight);
@@ -1188,7 +1190,8 @@
             axis = axes.yaxis;
             for (i = 0; i < axis.ticks.length; ++i) {
                 v = axis.ticks[i].v;
-                if (v <= axis.min || v >= axis.max)
+                if (v < axis.min || v > axis.max ||
+                    (bw > 0 && (v == axis.min || v == axis.max)))
                     continue;
 
                 ctx.moveTo(0, Math.floor(axis.p2c(v)) + ctx.lineWidth/2);
@@ -1198,7 +1201,8 @@
             axis = axes.x2axis;
             for (i = 0; i < axis.ticks.length; ++i) {
                 v = axis.ticks[i].v;
-                if (v <= axis.min || v >= axis.max)
+                if (v < axis.min || v > axis.max ||
+                    (bw > 0 && (v == axis.min || v == axis.max)))
                     continue;
     
                 ctx.moveTo(Math.floor(axis.p2c(v)) + ctx.lineWidth/2, -5);
@@ -1208,7 +1212,8 @@
             axis = axes.y2axis;
             for (i = 0; i < axis.ticks.length; ++i) {
                 v = axis.ticks[i].v;
-                if (v <= axis.min || v >= axis.max)
+                if (v < axis.min || v > axis.max ||
+                    (bw > 0 && (v == axis.min || v == axis.max)))
                     continue;
 
                 ctx.moveTo(plotWidth-5, Math.floor(axis.p2c(v)) + ctx.lineWidth/2);
@@ -1219,7 +1224,6 @@
             
             if (options.grid.borderWidth) {
                 // draw border
-                var bw = options.grid.borderWidth;
                 ctx.lineWidth = bw;
                 ctx.strokeStyle = options.grid.borderColor;
                 ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
