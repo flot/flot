@@ -1,6 +1,18 @@
 Flot x.x
 --------
 
+Changes:
+
+- Support for specifying a bottom for each point for line charts when
+  filling them, this means that an arbitrary bottom can be used
+  instead of just the x axis (based on patches patiently provided by
+  Roman V. Prikhodchenko).
+- New fillbetween plugin that can compute a bottom for a series from
+  another series, useful for filling areas between lines (see new
+  example percentiles.html for a use case).
+- More predictable handling of gaps for the stacking plugin, now all
+  undefined ranges are skipped.
+
 
 Bug fixes:
 
@@ -8,7 +20,9 @@ Bug fixes:
   (reported by ragingchikn, issue 242).
 - Fixed problem with ticks and the border (based on patch from
   ultimatehustler69, issue 236).
-
+- Fixed problem with plugins adding options to the series objects.
+- Fixed a problem introduced in 0.6 with specifying a gradient with {
+  brightness: x, opacity: y }.
 
 Flot 0.6
 --------

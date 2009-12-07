@@ -1,59 +1,62 @@
 /*
-Flot plugin for stacking data sets, i.e. putting them on top of each
-other, for accumulative graphs.
+Flot plugin for computing bottoms for filled line and bar charts.
 
-The plugin assumes the data is sorted on x. For line charts, it is
-assumed that if a line has an undefined gap (from a null point), then
-the line above it should have the same gap - insert zeros instead of
-"null" if you want another behaviour. This also holds for the start
-and end of the chart. Note that stacking a mix of positive and negative
-values in most instances doesn't make sense (so it looks weird).
+The case: you've got two series that you want to fill the area
+between. In Flot terms, you need to use one as the fill bottom of the
+other. You can specify the bottom of each data point as the third
+coordinate manually, or you can use this plugin to compute it for you.
 
-Two or more series are stacked when their "stack" attribute is set to
-the same key (which can be any number or string or just "true"). To
-specify the default stack, you can set
+In order to name the other series, you need to give it an id, like this
 
-  series: {
-    stack: null or true or key (number/string)
-  }
+  var dataset = [
+       { data: [ ... ], id: "foo" } ,         // use default bottom
+       { data: [ ... ], fillBetween: "foo" }, // use first dataset as bottom
+       ];
 
-or specify it for a specific series
+  $.plot($("#placeholder"), dataset, { line: { show: true, fill: true }});
 
-  $.plot($("#placeholder"), [{ data: [ ... ], stack: true }])
+As a convenience, if the id given is a number that doesn't appear as
+an id in the series, it is interpreted as the index in the array
+instead (so fillBetween: 0 can also mean the first series).
   
-The stacking order is determined by the order of the data series in
-the array (later series end up on top of the previous).
-
-Internally, the plugin modifies the datapoints in each series, adding
-an offset to the y value. For line series, extra data points are
-inserted through interpolation. If there's a second y value, it's also
-adjusted (e.g for bar charts or filled areas).
+Internally, the plugin modifies the datapoints in each series. For
+line series, extra data points might be inserted through
+interpolation. Note that at points where the bottom line is not
+defined (due to a null point or start/end of line), the current line
+will show a gap too. The algorithm comes from the jquery.flot.stack.js
+plugin, possibly some code could be shared.
 */
 
 (function ($) {
     var options = {
-        series: { stack: null } // or number/string
+        series: { fillBetween: null } // or number
     };
     
     function init(plot) {
-        function findMatchingSeries(s, allseries) {
-            var res = null
-            for (var i = 0; i < allseries.length; ++i) {
-                if (s == allseries[i])
-                    break;
-                
-                if (allseries[i].stack == s.stack)
-                    res = allseries[i];
+        function findBottomSeries(s, allseries) {
+            var i;
+            for (i = 0; i < allseries.length; ++i) {
+                if (allseries[i].id == s.fillBetween)
+                    return allseries[i];
+            }
+
+            if (typeof s.fillBetween == "number") {
+                i = s.fillBetween;
+            
+                if (i < 0 || i >= allseries.length)
+                    return null;
+
+                return allseries[i];
             }
             
-            return res;
+            return null;
         }
         
-        function stackData(plot, s, datapoints) {
-            if (s.stack == null)
+        function computeFillBottoms(plot, s, datapoints) {
+            if (s.fillBetween == null)
                 return;
 
-            var other = findMatchingSeries(s, plot.getData());
+            var other = findBottomSeries(s, plot.getData());
             if (!other)
                 return;
 
@@ -108,7 +111,7 @@ adjusted (e.g for bar charts or filled areas).
                         for (m = 0; m < ps; ++m)
                             newpoints.push(points[i + m]);
 
-                        newpoints[l + 1] += qy;
+                        //newpoints[l + 1] += qy;
                         bottom = qy;
                         
                         i += ps;
@@ -120,7 +123,7 @@ adjusted (e.g for bar charts or filled areas).
                         if (withlines && i > 0 && points[i - ps] != null) {
                             intery = py + (points[i - ps + 1] - py) * (qx - px) / (points[i - ps] - px);
                             newpoints.push(qx);
-                            newpoints.push(intery + qy)
+                            newpoints.push(intery)
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
                             bottom = qy; 
@@ -143,7 +146,7 @@ adjusted (e.g for bar charts or filled areas).
                         if (withlines && j > 0 && otherpoints[j - otherps] != null)
                             bottom = qy + (otherpoints[j - otherps + 1] - qy) * (px - qx) / (otherpoints[j - otherps] - qx);
 
-                        newpoints[l + 1] += bottom;
+                        //newpoints[l + 1] += bottom;
                         
                         i += ps;
                     }
@@ -151,7 +154,7 @@ adjusted (e.g for bar charts or filled areas).
                     fromgap = false;
                     
                     if (l != newpoints.length && withbottom)
-                        newpoints[l + 2] += bottom;
+                        newpoints[l + 2] = bottom;
                 }
 
                 // maintain the line steps invariant
@@ -168,13 +171,13 @@ adjusted (e.g for bar charts or filled areas).
             datapoints.points = newpoints;
         }
         
-        plot.hooks.processDatapoints.push(stackData);
+        plot.hooks.processDatapoints.push(computeFillBottoms);
     }
     
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'stack',
-        version: '1.1'
+        name: 'fillbetween',
+        version: '1.0'
     });
 })(jQuery);

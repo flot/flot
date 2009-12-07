@@ -50,7 +50,7 @@ $(function () {
         $.plot($("#placeholder"), [ d1, d2, d3 ], {
             series: {
                 stack: stack,
-                lines: { show: lines, steps: steps },
+                lines: { show: lines, fill: true, steps: steps },
                 bars: { show: bars, barWidth: 0.6 }
             }
         });

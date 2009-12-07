@@ -330,7 +330,7 @@
                 if (s.lines.show == null) {
                     var v, show = true;
                     for (v in s)
-                        if (s[v].show) {
+                        if (s[v] && s[v].show) {
                             show = false;
                             break;
                         }
@@ -382,7 +382,7 @@
                     format.push({ x: true, number: true, required: true });
                     format.push({ y: true, number: true, required: true });
 
-                    if (s.bars.show)
+                    if (s.bars.show || (s.lines.show && s.lines.fill))
                         format.push({ y: true, number: true, required: false, defaultValue: 0 });
                     
                     s.datapoints.format = format;
@@ -1364,18 +1364,40 @@
                 var points = datapoints.points,
                     ps = datapoints.pointsize,
                     bottom = Math.min(Math.max(0, axisy.min), axisy.max),
-                    top, lastX = 0, areaOpen = false;
-                
-                for (var i = ps; i < points.length; i += ps) {
-                    var x1 = points[i - ps], y1 = points[i - ps + 1],
-                        x2 = points[i], y2 = points[i + 1];
-                    
-                    if (areaOpen && x1 != null && x2 == null) {
-                        // close area
-                        ctx.lineTo(axisx.p2c(lastX), axisy.p2c(bottom));
-                        ctx.fill();
-                        areaOpen = false;
-                        continue;
+                    i = 0, top, areaOpen = false,
+                    ypos = 1, segmentStart = 0, segmentEnd = 0;
+
+                // we process each segment in two turns, first forward
+                // direction to sketch out top, then once we hit the
+                // end we go backwards to sketch the bottom
+                while (true) {
+                    if (ps > 0 && i > points.length + ps)
+                        break;
+
+                    i += ps; // ps is negative if going backwards
+
+                    var x1 = points[i - ps],
+                        y1 = points[i - ps + ypos],
+                        x2 = points[i], y2 = points[i + ypos];
+
+                    if (areaOpen) {
+                        if (ps > 0 && x1 != null && x2 == null) {
+                            // at turning point
+                            segmentEnd = i;
+                            ps = -ps;
+                            ypos = 2;
+                            continue;
+                        }
+
+                        if (ps < 0 && i == segmentStart + ps) {
+                            // done with the reverse sweep
+                            ctx.fill();
+                            areaOpen = false;
+                            ps = -ps;
+                            ypos = 1;
+                            i = segmentStart = segmentEnd + ps;
+                            continue;
+                        }
                     }
 
                     if (x1 == null || x2 == null)
@@ -1422,22 +1444,22 @@
                     if (y1 >= axisy.max && y2 >= axisy.max) {
                         ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
-                        lastX = x2;
                         continue;
                     }
                     else if (y1 <= axisy.min && y2 <= axisy.min) {
                         ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
-                        lastX = x2;
                         continue;
                     }
                     
                     // else it's a bit more complicated, there might
-                    // be two rectangles and two triangles we need to fill
-                    // in; to find these keep track of the current x values
+                    // be a flat maxed out rectangle first, then a
+                    // triangular cutout or reverse; to find these
+                    // keep track of the current x values
                     var x1old = x1, x2old = x2;
 
-                    // and clip the y values, without shortcutting
+                    // clip the y values, without shortcutting, we
+                    // go through all cases in turn
                     
                     // clip with ymin
                     if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
@@ -1459,43 +1481,27 @@
                         y2 = axisy.max;
                     }
 
-
                     // if the x value was changed we got a rectangle
                     // to fill
                     if (x1 != x1old) {
-                        if (y1 <= axisy.min)
-                            top = axisy.min;
-                        else
-                            top = axisy.max;
-                        
-                        ctx.lineTo(axisx.p2c(x1old), axisy.p2c(top));
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(top));
+                        ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
+                        // it goes to (x1, y1), but we fill that below
                     }
                     
-                    // fill the triangles
+                    // fill triangular section, this sometimes result
+                    // in redundant points if (x1, y1) hasn't changed
+                    // from previous line to, but we just ignore that
                     ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
                     ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
 
                     // fill the other rectangle if it's there
                     if (x2 != x2old) {
-                        if (y2 <= axisy.min)
-                            top = axisy.min;
-                        else
-                            top = axisy.max;
-                        
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(top));
-                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(top));
+                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
                     }
-
-                    lastX = Math.max(x2, x2old);
-                }
-
-                if (areaOpen) {
-                    ctx.lineTo(axisx.p2c(lastX), axisy.p2c(bottom));
-                    ctx.fill();
                 }
             }
-            
+
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
@@ -2039,9 +2045,12 @@
                 for (var i = 0, l = spec.colors.length; i < l; ++i) {
                     var c = spec.colors[i];
                     if (typeof c != "string") {
-                        c = $.color.parse(defaultColor).scale('rgb', c.brightness);
-                        c.a *= c.opacity;
-                        c = c.toString();
+                        var co = $.color.parse(defaultColor);
+                        if (c.brightness != null)
+                            co = co.scale('rgb', c.brightness)
+                        if (c.opacity != null)
+                            co.a *= c.opacity;
+                        c = co.toString();
                     }
                     gradient.addColorStop(i / (l - 1), c);
                 }

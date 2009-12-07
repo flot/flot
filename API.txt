@@ -52,8 +52,9 @@ drawing. As a special case, a null value for lines is interpreted as a
 line segment end, i.e. the points before and after the null value are
 not connected.
 
-Lines and points take two coordinates. For bars, you can specify a
-third coordinate which is the bottom of the bar (defaults to 0).
+Lines and points take two coordinates. For filled lines and bars, you
+can specify a third coordinate which is the bottom of the filled
+area/bar (defaults to 0).
 
 The format of a single series object is as follows:
 
@@ -479,7 +480,7 @@ The most important options are "lines", "points" and "bars" that
 specify whether and how lines, points and bars should be shown for
 each data series. In case you don't specify anything at all, Flot will
 default to showing lines (you can turn this off with
-lines: { show: false}). You can specify the various types
+lines: { show: false }). You can specify the various types
 independently of each other, and Flot will happily draw each of them
 in turn (this is probably only useful for lines and points), e.g.
 
