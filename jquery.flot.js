@@ -102,7 +102,7 @@
                         fill: true,
                         fillColor: null,
                         align: "left", // or "center" 
-                        horizontal: false // when horizontal, left is now top
+                        horizontal: false
                     },
                     shadowSize: 3
                 },
@@ -382,8 +382,13 @@
                     format.push({ x: true, number: true, required: true });
                     format.push({ y: true, number: true, required: true });
 
-                    if (s.bars.show || (s.lines.show && s.lines.fill))
+                    if (s.bars.show || (s.lines.show && s.lines.fill)) {
                         format.push({ y: true, number: true, required: false, defaultValue: 0 });
+                        if (s.bars.horizontal) {
+                            delete format[format.length - 1].y;
+                            format[format.length - 1].x = true;
+                        }
+                    }
                     
                     s.datapoints.format = format;
                 }
@@ -1584,6 +1589,9 @@
                 drawLeft, drawRight, drawTop, drawBottom,
                 tmp;
 
+            // in horizontal mode, we start the bar from the left
+            // instead of from the bottom so it appears to be
+            // horizontal rather than vertical
             if (horizontal) {
                 drawBottom = drawRight = drawTop = true;
                 drawLeft = false;

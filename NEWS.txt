@@ -12,6 +12,7 @@ Changes:
   example percentiles.html for a use case).
 - More predictable handling of gaps for the stacking plugin, now all
   undefined ranges are skipped.
+- Stacking plugin can stack horizontal bar charts.
 
 
 Bug fixes:

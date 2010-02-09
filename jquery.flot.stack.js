@@ -64,9 +64,12 @@ adjusted (e.g for bar charts or filled areas).
                 newpoints = [],
                 px, py, intery, qx, qy, bottom,
                 withlines = s.lines.show,
-                withbottom = ps > 2 && datapoints.format[2].y,
+                horizontal = s.bars.horizontal,
+                withbottom = ps > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y),
                 withsteps = withlines && s.lines.steps,
                 fromgap = true,
+                keyOffset = horizontal ? 1 : 0,
+                accumulateOffset = horizontal ? 0 : 1,
                 i = 0, j = 0, l;
 
             while (true) {
@@ -98,17 +101,17 @@ adjusted (e.g for bar charts or filled areas).
                 }
                 else {
                     // cases where we actually got two points
-                    px = points[i];
-                    py = points[i + 1];
-                    qx = otherpoints[j];
-                    qy = otherpoints[j + 1];
+                    px = points[i + keyOffset];
+                    py = points[i + accumulateOffset];
+                    qx = otherpoints[j + keyOffset];
+                    qy = otherpoints[j + accumulateOffset];
                     bottom = 0;
 
                     if (px == qx) {
                         for (m = 0; m < ps; ++m)
                             newpoints.push(points[i + m]);
 
-                        newpoints[l + 1] += qy;
+                        newpoints[l + accumulateOffset] += qy;
                         bottom = qy;
                         
                         i += ps;
@@ -118,9 +121,9 @@ adjusted (e.g for bar charts or filled areas).
                         // we got past point below, might need to
                         // insert interpolated extra point
                         if (withlines && i > 0 && points[i - ps] != null) {
-                            intery = py + (points[i - ps + 1] - py) * (qx - px) / (points[i - ps] - px);
+                            intery = py + (points[i - ps + accumulateOffset] - py) * (qx - px) / (points[i - ps + keyOffset] - px);
                             newpoints.push(qx);
-                            newpoints.push(intery + qy)
+                            newpoints.push(intery + qy);
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
                             bottom = qy; 
@@ -141,9 +144,9 @@ adjusted (e.g for bar charts or filled areas).
                         // we might be able to interpolate a point below,
                         // this can give us a better y
                         if (withlines && j > 0 && otherpoints[j - otherps] != null)
-                            bottom = qy + (otherpoints[j - otherps + 1] - qy) * (px - qx) / (otherpoints[j - otherps] - qx);
+                            bottom = qy + (otherpoints[j - otherps + accumulateOffset] - qy) * (px - qx) / (otherpoints[j - otherps + keyOffset] - qx);
 
-                        newpoints[l + 1] += bottom;
+                        newpoints[l + accumulateOffset] += bottom;
                         
                         i += ps;
                     }
@@ -175,6 +178,6 @@ adjusted (e.g for bar charts or filled areas).
         init: init,
         options: options,
         name: 'stack',
-        version: '1.1'
+        version: '1.2'
     });
 })(jQuery);
