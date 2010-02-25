@@ -54,20 +54,21 @@ libraries, see the documentation in jQuery ("Using jQuery with other
 libraries") for details.
 
 
-Q: Flot doesn't work with [UI framework xyz]!
+Q: Flot doesn't work with [insert name of Javascript UI framework]!
 
-A: The problem is most likely within the framework, or your use of the
-framework.
-
-The only non-standard thing used by Flot is the canvas tag; otherwise
-it is simply a series of absolute positioned divs within the
+A: The only non-standard thing used by Flot is the canvas tag;
+otherwise it is simply a series of absolute positioned divs within the
 placeholder tag you put in. If this is not working, it's probably
 because the framework you're using is doing something weird with the
-DOM. A common problem is that there's display:none on a container
-until the user does something. Many tab widgets work this way, and
-there's nothing wrong with it - you just can't call Flot inside a
-display:none container as explained in the README so you need to hold
-off the Flot call until the container is actually displayed.
+DOM, or you're using it the wrong way.
+
+A common problem is that there's display:none on a container until the
+user does something. Many tab widgets work this way, and there's
+nothing wrong with it - you just can't call Flot inside a display:none
+container as explained in the README so you need to hold off the Flot
+call until the container is actually displayed (or use
+visibility:hidden instead of display:none or move the container
+off-screen).
 
 If you find there's a specific thing we can do to Flot to help, feel
 free to submit a bug report. Otherwise, you're welcome to ask for help
