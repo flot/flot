@@ -541,7 +541,7 @@
                 var c = document.createElement('canvas');
                 c.width = width;
                 c.height = height;
-                if ($.browser.msie) // excanvas hack
+                if (!c.getContext) // excanvas hack
                     c = window.G_vmlCanvasManager.initElement(c);
                 return c;
             }
@@ -555,7 +555,7 @@
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
 
-            if ($.browser.msie) // excanvas hack
+            if (window.G_vmlCanvasManager) // excanvas hack
                 window.G_vmlCanvasManager.init_(document); // make sure everything is setup
             
             // the canvas

@@ -27,6 +27,8 @@ Bug fixes:
 - Fixed problem with plugins adding options to the series objects.
 - Fixed a problem introduced in 0.6 with specifying a gradient with {
   brightness: x, opacity: y }.
+- Don't use $.browser.msie, check for getContext on the created canvas
+  element instead and try to use excanvas if it's not found.
 
 Flot 0.6
 --------
