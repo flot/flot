@@ -7,20 +7,6 @@ plot.zoomOut() and plot.pan(offset) so you easily can add custom
 controls. It also fires a "plotpan" and "plotzoom" event when
 something happens, useful for synchronizing plots.
 
-Example usage:
-
-  plot = $.plot(...);
-  
-  // zoom default amount in on the pixel (100, 200) 
-  plot.zoom({ center: { left: 10, top: 20 } });
-
-  // zoom out again
-  plot.zoomOut({ center: { left: 10, top: 20 } });
-
-  // pan 100 pixels to the left and 20 down
-  plot.pan({ left: -100, top: 20 })
-
-
 Options:
 
   zoom: {
@@ -31,6 +17,7 @@ Options:
   
   pan: {
     interactive: false
+    frameRate: 20
   }
 
   xaxis, yaxis, x2axis, y2axis: {
@@ -38,18 +25,52 @@ Options:
     panRange: null   // or [number, number] (min, max)
   }
   
-"interactive" enables the built-in drag/click behaviour. "amount" is
-the amount to zoom the viewport relative to the current range, so 1 is
-100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out).
+"interactive" enables the built-in drag/click behaviour. If you enable
+interactive for pan, then you'll have a basic plot that supports
+moving around; the same for zoom.
+
+"amount" specifies the default amount to zoom in (so 1.5 = 150%)
+relative to the current viewport.
+
+"frameRate" specifies the maximum number of times per second the plot
+will update itself while the user is panning around on it (set to null
+to disable intermediate pans, the plot will then not update until the
+mouse button is released).
 
 "zoomRange" is the interval in which zooming can happen, e.g. with
 zoomRange: [1, 100] the zoom will never scale the axis so that the
 difference between min and max is smaller than 1 or larger than 100.
-You can set either of them to null to ignore.
+You can set either end to null to ignore, e.g. [1, null].
 
 "panRange" confines the panning to stay within a range, e.g. with
 panRange: [-10, 20] panning stops at -10 in one end and at 20 in the
-other. Either can be null.
+other. Either can be null, e.g. [-10, null].
+
+Example API usage:
+
+  plot = $.plot(...);
+  
+  // zoom default amount in on the pixel (10, 20) 
+  plot.zoom({ center: { left: 10, top: 20 } });
+
+  // zoom out again
+  plot.zoomOut({ center: { left: 10, top: 20 } });
+
+  // zoom 200% in on the pixel (10, 20) 
+  plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
+  
+  // pan 100 pixels to the left and 20 down
+  plot.pan({ left: -100, top: 20 })
+
+Here, "center" specifies where the center of the zooming should
+happen. Note that this is defined in pixel space, not the space of the
+data points (you can use the c2p helpers on the axes in Flot to help
+you convert between these).
+
+"amount" is the amount to zoom the viewport relative to the current
+range, so 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is
+70% (zoom out). You can set the default in the options.
+  
 */
 
 
@@ -92,7 +113,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
-            interactive: false
+            interactive: false,
+            frameRate: 20
         }
     };
 
@@ -118,7 +140,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 });
             }
             if (o.pan.interactive) {
-                var prevCursor = 'default', pageX = 0, pageY = 0;
+                var prevCursor = 'default', pageX = 0, pageY = 0,
+                    panTimeout = null;
                 
                 eventHolder.bind("dragstart", { distance: 10 }, function (e) {
                     if (e.which != 1)  // only accept left-click
@@ -129,10 +152,24 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     pageY = e.pageY;
                 });
                 eventHolder.bind("drag", function (e) {
-                    // unused at the moment, but we need it here to
-                    // trigger the dragstart/dragend events
+                    if (panTimeout || !o.pan.frameRate)
+                        return;
+
+                    panTimeout = setTimeout(function () {
+                        plot.pan({ left: pageX - e.pageX,
+                                   top: pageY - e.pageY });
+                        pageX = e.pageX;
+                        pageY = e.pageY;
+                                                    
+                        panTimeout = null;
+                    }, 1/o.pan.frameRate * 1000);
                 });
                 eventHolder.bind("dragend", function (e) {
+                    if (panTimeout) {
+                        clearTimeout(panTimeout);
+                        panTimeout = null;
+                    }
+                    
                     eventHolder.css('cursor', prevCursor);
                     plot.pan({ left: pageX - e.pageX,
                                top: pageY - e.pageY });
@@ -267,6 +304,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         init: init,
         options: options,
         name: 'navigate',
-        version: '1.1'
+        version: '1.2'
     });
 })(jQuery);

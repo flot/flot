@@ -13,6 +13,9 @@ Changes:
 - More predictable handling of gaps for the stacking plugin, now all
   undefined ranges are skipped.
 - Stacking plugin can stack horizontal bar charts.
+- Navigate plugin now redraws the plot while panning instead of only
+  after the fact (can be disabled by setting the pan.frameRate option
+  to null). Issue 235.
 
 
 Bug fixes:
