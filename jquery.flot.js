@@ -2090,7 +2090,7 @@
         };
         
         var r = [];
-        var escape = false;
+        var escape = false, padNext = false;
         var hours = d.getUTCHours();
         var isAM = hours < 12;
         if (monthNames == null)
@@ -2118,9 +2118,15 @@
                 case 'b': c = "" + monthNames[d.getUTCMonth()]; break;
                 case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
                 case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
+                case '0': c = ""; padNext = true; break;
+                }
+                if (c && padNext) {
+                    c = leftPad(c);
+                    padNext = false;
                 }
                 r.push(c);
-                escape = false;
+                if (!padNext)
+                    escape = false;
             }
             else {
                 if (c == "%")

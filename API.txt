@@ -404,6 +404,10 @@ specifiers are supported
   %p: am/pm, additionally switches %h/%H to 12 hour instead of 24
   %P: AM/PM (uppercase version of %p)
 
+Inserting a zero like %0m or %0d means that the specifier will be
+left-padded with a zero if it's only single-digit. So %y-%0m-%0d
+results in unambigious ISO timestamps like 2007-05-10 (for May 10th).
+
 You can customize the month names with the "monthNames" option. For
 instance, for Danish you might specify:
 

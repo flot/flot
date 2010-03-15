@@ -16,6 +16,8 @@ Changes:
 - Navigate plugin now redraws the plot while panning instead of only
   after the fact (can be disabled by setting the pan.frameRate option
   to null). Issue 235.
+- Date formatter now accepts %0m and %0d to get a zero-padded month or
+  day (issue raised by Maximillian Dornseif).
 
 
 Bug fixes:
