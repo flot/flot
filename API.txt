@@ -397,8 +397,8 @@ specifiers are supported
   %H: hours (left-padded with a zero)
   %M: minutes (left-padded with a zero)
   %S: seconds (left-padded with a zero)
-  %d: day of month (1-31)
-  %m: month (1-12)
+  %d: day of month (1-31), use %0d for zero-padding
+  %m: month (1-12), use %0m for zero-padding
   %y: year (four digits)
   %b: month name (customizable)
   %p: am/pm, additionally switches %h/%H to 12 hour instead of 24
