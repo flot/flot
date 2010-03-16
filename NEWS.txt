@@ -31,6 +31,10 @@ Bug fixes:
   brightness: x, opacity: y }.
 - Don't use $.browser.msie, check for getContext on the created canvas
   element instead and try to use excanvas if it's not found.
+- highlight(s, index) was looking up the point in the original s.data
+  instead of in the computed datapoints array, which breaks with
+  plugins that modify the datapoints (such as the stacking plugin).
+  Issue 316 reported by curlypaul924.
 
 Flot 0.6
 --------
