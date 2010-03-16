@@ -48,8 +48,8 @@ $(function () {
         $.plot($("#placeholder"), [d], {
             xaxis: {
                 mode: "time",
-                min: (new Date("1990/01/01")).getTime(),
-                max: (new Date("2000/01/01")).getTime()
+                min: (new Date(1990, 1, 1)).getTime(),
+                max: (new Date(2000, 1, 1)).getTime()
             }
         });
     });
@@ -59,8 +59,8 @@ $(function () {
             xaxis: {
                 mode: "time",
                 minTickSize: [1, "month"],
-                min: (new Date("1999/01/01")).getTime(),
-                max: (new Date("2000/01/01")).getTime()
+                min: (new Date(1999, 1, 1)).getTime(),
+                max: (new Date(2000, 1, 1)).getTime()
             }
         });
     });
