@@ -35,6 +35,8 @@ Bug fixes:
   instead of in the computed datapoints array, which breaks with
   plugins that modify the datapoints (such as the stacking plugin).
   Issue 316 reported by curlypaul924.
+- More robust handling of axis from data passed in from getData()
+  (problem reported by Morgan).
 
 Flot 0.6
 --------
