@@ -130,7 +130,8 @@
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
-        axes = { xaxis: {}, yaxis: {}, x2axis: {}, y2axis: {} },
+        axes = { xaxis: { n: 1 }, yaxis: { n: 1 },
+                 x2axis: { n: 2 }, y2axis: { n: 2 } },
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
         canvasWidth = 0, canvasHeight = 0,
         plotWidth = 0, plotHeight = 0,
@@ -257,11 +258,13 @@
         
         function axisSpecToRealAxis(obj, attr) {
             var a = obj[attr];
-            if (!a || a == 1)
-                return axes[attr];
-            if (typeof a == "number")
+            if (typeof a == "object") // if we got a real axis, extract number
+                a = a.n;
+            if (typeof a == "number" && a != 1)
                 return axes[attr.charAt(0) + a + attr.slice(1)];
-            return a; // assume it's OK
+
+            // default to first axis
+            return axes[attr];
         }
         
         function fillInSeriesOptions() {
