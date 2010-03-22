@@ -688,7 +688,7 @@
                 // get the most space needed around the grid for things
                 // that may stick out
                 var maxOutset = options.grid.borderWidth;
-                for (i = 0; i < series.length; ++i)
+                for (var i = 0; i < series.length; ++i)
                     maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
                 
                 plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = maxOutset;
@@ -826,7 +826,7 @@
                         minSize = axisOptions.minTickSize[0] * timeUnitSize[axisOptions.minTickSize[1]];
                 }
 
-                for (i = 0; i < spec.length - 1; ++i)
+                for (var i = 0; i < spec.length - 1; ++i)
                     if (delta < (spec[i][0] * timeUnitSize[spec[i][1]]
                                  + spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2
                        && spec[i][0] * timeUnitSize[spec[i][1]] >= minSize)
@@ -1745,7 +1745,7 @@
             
             var fragments = [], rowStarted = false,
                 lf = options.legend.labelFormatter, s, label;
-            for (i = 0; i < series.length; ++i) {
+            for (var i = 0; i < series.length; ++i) {
                 s = series[i];
                 label = s.label;
                 if (!label)
