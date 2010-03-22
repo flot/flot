@@ -18,7 +18,7 @@ Changes:
   to null). Issue 235.
 - Date formatter now accepts %0m and %0d to get a zero-padded month or
   day (issue raised by Maximillian Dornseif).
-
+- New hooks: drawSeries
 
 Bug fixes:
 

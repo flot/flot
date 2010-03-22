@@ -950,14 +950,23 @@ hooks in the plugins bundled with Flot.
    doesn't check it or do any normalization on it afterwards.
 
 
+ - drawSeries  [phase 5]
+
+   function(plot, canvascontext, series)
+
+   Hook for custom drawing of a single series. Called just before the
+   standard drawing routine has been called in the loop that draws
+   each series.
+   
+ 
  - draw  [phase 5]
 
    function(plot, canvascontext)
  
    Hook for drawing on the canvas. Called after the grid is drawn
-   (unless it's disabled) and the series have been plotted (in case
-   any points, lines or bars have been turned on). For examples of how
-   to draw things, look at the source code.
+   (unless it's disabled or grid.aboveData is set) and the series have
+   been plotted (in case any points, lines or bars have been turned
+   on). For examples of how to draw things, look at the source code.
    
  
  - bindEvents  [phase 6]
