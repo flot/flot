@@ -37,6 +37,8 @@ Bug fixes:
   Issue 316 reported by curlypaul924.
 - More robust handling of axis from data passed in from getData()
   (problem reported by Morgan).
+- Fixed problem with turning off bar outline (issue 253, fix by Jordi
+  Castells).
 
 Flot 0.6
 --------

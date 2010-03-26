@@ -223,6 +223,7 @@
             if (options.shadowSize)
                 options.series.shadowSize = options.shadowSize;
 
+            // add hooks from options
             for (var n in hooks)
                 if (options.hooks[n] && options.hooks[n].length)
                     hooks[n] = hooks[n].concat(options.hooks[n]);
@@ -1590,7 +1591,7 @@
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal) {
+        function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
             var left, right, bottom, top,
                 drawLeft, drawRight, drawTop, drawBottom,
                 tmp;
@@ -1675,7 +1676,7 @@
             }
 
             // draw outline
-            if (drawLeft || drawRight || drawTop || drawBottom) {
+            if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
                 c.beginPath();
 
                 // FIXME: inline moveTo is buggy with excanvas
@@ -1707,7 +1708,7 @@
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal);
+                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 
@@ -2046,7 +2047,7 @@
             var fillStyle = $.color.parse(series.color).scale('a', 0.5).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
-                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal);
+                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
