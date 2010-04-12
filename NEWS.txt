@@ -42,6 +42,8 @@ Bug fixes:
 - Check the selection passed into setSelection in the selection
   plugin, to guard against errors when synchronizing plots (fix by Lau
   Bech Lauritzen).
+- Fix bug in crosshair code with mouseout resetting the crosshair even
+  if it is locked (fix by Lau Bech Lauritzen). 
 
 Flot 0.6
 --------

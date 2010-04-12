@@ -95,6 +95,9 @@ The plugin also adds four public methods:
                 return;
 
             eventHolder.mouseout(function () {
+                if (crosshair.locked)
+                    return;
+
                 if (crosshair.x != -1) {
                     crosshair.x = -1;
                     plot.triggerRedrawOverlay();
