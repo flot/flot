@@ -39,6 +39,9 @@ Bug fixes:
   (problem reported by Morgan).
 - Fixed problem with turning off bar outline (issue 253, fix by Jordi
   Castells).
+- Check the selection passed into setSelection in the selection
+  plugin, to guard against errors when synchronizing plots (fix by Lau
+  Bech Lauritzen).
 
 Flot 0.6
 --------

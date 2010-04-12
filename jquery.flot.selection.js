@@ -232,7 +232,7 @@ The plugin allso adds the following methods to the plot object:
 
             selection.show = true;
             plot.triggerRedrawOverlay();
-            if (!preventEvent)
+            if (!preventEvent && selectionIsSane())
                 triggerSelectedEvent();
         }
 
