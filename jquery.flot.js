@@ -1576,7 +1576,7 @@
                     for (var a in pos)
                         style.push(a + ":" + pos[a] + "px")
                     
-                    html.push('<div style="' + style.join(';') + '">' + tick.label + '</div>');
+                    html.push('<div class="tickLabel" style="' + style.join(';') + '">' + tick.label + '</div>');
                 }
                 html.push('</div>');
             }
