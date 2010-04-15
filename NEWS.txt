@@ -1,6 +1,30 @@
 Flot x.x
 --------
 
+API changes:
+
+Multiple axes support. Code using dual axes should be changed from
+using x2axis/y2axis in the options to using an array. For instance,
+
+  {
+    xaxis: { ... }, x2axis: { ... },
+    yaxis: { ... }, y2axis: { ... }
+  }
+
+becomes
+
+  {
+    xaxes: [ { ... }, { ... } ],
+    yaxes: [ { ... }, { ... } ]
+  }
+
+Note that if you're just using one axis, continue to use the
+xaxis/yaxis directly (it now sets the default settings for the
+arrays). Plugins touching the axes must be ported to take the extra
+axes into account, a couple of helper functions have been added for
+that purpose, check the source.
+  
+
 Changes:
 
 - Support for specifying a bottom for each point for line charts when
@@ -15,9 +39,11 @@ Changes:
 - Stacking plugin can stack horizontal bar charts.
 - Navigate plugin now redraws the plot while panning instead of only
   after the fact (can be disabled by setting the pan.frameRate option
-  to null). Issue 235.
+  to null), raised by lastthemy (issue 235).
 - Date formatter now accepts %0m and %0d to get a zero-padded month or
   day (issue raised by Maximillian Dornseif).
+- Revamped internals to support an unlimited number of axes, not just
+  dual (sponsored by Flight Data Services, www.flightdataservices.com).
 - New hooks: drawSeries
 
 Bug fixes:

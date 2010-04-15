@@ -64,7 +64,7 @@ Example API usage:
 
 Here, "center" specifies where the center of the zooming should
 happen. Note that this is defined in pixel space, not the space of the
-data points (you can use the c2p helpers on the axes in Flot to help
+data points (you can use the p2c helpers on the axes in Flot to help
 you convert between these).
 
 "amount" is the amount to zoom the viewport relative to the current
@@ -192,51 +192,49 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (!args)
                 args = {};
             
-            var axes = plot.getAxes(),
-                options = plot.getOptions(),
-                c = args.center,
-                amount = args.amount ? args.amount : options.zoom.amount,
+            var c = args.center,
+                amount = args.amount || plot.getOptions().zoom.amount,
                 w = plot.width(), h = plot.height();
 
             if (!c)
                 c = { left: w / 2, top: h / 2 };
                 
             var xf = c.left / w,
-                x1 = c.left - xf * w / amount,
-                x2 = c.left + (1 - xf) * w / amount,
                 yf = c.top / h,
-                y1 = c.top - yf * h / amount,
-                y2 = c.top + (1 - yf) * h / amount;
+                minmax = {
+                    x: {
+                        min: c.left - xf * w / amount,
+                        max: c.left + (1 - xf) * w / amount
+                    },
+                    y: {
+                        min: c.top - yf * h / amount,
+                        max: c.top + (1 - yf) * h / amount
+                    }
+                };
 
-            function scaleAxis(min, max, name) {
-                var axis = axes[name],
-                    axisOptions = options[name];
-                
-                if (!axis.used)
-                    return;
+            $.each(plot.getUsedAxes(), function(i, axis) {
+                var opts = axis.options,
+                    min = minmax[axis.direction].min,
+                    max = minmax[axis.direction].max
                     
                 min = axis.c2p(min);
                 max = axis.c2p(max);
-                if (max < min) { // make sure min < max
-                    var tmp = min
+                if (min > max) {
+                    // make sure min < max
+                    var tmp = min;
                     min = max;
                     max = tmp;
                 }
 
-                var range = max - min, zr = axisOptions.zoomRange;
+                var range = max - min, zr = opts.zoomRange;
                 if (zr &&
                     ((zr[0] != null && range < zr[0]) ||
                      (zr[1] != null && range > zr[1])))
                     return;
             
-                axisOptions.min = min;
-                axisOptions.max = max;
-            }
-
-            scaleAxis(x1, x2, 'xaxis');
-            scaleAxis(x1, x2, 'x2axis');
-            scaleAxis(y1, y2, 'yaxis');
-            scaleAxis(y1, y2, 'y2axis');
+                opts.min = min;
+                opts.max = max;
+            });
             
             plot.setupGrid();
             plot.draw();
@@ -246,49 +244,42 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         plot.pan = function (args) {
-            var l = +args.left, t = +args.top,
-                axes = plot.getAxes(), options = plot.getOptions();
+            var delta = {
+                x: +args.left,
+                y: +args.top
+            };
 
-            if (isNaN(l))
-                l = 0;
-            if (isNaN(t))
-                t = 0;
+            if (isNaN(delta.x))
+                delta.x = 0;
+            if (isNaN(delta.y))
+                delta.y = 0;
 
-            function panAxis(delta, name) {
-                var axis = axes[name],
-                    axisOptions = options[name],
-                    min, max;
-                
-                if (!axis.used)
-                    return;
+            $.each(plot.getUsedAxes(), function (i, axis) {
+                var opts = axis.options,
+                    min, max, d = delta[axis.direction];
 
-                min = axis.c2p(axis.p2c(axis.min) + delta),
-                max = axis.c2p(axis.p2c(axis.max) + delta);
+                min = axis.c2p(axis.p2c(axis.min) + d),
+                max = axis.c2p(axis.p2c(axis.max) + d);
 
-                var pr = axisOptions.panRange;
+                var pr = opts.panRange;
                 if (pr) {
                     // check whether we hit the wall
                     if (pr[0] != null && pr[0] > min) {
-                        delta = pr[0] - min;
-                        min += delta;
-                        max += delta;
+                        d = pr[0] - min;
+                        min += d;
+                        max += d;
                     }
                     
                     if (pr[1] != null && pr[1] < max) {
-                        delta = pr[1] - max;
-                        min += delta;
-                        max += delta;
+                        d = pr[1] - max;
+                        min += d;
+                        max += d;
                     }
                 }
                 
-                axisOptions.min = min;
-                axisOptions.max = max;
-            }
-
-            panAxis(l, 'xaxis');
-            panAxis(l, 'x2axis');
-            panAxis(t, 'yaxis');
-            panAxis(t, 'y2axis');
+                opts.min = min;
+                opts.max = max;
+            });
             
             plot.setupGrid();
             plot.draw();

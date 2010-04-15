@@ -8,20 +8,20 @@ The plugin defines the following options:
     color: color
   }
 
-You enable selection support by setting the mode to one of "x", "y" or
+Selection support is enabled by setting the mode to one of "x", "y" or
 "xy". In "x" mode, the user will only be able to specify the x range,
 similarly for "y" mode. For "xy", the selection becomes a rectangle
 where both ranges can be specified. "color" is color of the selection.
 
-When selection support is enabled, a "plotselected" event will be emitted
-on the DOM element you passed into the plot function. The event
-handler gets one extra parameter with the ranges selected on the axes,
+When selection support is enabled, a "plotselected" event will be
+emitted on the DOM element you passed into the plot function. The
+event handler gets a parameter with the ranges selected on the axes,
 like this:
 
   placeholder.bind("plotselected", function(event, ranges) {
     alert("You selected " + ranges.xaxis.from + " to " + ranges.xaxis.to)
-    // similar for yaxis, secondary axes are in x2axis
-    // and y2axis if present
+    // similar for yaxis - with multiple axes, the extra ones are in
+    // x2axis, x3axis, ...
   });
 
 The "plotselected" event is only fired when the user has finished
@@ -37,17 +37,19 @@ The plugin allso adds the following methods to the plot object:
 - setSelection(ranges, preventEvent)
 
   Set the selection rectangle. The passed in ranges is on the same
-  form as returned in the "plotselected" event. If the selection
-  mode is "x", you should put in either an xaxis (or x2axis) object,
-  if the mode is "y" you need to put in an yaxis (or y2axis) object
-  and both xaxis/x2axis and yaxis/y2axis if the selection mode is
-  "xy", like this:
+  form as returned in the "plotselected" event. If the selection mode
+  is "x", you should put in either an xaxis range, if the mode is "y"
+  you need to put in an yaxis range and both xaxis and yaxis if the
+  selection mode is "xy", like this:
 
     setSelection({ xaxis: { from: 0, to: 10 }, yaxis: { from: 40, to: 60 } });
 
   setSelection will trigger the "plotselected" event when called. If
   you don't want that to happen, e.g. if you're inside a
-  "plotselected" handler, pass true as the second parameter.
+  "plotselected" handler, pass true as the second parameter. If you
+  are using multiple axes, you can specify the ranges on any of those,
+  e.g. as x2axis/x3axis/... instead of xaxis, the plugin picks the
+  first one it sees.
   
 - clearSelection(preventEvent)
 
@@ -135,21 +137,13 @@ The plugin allso adds the following methods to the plot object:
             if (!selectionIsSane())
                 return null;
 
-            var x1 = Math.min(selection.first.x, selection.second.x),
-                x2 = Math.max(selection.first.x, selection.second.x),
-                y1 = Math.max(selection.first.y, selection.second.y),
-                y2 = Math.min(selection.first.y, selection.second.y);
-
-            var r = {};
-            var axes = plot.getAxes();
-            if (axes.xaxis.used)
-                r.xaxis = { from: axes.xaxis.c2p(x1), to: axes.xaxis.c2p(x2) };
-            if (axes.x2axis.used)
-                r.x2axis = { from: axes.x2axis.c2p(x1), to: axes.x2axis.c2p(x2) };
-            if (axes.yaxis.used)
-                r.yaxis = { from: axes.yaxis.c2p(y1), to: axes.yaxis.c2p(y2) };
-            if (axes.y2axis.used)
-                r.y2axis = { from: axes.y2axis.c2p(y1), to: axes.y2axis.c2p(y2) };
+            var r = {}, c1 = selection.first, c2 = selection.second;
+            $.each(plot.getAxes(), function (name, axis) {
+                if (axis.used) {
+                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]); 
+                    r[name] = { from: Math.min(p1, p2), to: Math.max(p1, p2) };
+                }
+            });
             return r;
         }
 
@@ -159,13 +153,12 @@ The plugin allso adds the following methods to the plot object:
             plot.getPlaceholder().trigger("plotselected", [ r ]);
 
             // backwards-compat stuff, to be removed in future
-            var axes = plot.getAxes();
-            if (axes.xaxis.used && axes.yaxis.used)
+            if (r.xaxis && r.yaxis)
                 plot.getPlaceholder().trigger("selected", [ { x1: r.xaxis.from, y1: r.yaxis.from, x2: r.xaxis.to, y2: r.yaxis.to } ]);
         }
 
         function clamp(min, value, max) {
-            return value < min? min: (value > max? max: value);
+            return value < min ? min: (value > max ? max: value);
         }
 
         function setSelectionPos(pos, e) {
@@ -176,10 +169,10 @@ The plugin allso adds the following methods to the plot object:
             pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plot.height());
 
             if (o.selection.mode == "y")
-                pos.x = pos == selection.first? 0: plot.width();
+                pos.x = pos == selection.first ? 0 : plot.width();
 
             if (o.selection.mode == "x")
-                pos.y = pos == selection.first? 0: plot.height();
+                pos.y = pos == selection.first ? 0 : plot.height();
         }
 
         function updateSelection(pos) {
@@ -204,19 +197,55 @@ The plugin allso adds the following methods to the plot object:
             }
         }
 
+        // taken from markings support
+        function extractRange(ranges, coord) {
+            var axis, from, to, axes, key;
+
+            axes = plot.getUsedAxes();
+            for (i = 0; i < axes.length; ++i) {
+                axis = axes[i];
+                if (axis.direction == coord) {
+                    key = coord + axis.n + "axis";
+                    if (!ranges[key] && axis.n == 1)
+                        key = coord + "axis"; // support x1axis as xaxis
+                    if (ranges[key]) {
+                        from = ranges[key].from;
+                        to = ranges[key].to;
+                        break;
+                    }
+                }
+            }
+
+            // backwards-compat stuff - to be removed in future
+            if (!ranges[key]) {
+                axis = coord == "x" ? plot.getXAxes()[0] : plot.getYAxes()[0];
+                from = ranges[coord + "1"];
+                to = ranges[coord + "2"];
+            }
+
+            // auto-reverse as an added bonus
+            if (from != null && to != null && from > to) {
+                var tmp = from;
+                from = to;
+                to = tmp;
+            }
+            
+            return { from: from, to: to, axis: axis };
+        }
+        
+        
         function setSelection(ranges, preventEvent) {
-            var axis, range, axes = plot.getAxes();
-            var o = plot.getOptions();
+            var axis, range, o = plot.getOptions();
 
             if (o.selection.mode == "y") {
                 selection.first.x = 0;
                 selection.second.x = plot.width();
             }
             else {
-                axis = ranges["xaxis"]? axes["xaxis"]: (ranges["x2axis"]? axes["x2axis"]: axes["xaxis"]);
-                range = ranges["xaxis"] || ranges["x2axis"] || { from:ranges["x1"], to:ranges["x2"] }
-                selection.first.x = axis.p2c(Math.min(range.from, range.to));
-                selection.second.x = axis.p2c(Math.max(range.from, range.to));
+                range = extractRange(ranges, "x");
+
+                selection.first.x = range.axis.p2c(range.from);
+                selection.second.x = range.axis.p2c(range.to);
             }
 
             if (o.selection.mode == "x") {
@@ -224,10 +253,10 @@ The plugin allso adds the following methods to the plot object:
                 selection.second.y = plot.height();
             }
             else {
-                axis = ranges["yaxis"]? axes["yaxis"]: (ranges["y2axis"]? axes["y2axis"]: axes["yaxis"]);
-                range = ranges["yaxis"] || ranges["y2axis"] || { from:ranges["y1"], to:ranges["y2"] }
-                selection.first.y = axis.p2c(Math.min(range.from, range.to));
-                selection.second.y = axis.p2c(Math.max(range.from, range.to));
+                range = extractRange(ranges, "y");
+
+                selection.first.y = range.axis.p2c(range.from);
+                selection.second.y = range.axis.p2c(range.to);
             }
 
             selection.show = true;
