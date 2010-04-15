@@ -43,7 +43,12 @@ Changes:
 - Date formatter now accepts %0m and %0d to get a zero-padded month or
   day (issue raised by Maximillian Dornseif).
 - Revamped internals to support an unlimited number of axes, not just
-  dual (sponsored by Flight Data Services, www.flightdataservices.com).
+  dual (sponsored by Flight Data Services,
+  www.flightdataservices.com).
+- New setting on axes, "tickLength", to control the size of ticks or
+  turn them off without turning off the labels.
+- Axes are now put in container divs with classes, for instance labels
+  in the x axes can be reached via ".xAxis .tickLabels".
 - New hooks: drawSeries
 
 Bug fixes:
