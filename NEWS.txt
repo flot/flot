@@ -4,7 +4,8 @@ Flot x.x
 API changes:
 
 Multiple axes support. Code using dual axes should be changed from
-using x2axis/y2axis in the options to using an array. For instance,
+using x2axis/y2axis in the options to using an array (although
+backwards-compatibility hooks are in place). For instance,
 
   {
     xaxis: { ... }, x2axis: { ... },
