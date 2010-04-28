@@ -24,7 +24,13 @@ xaxis/yaxis directly (it now sets the default settings for the
 arrays). Plugins touching the axes must be ported to take the extra
 axes into account, a couple of helper functions have been added for
 that purpose, check the source.
-  
+
+"tickColor" on the grid options is now deprecated in favour of a
+corresponding option on the axes, so { grid: { tickColor: "#000" }}
+becomes { xaxis: { tickColor: "#000"}, yaxis: { tickColor: "#000"} },
+but if you just configure a base color Flot will now autogenerate a
+tick color by adding transparency. Backwards-compatibility hooks are
+in place.
 
 Changes:
 
@@ -48,8 +54,13 @@ Changes:
   www.flightdataservices.com).
 - New setting on axes, "tickLength", to control the size of ticks or
   turn them off without turning off the labels.
-- Axes are now put in container divs with classes, for instance labels
-  in the x axes can be reached via ".xAxis .tickLabels".
+- Axis labels are now put in container divs with classes, for instance
+  labels in the x axes can be reached via ".xAxis .tickLabel".
+- Support for setting the color of an axis (sponsored by Flight Data
+  Services, www.flightdataservices.com).
+- Tick color is now auto-generated as the base color with some
+  transparency (unless you override it).
+
 - New hooks: drawSeries
 
 Bug fixes:

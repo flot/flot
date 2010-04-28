@@ -53,6 +53,8 @@
                 xaxis: {
                     position: "bottom", // or "top"
                     mode: null, // null or "time"
+                    color: null, // base color, labels, ticks
+                    tickColor: null, // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
                     transform: null, // null or f: number -> number to transform axis
                     inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
@@ -110,11 +112,11 @@
                     aboveData: false,
                     color: "#545454", // primary color used for outline and labels
                     backgroundColor: null, // null for transparent, else color
-                    tickColor: "rgba(0,0,0,0.15)", // color used for the ticks
+                    borderColor: null, // set if different from the grid color
+                    tickColor: null, // color for the ticks, e.g. "rgba(0,0,0,0.15)"
                     labelMargin: 5, // in pixels
                     axisMargin: 8, // in pixels
                     borderWidth: 2, // in pixels
-                    borderColor: null, // set if different from the grid color
                     markings: null, // array of ranges or fn: axes -> array of ranges
                     markingsColor: "#f4f4f4",
                     markingsLineWidth: 2,
@@ -130,8 +132,6 @@
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
-        /*axes = { xaxis: { n: 1 }, yaxis: { n: 1 },
-                 x2axis: { n: 2 }, y2axis: { n: 2 } },*/
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
         canvasWidth = 0, canvasHeight = 0,
@@ -232,9 +232,22 @@
             var i;
             
             $.extend(true, options, opts);
+            
+            if (options.xaxis.color == null)
+                options.xaxis.color = options.grid.color;
+            if (options.yaxis.color == null)
+                options.yaxis.color = options.grid.color;
+            
+            if (options.xaxis.tickColor == null) // backwards-compatibility
+                options.xaxis.tickColor = options.grid.tickColor;
+            if (options.yaxis.tickColor == null) // backwards-compatibility
+                options.yaxis.tickColor = options.grid.tickColor;
+
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
-
+            if (options.grid.tickColor == null)
+                options.grid.tickColor = $.color.parse(options.grid.color).scale('a', 0.22).toString();
+            
             // fill in defaults in axes, copy at least always the
             // first as the rest of the code assumes it'll be there
             for (i = 0; i < Math.max(1, options.xaxes.length); ++i)
@@ -1438,13 +1451,15 @@
             }
             
             // draw the ticks
-            ctx.strokeStyle = options.grid.tickColor;
             var axes = getUsedAxes(), bw = options.grid.borderWidth;
 
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box,
                     t = axis.tickLength, x, y, xoff, yoff;
 
+                ctx.strokeStyle = axis.options.tickColor || $.color.parse(axis.options.color).scale('a', 0.22).toString();
+                ctx.lineWidth = 1;
+                
                 // find the edges
                 if (axis.direction == "x") {
                     x = 0;
@@ -1460,8 +1475,6 @@
                     else
                         x = box.left - plotOffset.left;
                 }
-
-                ctx.lineWidth = 1;
                 
                 // draw tick bar
                 if (!axis.innermost) {
@@ -1536,13 +1549,13 @@
         function insertAxisLabels() {
             placeholder.find(".tickLabels").remove();
             
-            var html = ['<div class="tickLabels" style="font-size:smaller;color:' + options.grid.color + '">'];
+            var html = ['<div class="tickLabels" style="font-size:smaller">'];
 
             var axes = getUsedAxes();
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box;
                 //debug: html.push('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
-                html.push('<div class="' + axis.direction + 'Axis ' + axis.direction + axis.n + 'Axis">');
+                html.push('<div class="' + axis.direction + 'Axis ' + axis.direction + axis.n + 'Axis" style="color:' + axis.options.color + '">');
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
