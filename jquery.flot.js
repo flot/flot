@@ -62,9 +62,10 @@
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
-                    tickLength: null, // size in pixels of ticks, or "full" for whole line
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
+                    tickLength: null, // size in pixels of ticks, or "full" for whole line
+                    alignTicksWithAxis: null, // axis number or null for no sync
                     
                     // mode specific options
                     tickDecimals: null, // no. of decimals, null means auto
@@ -881,8 +882,9 @@
             var sameDirection = $.grep(all, function (a) {
                 return a && (a.labelHeight || a.labelWidth);
             });
-            
-            if ($.inArray(axis, sameDirection) != 0 && tickLength == "full")
+
+            var innermost = $.inArray(axis, sameDirection) == 0;
+            if (!innermost && tickLength == "full")
                 tickLength = 5;
                 
             if (!isNaN(+tickLength))
@@ -918,7 +920,7 @@
             axis.position = pos;
             axis.tickLength = tickLength;
             axis.box.padding = padding;
-            axis.innermost = $.inArray(axis, samePosition) == 0;
+            axis.innermost = innermost;
         }
 
         function fixupAxisBox(axis) {
@@ -947,11 +949,12 @@
                 for (k = 0; k < axes.length; ++k) {
                     setupTickGeneration(axes[k]);
                     setTicks(axes[k]);
+                    snapRangeToTicks(axes[k], axes[k].ticks);
                 }
 
                 // find labelWidth/Height, do this on all, not just
                 // used as we might need to reserve space for unused
-                // to if their labelWidth/Height is set
+                // too if their labelWidth/Height is set
                 for (j = 0; j < xaxes.length; ++j)
                     measureTickLabels(xaxes[j]);
                 for (j = 0; j < yaxes.length; ++j)
@@ -1042,7 +1045,7 @@
                 noTicks = 0.3 * Math.sqrt(canvasWidth);
             else
                 noTicks = 0.3 * Math.sqrt(canvasHeight);
-            
+
             var delta = (axis.max - axis.min) / noTicks,
                 size, generator, unit, formatter, i, magn, norm;
 
@@ -1107,10 +1110,7 @@
                     size *= magn;
                 }
 
-                if (opts.tickSize) {
-                    size = opts.tickSize[0];
-                    unit = opts.tickSize[1];
-                }
+                axis.tickSize = opts.tickSize || [size, unit];
                 
                 generator = function(axis) {
                     var ticks = [],
@@ -1148,7 +1148,7 @@
                     do {
                         prev = v;
                         v = d.getTime();
-                        ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
+                        ticks.push(v);
                         if (unit == "month") {
                             if (tickSize < 1) {
                                 // a bit complicated - we'll divide the month
@@ -1238,10 +1238,8 @@
                 if (opts.minTickSize != null && size < opts.minTickSize)
                     size = opts.minTickSize;
 
-                if (opts.tickSize != null)
-                    size = opts.tickSize;
-
-                axis.tickDecimals = Math.max(0, (maxDec != null) ? maxDec : dec);
+                axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
+                axis.tickSize = opts.tickSize || size;
 
                 generator = function (axis) {
                     var ticks = [];
@@ -1252,7 +1250,7 @@
                     do {
                         prev = v;
                         v = start + i * axis.tickSize;
-                        ticks.push({ v: v, label: axis.tickFormatter(v, axis) });
+                        ticks.push(v);
                         ++i;
                     } while (v < axis.max && v != prev);
                     return ticks;
@@ -1263,7 +1261,44 @@
                 };
             }
 
-            axis.tickSize = unit ? [size, unit] : size;
+            if (opts.alignTicksWithAxis != null) {
+                var otherAxis = (axis.direction == "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
+                if (otherAxis && otherAxis.used && otherAxis != axis) {
+                    // consider snapping min/max to outermost nice ticks
+                    var niceTicks = generator(axis);
+                    if (niceTicks.length > 0) {
+                        if (opts.min == null)
+                            axis.min = Math.min(axis.min, niceTicks[0]);
+                        if (opts.max == null && niceTicks.length > 1)
+                            axis.max = Math.max(axis.max, niceTicks[niceTicks.length - 1]);
+                    }
+                    
+                    generator = function (axis) {
+                        // copy ticks, scaled to this axis
+                        var ticks = [], v, i;
+                        for (i = 0; i < otherAxis.ticks.length; ++i) {
+                            v = (otherAxis.ticks[i].v - otherAxis.min) / (otherAxis.max - otherAxis.min);
+                            v = axis.min + v * (axis.max - axis.min);
+                            ticks.push(v);
+                        }
+                        return ticks;
+                    };
+                    
+                    // we might need an extra decimal since forced
+                    // ticks don't necessarily fit naturally
+                    if (axis.mode != "time" && opts.tickDecimals == null) {
+                        var extraDec = Math.max(0, -Math.floor(Math.log(delta) / Math.LN10) + 1),
+                            ts = generator(axis);
+
+                        // only proceed if the tick interval rounded
+                        // with an extra decimal doesn't give us a
+                        // zero at end
+                        if (!(ts.length > 1 && /\..*0$/.test((ts[1] - ts[0]).toFixed(extraDec))))
+                            axis.tickDecimals = extraDec;
+                    }
+                }
+            }
+
             axis.tickGenerator = generator;
             if ($.isFunction(opts.tickFormatter))
                 axis.tickFormatter = function (v, axis) { return "" + opts.tickFormatter(v, axis); };
@@ -1272,47 +1307,44 @@
         }
         
         function setTicks(axis) {
-            var opts = axis.options;
-            
             axis.ticks = [];
 
-            if (opts.ticks == null)
-                axis.ticks = axis.tickGenerator(axis);
-            else if (typeof opts.ticks == "number") {
-                if (opts.ticks > 0)
-                    axis.ticks = axis.tickGenerator(axis);
-            }
-            else if (opts.ticks) {
-                var ticks = opts.ticks;
-
-                if ($.isFunction(ticks))
+            var oticks = axis.options.ticks, ticks = null;
+            if (oticks == null || (typeof oticks == "number" && oticks > 0))
+                ticks = axis.tickGenerator(axis);
+            else if (oticks) {
+                if ($.isFunction(oticks))
                     // generate the ticks
-                    ticks = ticks({ min: axis.min, max: axis.max });
-                
-                // clean up the user-supplied ticks, copy them over
-                var i, v;
-                for (i = 0; i < ticks.length; ++i) {
-                    var label = null;
-                    var t = ticks[i];
-                    if (typeof t == "object") {
-                        v = t[0];
-                        if (t.length > 1)
-                            label = t[1];
-                    }
-                    else
-                        v = t;
-                    if (label == null)
-                        label = axis.tickFormatter(v, axis);
-                    axis.ticks[i] = { v: v, label: label };
-                }
+                    ticks = oticks({ min: axis.min, max: axis.max });
+                else
+                    ticks = oticks;
             }
 
-            if (opts.autoscaleMargin != null && axis.ticks.length > 0) {
+            // clean up/labelify the supplied ticks, copy them over
+            var i, v;
+            for (i = 0; i < ticks.length; ++i) {
+                var label = null;
+                var t = ticks[i];
+                if (typeof t == "object") {
+                    v = t[0];
+                    if (t.length > 1)
+                        label = t[1];
+                }
+                else
+                    v = t;
+                if (label == null)
+                    label = axis.tickFormatter(v, axis);
+                axis.ticks[i] = { v: v, label: label };
+            }
+        }
+
+        function snapRangeToTicks(axis, ticks) {
+            if (axis.options.autoscaleMargin != null && ticks.length > 0) {
                 // snap to ticks
-                if (opts.min == null)
-                    axis.min = Math.min(axis.min, axis.ticks[0].v);
-                if (opts.max == null && axis.ticks.length > 1)
-                    axis.max = Math.max(axis.max, axis.ticks[axis.ticks.length - 1].v);
+                if (axis.options.min == null)
+                    axis.min = Math.min(axis.min, ticks[0].v);
+                if (axis.options.max == null && ticks.length > 1)
+                    axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
         }
       

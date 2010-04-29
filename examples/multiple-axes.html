@@ -39,7 +39,12 @@ $(function () {
            { 
                xaxes: [ { mode: 'time' } ],
                yaxes: [ { min: 0 },
-                        { position: position, tickFormatter: euroFormatter } ],
+                        {
+                          // align if we are to the right
+                          alignTicksWithAxis: position == "right" ? 1 : null,
+                          position: position,
+                          tickFormatter: euroFormatter
+                        } ],
                legend: { position: 'sw' }
            });
     }

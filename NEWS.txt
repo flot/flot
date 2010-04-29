@@ -60,6 +60,10 @@ Changes:
   Services, www.flightdataservices.com).
 - Tick color is now auto-generated as the base color with some
   transparency (unless you override it).
+- Support for aligning ticks in the axes with "alignTicksWithAxis" to
+  ensure that they appear next to each other rather than in between,
+  at the expense of possibly awkward tick steps (sponsored by Flight
+  Data Services, www.flightdataservices.com).
 
 - New hooks: drawSeries
 
