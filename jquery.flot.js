@@ -804,7 +804,7 @@
                 // them, we don't need the exact figures and the
                 // fixed-size box content is easy to center
                 if (w == null)
-                    w = canvasWidth / (ticks.length > 0 ? ticks.length : 1);
+                    w = Math.floor(canvasWidth / (ticks.length > 0 ? ticks.length : 1));
 
                 // measure x label heights
                 if (h == null) {
@@ -839,6 +839,7 @@
                         w = dummyDiv.children().width();
                     if (h == null)
                         h = dummyDiv.find("div.tickLabel").height();
+                    dummyDiv.remove();
                 }
             }
 
@@ -968,17 +969,19 @@
 
                 // make sure we've got enough space for things that
                 // might stick out
-                var maxOutset = options.grid.borderWidth;
+                var maxOutset = 0;
                 for (var i = 0; i < series.length; ++i)
                     maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
 
-                for (var a in plotOffset)
+                for (var a in plotOffset) {
+                    plotOffset[a] += options.grid.borderWidth;
                     plotOffset[a] = Math.max(maxOutset, plotOffset[a]);
+                }
             }
             
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
-
+            
             // now we got the proper plotWidth/Height, we can compute the scaling
             for (k = 0; k < axes.length; ++k)
                 setTransformationHelpers(axes[k]);
@@ -1495,17 +1498,17 @@
                 // find the edges
                 if (axis.direction == "x") {
                     x = 0;
-                    if (axis.position == "bottom")
-                        y = box.top - plotOffset.top;
+                    if (t == "full")
+                        y = (axis.position == "top" ? 0 : plotHeight);
                     else
-                        y = box.top - plotOffset.top + box.height;
+                        y = box.top - plotOffset.top + (axis.position == "top" ? box.height : 0);
                 }
                 else {
                     y = 0;
-                    if (axis.position == "left")
-                        x = box.left - plotOffset.left + box.width;
+                    if (t == "full")
+                        x = (axis.position == "left" ? 0 : plotWidth);
                     else
-                        x = box.left - plotOffset.left;
+                        x = box.left - plotOffset.left + (axis.position == "left" ? box.width : 0);
                 }
                 
                 // draw tick bar
@@ -1516,12 +1519,12 @@
                         xoff = plotWidth;
                     else
                         yoff = plotHeight;
-
+                    
                     if (ctx.lineWidth == 1) {
                         x = Math.floor(x) + 0.5;
                         y = Math.floor(y) + 0.5;
                     }
-                    
+
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
                     ctx.stroke();
@@ -1533,7 +1536,7 @@
                     var v = axis.ticks[i].v;
                     
                     xoff = yoff = 0;
-                    
+
                     if (v < axis.min || v > axis.max
                         // skip those lying on the axes if we got a border
                         || (t == "full" && bw > 0
@@ -1556,8 +1559,10 @@
                     }
 
                     if (ctx.lineWidth == 1) {
-                        x = Math.floor(x) + 0.5;
-                        y = Math.floor(y) + 0.5;
+                        if (axis.direction == "x")
+                            x = Math.floor(x) + 0.5;
+                        else
+                            y = Math.floor(y) + 0.5;
                     }
 
                     ctx.moveTo(x, y);
