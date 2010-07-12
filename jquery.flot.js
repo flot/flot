@@ -1920,7 +1920,7 @@
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            var lw = series.lines.lineWidth,
+            var lw = series.points.lineWidth,
                 sw = series.shadowSize,
                 radius = series.points.radius;
             if (lw > 0 && sw > 0) {
