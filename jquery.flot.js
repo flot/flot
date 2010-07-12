@@ -87,7 +87,8 @@
                         radius: 3,
                         lineWidth: 2, // in pixels
                         fill: true,
-                        fillColor: "#ffffff"
+                        fillColor: "#ffffff",
+                        symbol: "circle" // or callback
                     },
                     lines: {
                         // we don't put in show: false so we can see
@@ -1899,16 +1900,23 @@
         }
 
         function drawSeriesPoints(series) {
-            function plotPoints(datapoints, radius, fillStyle, offset, circumference, axisx, axisy) {
+            function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
                 var points = datapoints.points, ps = datapoints.pointsize;
-                
+
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i], y = points[i + 1];
                     if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
                         continue;
                     
                     ctx.beginPath();
-                    ctx.arc(axisx.p2c(x), axisy.p2c(y) + offset, radius, 0, circumference, false);
+                    x = axisx.p2c(x);
+                    y = axisy.p2c(y) + offset;
+                    if (symbol == "circle")
+                        ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+                    else
+                        symbol(ctx, x, y, radius, shadow);
+                    ctx.closePath();
+                    
                     if (fillStyle) {
                         ctx.fillStyle = fillStyle;
                         ctx.fill();
@@ -1922,25 +1930,26 @@
 
             var lw = series.points.lineWidth,
                 sw = series.shadowSize,
-                radius = series.points.radius;
+                radius = series.points.radius,
+                symbol = series.points.symbol;
             if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, null, w + w/2, Math.PI,
-                           series.xaxis, series.yaxis);
+                plotPoints(series.datapoints, radius, null, w + w/2, true,
+                           series.xaxis, series.yaxis, symbol);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, null, w/2, Math.PI,
-                           series.xaxis, series.yaxis);
+                plotPoints(series.datapoints, radius, null, w/2, true,
+                           series.xaxis, series.yaxis, symbol);
             }
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
             plotPoints(series.datapoints, radius,
-                       getFillStyle(series.points, series.color), 0, 2 * Math.PI,
-                       series.xaxis, series.yaxis);
+                       getFillStyle(series.points, series.color), 0, false,
+                       series.xaxis, series.yaxis, symbol);
             ctx.restore();
         }
 
@@ -2382,9 +2391,16 @@
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
             octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
-            var radius = 1.5 * pointRadius;
+            var radius = 1.5 * pointRadius,
+                x = axisx.p2c(x),
+                y = axisy.p2c(y);
+            
             octx.beginPath();
-            octx.arc(axisx.p2c(x), axisy.p2c(y), radius, 0, 2 * Math.PI, false);
+            if (series.points.symbol == "circle")
+                octx.arc(x, y, radius, 0, 2 * Math.PI, false);
+            else
+                series.points.symbol(octx, x, y, radius, false);
+            octx.closePath();
             octx.stroke();
         }
 
