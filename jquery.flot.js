@@ -262,7 +262,7 @@
             if (options.yaxis.noTicks && options.yaxis.ticks == null)
                 options.yaxis.ticks = options.yaxis.noTicks;
             if (options.x2axis) {
-                options.y2axis.position = "top";
+                options.x2axis.position = "top";
                 options.xaxes[1] = options.x2axis;
             }
             if (options.y2axis) {
