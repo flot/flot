@@ -367,7 +367,7 @@
                     if (pos[key] == null && axis.n == 1)
                         key = "x";
 
-                    if (pos[key]) {
+                    if (pos[key] != null) {
                         res.left = axis.p2c(pos[key]);
                         break;
                     }
@@ -381,7 +381,7 @@
                     if (pos[key] == null && axis.n == 1)
                         key = "y";
 
-                    if (pos[key]) {
+                    if (pos[key] != null) {
                         res.top = axis.p2c(pos[key]);
                         break;
                     }
