@@ -67,6 +67,8 @@ Changes:
 - Support for customizing the point type through a callback when
   plotting points and new symbol plugin with some predefined point
   types (sponsored by Utility Data Corporation).
+- Resize plugin for automatically redrawing when the placeholder
+  changes size, e.g. on window resizes (sponsored by Novus Partners).
 
 - New hooks: drawSeries
 
