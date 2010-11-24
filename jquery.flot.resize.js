@@ -32,8 +32,15 @@ plots, you can just fix the size of their placeholders.
                 plot.getPlaceholder().resize(onResize);
 
             function onResize() {
+                var placeholder = plot.getPlaceholder();
+
+                // somebody might have hidden us and we can't plot
+                // when we don't have the dimensions
+                if (placeholder.width() == 0 || placeholder.height() == 0)
+                    return;
+                
                 ++redrawing;
-                $.plot(plot.getPlaceholder(), plot.getData(), plot.getOptions());
+                $.plot(placeholder, plot.getData(), plot.getOptions());
                 --redrawing;
             }
         }
