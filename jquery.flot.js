@@ -308,7 +308,7 @@
             for (var i = 0; i < d.length; ++i) {
                 var s = $.extend(true, {}, options.series);
 
-                if (d[i].data) {
+                if (d[i].data != null) {
                     s.data = d[i].data; // move the data instead of deep-copy
                     delete d[i].data;
 
