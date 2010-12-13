@@ -98,6 +98,11 @@ Bug fixes:
   if it is locked (fix by Lau Bech Lauritzen and Banko Adam).
 - Fix bug with points plotting using line width from lines rather than
   points.
+- Fix bug with passing non-array 0 data (for plugins that don't expect
+  arrays, patch by vpapp1).
+- Fix errors in JSON in examples so they work with jQuery 1.4.2
+  (fix reported by honestbleeps, issue 357).
+
 
 Flot 0.6
 --------
