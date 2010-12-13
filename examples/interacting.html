@@ -62,8 +62,8 @@ $(function () {
 
         if ($("#enableTooltip:checked").length > 0) {
             if (item) {
-                if (previousPoint != item.datapoint) {
-                    previousPoint = item.datapoint;
+                if (previousPoint != item.dataIndex) {
+                    previousPoint = item.dataIndex;
                     
                     $("#tooltip").remove();
                     var x = item.datapoint[0].toFixed(2),

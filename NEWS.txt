@@ -102,6 +102,8 @@ Bug fixes:
   arrays, patch by vpapp1).
 - Fix errors in JSON in examples so they work with jQuery 1.4.2
   (fix reported by honestbleeps, issue 357).
+- Fix bug with tooltip in interacting.html, this makes the tooltip
+  much smoother (fix by bdkahn).
 
 
 Flot 0.6
