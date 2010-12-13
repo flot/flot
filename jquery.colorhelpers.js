@@ -17,11 +17,11 @@
  * new objects.
  */ 
 
-(function() {
-    jQuery.color = {};
+(function($) {
+    $.color = {};
 
     // construct color object with some convenient chainable helpers
-    jQuery.color.make = function (r, g, b, a) {
+    $.color.make = function (r, g, b, a) {
         var o = {};
         o.r = r || 0;
         o.g = g || 0;
@@ -61,7 +61,7 @@
         };
 
         o.clone = function () {
-            return jQuery.color.make(o.r, o.b, o.g, o.a);
+            return $.color.make(o.r, o.b, o.g, o.a);
         };
 
         return o.normalize();
@@ -69,7 +69,7 @@
 
     // extract CSS color property from element, going up in the DOM
     // if it's "transparent"
-    jQuery.color.extract = function (elem, css) {
+    $.color.extract = function (elem, css) {
         var c;
         do {
             c = elem.css(css).toLowerCase();
@@ -78,19 +78,19 @@
             if (c != '' && c != 'transparent')
                 break;
             elem = elem.parent();
-        } while (!jQuery.nodeName(elem.get(0), "body"));
+        } while (!$.nodeName(elem.get(0), "body"));
 
         // catch Safari's way of signalling transparent
         if (c == "rgba(0, 0, 0, 0)")
             c = "transparent";
         
-        return jQuery.color.parse(c);
+        return $.color.parse(c);
     }
     
     // parse CSS color string (like "rgb(10, 32, 43)" or "#fff"),
     // returns color object
-    jQuery.color.parse = function (str) {
-        var res, m = jQuery.color.make;
+    $.color.parse = function (str) {
+        var res, m = $.color.make;
 
         // Look for rgb(num,num,num)
         if (res = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str))
@@ -117,7 +117,7 @@
             return m(parseInt(res[1]+res[1], 16), parseInt(res[2]+res[2], 16), parseInt(res[3]+res[3], 16));
 
         // Otherwise, we're most likely dealing with a named color
-        var name = jQuery.trim(str).toLowerCase();
+        var name = $.trim(str).toLowerCase();
         if (name == "transparent")
             return m(255, 255, 255, 0);
         else {
@@ -170,5 +170,5 @@
         silver:[192,192,192],
         white:[255,255,255],
         yellow:[255,255,0]
-    };    
-})();
+    };
+})(jQuery);

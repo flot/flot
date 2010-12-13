@@ -104,6 +104,9 @@ Bug fixes:
   (fix reported by honestbleeps, issue 357).
 - Fix bug with tooltip in interacting.html, this makes the tooltip
   much smoother (fix by bdkahn).
+- Use closure trick to make inline colorhelpers plugin respect
+  jQuery.noConflict(true), renaming the global jQuery object (reported
+  by Nick Stielau).
 
 
 Flot 0.6
