@@ -95,7 +95,7 @@ Bug fixes:
   plugin, to guard against errors when synchronizing plots (fix by Lau
   Bech Lauritzen).
 - Fix bug in crosshair code with mouseout resetting the crosshair even
-  if it is locked (fix by Lau Bech Lauritzen).
+  if it is locked (fix by Lau Bech Lauritzen and Banko Adam).
 - Fix bug with points plotting using line width from lines rather than
   points.
 
