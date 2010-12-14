@@ -11,7 +11,9 @@ The plugin defines the following options:
 Selection support is enabled by setting the mode to one of "x", "y" or
 "xy". In "x" mode, the user will only be able to specify the x range,
 similarly for "y" mode. For "xy", the selection becomes a rectangle
-where both ranges can be specified. "color" is color of the selection.
+where both ranges can be specified. "color" is color of the selection
+(if you need to change the color later on, you can get to it with
+plot.getOptions().selection.color).
 
 When selection support is enabled, a "plotselected" event will be
 emitted on the DOM element you passed into the plot function. The
