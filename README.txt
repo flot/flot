@@ -16,20 +16,27 @@ Installation
 
 Just include the Javascript file after you've included jQuery.
 
-Note that you need to get a version of Excanvas (e.g. the one bundled
-with Flot) which is canvas emulation on Internet Explorer. You can
+Generally, all browsers that support the HTML5 canvas tag are
+supported.
+
+For support for Internet Explorer < 9, you can use Excanvas, a canvas
+emulator; this is used in the examples bundled with Flot. You just
 include the excanvas script like this:
 
-  <!--[if IE]><script language="javascript" type="text/javascript" src="excanvas.pack.js"></script><![endif]-->
+  <!--[if IE]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
 
 If it's not working on your development IE 6.0, check that it has
-support for VML which excanvas is relying on. It appears that some
+support for VML which Excanvas is relying on. It appears that some
 stripped down versions used for test environments on virtual machines
 lack the VML support.
-  
-Also note that you need at least jQuery 1.2.6 (but at least jQuery
-1.3.2 is recommended for interactive charts because of performance
-improvements in event handling).
+
+You can also try using Flashcanvas (see FlashCanvas.net), which uses
+Flash to do the emulation. It might be faster with charts with many
+points. Flot contains some wrapper code for activating Excanvas which
+Flashcanvas is compatible with.
+
+You need at least jQuery 1.2.6, but try at least 1.3.2 for interactive
+charts because of performance improvements in event handling.
 
 
 Basic usage

@@ -697,15 +697,6 @@
         }
 
         function constructCanvas() {
-            function makeCanvas(width, height) {
-                var c = document.createElement('canvas');
-                c.width = width;
-                c.height = height;
-                if (!c.getContext) // excanvas hack
-                    c = window.G_vmlCanvasManager.initElement(c);
-                return c;
-            }
-            
             canvasWidth = placeholder.width();
             canvasHeight = placeholder.height();
             placeholder.html(""); // clear placeholder
@@ -715,17 +706,32 @@
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
 
-            if (window.G_vmlCanvasManager) // excanvas hack
-                window.G_vmlCanvasManager.init_(document); // make sure everything is setup
+            if (window.G_vmlCanvasManager) // excanvas hack, make sure everything is setup
+                window.G_vmlCanvasManager.init_(document);
+            
+            function makeCanvas(skipPositioning) {
+                var c = document.createElement('canvas');
+                c.width = canvasWidth;
+                c.height = canvasHeight;
+                
+                if (!skipPositioning)
+                    $(c).css({ position: 'absolute', left: 0, top: 0 });
+                
+                $(c).appendTo(placeholder);
+                
+                if (!c.getContext) // excanvas hack
+                    c = window.G_vmlCanvasManager.initElement(c);
+
+                return c;
+            }
             
             // the canvas
-            canvas = $(makeCanvas(canvasWidth, canvasHeight)).appendTo(placeholder).get(0);
+            canvas = makeCanvas(true);
             ctx = canvas.getContext("2d");
 
             // overlay canvas for interactive features
-            overlay = $(makeCanvas(canvasWidth, canvasHeight)).css({ position: 'absolute', left: 0, top: 0 }).appendTo(placeholder).get(0);
+            overlay = makeCanvas();
             octx = overlay.getContext("2d");
-            octx.stroke();
         }
 
         function bindEvents() {
