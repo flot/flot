@@ -740,8 +740,10 @@
             eventHolder = $([overlay, canvas]);
 
             // bind events
-            if (options.grid.hoverable)
+            if (options.grid.hoverable) {
                 eventHolder.mousemove(onMouseMove);
+                eventHolder.mouseleave(onMouseLeave);
+            }
 
             if (options.grid.clickable)
                 eventHolder.click(onClick);
@@ -2269,6 +2271,12 @@
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", e,
                                        function (s) { return s["hoverable"] != false; });
+        }
+
+        function onMouseLeave(e) {
+            if (options.grid.hoverable)
+                triggerClickHoverEvent("plothover", e,
+                                       function (s) { return false; });
         }
 
         function onClick(e) {

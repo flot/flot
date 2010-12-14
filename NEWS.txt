@@ -103,11 +103,14 @@ Bug fixes:
 - Fix errors in JSON in examples so they work with jQuery 1.4.2
   (fix reported by honestbleeps, issue 357).
 - Fix bug with tooltip in interacting.html, this makes the tooltip
-  much smoother (fix by bdkahn).
+  much smoother (fix by bdkahn). Fix related bug inside highlighting
+  handler in Flot.
 - Use closure trick to make inline colorhelpers plugin respect
   jQuery.noConflict(true), renaming the global jQuery object (reported
   by Nick Stielau).
-
+- Listen for mouseleave events and fire a plothover event with empty
+  item when it occurs to drop highlights when the mouse leaves the
+  plot (reported by by outspirit).
 
 Flot 0.6
 --------
