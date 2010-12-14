@@ -607,12 +607,9 @@ More detail and specific examples can be found in the included HTML file.
 				}
 			}
 			
-			// if no slice was found, quit
-			if (!item) 
-				return;
-				
 			// highlight the slice
-			highlight(item.series, eventname);
+			if (item) 
+			    highlight(item.series, eventname);
 				
 			// trigger any hover bind events
 			var pos = { pageX: e.pageX, pageY: e.pageY };
