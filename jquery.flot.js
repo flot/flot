@@ -1363,6 +1363,10 @@
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             var grid = options.grid;
+
+            // draw background, if any
+            if (grid.show && grid.backgroundColor)
+                drawBackground();
             
             if (grid.show && !grid.aboveData)
                 drawGrid();
@@ -1413,17 +1417,20 @@
             return { from: from, to: to, axis: axis };
         }
         
+        function drawBackground() {
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+
+            ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor, plotHeight, 0, "rgba(255, 255, 255, 0)");
+            ctx.fillRect(0, 0, plotWidth, plotHeight);
+            ctx.restore();
+        }
+
         function drawGrid() {
             var i;
             
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
-
-            // draw background, if any
-            if (options.grid.backgroundColor) {
-                ctx.fillStyle = getColorOrGradient(options.grid.backgroundColor, plotHeight, 0, "rgba(255, 255, 255, 0)");
-                ctx.fillRect(0, 0, plotWidth, plotHeight);
-            }
 
             // draw markings
             var markings = options.grid.markings;
