@@ -2270,7 +2270,7 @@
                 triggerClickHoverEvent("plothover", e,
                                        function (s) { return s["hoverable"] != false; });
         }
-        
+
         function onClick(e) {
             triggerClickHoverEvent("plotclick", e,
                                    function (s) { return s["clickable"] != false; });
@@ -2300,7 +2300,9 @@
                 for (var i = 0; i < highlights.length; ++i) {
                     var h = highlights[i];
                     if (h.auto == eventname &&
-                        !(item && h.series == item.series && h.point == item.datapoint))
+                        !(item && h.series == item.series &&
+                          h.point[0] == item.datapoint[0] &&
+                          h.point[1] == item.datapoint[1]))
                         unhighlight(h.series, h.point);
                 }
                 
