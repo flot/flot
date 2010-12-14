@@ -111,7 +111,9 @@ Bug fixes:
 - Listen for mouseleave events and fire a plothover event with empty
   item when it occurs to drop highlights when the mouse leaves the
   plot (reported by by outspirit).
-- Fix bug with using aboveData with a background (reported by amitayd).
+- Fix bug with using aboveData with a background (reported by
+  amitayd).
+- Fix possible excanvas leak (report and suggested fix by tom9729).
 
 
 Flot 0.6
