@@ -281,7 +281,7 @@
                 $.extend(true, options.series.points, options.points);
             if (options.bars)
                 $.extend(true, options.series.bars, options.bars);
-            if (options.shadowSize)
+            if (options.shadowSize != null)
                 options.series.shadowSize = options.shadowSize;
 
             for (i = 0; i < options.xaxes.length; ++i)

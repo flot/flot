@@ -114,6 +114,8 @@ Bug fixes:
 - Fix bug with using aboveData with a background (reported by
   amitayd).
 - Fix possible excanvas leak (report and suggested fix by tom9729).
+- Fix bug with backwards compatibility for shadowSize = 0 (report and
+  suggested fix by aspinak).
 
 
 Flot 0.6
