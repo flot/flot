@@ -715,13 +715,6 @@
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
 
-             // excanvas hack, make sure everything is setup
-            if (window.G_vmlCanvasManager
-                && !window.G_vmlCanvasManager.inited) {
-                window.G_vmlCanvasManager.inited = true;
-                window.G_vmlCanvasManager.init_(document);
-            }
-            
             function makeCanvas(skipPositioning) {
                 var c = document.createElement('canvas');
                 c.width = canvasWidth;
