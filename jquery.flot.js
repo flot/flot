@@ -166,7 +166,7 @@
         };
         plot.getData = function () { return series; };
         plot.getAxis = function (dir, number) {
-            var a = (dir == x ? xaxes : yaxes)[number - 1];
+            var a = (dir == "x" ? xaxes : yaxes)[number - 1];
             if (a && !a.used)
                 a = null;
             return a;
@@ -861,13 +861,13 @@
                 w = 0;
             if (h == null)
                 h = 0;
-            
+
             axis.labelWidth = w;
             axis.labelHeight = h;
         }
 
         function computeAxisBox(axis) {
-            if (!axis || (!axis.used && !(axis.labelWidth || axis.labelHeight)))
+            if (!axis || !axis.labelWidth || !axis.labelHeight)
                 return;
 
             // find the bounding box of the axis by looking at label
@@ -939,6 +939,9 @@
         }
 
         function fixupAxisBox(axis) {
+            if (!axis || !axis.labelWidth || !axis.labelHeight)
+                return;
+            
             // set remaining bounding box coordinates
             if (axis.direction == "x") {
                 axis.box.left = plotOffset.left;
@@ -995,7 +998,7 @@
             
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
-            
+
             // now we got the proper plotWidth/Height, we can compute the scaling
             for (k = 0; k < axes.length; ++k)
                 setTransformationHelpers(axes[k]);
@@ -1326,7 +1329,7 @@
         function setTicks(axis) {
             axis.ticks = [];
 
-            var oticks = axis.options.ticks, ticks = null;
+            var oticks = axis.options.ticks, ticks = [];
             if (oticks == null || (typeof oticks == "number" && oticks > 0))
                 ticks = axis.tickGenerator(axis);
             else if (oticks) {
@@ -1356,7 +1359,7 @@
         }
 
         function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoscaleMargin != null && ticks.length > 0) {
+            if (axis.options.autoscaleMargin && ticks.length > 0) {
                 // snap to ticks
                 if (axis.options.min == null)
                     axis.min = Math.min(axis.min, ticks[0].v);
@@ -1513,9 +1516,12 @@
                 var axis = axes[j], box = axis.box,
                     t = axis.tickLength, x, y, xoff, yoff;
 
+                if (axis.ticks.length == 0)
+                    continue;
+                
                 ctx.strokeStyle = axis.options.tickColor || $.color.parse(axis.options.color).scale('a', 0.22).toString();
                 ctx.lineWidth = 1;
-                
+
                 // find the edges
                 if (axis.direction == "x") {
                     x = 0;
