@@ -303,7 +303,7 @@ number of decimals to display (default is auto-detected).
 
 Alternatively, for ultimate control over how ticks are formatted you can
 provide a function to "tickFormatter". The function is passed two
-parameters, the tick value and an "axis" object with information, and
+parameters, the tick value and an axis object with information, and
 should return a string. The default formatter looks like this:
 
   function formatter(val, axis) {
