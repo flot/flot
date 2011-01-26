@@ -32,6 +32,15 @@ but if you just configure a base color Flot will now autogenerate a
 tick color by adding transparency. Backwards-compatibility hooks are
 in place.
 
+Final note: now that IE 9 is coming out with canvas support, you may
+want to adapt the excanvas include to skip loading it in IE 9 (the
+examples have been adapted thanks to Ryley Breiddal). An alternative
+to excanvas using Flash has also surfaced, if your graphs are slow in
+IE, you may want to give it a spin:
+
+  http://code.google.com/p/flashcanvas/
+
+
 Changes:
 
 - Support for specifying a bottom for each point for line charts when
@@ -82,7 +91,8 @@ Bug fixes:
 - Fixed a problem introduced in 0.6 with specifying a gradient with {
   brightness: x, opacity: y }.
 - Don't use $.browser.msie, check for getContext on the created canvas
-  element instead and try to use excanvas if it's not found.
+  element instead and try to use excanvas if it's not found (fixes IE
+  9 compatibility).
 - highlight(s, index) was looking up the point in the original s.data
   instead of in the computed datapoints array, which breaks with
   plugins that modify the datapoints (such as the stacking plugin).
@@ -116,6 +126,7 @@ Bug fixes:
 - Fix possible excanvas leak (report and suggested fix by tom9729).
 - Fix bug with backwards compatibility for shadowSize = 0 (report and
   suggested fix by aspinak).
+- Adapt examples to skip loading excanvas (fix by Ryley Breiddal).
 
 
 Flot 0.6

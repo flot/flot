@@ -23,16 +23,18 @@ For support for Internet Explorer < 9, you can use Excanvas, a canvas
 emulator; this is used in the examples bundled with Flot. You just
 include the excanvas script like this:
 
-  <!--[if IE]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
+  <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
 
 If it's not working on your development IE 6.0, check that it has
 support for VML which Excanvas is relying on. It appears that some
 stripped down versions used for test environments on virtual machines
 lack the VML support.
 
-You can also try using Flashcanvas (see FlashCanvas.net), which uses
-Flash to do the emulation. It might be faster with charts with many
-points. Flot contains some wrapper code for activating Excanvas which
+You can also try using Flashcanvas (see
+http://code.google.com/p/flashcanvas/), which uses Flash to do the
+emulation. Although Flash can be a bit slower to load than VML, if
+you've got a lot of points, the Flash version can be much faster
+overall. Flot contains some wrapper code for activating Excanvas which
 Flashcanvas is compatible with.
 
 You need at least jQuery 1.2.6, but try at least 1.3.2 for interactive
