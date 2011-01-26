@@ -704,7 +704,7 @@
              // the state on them manually
             if (window.G_vmlCanvasManager)
                 placeholder.find("canvas").each(function () {
-                    delete this.context_;
+                    this.context_ = null;
                 });
             
             placeholder.html(""); // clear placeholder
