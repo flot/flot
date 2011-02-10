@@ -78,6 +78,8 @@ Changes:
   types (sponsored by Utility Data Corporation).
 - Resize plugin for automatically redrawing when the placeholder
   changes size, e.g. on window resizes (sponsored by Novus Partners).
+- Support Infinity/-Infinity for plotting asymptotes by hacking it
+  into +/-Number.MAX_VALUE (reported by rabaea.mircea).
 
 - New hooks: drawSeries
 

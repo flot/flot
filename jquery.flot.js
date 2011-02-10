@@ -500,6 +500,7 @@
         function processData() {
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
+                fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m, length,
                 s, points, ps, x, y, axis, val, f, p;
 
@@ -513,9 +514,9 @@
             }
 
             function updateAxis(axis, min, max) {
-                if (min < axis.datamin)
+                if (min < axis.datamin && min != -fakeInfinity)
                     axis.datamin = min;
-                if (max > axis.datamax)
+                if (max > axis.datamax && max != fakeInfinity)
                     axis.datamax = max;
             }
 
@@ -579,6 +580,10 @@
                                     val = +val; // convert to number
                                     if (isNaN(val))
                                         val = null;
+                                    else if (val == Infinity)
+                                        val = fakeInfinity;
+                                    else if (val == -Infinity)
+                                        val = -fakeInfinity;
                                 }
 
                                 if (val == null) {
