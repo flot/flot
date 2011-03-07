@@ -262,14 +262,12 @@
             if (options.yaxis.noTicks && options.yaxis.ticks == null)
                 options.yaxis.ticks = options.yaxis.noTicks;
             if (options.x2axis) {
-                options.x2axis.position = "top";
-                options.xaxes[1] = options.x2axis;
+                options.xaxes[1] = $.extend(true, options.x2axis, options.xaxis);
+                options.xaxes[1].position = "top";
             }
             if (options.y2axis) {
-                if (options.y2axis.autoscaleMargin === undefined)
-                    options.y2axis.autoscaleMargin = 0.02;
-                options.y2axis.position = "right";
-                options.yaxes[1] = options.y2axis;
+                options.yaxes[1] = $.extend(true, options.y2axis, options.yaxis);
+                options.yaxes[1].position = "right";
             }
             if (options.grid.coloredAreas)
                 options.grid.markings = options.grid.coloredAreas;
