@@ -304,6 +304,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         init: init,
         options: options,
         name: 'navigate',
-        version: '1.2'
+        version: '1.3'
     });
 })(jQuery);
