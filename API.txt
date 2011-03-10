@@ -217,7 +217,10 @@ transparency).
 
 The options "min"/"max" are the precise minimum/maximum value on the
 scale. If you don't specify either of them, a value will automatically
-be chosen based on the minimum/maximum data values.
+be chosen based on the minimum/maximum data values. Note that Flot
+always examines all the data values you feed to it, even if a
+restriction on another axis may make some of them invisible (this
+makes interactive use more stable).
 
 The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
 that the scaling algorithm will add to avoid that the outermost points
