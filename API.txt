@@ -854,7 +854,8 @@ can call:
     interactive things like a selection and point highlights. This
     is mostly useful for writing plugins. The redraw doesn't happen
     immediately, instead a timer is set to catch multiple successive
-    redraws (e.g. from a mousemove).
+    redraws (e.g. from a mousemove). You can get to the overlay by
+    setting up a drawOverlay hook.
 
   - width()/height()
 
