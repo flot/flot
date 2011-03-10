@@ -80,6 +80,8 @@ Changes:
   changes size, e.g. on window resizes (sponsored by Novus Partners).
 - Support Infinity/-Infinity for plotting asymptotes by hacking it
   into +/-Number.MAX_VALUE (reported by rabaea.mircea).
+- Support restricting navigate plugin to not pan/zoom an axis (based
+  on patch by kkaefer).
 
 - New hooks: drawSeries
 

@@ -21,8 +21,8 @@ Options:
   }
 
   xaxis, yaxis, x2axis, y2axis: {
-    zoomRange: null  // or [number, number] (min range, max range)
-    panRange: null   // or [number, number] (min, max)
+    zoomRange: null  // or [number, number] (min range, max range) or false
+    panRange: null   // or [number, number] (min, max) or false
   }
   
 "interactive" enables the built-in drag/click behaviour. If you enable
@@ -40,11 +40,13 @@ mouse button is released).
 "zoomRange" is the interval in which zooming can happen, e.g. with
 zoomRange: [1, 100] the zoom will never scale the axis so that the
 difference between min and max is smaller than 1 or larger than 100.
-You can set either end to null to ignore, e.g. [1, null].
+You can set either end to null to ignore, e.g. [1, null]. If you set
+zoomRange to false, zooming on that axis will be disabled.
 
 "panRange" confines the panning to stay within a range, e.g. with
 panRange: [-10, 20] panning stops at -10 in one end and at 20 in the
-other. Either can be null, e.g. [-10, null].
+other. Either can be null, e.g. [-10, null]. If you set
+panRange to false, panning on that axis will be disabled.
 
 Example API usage:
 
@@ -215,7 +217,11 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             $.each(plot.getUsedAxes(), function(i, axis) {
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
-                    max = minmax[axis.direction].max
+                    max = minmax[axis.direction].max,
+                    zr = opts.zoomRange;
+
+                if (zr === false) // no zooming on this axis
+                    return;
                     
                 min = axis.c2p(min);
                 max = axis.c2p(max);
@@ -226,7 +232,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = tmp;
                 }
 
-                var range = max - min, zr = opts.zoomRange;
+                var range = max - min;
                 if (zr &&
                     ((zr[0] != null && range < zr[0]) ||
                      (zr[1] != null && range > zr[1])))
@@ -262,6 +268,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 max = axis.c2p(axis.p2c(axis.max) + d);
 
                 var pr = opts.panRange;
+                if (pr === false) // no panning on this axis
+                    return;
+                
                 if (pr) {
                     // check whether we hit the wall
                     if (pr[0] != null && pr[0] > min) {
