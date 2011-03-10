@@ -262,11 +262,11 @@
             if (options.yaxis.noTicks && options.yaxis.ticks == null)
                 options.yaxis.ticks = options.yaxis.noTicks;
             if (options.x2axis) {
-                options.xaxes[1] = $.extend(true, options.x2axis, options.xaxis);
+                options.xaxes[1] = $.extend(true, {}, options.xaxis, options.x2axis);
                 options.xaxes[1].position = "top";
             }
             if (options.y2axis) {
-                options.yaxes[1] = $.extend(true, options.y2axis, options.yaxis);
+                options.yaxes[1] = $.extend(true, {}, options.yaxis, options.y2axis);
                 options.yaxes[1].position = "right";
             }
             if (options.grid.coloredAreas)
