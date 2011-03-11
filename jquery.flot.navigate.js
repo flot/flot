@@ -153,7 +153,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 eventHolder.bind("dragstart", { distance: 10 }, function (e) {
                     if (e.which != 1)  // only accept left-click
                         return false;
-                    eventHolderCursor = eventHolder.css('cursor');
+                    var c = eventHolder.css('cursor');
+                    if (c)
+                        prevCursor = c;
                     eventHolder.css('cursor', o.pan.cursor);
                     pageX = e.pageX;
                     pageY = e.pageY;

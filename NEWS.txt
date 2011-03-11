@@ -138,6 +138,8 @@ Bug fixes:
 - Adapt examples to skip loading excanvas (fix by Ryley Breiddal).
 - Fix bug that prevent a simple f(x) = -x transform from working
   correctly (fix by Mike, issue 263).
+- Fix bug in restoring cursor in navigate plugin (reported by Matteo
+  Gattanini, issue 395).
 
 
 Flot 0.6
