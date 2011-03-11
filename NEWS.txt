@@ -87,6 +87,8 @@ Changes:
 - Options for controlling whether an axis is shown or not (suggestion
   by Timo Tuominen) and whether to reserve space for it even if it
   isn't shown.
+- New attribute $.plot.version with the Flot version as a string.
+- The version comment is now included in the minified jquery.flot.min.js.
 
 - New hooks: drawSeries
 

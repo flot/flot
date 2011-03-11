@@ -1156,9 +1156,15 @@ Here's a brief explanation of how the plugin plumbings work:
 Each plugin registers itself in the global array $.plot.plugins. When
 you make a new plot object with $.plot, Flot goes through this array
 calling the "init" function of each plugin and merging default options
-from its "option" attribute. The init function gets a reference to the
-plot object created and uses this to register hooks and add new public
-methods if needed.
+from the plugin's "option" attribute. The init function gets a
+reference to the plot object created and uses this to register hooks
+and add new public methods if needed.
 
 See the PLUGINS.txt file for details on how to write a plugin. As the
 above description hints, it's actually pretty easy.
+
+
+Version number
+--------------
+
+The version number of Flot is available in $.plot.version.

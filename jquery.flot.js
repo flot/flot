@@ -1,4 +1,4 @@
-/* Javascript plotting library for jQuery, v. 0.6.
+/*! Javascript plotting library for jQuery, v. 0.6.
  *
  * Released under the MIT license by IOLA, December 2007.
  *
@@ -2481,6 +2481,8 @@
         return plot;
     };
 
+    $.plot.version = "0.7pre";
+    
     $.plot.plugins = [];
 
     // returns a string with the date d formatted according to fmt
