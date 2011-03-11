@@ -84,6 +84,9 @@ Changes:
   on patch by kkaefer).
 - Support for providing the drag cursor for the navigate plugin as an
   option (based on patch by Kelly T. Moore).
+- Options for controlling whether an axis is shown or not (suggestion
+  by Timo Tuominen) and whether to reserve space for it even if it
+  isn't shown.
 
 - New hooks: drawSeries
 

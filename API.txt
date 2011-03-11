@@ -172,6 +172,7 @@ Customizing the axes
 ====================
 
   xaxis, yaxis: {
+    show: null or true/false
     position: "bottom" or "top" or "left" or "right"
     mode: null or "time"
 
@@ -193,6 +194,7 @@ Customizing the axes
 
     labelWidth: null or number
     labelHeight: null or number
+    reserveSpace: null or true
     
     tickLength: null or number
 
@@ -202,6 +204,10 @@ Customizing the axes
 All axes have the same kind of options. The following describes how to
 configure one axis, see below for what to do if you've got more than
 one x axis or y axis.
+
+The "show" option defaults to null which means the axis will show up
+if there's data associated with it. You can override this by setting
+"show" to true or false.
 
 The "position" option specifies where the axis is placed, bottom or
 top for x axes, left or right for y axes. The "mode" option determines
@@ -330,7 +336,9 @@ an example of a custom formatter:
 
 "labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several
-plots.
+plots. "reserveSpace" means that even if an axis isn't shown, Flot
+should reserve space for it - it is useful in combination with
+labelWidth and labelHeight for aligning multi-axis charts.
 
 "tickLength" is the length of the tick lines in pixels. By default, the
 innermost axes will have ticks that extend all across the plot, while
@@ -918,7 +926,8 @@ Flot to keep track of its state, so be careful.
 
     With multiple axes, the extra axes are returned as x2axis, x3axis,
     etc., e.g. getAxes().y2axis is the second y axis. You can check
-    y2axis.used to see whether the axis is actually in use or not. 
+    y2axis.used to see whether the axis is associated with any data
+    points and y2axis.show to see if it is currently shown. 
  
   - getPlaceholder()
 
