@@ -17,6 +17,7 @@ Options:
   
   pan: {
     interactive: false
+    cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
     frameRate: 20
   }
 
@@ -31,6 +32,9 @@ moving around; the same for zoom.
 
 "amount" specifies the default amount to zoom in (so 1.5 = 150%)
 relative to the current viewport.
+
+"cursor" is a standard CSS mouse cursor string used for visual
+feedback to the user when dragging.
 
 "frameRate" specifies the maximum number of times per second the plot
 will update itself while the user is panning around on it (set to null
@@ -116,6 +120,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         },
         pan: {
             interactive: false,
+            cursor: "move",
             frameRate: 20
         }
     };
@@ -149,7 +154,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     if (e.which != 1)  // only accept left-click
                         return false;
                     eventHolderCursor = eventHolder.css('cursor');
-                    eventHolder.css('cursor', 'move');
+                    eventHolder.css('cursor', o.pan.cursor);
                     pageX = e.pageX;
                     pageY = e.pageY;
                 });
