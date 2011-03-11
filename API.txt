@@ -249,6 +249,14 @@ into a natural logarithm axis with the following code:
     inverseTransform: function (v) { return Math.exp(v); }
   }
 
+Similarly, for reversing the y axis so the values appear in inverse
+order:
+  
+  yaxis: {
+    transform: function (v) { return -v; },
+    inverseTransform: function (v) { return -v; }
+  }
+
 Note that for finding extrema, Flot assumes that the transform
 function does not reorder values (it should be monotone).
 
