@@ -140,6 +140,9 @@ Bug fixes:
   correctly (fix by Mike, issue 263).
 - Fix bug in restoring cursor in navigate plugin (reported by Matteo
   Gattanini, issue 395).
+- Fix bug in picking items when transform/inverseTransform is in use
+  (reported by Ofri Raviv, and patches and analysis by Jan and Tom
+  Paton, issue 334 and 467).
 
 
 Flot 0.6
