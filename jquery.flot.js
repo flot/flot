@@ -175,22 +175,14 @@
         };
         plot.getAxes = function () {
             var res = {}, i;
-            for (i = 0; i < xaxes.length; ++i)
-                res["x" + (i ? (i + 1) : "") + "axis"] = xaxes[i] || {};
-            for (i = 0; i < yaxes.length; ++i)
-                res["y" + (i ? (i + 1) : "") + "axis"] = yaxes[i] || {};
-
-            // backwards compatibility - to be removed
-            if (!res.x2axis)
-                res.x2axis = { n: 2 };
-            if (!res.y2axis)
-                res.y2axis = { n: 2 };
-            
+            $.each(xaxes.concat(yaxes), function (_, axis) {
+                if (axis)
+                    res[axis.direction + (axis.n != 1 ? axis.n : "") + "axis"] = axis;
+            });
             return res;
         };
         plot.getXAxes = function () { return xaxes; };
         plot.getYAxes = function () { return yaxes; };
-        plot.getUsedAxes = getUsedAxes; // return flat array with x and y axes that are in use
         plot.c2p = canvasToAxisCoords;
         plot.p2c = axisToCanvasCoords;
         plot.getOptions = function () { return options; };
@@ -398,21 +390,6 @@
             return res;
         }
         
-        function getUsedAxes() {
-            var res = [], i, axis;
-            for (i = 0; i < xaxes.length; ++i) {
-                axis = xaxes[i];
-                if (axis && axis.used)
-                    res.push(axis);
-            }
-            for (i = 0; i < yaxes.length; ++i) {
-                axis = yaxes[i];
-                if (axis && axis.used)
-                    res.push(axis);
-            }
-            return res;
-        }
-
         function getOrCreateAxis(axes, number) {
             if (!axes[number - 1])
                 axes[number - 1] = {
@@ -1383,9 +1360,8 @@
         }
 
         function extractRange(ranges, coord) {
-            var axis, from, to, axes, key;
+            var axis, from, to, key, axes = allAxes();
 
-            axes = getUsedAxes();
             for (i = 0; i < axes.length; ++i) {
                 axis = axes[i];
                 if (axis.direction == coord) {

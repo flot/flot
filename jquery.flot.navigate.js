@@ -221,7 +221,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     }
                 };
 
-            $.each(plot.getUsedAxes(), function(i, axis) {
+            $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
@@ -267,7 +267,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.y))
                 delta.y = 0;
 
-            $.each(plot.getUsedAxes(), function (i, axis) {
+            $.each(plot.getAxes(), function (_, axis) {
                 var opts = axis.options,
                     min, max, d = delta[axis.direction];
 

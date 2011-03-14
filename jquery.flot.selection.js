@@ -199,13 +199,12 @@ The plugin allso adds the following methods to the plot object:
             }
         }
 
-        // taken from markings support
+        // function taken from markings support in Flot
         function extractRange(ranges, coord) {
-            var axis, from, to, axes, key;
+            var axis, from, to, key, axes = plot.getAxes();
 
-            axes = plot.getUsedAxes();
-            for (i = 0; i < axes.length; ++i) {
-                axis = axes[i];
+            for (var k in axes) {
+                axis = axes[k];
                 if (axis.direction == coord) {
                     key = coord + axis.n + "axis";
                     if (!ranges[key] && axis.n == 1)
@@ -234,7 +233,6 @@ The plugin allso adds the following methods to the plot object:
             
             return { from: from, to: to, axis: axis };
         }
-        
         
         function setSelection(ranges, preventEvent) {
             var axis, range, o = plot.getOptions();
