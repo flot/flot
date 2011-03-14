@@ -167,12 +167,6 @@
             return o;
         };
         plot.getData = function () { return series; };
-        plot.getAxis = function (dir, number) {
-            var a = (dir == "x" ? xaxes : yaxes)[number - 1];
-            if (a && !a.used)
-                a = null;
-            return a;
-        };
         plot.getAxes = function () {
             var res = {}, i;
             $.each(xaxes.concat(yaxes), function (_, axis) {
