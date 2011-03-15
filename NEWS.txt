@@ -92,6 +92,8 @@ Changes:
   isn't shown.
 - New attribute $.plot.version with the Flot version as a string.
 - The version comment is now included in the minified jquery.flot.min.js.
+- New options.grid.minBorderMargin for adjusting the minimum margin
+  provided around the border (based on patch by corani, issue 188).
 
 - New hooks: drawSeries
 

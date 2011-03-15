@@ -657,6 +657,7 @@ Customizing the grid
     markings: array of markings or (fn: axes -> array of markings)
     borderWidth: number
     borderColor: color or null
+    minBorderMargin: number or null
     clickable: boolean
     hoverable: boolean
     autoHighlight: boolean
@@ -678,9 +679,14 @@ above the data or below (below is default).
 line, and "axisMargin" is the space in pixels between axes when there
 are two next to each other. Note that you can style the tick labels
 with CSS, e.g. to change the color. They have class "tickLabel".
+
 "borderWidth" is the width of the border around the plot. Set it to 0
 to disable the border. You can also set "borderColor" if you want the
 border to have a different color than the grid lines.
+"minBorderMargin" controls the default minimum margin around the
+border - it's used to make sure that points aren't accidentally
+clipped by the canvas edge so by default the value is computed from
+the point radius.
 
 "markings" is used to draw simple lines and rectangular areas in the
 background of the plot. You can either specify an array of ranges on

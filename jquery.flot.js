@@ -121,6 +121,7 @@
                     labelMargin: 5, // in pixels
                     axisMargin: 8, // in pixels
                     borderWidth: 2, // in pixels
+                    minBorderMargin: null, // in pixels, null means taken from points radius
                     markings: null, // array of ranges or fn: axes -> array of ranges
                     markingsColor: "#f4f4f4",
                     markingsLineWidth: 2,
@@ -949,13 +950,16 @@
 
                 // make sure we've got enough space for things that
                 // might stick out
-                var maxOutset = 0;
-                for (i = 0; i < series.length; ++i)
-                    maxOutset = Math.max(maxOutset, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
-
+                var minMargin = options.grid.minBorderMargin;
+                if (minMargin == null) {
+                    minMargin = 0;
+                    for (i = 0; i < series.length; ++i)
+                        minMargin = Math.max(minMargin, series[i].points.radius + series[i].points.lineWidth/2);
+                }
+                    
                 for (var a in plotOffset) {
                     plotOffset[a] += options.grid.borderWidth;
-                    plotOffset[a] = Math.max(maxOutset, plotOffset[a]);
+                    plotOffset[a] = Math.max(minMargin, plotOffset[a]);
                 }
             }
             
