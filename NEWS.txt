@@ -148,6 +148,10 @@ Bug fixes:
 - Fix bug in picking items when transform/inverseTransform is in use
   (reported by Ofri Raviv, and patches and analysis by Jan and Tom
   Paton, issue 334 and 467).
+- Fix problem with unaligned ticks and hover/click events caused by
+  padding on the placeholder by hardcoding the placeholder padding to
+  0 (reported by adityadineshsaxena, Matt Sommer, Daniel Atos and some
+  other people, issue 301).
 
 
 Flot 0.6
