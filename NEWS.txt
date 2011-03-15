@@ -22,8 +22,11 @@ becomes
 Note that if you're just using one axis, continue to use the
 xaxis/yaxis directly (it now sets the default settings for the
 arrays). Plugins touching the axes must be ported to take the extra
-axes into account, a couple of helper functions have been added for
-that purpose, check the source.
+axes into account, check the source to see some examples.
+
+A related change is that the visibility of axes is now auto-detected.
+So if you were relying on an axis to show up even without any data in
+the chart, you now need to set the axis "show" option explicitly.
 
 "tickColor" on the grid options is now deprecated in favour of a
 corresponding option on the axes, so { grid: { tickColor: "#000" }}
