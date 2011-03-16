@@ -630,7 +630,7 @@
                     for (m = 0; m < ps; ++m) {
                         val = points[j + m];
                         f = format[m];
-                        if (!f)
+                        if (!f || val == fakeInfinity || val == -fakeInfinity)
                             continue;
                         
                         if (f.x) {
