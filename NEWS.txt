@@ -101,6 +101,7 @@ Changes:
   and hopefully makes replotting faster for those who are using $.plot
   instead of .setData()/.draw(). Also update jQuery to 1.5.1 to
   prevent IE leaks fixed in jQuery.
+- New real-time line chart example.
 
 - New hooks: drawSeries, shutdown
 
