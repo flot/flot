@@ -81,6 +81,7 @@ Changes:
   types (sponsored by Utility Data Corporation).
 - Resize plugin for automatically redrawing when the placeholder
   changes size, e.g. on window resizes (sponsored by Novus Partners).
+  A resize() method has been added to plot object facilitate this.
 - Support Infinity/-Infinity for plotting asymptotes by hacking it
   into +/-Number.MAX_VALUE (reported by rabaea.mircea).
 - Support for restricting navigate plugin to not pan/zoom an axis (based
