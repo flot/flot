@@ -162,6 +162,8 @@ Bug fixes:
   padding on the placeholder by hardcoding the placeholder padding to
   0 (reported by adityadineshsaxena, Matt Sommer, Daniel Atos and some
   other people, issue 301).
+- Update colorhelpers plugin to avoid dying when trying to parse an
+  invalid string (reported by cadavor, issue 483).
 
 
 Flot 0.6
