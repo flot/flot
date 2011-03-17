@@ -1,6 +1,6 @@
 /* Plugin for jQuery for working with colors.
  * 
- * Version 1.0.
+ * Version 1.1.
  * 
  * Inspiration from jQuery color animation plugin by John Resig.
  *
@@ -13,8 +13,11 @@
  *   console.log(c.r, c.g, c.b, c.a);
  *   $.color.make(100, 50, 25, 0.4).toString() // returns "rgba(100,50,25,0.4)"
  *
- * Note that .scale() and .add() work in-place instead of returning
- * new objects.
+ * Note that .scale() and .add() return the same modified object
+ * instead of making a new one.
+ *
+ * V. 1.1: Fix error handling so e.g. parsing an empty string does
+ * produce a color rather than just crashing.
  */ 
 
 (function($) {
@@ -88,7 +91,8 @@
     }
     
     // parse CSS color string (like "rgb(10, 32, 43)" or "#fff"),
-    // returns color object
+    // returns color object, if parsing failed, you get black (0, 0,
+    // 0) out
     $.color.parse = function (str) {
         var res, m = $.color.make;
 
@@ -121,7 +125,8 @@
         if (name == "transparent")
             return m(255, 255, 255, 0);
         else {
-            res = lookupColors[name];
+            // default to black
+            res = lookupColors[name] || [0, 0, 0];
             return m(res[0], res[1], res[2]);
         }
     }
