@@ -94,8 +94,14 @@ Changes:
 - The version comment is now included in the minified jquery.flot.min.js.
 - New options.grid.minBorderMargin for adjusting the minimum margin
   provided around the border (based on patch by corani, issue 188).
+- Refactor replot behaviour so Flot tries to reuse the existing
+  canvas, adding shutdown() methods to the plot (based on patch by
+  Ryley Breiddal, issue 269). This prevents a memory leak in Chrome
+  and hopefully makes replotting faster for those who are using $.plot
+  instead of .setData()/.draw(). Also update jQuery to 1.5.1 to
+  prevent IE leaks fixed in jQuery.
 
-- New hooks: drawSeries
+- New hooks: drawSeries, shutdown
 
 Bug fixes:
 

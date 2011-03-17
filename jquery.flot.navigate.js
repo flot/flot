@@ -126,63 +126,72 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     };
 
     function init(plot) {
+        function onZoomClick(e, zoomOut) {
+            var c = plot.offset();
+            c.left = e.pageX - c.left;
+            c.top = e.pageY - c.top;
+            if (zoomOut)
+                plot.zoomOut({ center: c });
+            else
+                plot.zoom({ center: c });
+        }
+
+        function onMouseWheel(e, delta) {
+            onZoomClick(e, delta < 0);
+            return false;
+        }
+        
+        var prevCursor = 'default', prevPageX = 0, prevPageY = 0,
+            panTimeout = null;
+
+        function onDragStart(e) {
+            if (e.which != 1)  // only accept left-click
+                return false;
+            var c = plot.getPlaceholder().css('cursor');
+            if (c)
+                prevCursor = c;
+            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
+            prevPageX = e.pageX;
+            prevPageY = e.pageY;
+        }
+        
+        function onDrag(e) {
+            var frameRate = plot.getOptions().pan.frameRate;
+            if (panTimeout || !frameRate)
+                return;
+
+            panTimeout = setTimeout(function () {
+                plot.pan({ left: prevPageX - e.pageX,
+                           top: prevPageY - e.pageY });
+                prevPageX = e.pageX;
+                prevPageY = e.pageY;
+                                                    
+                panTimeout = null;
+            }, 1 / frameRate * 1000);
+        }
+
+        function onDragEnd(e) {
+            if (panTimeout) {
+                clearTimeout(panTimeout);
+                panTimeout = null;
+            }
+                    
+            plot.getPlaceholder().css('cursor', prevCursor);
+            plot.pan({ left: prevPageX - e.pageX,
+                       top: prevPageY - e.pageY });
+        }
+        
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
-                function clickHandler(e, zoomOut) {
-                    var c = plot.offset();
-                    c.left = e.pageX - c.left;
-                    c.top = e.pageY - c.top;
-                    if (zoomOut)
-                        plot.zoomOut({ center: c });
-                    else
-                        plot.zoom({ center: c });
-                }
-                
-                eventHolder[o.zoom.trigger](clickHandler);
-
-                eventHolder.mousewheel(function (e, delta) {
-                    clickHandler(e, delta < 0);
-                    return false;
-                });
+                eventHolder[o.zoom.trigger](onZoomClick);
+                eventHolder.mousewheel(onMouseWheel);
             }
-            if (o.pan.interactive) {
-                var prevCursor = 'default', pageX = 0, pageY = 0,
-                    panTimeout = null;
-                
-                eventHolder.bind("dragstart", { distance: 10 }, function (e) {
-                    if (e.which != 1)  // only accept left-click
-                        return false;
-                    var c = eventHolder.css('cursor');
-                    if (c)
-                        prevCursor = c;
-                    eventHolder.css('cursor', o.pan.cursor);
-                    pageX = e.pageX;
-                    pageY = e.pageY;
-                });
-                eventHolder.bind("drag", function (e) {
-                    if (panTimeout || !o.pan.frameRate)
-                        return;
 
-                    panTimeout = setTimeout(function () {
-                        plot.pan({ left: pageX - e.pageX,
-                                   top: pageY - e.pageY });
-                        pageX = e.pageX;
-                        pageY = e.pageY;
-                                                    
-                        panTimeout = null;
-                    }, 1/o.pan.frameRate * 1000);
-                });
-                eventHolder.bind("dragend", function (e) {
-                    if (panTimeout) {
-                        clearTimeout(panTimeout);
-                        panTimeout = null;
-                    }
-                    
-                    eventHolder.css('cursor', prevCursor);
-                    plot.pan({ left: pageX - e.pageX,
-                               top: pageY - e.pageY });
-                });
+            if (o.pan.interactive) {
+                eventHolder.bind("dragstart", { distance: 10 }, onDragStart);
+                eventHolder.bind("drag", onDrag);
+                eventHolder.bind("dragend", onDragEnd);
             }
         }
 
@@ -303,8 +312,19 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (!args.preventEvent)
                 plot.getPlaceholder().trigger("plotpan", [ plot ]);
         }
+
+        function shutdown(plot, eventHolder) {
+            eventHolder.unbind(plot.getOptions().zoom.trigger, onZoomClick);
+            eventHolder.unbind("mousewheel", onMouseWheel);
+            eventHolder.unbind("dragstart", onDragStart);
+            eventHolder.unbind("drag", onDrag);
+            eventHolder.unbind("dragend", onDragEnd);
+            if (panTimeout)
+                clearTimeout(panTimeout);
+        }
         
         plot.hooks.bindEvents.push(bindEvents);
+        plot.hooks.shutdown.push(shutdown);
     }
     
     $.plot.plugins.push({

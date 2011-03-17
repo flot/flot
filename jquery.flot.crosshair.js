@@ -90,34 +90,37 @@ The plugin also adds four public methods:
             crosshair.locked = false;
         }
 
+        function onMouseOut(e) {
+            if (crosshair.locked)
+                return;
+
+            if (crosshair.x != -1) {
+                crosshair.x = -1;
+                plot.triggerRedrawOverlay();
+            }
+        }
+
+        function onMouseMove(e) {
+            if (crosshair.locked)
+                return;
+                
+            if (plot.getSelection && plot.getSelection()) {
+                crosshair.x = -1; // hide the crosshair while selecting
+                return;
+            }
+                
+            var offset = plot.offset();
+            crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
+            crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+            plot.triggerRedrawOverlay();
+        }
+        
         plot.hooks.bindEvents.push(function (plot, eventHolder) {
             if (!plot.getOptions().crosshair.mode)
                 return;
 
-            eventHolder.mouseout(function () {
-                if (crosshair.locked)
-                    return;
-
-                if (crosshair.x != -1) {
-                    crosshair.x = -1;
-                    plot.triggerRedrawOverlay();
-                }
-            });
-            
-            eventHolder.mousemove(function (e) {
-                if (crosshair.locked)
-                    return;
-                
-                if (plot.getSelection && plot.getSelection()) {
-                    crosshair.x = -1; // hide the crosshair while selecting
-                    return;
-                }
-                
-                var offset = plot.offset();
-                crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
-                crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
-                plot.triggerRedrawOverlay();
-            });
+            eventHolder.mouseout(onMouseOut);
+            eventHolder.mousemove(onMouseMove);
         });
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
@@ -147,6 +150,11 @@ The plugin also adds four public methods:
                 ctx.stroke();
             }
             ctx.restore();
+        });
+
+        plot.hooks.shutdown.push(function (plot, eventHolder) {
+            eventHolder.unbind("mouseout", onMouseOut);
+            eventHolder.unbind("mousemove", onMouseMove);
         });
     }
     

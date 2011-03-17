@@ -148,7 +148,8 @@
             drawSeries: [],
             draw: [],
             bindEvents: [],
-            drawOverlay: []
+            drawOverlay: [],
+            shutdown: []
         },
         plot = this;
 
@@ -190,6 +191,12 @@
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top)
             };
         };
+        plot.shutdown = shutdown;
+        plot.resize = function () {
+            getCanvasDimensions();
+            resizeCanvas(canvas);
+            resizeCanvas(overlay);
+        };
 
         // public attributes
         plot.hooks = hooks;
@@ -197,7 +204,7 @@
         // initialize
         initPlugins(plot);
         parseOptions(options_);
-        constructCanvas();
+        setupCanvases();
         setData(data_);
         setupGrid();
         draw();
@@ -673,56 +680,110 @@
             });
         }
 
-        function constructCanvas() {
-            canvasWidth = placeholder.width();
-            canvasHeight = placeholder.height();
-
-             // excanvas hack, if there are any canvases here, whack
-             // the state on them manually
-            if (window.G_vmlCanvasManager)
-                placeholder.find("canvas").each(function () {
-                    this.context_ = null;
-                });
-            
-            placeholder.html(""); // clear placeholder
-            
-            if (placeholder.css("position") == 'static')
-                placeholder.css("position", "relative"); // for positioning labels and overlay
-            placeholder.css({ padding: 0 });
-
-            if (canvasWidth <= 0 || canvasHeight <= 0)
-                throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
-
-            function makeCanvas(skipPositioning) {
-                var c = document.createElement('canvas');
-                c.width = canvasWidth;
-                c.height = canvasHeight;
+        function makeCanvas(skipPositioning, cls) {
+            var c = document.createElement('canvas');
+            c.className = cls;
+            c.width = canvasWidth;
+            c.height = canvasHeight;
+                    
+            if (!skipPositioning)
+                $(c).css({ position: 'absolute', left: 0, top: 0 });
                 
-                if (!skipPositioning)
-                    $(c).css({ position: 'absolute', left: 0, top: 0 });
+            $(c).appendTo(placeholder);
                 
-                $(c).appendTo(placeholder);
-                
-                if (!c.getContext) // excanvas hack
-                    c = window.G_vmlCanvasManager.initElement(c);
+            if (!c.getContext) // excanvas hack
+                c = window.G_vmlCanvasManager.initElement(c);
 
-                return c;
-            }
+            // used for resetting in case we get replotted
+            c.getContext("2d").save();
             
-            // the canvas
-            canvas = makeCanvas(true);
-            ctx = canvas.getContext("2d");
-
-            // overlay canvas for interactive features
-            overlay = makeCanvas();
-            octx = overlay.getContext("2d");
+            return c;
         }
 
-        function bindEvents() {
+        function getCanvasDimensions() {
+            canvasWidth = placeholder.width();
+            canvasHeight = placeholder.height();
+            
+            if (canvasWidth <= 0 || canvasHeight <= 0)
+                throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
+        }
+
+        function resizeCanvas(c) {
+            // resizing should reset the state (excanvas seems to be
+            // buggy though)
+            if (c.width != canvasWidth)
+                c.width = canvasWidth;
+
+            if (c.height != canvasHeight)
+                c.height = canvasHeight;
+
+            // so try to get back to the initial state (even if it's
+            // gone now, this should be safe according to the spec)
+            var cctx = c.getContext("2d");
+            cctx.restore();
+
+            // and save again
+            cctx.save();
+        }
+        
+        function setupCanvases() {
+            var reused,
+                existingCanvas = placeholder.children("canvas.base"),
+                existingOverlay = placeholder.children("canvas.overlay");
+
+            if (existingCanvas.length == 0 || existingOverlay == 0) {
+                // init everything
+                
+                placeholder.html(""); // make sure placeholder is clear
+            
+                placeholder.css({ padding: 0 }); // padding messes up the positioning
+                
+                if (placeholder.css("position") == 'static')
+                    placeholder.css("position", "relative"); // for positioning labels and overlay
+
+                getCanvasDimensions();
+                
+                canvas = makeCanvas(true, "base");
+                overlay = makeCanvas(false, "overlay"); // overlay canvas for interactive features
+
+                reused = false;
+            }
+            else {
+                // reuse existing elements
+
+                canvas = existingCanvas.get(0);
+                overlay = existingOverlay.get(0);
+
+                reused = true;
+            }
+
+            ctx = canvas.getContext("2d");
+            octx = overlay.getContext("2d");
+
             // we include the canvas in the event holder too, because IE 7
             // sometimes has trouble with the stacking order
             eventHolder = $([overlay, canvas]);
 
+            if (reused) {
+                // run shutdown in the old plot object
+                placeholder.data("plot").shutdown();
+
+                // reset reused canvases
+                plot.resize();
+                
+                // make sure overlay pixels are cleared (canvas is cleared when we redraw)
+                octx.clearRect(0, 0, canvasWidth, canvasHeight);
+                
+                // then whack any remaining obvious garbage left
+                eventHolder.unbind();
+                placeholder.children().not([canvas, overlay]).remove();
+            }
+
+            // save in case we get replotted
+            placeholder.data("plot", plot);
+        }
+
+        function bindEvents() {
             // bind events
             if (options.grid.hoverable) {
                 eventHolder.mousemove(onMouseMove);
@@ -733,6 +794,17 @@
                 eventHolder.click(onClick);
 
             executeHooks(hooks.bindEvents, [eventHolder]);
+        }
+
+        function shutdown() {
+            if (redrawTimeout)
+                clearTimeout(redrawTimeout);
+            
+            eventHolder.unbind("mousemove", onMouseMove);
+            eventHolder.unbind("mouseleave", onMouseLeave);
+            eventHolder.unbind("click", onClick);
+            
+            executeHooks(hooks.shutdown, [eventHolder]);
         }
 
         function setTransformationHelpers(axis) {

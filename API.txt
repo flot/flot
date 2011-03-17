@@ -901,7 +901,19 @@ can call:
 
       o = pointOffset({ x: xpos, y: ypos, xaxis: 2, yaxis: 3 })
       // o.left and o.top now contains the offset within the div
-  
+
+  - resize()
+
+    Tells Flot to resize the drawing canvas to the size of the
+    placeholder. You need to run setupGrid() and draw() afterwards as
+    canvas resizing is a destructive operation. This is used
+    internally by the resize plugin.
+
+  - shutdown()
+
+    Cleans up any event handlers Flot has currently registered. This
+    is used internally.
+
 
 There are also some members that let you peek inside the internal
 workings of Flot which is useful in some cases. Note that if you change
@@ -997,6 +1009,8 @@ Here's an overview of the phases Flot goes through:
   6. Setting up event handling for interactive features
 
   7. Responding to events, if any
+
+  8. Shutdown: this mostly happens in case a plot is overwritten 
 
 Each hook is simply a function which is put in the appropriate array.
 You can add them through the "hooks" option, and they are also available
@@ -1146,6 +1160,16 @@ hooks in the plugins bundled with Flot.
    crosshair plugin for an example.
 
 
+ - shutdown  [phase 8]
+
+   function (plot, eventHolder)
+
+   Run when plot.shutdown() is called, which usually only happens in
+   case a plot is overwritten by a new plot. If you're writing a
+   plugin that adds extra DOM elements or event handlers, you should
+   add a callback to clean up after you. Take a look at the section in
+   PLUGINS.txt for more info.
+
    
 Plugins
 -------
@@ -1163,7 +1187,7 @@ Here's a brief explanation of how the plugin plumbings work:
 Each plugin registers itself in the global array $.plot.plugins. When
 you make a new plot object with $.plot, Flot goes through this array
 calling the "init" function of each plugin and merging default options
-from the plugin's "option" attribute. The init function gets a
+from the "option" attribute of the plugin. The init function gets a
 reference to the plot object created and uses this to register hooks
 and add new public methods if needed.
 
