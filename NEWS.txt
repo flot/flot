@@ -1,4 +1,4 @@
-Flot x.x
+Flot 0.7
 --------
 
 API changes:
