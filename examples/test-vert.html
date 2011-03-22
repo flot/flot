@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Examples</title>
+    <link href="layout.css" rel="stylesheet" type="text/css"></link>
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script>
+    <script language="javascript">
+        $(document).ready(function(){
+            var income = [[0, 310.00], [1, 417.99], [2, 3228.12], [3, 1945.14], [4, 2065.20], [5, 2444.27], [6, 2327.58], [7, 1823.28]];
+            var series = [
+                {
+                data: income,
+                color: 'blue',
+                label: 'Income',
+                bars: {
+                    show: true,
+                    barWidth: 0.3,
+                    align: 'center'
+                }}
+            ];
+
+            function rotateGraphs(){
+                $.plot($("#xbottom"), series , {
+                    xaxis: {
+                        tickFormatter: function(v) {
+                            var r='';
+                            for (var i=0;i<v;i++){
+                                r+=i;
+                            }
+                            return r;
+                        },
+                        labelAngle:$('#angle').val()
+                    }, 
+                    yaxis: {
+                        labelAngle:$('#angle').val()
+                    }
+                });
+                $.plot($("#xtop"), series , {
+                    xaxis: {
+                        tickFormatter: function() {
+                            return 'Long Format is Long';
+                        },
+                        labelAngle:$('#angle').val(),
+                        position:'top'
+                    },
+                    yaxis: {
+                        position:'right',
+                        labelAngle:$('#angle').val()
+                    }
+                });
+            }
+            
+            $('#rotate').click(function(){
+                rotateGraphs();
+            });
+
+            rotateGraphs();
+
+        });
+
+    </script>
+    <style>
+        .tickLabel {
+            background-color:blue;
+            color:white;
+            opacity:0.5;
+            filter:alpha(opacity=50);
+        }
+    </style>
+</head>
+<body>
+Angle: <input type="text" value="-90" id="angle"> <input type="button" id="rotate" value="rotate">
+<div id="xbottom" style="background-color:lightblue;width:600px;height:300px"></div>
+<br><br>
+<div id="xtop" style="background-color:lightblue;width:600px;height:300px"></div>
+</body>
+</html>

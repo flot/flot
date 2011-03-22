@@ -194,6 +194,7 @@ Customizing the axes
 
     labelWidth: null or number
     labelHeight: null or number
+    labelAngle: null or number
     reserveSpace: null or true
     
     tickLength: null or number
@@ -345,7 +346,10 @@ an example of a custom formatter:
 
 "labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several
-plots. "reserveSpace" means that even if an axis isn't shown, Flot
+plots. "labelAngle" specifies what angle the labels should be drawn
+at.  This is especially useful for x-axes where longer labels tend to
+overlap.  You can use angles between -90 and 90 degrees.
+"reserveSpace" means that even if an axis isn't shown, Flot
 should reserve space for it - it is useful in combination with
 labelWidth and labelHeight for aligning multi-axis charts.
 
