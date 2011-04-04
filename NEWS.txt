@@ -1,3 +1,13 @@
+Flot x.x
+--------
+
+
+Bug fixes
+
+- Fix problem with null values and pie plugin (patch by gcruxifix,
+  issue 500).
+
+
 Flot 0.7
 --------
 

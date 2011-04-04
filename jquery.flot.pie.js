@@ -391,7 +391,7 @@ More detail and specific examples can be found in the included HTML file.
 				
 				function drawSlice(angle, color, fill)
 				{	
-					if (angle<=0)
+					if (angle <= 0 || isNaN(angle))
 						return;
 				
 					if (fill)
@@ -682,7 +682,8 @@ More detail and specific examples can be found in the included HTML file.
 
 			function drawHighlight(series) 
 			{
-				if (series.angle < 0) return;
+				if (series.angle <= 0 || isNaN(angle))
+					return;
 				
 				//octx.fillStyle = parseColor(options.series.pie.highlight.color).scale(null, null, null, options.series.pie.highlight.opacity).toString();
 				octx.fillStyle = "rgba(255, 255, 255, "+options.series.pie.highlight.opacity+")"; // this is temporary until we have access to parseColor
