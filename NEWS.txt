@@ -6,6 +6,7 @@ Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
   issue 500).
+- Fix problem with threshold plugin and bars (based on patch by kaarlenkaski)
 
 
 Flot 0.7
