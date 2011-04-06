@@ -1,13 +1,31 @@
 Flot x.x
 --------
 
+API changes:
+
+Axis labels are now drawn with canvas text with some parsing to
+support newlines. This solves various issues but also means that they
+no longer support HTML markup, can be accessed as DOM elements or
+styled directly with CSS. Some older browsers lack this function of
+the canvas API (this doesn't affect IE); if this is a problem, either
+continue using an older version of Flot or try an emulation helper
+such as canvas-text or Flashcanvas.
+
+
+
+Changes:
+
+- Canvas text support for labels (sponsored by YCharts.com).
 
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
   issue 500).
-- Fix problem with threshold plugin and bars (based on patch by kaarlenkaski)
-
+- Fix problem with threshold plugin and bars (based on patch by
+  kaarlenkaski, issue 348).
+- Fix axis box calculations so the boxes include the outermost part of
+  the labels too.
+  
 
 Flot 0.7
 --------

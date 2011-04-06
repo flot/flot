@@ -6,7 +6,8 @@ Q: How much data can Flot cope with?
 A: Flot will happily draw everything you send to it so the answer
 depends on the browser. The excanvas emulation used for IE (built with
 VML) makes IE by far the slowest browser so be sure to test with that
-if IE users are in your target group.
+if IE users are in your target group (for large plots in IE, you can
+also check out Flashcanvas which may be faster).
 
 1000 points is not a problem, but as soon as you start having more
 points than the pixel width, you should probably start thinking about
@@ -25,10 +26,11 @@ conversion automatically.
 
 Q: Can I export the graph?
 
-A: This is a limitation of the canvas technology. There's a hook in
-the canvas object for getting an image out, but you won't get the tick
-labels. And it's not likely to be supported by IE. At this point, your
-best bet is probably taking a screenshot, e.g. with PrtScn.
+A: You can grab the image rendered by the canvas element used by Flot
+as a PNG or JPEG (remember to set a background). Note that it won't
+include anything not drawn in the canvas (such as the legend). And it
+doesn't work with excanvas which uses VML, but you could try
+Flashcanvas.
 
 
 Q: The bars are all tiny in time mode?
@@ -56,11 +58,9 @@ libraries") for details.
 
 Q: Flot doesn't work with [insert name of Javascript UI framework]!
 
-A: The only non-standard thing used by Flot is the canvas tag;
-otherwise it is simply a series of absolute positioned divs within the
-placeholder tag you put in. If this is not working, it's probably
-because the framework you're using is doing something weird with the
-DOM, or you're using it the wrong way.
+A: Flot is using standard HTML to make charts. If this is not working,
+it's probably because the framework you're using is doing something
+weird with the DOM or with the CSS that is interfering with Flot.
 
 A common problem is that there's display:none on a container until the
 user does something. Many tab widgets work this way, and there's

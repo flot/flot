@@ -32,10 +32,10 @@ $(function () {
     }
 
     var data = [
-        { data: generate(0, 10, function (x) { return Math.sqrt(x)}), xaxis: 1, yaxis:1 },
-        { data: generate(0, 10, function (x) { return Math.sin(x)}), xaxis: 1, yaxis:2 },
-        { data: generate(0, 10, function (x) { return Math.cos(x)}), xaxis: 1, yaxis:3 },
-        { data: generate(2, 10, function (x) { return Math.tan(x)}), xaxis: 2, yaxis: 4 }
+        { data: generate(0, 10, function (x) { return Math.sqrt(x);}), xaxis: 1, yaxis:1 },
+        { data: generate(0, 10, function (x) { return Math.sin(x);}), xaxis: 1, yaxis:2 },
+        { data: generate(0, 10, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:3 },
+        { data: generate(2, 10, function (x) { return Math.tan(x);}), xaxis: 2, yaxis: 4 }
     ];
 
     var plot = $.plot($("#placeholder"),
@@ -54,29 +54,11 @@ $(function () {
                       });
 
     // now for each axis, create a div
-
-    function getBoundingBoxForAxis(plot, axis) {
-        var left = axis.box.left, top = axis.box.top,
-            right = left + axis.box.width, bottom = top + axis.box.height;
-
-        // some ticks may stick out, enlarge the box to encompass all ticks
-        var cls = axis.direction + axis.n + 'Axis';
-        plot.getPlaceholder().find('.' + cls + ' .tickLabel').each(function () {
-            var pos = $(this).position();
-            left = Math.min(pos.left, left);
-            top = Math.min(pos.top, top);
-            right = Math.max(Math.round(pos.left) + $(this).outerWidth(), right);
-            bottom = Math.max(Math.round(pos.top) + $(this).outerHeight(), bottom);
-        });
-        
-        return { left: left, top: top, width: right - left, height: bottom - top };
-    }
-    
     $.each(plot.getAxes(), function (i, axis) {
         if (!axis.show)
             return;
         
-        var box = getBoundingBoxForAxis(plot, axis);
+        var box = axis.box;
         
         $('<div class="axisTarget" style="position:absolute;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
             .data('axis.direction', axis.direction)

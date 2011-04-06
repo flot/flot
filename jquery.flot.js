@@ -57,6 +57,7 @@
                     show: null, // null = auto-detect, true = always, false = never
                     position: "bottom", // or "top"
                     mode: null, // null or "time"
+                    font: null, // null (derived from CSS in placeholder) or object like { size: 11, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
                     color: null, // base color, labels, ticks
                     tickColor: null, // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
                     transform: null, // null or f: number -> number to transform axis
@@ -844,80 +845,72 @@
         }
 
         function measureTickLabels(axis) {
-            var opts = axis.options, i, ticks = axis.ticks || [], labels = [],
-                l, w = opts.labelWidth, h = opts.labelHeight, dummyDiv;
+            var opts = axis.options, ticks = axis.ticks || [],
+                axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
+                f = axis.font;
 
-            function makeDummyDiv(labels, width) {
-                return $('<div style="position:absolute;top:-10000px;' + width + 'font-size:smaller">' +
-                         '<div class="' + axis.direction + 'Axis ' + axis.direction + axis.n + 'Axis">'
-                         + labels.join("") + '</div></div>')
-                    .appendTo(placeholder);
-            }
+            if (opts.labelWidth == null || opts.labelHeight == null) {
+                ctx.save();
+                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
             
-            if (axis.direction == "x") {
-                // to avoid measuring the widths of the labels (it's slow), we
-                // construct fixed-size boxes and put the labels inside
-                // them, we don't need the exact figures and the
-                // fixed-size box content is easy to center
-                if (w == null)
-                    w = Math.floor(canvasWidth / (ticks.length > 0 ? ticks.length : 1));
+                for (var i = 0; i < ticks.length; ++i) {
+                    var t = ticks[i];
+                    
+                    t.lines = [];
+                    t.width = t.height = 0;
 
-                // measure x label heights
-                if (h == null) {
-                    labels = [];
-                    for (i = 0; i < ticks.length; ++i) {
-                        l = ticks[i].label;
-                        if (l)
-                            labels.push('<div class="tickLabel" style="float:left;width:' + w + 'px">' + l + '</div>');
+                    if (!t.label)
+                        continue;
+
+                    // accept various kinds of newlines, including HTML ones
+                    // (you can actually split directly on regexps in Javascript,
+                    // but IE is unfortunately broken)
+                    var lines = t.label.replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
+                    for (var j = 0; j < lines.length; ++j) {
+                        var line = { text: lines[j] },
+                            m = ctx.measureText(line.text);
+                        
+                        line.width = m.width;
+                        // m.height might not be defined, not in the
+                        // standard yet
+                        line.height = m.height != null ? m.height : f.size;
+
+                        // add a bit of margin since font rendering is
+                        // not pixel perfect and cut off letters look
+                        // bad, this also doubles as spacing between
+                        // lines
+                        line.height += Math.round(f.size * 0.15);
+
+                        t.width = Math.max(line.width, t.width);
+                        t.height += line.height;
+
+                        t.lines.push(line);
                     }
 
-                    if (labels.length > 0) {
-                        // stick them all in the same div and measure
-                        // collective height
-                        labels.push('<div style="clear:left"></div>');
-                        dummyDiv = makeDummyDiv(labels, "width:10000px;");
-                        h = dummyDiv.height();
-                        dummyDiv.remove();
-                    }
+                    if (opts.labelWidth == null)
+                        axisw = Math.max(axisw, t.width);
+                    if (opts.labelHeight == null)
+                        axish = Math.max(axish, t.height);
                 }
-            }
-            else if (w == null || h == null) {
-                // calculate y label dimensions
-                for (i = 0; i < ticks.length; ++i) {
-                    l = ticks[i].label;
-                    if (l)
-                        labels.push('<div class="tickLabel">' + l + '</div>');
-                }
-                
-                if (labels.length > 0) {
-                    dummyDiv = makeDummyDiv(labels, "");
-                    if (w == null)
-                        w = dummyDiv.children().width();
-                    if (h == null)
-                        h = dummyDiv.find("div.tickLabel").height();
-                    dummyDiv.remove();
-                }
+                ctx.restore();
             }
 
-            if (w == null)
-                w = 0;
-            if (h == null)
-                h = 0;
-
-            axis.labelWidth = w;
-            axis.labelHeight = h;
+            axis.labelWidth = axisw;
+            axis.labelHeight = axish;
         }
 
         function allocateAxisBoxFirstPhase(axis) {
             // find the bounding box of the axis by looking at label
             // widths/heights and ticks, make room by diminishing the
-            // plotOffset
+            // plotOffset; this first phase only looks at one
+            // dimension per axis, the other dimension depends on the
+            // other axes so will have to wait
 
             var lw = axis.labelWidth,
                 lh = axis.labelHeight,
                 pos = axis.options.position,
                 tickLength = axis.options.tickLength,
-                axismargin = options.grid.axisMargin,
+                axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction == "x" ? xaxes : yaxes,
                 index;
@@ -927,20 +920,21 @@
                 return a && a.options.position == pos && a.reserveSpace;
             });
             if ($.inArray(axis, samePosition) == samePosition.length - 1)
-                axismargin = 0; // outermost
+                axisMargin = 0; // outermost
 
             // determine tick length - if we're innermost, we can use "full"
-            if (tickLength == null)
-                tickLength = "full";
-
-            var sameDirection = $.grep(all, function (a) {
-                return a && a.reserveSpace;
-            });
-
-            var innermost = $.inArray(axis, sameDirection) == 0;
-            if (!innermost && tickLength == "full")
-                tickLength = 5;
+            if (tickLength == null) {
+                var sameDirection = $.grep(all, function (a) {
+                    return a && a.reserveSpace;
+                });
                 
+                var innermost = $.inArray(axis, sameDirection) == 0;
+                if (innermost)
+                    tickLength = "full"
+                else
+                    tickLength = 5;
+            }
+            
             if (!isNaN(+tickLength))
                 padding += +tickLength;
 
@@ -949,23 +943,23 @@
                 lh += padding;
                 
                 if (pos == "bottom") {
-                    plotOffset.bottom += lh + axismargin;
+                    plotOffset.bottom += lh + axisMargin;
                     axis.box = { top: canvasHeight - plotOffset.bottom, height: lh };
                 }
                 else {
-                    axis.box = { top: plotOffset.top + axismargin, height: lh };
-                    plotOffset.top += lh + axismargin;
+                    axis.box = { top: plotOffset.top + axisMargin, height: lh };
+                    plotOffset.top += lh + axisMargin;
                 }
             }
             else {
                 lw += padding;
                 
                 if (pos == "left") {
-                    axis.box = { left: plotOffset.left + axismargin, width: lw };
-                    plotOffset.left += lw + axismargin;
+                    axis.box = { left: plotOffset.left + axisMargin, width: lw };
+                    plotOffset.left += lw + axisMargin;
                 }
                 else {
-                    plotOffset.right += lw + axismargin;
+                    plotOffset.right += lw + axisMargin;
                     axis.box = { left: canvasWidth - plotOffset.right, width: lw };
                 }
             }
@@ -978,22 +972,59 @@
         }
 
         function allocateAxisBoxSecondPhase(axis) {
-            // set remaining bounding box coordinates
+            // now that all axis boxes have been placed in one
+            // dimension, we can set the remaining dimension coordinates
             if (axis.direction == "x") {
-                axis.box.left = plotOffset.left;
-                axis.box.width = plotWidth;
+                axis.box.left = plotOffset.left - axis.labelWidth / 2;
+                axis.box.width = canvasWidth - plotOffset.left - plotOffset.right + axis.labelWidth;
             }
             else {
-                axis.box.top = plotOffset.top;
-                axis.box.height = plotHeight;
+                axis.box.top = plotOffset.top - axis.labelHeight / 2;
+                axis.box.height = canvasHeight - plotOffset.bottom - plotOffset.top + axis.labelHeight;
             }
+        }
+
+        function adjustLayoutForThingsStickingOut() {
+            // possibly adjust plot offset to ensure everything stays
+            // inside the canvas and isn't clipped off
+            
+            var minMargin = options.grid.minBorderMargin,
+                margins = { x: 0, y: 0 }, i, axis;
+
+            // check stuff from the plot (FIXME: this should just read
+            // a value from the series, otherwise it's impossible to
+            // customize)
+            if (minMargin == null) {
+                minMargin = 0;
+                for (i = 0; i < series.length; ++i)
+                    minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
+            }
+
+            margins.x = margins.y = minMargin;
+            
+            // check axis labels, note we don't check the actual
+            // labels but instead use the overall width/height to not
+            // jump as much around with replots
+            $.each(allAxes(), function (_, axis) {
+                var dir = axis.direction;
+                if (axis.reserveSpace)
+                    margins[dir] = Math.max(margins[dir], (dir == "x" ? axis.labelWidth : axis.labelHeight) / 2);
+            });
+
+            plotOffset.left = Math.max(margins.x, plotOffset.left);
+            plotOffset.right = Math.max(margins.x, plotOffset.right);
+            plotOffset.top = Math.max(margins.y, plotOffset.top);
+            plotOffset.bottom = Math.max(margins.y, plotOffset.bottom);
         }
         
         function setupGrid() {
-            var i, axes = allAxes();
+            var i, axes = allAxes(), showGrid = options.grid.show;
 
-            // first calculate the plot and axis box dimensions
-
+            // init plot offset
+            for (var a in plotOffset)
+                plotOffset[a] = showGrid ? options.grid.borderWidth : 0;
+            
+            // init axes
             $.each(axes, function (_, axis) {
                 axis.show = axis.options.show;
                 if (axis.show == null)
@@ -1003,11 +1034,19 @@
 
                 setRange(axis);
             });
+            
+            if (showGrid) {
+                // determine from the placeholder the font size ~ height of font ~ 1 em
+                var fontDefaults = {
+                    style: placeholder.css("font-style"),
+                    size: Math.round(0.8 * (+placeholder.css("font-size").replace("px", "") || 13)),
+                    variant: placeholder.css("font-variant"),
+                    weight: placeholder.css("font-weight"),
+                    family: placeholder.css("font-family")
+                };
 
-            allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
+                var allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
 
-            plotOffset.left = plotOffset.right = plotOffset.top = plotOffset.bottom = 0;
-            if (options.grid.show) {
                 $.each(allocatedAxes, function (_, axis) {
                     // make the ticks
                     setupTickGeneration(axis);
@@ -1015,44 +1054,32 @@
                     snapRangeToTicks(axis, axis.ticks);
 
                     // find labelWidth/Height for axis
+                    axis.font = $.extend({}, fontDefaults, axis.options.font);
                     measureTickLabels(axis);
                 });
 
-                // with all dimensions in house, we can compute the
-                // axis boxes, start from the outside (reverse order)
+                // with all dimensions calculated, we can compute the
+                // axis bounding boxes, start from the outside
+                // (reverse order)
                 for (i = allocatedAxes.length - 1; i >= 0; --i)
                     allocateAxisBoxFirstPhase(allocatedAxes[i]);
 
                 // make sure we've got enough space for things that
                 // might stick out
-                var minMargin = options.grid.minBorderMargin;
-                if (minMargin == null) {
-                    minMargin = 0;
-                    for (i = 0; i < series.length; ++i)
-                        minMargin = Math.max(minMargin, series[i].points.radius + series[i].points.lineWidth/2);
-                }
-                    
-                for (var a in plotOffset) {
-                    plotOffset[a] += options.grid.borderWidth;
-                    plotOffset[a] = Math.max(minMargin, plotOffset[a]);
-                }
+                adjustLayoutForThingsStickingOut();
+
+                $.each(allocatedAxes, function (_, axis) {
+                    allocateAxisBoxSecondPhase(axis);
+                });
             }
             
             plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
             plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
 
-            // now we got the proper plotWidth/Height, we can compute the scaling
+            // now we got the proper plot dimensions, we can compute the scaling
             $.each(axes, function (_, axis) {
                 setTransformationHelpers(axis);
             });
-
-            if (options.grid.show) {
-                $.each(allocatedAxes, function (_, axis) {
-                    allocateAxisBoxSecondPhase(axis);
-                });
-
-                insertAxisLabels();
-            }
             
             insertLegend();
         }
@@ -1419,8 +1446,10 @@
             if (grid.show && grid.backgroundColor)
                 drawBackground();
             
-            if (grid.show && !grid.aboveData)
+            if (grid.show && !grid.aboveData) {
                 drawGrid();
+                drawAxisLabels();
+            }
 
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
@@ -1429,8 +1458,10 @@
 
             executeHooks(hooks.draw, [ctx]);
             
-            if (grid.show && grid.aboveData)
+            if (grid.show && grid.aboveData) {
                 drawGrid();
+                drawAxisLabels();
+            }
         }
 
         function extractRange(ranges, coord) {
@@ -1650,59 +1681,68 @@
             ctx.restore();
         }
 
-        function insertAxisLabels() {
-            placeholder.find(".tickLabels").remove();
-            
-            var html = ['<div class="tickLabels" style="font-size:smaller">'];
+        function drawAxisLabels() {
+            ctx.save();
 
-            var axes = allAxes();
-            for (var j = 0; j < axes.length; ++j) {
-                var axis = axes[j], box = axis.box;
-                if (!axis.show)
-                    continue;
-                //debug: html.push('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
-                html.push('<div class="' + axis.direction + 'Axis ' + axis.direction + axis.n + 'Axis" style="color:' + axis.options.color + '">');
+            $.each(allAxes(), function (_, axis) {
+                var box = axis.box, f = axis.font;
+                // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
+
+                ctx.fillStyle = axis.options.color;
+                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
+                ctx.textAlign = "start";
+                // middle align the labels - top would be more
+                // natural, but browsers can differ a pixel or two in
+                // where they consider the top to be, so instead we
+                // middle align to minimize variation between browsers
+                // and compensate when calculating the coordinates
+                ctx.textBaseline = "middle";
+                
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
 
-                    var pos = {}, align;
-                    
-                    if (axis.direction == "x") {
-                        align = "center";
-                        pos.left = Math.round(plotOffset.left + axis.p2c(tick.v) - axis.labelWidth/2);
-                        if (axis.position == "bottom")
-                            pos.top = box.top + box.padding;
-                        else
-                            pos.bottom = canvasHeight - (box.top + box.height - box.padding);
-                    }
-                    else {
-                        pos.top = Math.round(plotOffset.top + axis.p2c(tick.v) - axis.labelHeight/2);
-                        if (axis.position == "left") {
-                            pos.right = canvasWidth - (box.left + box.width - box.padding)
-                            align = "right";
+                    var x, y, offset = 0, line;
+                    for (var k = 0; k < tick.lines.length; ++k) {
+                        line = tick.lines[k];
+                        
+                        if (axis.direction == "x") {
+                            x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
+                            if (axis.position == "bottom")
+                                y = box.top + box.padding;
+                            else
+                                y = box.top + box.height - box.padding - tick.height;
                         }
                         else {
-                            pos.left = box.left + box.padding;
-                            align = "left";
+                            y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
+                            if (axis.position == "left")
+                                x = box.left + box.width - box.padding - line.width;
+                            else
+                                x = box.left + box.padding;
                         }
+
+                        // account for middle aligning and line number
+                        y += line.height/2 + offset;
+                        offset += line.height;
+
+                        if ($.browser.opera) {
+                            // FIXME: UGLY BROWSER DETECTION
+                            // round the coordinates since Opera
+                            // otherwise switches to more ugly
+                            // rendering (probably non-hinted) and
+                            // offset the y coordinates since it seems
+                            // to be off pretty consistently compared
+                            // to the other browsers
+                            x = Math.floor(x);
+                            y = Math.ceil(y - 2);
+                        }
+                        ctx.fillText(line.text, x, y);
                     }
-
-                    pos.width = axis.labelWidth;
-
-                    var style = ["position:absolute", "text-align:" + align ];
-                    for (var a in pos)
-                        style.push(a + ":" + pos[a] + "px")
-                    
-                    html.push('<div class="tickLabel" style="' + style.join(';') + '">' + tick.label + '</div>');
                 }
-                html.push('</div>');
-            }
+            });
 
-            html.push('</div>');
-
-            placeholder.append(html.join(""));
+            ctx.restore();
         }
 
         function drawSeries(series) {
