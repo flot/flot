@@ -1588,7 +1588,7 @@
                 var axis = axes[j], box = axis.box,
                     t = axis.tickLength, x, y, xoff, yoff;
                 if (!axis.show || axis.ticks.length == 0)
-                    continue
+                    continue;
                 
                 ctx.strokeStyle = axis.options.tickColor || $.color.parse(axis.options.color).scale('a', 0.22).toString();
                 ctx.lineWidth = 1;
@@ -1685,6 +1685,9 @@
             ctx.save();
 
             $.each(allAxes(), function (_, axis) {
+                if (!axis.show || axis.ticks.length == 0)
+                    return;
+                    
                 var box = axis.box, f = axis.font;
                 // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
 
