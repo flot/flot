@@ -1,0 +1,2 @@
+*.min.js
+!excanvas.min.js
