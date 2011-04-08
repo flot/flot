@@ -682,7 +682,7 @@ More detail and specific examples can be found in the included HTML file.
 
 			function drawHighlight(series) 
 			{
-				if (series.angle <= 0 || isNaN(angle))
+				if (series.angle <= 0 || isNaN(series.angle))
 					return;
 				
 				//octx.fillStyle = parseColor(options.series.pie.highlight.color).scale(null, null, null, options.series.pie.highlight.opacity).toString();
