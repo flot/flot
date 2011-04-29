@@ -52,10 +52,10 @@ events.
                 newpoints = [],
                 push = Array.prototype.push;
 
-            thresholded.datapoints = {
-                points: [],
-                pointsize: ps
-            };
+            thresholded.datapoints = $.extend({}, datapoints);
+            thresholded.datapoints.points = [];
+            thresholded.datapoints.pointsize = ps;
+
             thresholded.label = null;
             thresholded.color = s.threshold.color;
             thresholded.threshold = null;
