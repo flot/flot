@@ -37,8 +37,11 @@ events.
             }
 
             var ps = datapoints.pointsize,
-                i, x, y, pval, p, prevp, thresholded = $.extend({}, s),
-                // note: shallow copy
+                i,
+                x, y,
+                pval,
+                p, prevp,
+                thresholded = $.extend({}, s), // note: shallow copy
                 below = s.threshold.below,
                 origpoints = datapoints.points,
                 addCrossingPoints = s.lines.show,
@@ -55,6 +58,10 @@ events.
             thresholded.threshold = null;
             thresholded.originSeries = s;
             thresholded.data = [];
+
+            $.extend(thresholded.lines = $.extend({}, s.lines), s.threshold.lines);
+            $.extend(thresholded.bars = $.extend({}, s.bars), s.threshold.bars);
+            $.extend(thresholded.points = $.extend({}, s.points), s.threshold.points);
 
             for (i = 0; i < origpoints.length; i += ps) {
                 x = origpoints[i];
