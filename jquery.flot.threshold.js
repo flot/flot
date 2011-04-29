@@ -6,12 +6,15 @@ Flot plugin for thresholding data. Controlled through the option
     threshold: {
       below: number
       color: colorspec
+      lines: lines options
+      bars: bars options
+      points: points options
     }
   }
 
 or in a specific series
 
-  $.plot($("#placeholder"), [{ data: [ ... ], threshold: { ... }}])
+  $.plot($("#placeholder"), [{ data: [ ... ], threshold: { ... }, lines: { ... }, bars: { ... }, points { ... }}])
 
 The data points below "below" are drawn with the specified color. This
 makes it easy to mark points below 0, e.g. for budget data.
@@ -27,7 +30,7 @@ events.
     var options = {
         series: {
             threshold: null
-        } // or { below: number, color: color spec}
+        } // or { below: number, color: color spec, ...}
     };
 
     function init(plot) {
