@@ -61,6 +61,7 @@ events.
             thresholded.threshold = null;
             thresholded.originSeries = s;
             thresholded.data = [];
+            thresholded.dynamic = true;
 
             $.extend(thresholded.lines = $.extend({}, s.lines), s.threshold.lines);
             $.extend(thresholded.bars = $.extend({}, s.bars), s.threshold.bars);
@@ -72,10 +73,18 @@ events.
                 pval = origpoints.slice(i + 2, i + ps);
 
                 prevp = p;
-                if (y < below) {
-                    p = threspoints;
+                if (s.bars && s.bars.horizontal) {
+                    if (x < below) {
+                        p = threspoints;
+                    } else {
+                        p = newpoints;
+                    }
                 } else {
-                    p = newpoints;
+                    if (y < below) {
+                        p = threspoints;
+                    } else {
+                        p = newpoints;
+                    }
                 }
 
                 if (addCrossingPoints && prevp !== p && x !== null && i > 0 && origpoints[i - ps] !== null) {
