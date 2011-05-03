@@ -60,11 +60,8 @@ an offset to the x value.
       return {width: groupWidth, count: groupCount};
     }
 
-    function scaleTicks(ticks, series, allSeries, groupCount, groupWidth) {
-      var currentSeries,
-          added = {},
-          offset = 0,
-          s, sl,
+    function scaleTicks(ticks, series, groupCount, groupWidth) {
+      var offset = 0,
           t, tl;
       
       offset = groupWidth / 2 - (groupWidth / groupCount / 2);
@@ -77,7 +74,7 @@ an offset to the x value.
       plot._groupTicksScaled = true;
     }
 
-    function processOptions(plot, options) {
+    function processOptions(plot) {
       plot._groupTicksScaled = undefined;
     }
 
@@ -97,7 +94,7 @@ an offset to the x value.
           ticks = series.bars.horizontal ? series.yaxis.options.ticks : series.xaxis.options.ticks;
 
       if (ticks && !plot._groupTicksScaled) {
-        scaleTicks(ticks, series, allSeries, groupCount, groupWidth);
+        scaleTicks(ticks, series, groupCount, groupWidth);
         plot._groupTicksScaled = true;
       }
 
