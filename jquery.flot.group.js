@@ -34,11 +34,11 @@ an offset to the x value.
       var i, current, offset = 0;
       for (i = 0; i < allSeries.length; ++i) {
         current = allSeries[i];
-        if (s.bars.group && (s.bars.group == current.bars.group || s.bars.group === current.bars.group)) {
+        if (s.bars.group && s.bars.group === current.bars.group) {
           return offset;
         }
-        if (s.bars.group != current.bars.group) {
-          offset += current.bars.barWidth/* * current.xaxis.scale*/;
+        if (current.bars.group) {
+          offset += current.bars.barWidth;
         }
       }
     }
@@ -96,13 +96,12 @@ an offset to the x value.
           p, po, pl,
           ticks = series.bars.horizontal ? series.yaxis.options.ticks : series.xaxis.options.ticks;
 
-      if (!plot._groupTicksScaled) {
+      if (ticks && !plot._groupTicksScaled) {
         scaleTicks(ticks, series, allSeries, groupCount, groupWidth);
         plot._groupTicksScaled = true;
       }
 
       for (p = series.bars.horizontal ? 1 : 0, po = 0, pl = points.length; p < pl; p += ps, po++) {
-        var v = points[p];
         points[p] += offset + (po * groupWidth);
       }
     }
