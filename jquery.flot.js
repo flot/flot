@@ -110,7 +110,7 @@
                         barWidth: 1, // in units of the x axis
                         fill: true,
                         fillColor: null,
-                        align: "left", // or "center" 
+                        align: "left", // "left", "right", or "center"
                         horizontal: false
                     },
                     shadowSize: 3
@@ -661,7 +661,22 @@
                 
                 if (s.bars.show) {
                     // make sure we got room for the bar on the dancing floor
-                    var delta = s.bars.align == "left" ? 0 : -s.bars.barWidth/2;
+                    var delta;
+                    
+                    switch (s.bars.align) {
+                        case 'left':
+                            delta = 0;
+                            break;
+                        case 'right':
+                            delta = -s.bars.barWidth;
+                            break;
+                        case 'center':
+                            delta = -s.bars.barWidth / 2;
+                            break;
+                        default:
+                            throw 'Invalid bar alignment: ' + s.bars.align;
+                    }
+                    
                     if (s.bars.horizontal) {
                         ymin += delta;
                         ymax += delta + s.bars.barWidth;
@@ -2192,7 +2207,23 @@
             // FIXME: figure out a way to add shadows (for instance along the right edge)
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
-            var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+            
+            var barLeft;
+
+            switch (series.bars.align) {
+                case 'left': 
+                    barLeft = 0;
+                    break;
+                case 'right':
+                    barLeft = -series.bars.barWidth;
+                    break;
+                case 'center':
+                    barLeft = -series.bars.barWidth / 2;
+                    break;
+                default:
+                    throw 'Invalid bar alignment: ' + series.bars.align;
+            }
+            
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
