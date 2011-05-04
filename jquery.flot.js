@@ -1693,8 +1693,7 @@
 
                 ctx.fillStyle = axis.options.color;
                 // Important: Don't use quotes around axis.font.family! Just around single 
-                // font names like 'Times New Roman' that have a space in it, or if it includes a 
-                // special character).
+                // font names like 'Times New Roman' that have a space or special character in it.
                 ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
                 ctx.textAlign = "start";
                 // middle align the labels - top would be more
