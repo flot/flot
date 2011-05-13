@@ -16,13 +16,16 @@
     <p>One of the goals of Flot is to support user interactions. Try
     pointing and clicking on the points.</p>
 
-    <p id="hoverdata">Mouse hovers at
-    (<span id="x">0</span>, <span id="y">0</span>). <span id="clickdata"></span></p>
+    <p>
+      <label><input id="enablePosition" type="checkbox">Show mouse position</label>
+      <span id="hoverdata"></span>
+      <span id="clickdata"></span>
+    </p>
 
     <p>A tooltip is easy to build with a bit of jQuery code and the
     data returned from the plot.</p>
 
-    <p><input id="enableTooltip" type="checkbox">Enable tooltip</p>
+    <p><label><input id="enableTooltip" type="checkbox">Enable tooltip</label></p>
 
 <script type="text/javascript">
 $(function () {
@@ -57,8 +60,10 @@ $(function () {
 
     var previousPoint = null;
     $("#placeholder").bind("plothover", function (event, pos, item) {
-        $("#x").text(pos.x.toFixed(2));
-        $("#y").text(pos.y.toFixed(2));
+        if ($("#enablePosition:checked").length > 0) {
+            var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
+            $("#hoverdata").text(str);
+        }
 
         if ($("#enableTooltip:checked").length > 0) {
             if (item) {
@@ -82,7 +87,7 @@ $(function () {
 
     $("#placeholder").bind("plotclick", function (event, pos, item) {
         if (item) {
-            $("#clickdata").text("You clicked point " + item.dataIndex + " in " + item.series.label + ".");
+            $("#clickdata").text(" - click point " + item.dataIndex + " in " + item.series.label);
             plot.highlight(item.series, item.datapoint);
         }
     });
