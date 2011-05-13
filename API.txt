@@ -679,6 +679,10 @@ Customizing the grid
     mouseActiveRadius: number
   }
 
+  interaction: {
+    redrawOverlayInterval: number or -1
+  }
+
 The grid is the thing with the axes and a number of ticks. Many of the
 things in the grid are configured under the individual axes, but not
 all. "color" is the color of the grid itself whereas "backgroundColor"
@@ -797,6 +801,11 @@ radius, Flot chooses the closest item. For bars, the top-most bar
 If you want to disable interactivity for a specific data series, you
 can set "hoverable" and "clickable" to false in the options for that
 series, like this { data: [...], label: "Foo", clickable: false }.
+
+"redrawOverlayInterval" specifies the maximum time to delay a redraw
+of interactive things (this works as a rate limiting device). The
+default is capped to 60 frames per second. You can set it to -1 to
+disable the rate limiting.
 
 
 Specifying gradients

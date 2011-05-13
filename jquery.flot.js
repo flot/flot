@@ -764,9 +764,8 @@
             ctx = canvas.getContext("2d");
             octx = overlay.getContext("2d");
 
-            // we include the canvas in the event holder too, because IE 7
-            // sometimes has trouble with the stacking order
-            eventHolder = $([overlay, canvas]);
+            // define which element we're listening for events on
+            eventHolder = $(overlay);
 
             if (reused) {
                 // run shutdown in the old plot object
@@ -2434,7 +2433,7 @@
 
         function triggerRedrawOverlay() {
             if (!redrawTimeout)
-                redrawTimeout = setTimeout(drawOverlay, 30);
+                redrawTimeout = setTimeout(drawOverlay, 1000/60);
         }
 
         function drawOverlay() {
