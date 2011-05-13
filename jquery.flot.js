@@ -135,6 +135,9 @@
                     autoHighlight: true, // highlight in case mouse is near
                     mouseActiveRadius: 10 // how far the mouse can be away to activate an item
                 },
+                interaction: {
+                    redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
+                },
                 hooks: {}
             },
         canvas = null,      // the canvas for the plot itself
@@ -2432,8 +2435,14 @@
         }
 
         function triggerRedrawOverlay() {
+            var t = options.interaction.redrawOverlayInterval;
+            if (t == -1) {      // skip event queue
+                drawOverlay();
+                return;
+            }
+            
             if (!redrawTimeout)
-                redrawTimeout = setTimeout(drawOverlay, 1000/60);
+                redrawTimeout = setTimeout(drawOverlay, t);
         }
 
         function drawOverlay() {

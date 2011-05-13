@@ -17,6 +17,9 @@ Changes:
 
 - Canvas text support for labels (sponsored by YCharts.com).
 
+- Support for setting the interval between redraws of the overlay
+  canvas with redrawOverlayInterval (suggested in issue 185).
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
@@ -25,7 +28,10 @@ Bug fixes
   kaarlenkaski, issue 348).
 - Fix axis box calculations so the boxes include the outermost part of
   the labels too.
-  
+- Fix problem with event clicking and hovering in IE 8 by updating
+  Excanvas and removing previous work-around (test case by Ara
+  Anjargolian).
+
 
 Flot 0.7
 --------
