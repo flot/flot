@@ -1002,7 +1002,7 @@
                     minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
             }
 
-            margins.x = margins.y = minMargin;
+            margins.x = margins.y = Math.ceil(minMargin);
             
             // check axis labels, note we don't check the actual
             // labels but instead use the overall width/height to not
@@ -1010,7 +1010,7 @@
             $.each(allAxes(), function (_, axis) {
                 var dir = axis.direction;
                 if (axis.reserveSpace)
-                    margins[dir] = Math.max(margins[dir], (dir == "x" ? axis.labelWidth : axis.labelHeight) / 2);
+                    margins[dir] = Math.ceil(Math.max(margins[dir], (dir == "x" ? axis.labelWidth : axis.labelHeight) / 2));
             });
 
             plotOffset.left = Math.max(margins.x, plotOffset.left);

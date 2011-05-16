@@ -31,6 +31,8 @@ Bug fixes
 - Fix problem with event clicking and hovering in IE 8 by updating
   Excanvas and removing previous work-around (test case by Ara
   Anjargolian).
+- Fix issues with blurry 1px border when some measures aren't integer
+  (reported by Ara Anjargolian).
 
 
 Flot 0.7
