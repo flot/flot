@@ -46,6 +46,8 @@
                     show: true,
                     noColumns: 1, // number of colums in legend table
                     labelFormatter: null, // fn: string -> string
+                    labelComparator: null, // to sort  labels in legend
+                                           // fn: string,string -> int
                     labelBoxBorderColor: "#ccc", // border color for the little label boxes
                     container: null, // container (as jQuery object) to put legend in, null means default on top of graph
                     position: "ne", // position of default legend container within plot
@@ -2221,14 +2223,28 @@
                 return;
             
             var fragments = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
-            for (var i = 0; i < series.length; ++i) {
-                s = series[i];
+                lf = options.legend.labelFormatter, 
+                lc = options.legend.labelComparator, s, label;
+            
+            var legendSeries = series;
+            if (lc) {
+                // trim the series to just those with a label
+                // and then sort based on the label string
+                legendSeries = 
+                    $.grep(series,
+                           function (s) { return s.label; })
+                    .sort(function(a,b) 
+                          { return lc(a.label, b.label) });
+            }
+                
+            var labelCnt = 0;
+            for (var i = 0; i < legendSeries.length; ++i) {
+                s = legendSeries[i];
                 label = s.label;
                 if (!label)
                     continue;
                 
-                if (i % options.legend.noColumns == 0) {
+                if (labelCnt++ % options.legend.noColumns == 0) {
                     if (rowStarted)
                         fragments.push('</tr>');
                     fragments.push('<tr>');
