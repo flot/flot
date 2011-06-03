@@ -20,6 +20,9 @@ Changes:
 - Support for setting the interval between redraws of the overlay
   canvas with redrawOverlayInterval (suggested in issue 185).
 
+- Support for multiple thresholds in thresholds plugin (patch by
+  Arnaud Bellec, issue 523).
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
