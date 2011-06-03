@@ -11,6 +11,8 @@ the canvas API (this doesn't affect IE); if this is a problem, either
 continue using an older version of Flot or try an emulation helper
 such as canvas-text or Flashcanvas.
 
+The base and overlay canvas are now using the CSS classes "flot-base"
+and "flot-overlay" to prevent accidental clashes (issue 540).
 
 
 Changes:

@@ -735,8 +735,8 @@
         
         function setupCanvases() {
             var reused,
-                existingCanvas = placeholder.children("canvas.base"),
-                existingOverlay = placeholder.children("canvas.overlay");
+                existingCanvas = placeholder.children("canvas.flot-base"),
+                existingOverlay = placeholder.children("canvas.flot-overlay");
 
             if (existingCanvas.length == 0 || existingOverlay == 0) {
                 // init everything
@@ -750,8 +750,8 @@
 
                 getCanvasDimensions();
                 
-                canvas = makeCanvas(true, "base");
-                overlay = makeCanvas(false, "overlay"); // overlay canvas for interactive features
+                canvas = makeCanvas(true, "flot-base");
+                overlay = makeCanvas(false, "flot-overlay"); // overlay canvas for interactive features
 
                 reused = false;
             }
