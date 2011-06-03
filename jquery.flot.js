@@ -446,7 +446,7 @@
 
                 // vary color if needed
                 var sign = variation % 2 == 1 ? -1 : 1;
-                c.scale('rgb', 1 + sign * Math.ceil(variation / 2) * 0.2)
+                c.scale('rgb', 1 + sign * Math.ceil(variation / 2) * 0.2);
 
                 // FIXME: if we're getting to close to something else,
                 // we should probably skip this one
@@ -932,7 +932,7 @@
                 
                 var innermost = $.inArray(axis, sameDirection) == 0;
                 if (innermost)
-                    tickLength = "full"
+                    tickLength = "full";
                 else
                     tickLength = 5;
             }
@@ -2562,7 +2562,7 @@
                     if (typeof c != "string") {
                         var co = $.color.parse(defaultColor);
                         if (c.brightness != null)
-                            co = co.scale('rgb', c.brightness)
+                            co = co.scale('rgb', c.brightness);
                         if (c.opacity != null)
                             co.a *= c.opacity;
                         c = co.toString();
