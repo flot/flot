@@ -633,6 +633,7 @@
                 s = series[i];
                 points = s.datapoints.points,
                 ps = s.datapoints.pointsize;
+                format = s.datapoints.format;
 
                 var xmin = topSentry, ymin = topSentry,
                     xmax = bottomSentry, ymax = bottomSentry;

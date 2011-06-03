@@ -38,6 +38,8 @@ Bug fixes
   Anjargolian).
 - Fix issues with blurry 1px border when some measures aren't integer
   (reported by Ara Anjargolian).
+- Fix bug with formats in the data processor (reported by Peter Hull,
+  issue 534).
 
 
 Flot 0.7
