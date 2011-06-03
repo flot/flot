@@ -46,7 +46,7 @@ events.
             var ps = datapoints.pointsize, i, x, y, p, prevp,
                 thresholded = $.extend({}, s); // note: shallow copy
 
-            thresholded.datapoints = { points: [], pointsize: ps };
+            thresholded.datapoints = { points: [], pointsize: ps, format: datapoints.format };
             thresholded.label = null;
             thresholded.color = color;
             thresholded.threshold = null;
