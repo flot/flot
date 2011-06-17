@@ -1693,7 +1693,9 @@
                 // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
 
                 ctx.fillStyle = axis.options.color;
-                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
+                // Important: Don't use quotes around axis.font.family! Just around single 
+                // font names like 'Times New Roman' that have a space or special character in it.
+                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
                 ctx.textAlign = "start";
                 // middle align the labels - top would be more
                 // natural, but browsers can differ a pixel or two in
