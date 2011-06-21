@@ -1376,7 +1376,7 @@
                     
                     // we might need an extra decimal since forced
                     // ticks don't necessarily fit naturally
-                    if (axis.mode != "time" && opts.tickDecimals == null) {
+                    if (!axis.mode && opts.tickDecimals == null) {
                         var extraDec = Math.max(0, -Math.floor(Math.log(delta) / Math.LN10) + 1),
                             ts = generator(axis);
 
@@ -1403,7 +1403,7 @@
             else if (oticks) {
                 if ($.isFunction(oticks))
                     // generate the ticks
-                    ticks = oticks({ min: axis.min, max: axis.max });
+                    ticks = oticks(axis);
                 else
                     ticks = oticks;
             }

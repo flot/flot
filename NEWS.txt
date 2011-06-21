@@ -25,6 +25,11 @@ Changes:
 - Support for multiple thresholds in thresholds plugin (patch by
   Arnaud Bellec, issue 523).
 
+- Support for plotting categories/textual data directly with new
+  categories plugin.
+
+- Tick generators now get the whole axis rather than just min/max.
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,

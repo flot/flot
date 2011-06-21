@@ -187,7 +187,7 @@ Customizing the axes
     transform: null or fn: number -> number
     inverseTransform: null or fn: number -> number
     
-    ticks: null or number or ticks array or (fn: range -> ticks array)
+    ticks: null or number or ticks array or (fn: axis -> ticks array)
     tickSize: number or array
     minTickSize: number or array
     tickFormatter: (fn: number, object -> string) or string
