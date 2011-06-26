@@ -702,7 +702,7 @@
                 
             $(c).appendTo(placeholder);
                 
-            if (!c.getContext) // excanvas hack
+            if (window.G_vmlCanvasManager) // excanvas hack
                 c = window.G_vmlCanvasManager.initElement(c);
 
             // used for resetting in case we get replotted
