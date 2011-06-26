@@ -148,7 +148,7 @@
                            // fold into one object
                            ? $.extend(true, {},
                                // old options
-                               arguments[3] || {}, 
+                               arguments[2] || {}, 
                                // old arguments
                                { placeholder: arguments[0],
                                  data: arguments[1],
@@ -177,7 +177,7 @@
             shutdown: []
         },
         plot = this;
-        console.log('options', options, arguments)
+
         // public functions
         plot.setData = setData;
         plot.setupGrid = setupGrid;
