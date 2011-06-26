@@ -32,14 +32,13 @@
 
 // the actual Flot code
 (function($) {
-    function Plot(placeholder, data_, options_, plugins) {
+    function Plot() {
         // data is on the form:
         //   [ series1, series2 ... ]
         // where series is either just the data as [ [x1, y1], [x2, y2], ... ]
         // or { data: [ [x1, y1], [x2, y2], ... ], label: "some label", ... }
-
         var series = [],
-        options = {
+        defaults = {
             // the color theme used for graphs
             colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
             legend: {
@@ -142,6 +141,22 @@
             width: null,
             height: null
         },
+        // Backwards compatibility: Convert multiple arguments to single object
+        options = $.extend(true, {}, defaults,
+                           // multiple arguments?
+                           (arguments.length > 1)
+                           // fold into one object
+                           ? $.extend(true, {},
+                               // old options
+                               arguments[3] || {}, 
+                               // old arguments
+                               { placeholder: arguments[0],
+                                 data: arguments[1],
+                                 plugins: arguments[3]
+                               })
+                           // uses the single object call signature
+                           : arguments[0]),
+        placeholder = options.placeholder,
         canvas = null,      // the canvas for the plot itself
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
@@ -162,7 +177,7 @@
             shutdown: []
         },
         plot = this;
-
+        console.log('options', options, arguments)
         // public functions
         plot.setData = setData;
         plot.setupGrid = setupGrid;
@@ -212,10 +227,10 @@
         plot.hooks = hooks;
 
         // initialize
-        initPlugins(plot);
-        parseOptions(options_);
+        initPlugins(options.plugins);
+        parseOptions(options);
         setupCanvases();
-        setData(data_);
+        setData(options.data);
         setupGrid();
         draw();
         bindEvents();
@@ -227,7 +242,7 @@
                 hook[i].apply(this, args);
         }
 
-        function initPlugins() {
+        function initPlugins(plugins) {
             for (var i = 0; i < plugins.length; ++i) {
                 var p = plugins[i];
                 p.init(plot);
