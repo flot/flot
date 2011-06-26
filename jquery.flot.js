@@ -138,8 +138,8 @@
                 redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
             },
             hooks: {},
-            width: null,
-            height: null
+            width: 0,
+            height: 0
         },
         // Backwards compatibility: Convert multiple arguments to single object
         options = $.extend(true, {}, defaults,
@@ -163,8 +163,8 @@
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = options.width || 0,
-        canvasHeight = options.height || 0,
+        canvasWidth = options.width,
+        canvasHeight = options.height,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
@@ -727,8 +727,8 @@
         }
 
         function getCanvasDimensions() {
-            canvasWidth = placeholder.width();
-            canvasHeight = placeholder.height();
+            canvasWidth = options.width || placeholder.width();
+            canvasHeight = options.height || placeholder.height();
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
