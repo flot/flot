@@ -138,7 +138,9 @@
                 interaction: {
                     redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
                 },
-                hooks: {}
+                hooks: {},
+                width: null,
+                height: null
             },
         canvas = null,      // the canvas for the plot itself
         overlay = null,     // canvas for interactive stuff on top of plot
@@ -146,7 +148,8 @@
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = 0, canvasHeight = 0,
+        canvasWidth = options.width || 0, 
+        canvasHeight = options.height || 0,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
