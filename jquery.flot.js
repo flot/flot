@@ -728,7 +728,7 @@
 
         function getCanvasDimensions() {
             canvasWidth = options.width = options.width || placeholder.width();
-            canvasHeight = options.height = options.height || (placeholder && placeholder.height());
+            canvasHeight = options.height = options.height || placeholder.height();
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
