@@ -139,7 +139,9 @@
             },
             hooks: {},
             width: 0,
-            height: 0
+            height: 0,
+            canvasCSSClass: "flot-base",
+            overlayCSSClass: "flot-overlay"
         },
         // Backwards compatibility: Convert multiple arguments to single object
         options = $.extend(true, {}, defaults,
@@ -706,13 +708,13 @@
             });
         }
 
-        function makeCanvas(skipPositioning, cls) {
+        function makeCanvas(isOverlay) {
             var c = document.createElement('canvas');
-            c.className = cls;
-            c.width = canvasWidth;
-            c.height = canvasHeight;
+            c.className = isOverlay ? options.overlayCSSClass : options.canvasCSSClass;
+            c.width = options.width;
+            c.height = options.height;
 
-            if (!skipPositioning)
+            if (isOverlay)
                 $(c).css({ position: 'absolute', left: 0, top: 0 });
 
             $(c).appendTo(placeholder);
@@ -754,8 +756,8 @@
 
         function setupCanvases() {
             var reused,
-                existingCanvas = placeholder.children("canvas.flot-base"),
-                existingOverlay = placeholder.children("canvas.flot-overlay");
+                existingCanvas = placeholder.children("canvas." + options.canvasCSSClass),
+                existingOverlay = placeholder.children("canvas." + options.overlayCSSClass);
 
             if (existingCanvas.length == 0 || existingOverlay == 0) {
                 // init everything
@@ -769,8 +771,8 @@
 
                 getCanvasDimensions();
 
-                canvas = makeCanvas(true, "flot-base");
-                overlay = makeCanvas(false, "flot-overlay"); // overlay canvas for interactive features
+                canvas = makeCanvas();
+                overlay = makeCanvas(true); // overlay canvas for interactive features
 
                 reused = false;
             }
