@@ -163,8 +163,8 @@
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = options.width,
-        canvasHeight = options.height,
+        canvasWidth = options.width = options.width || (placeholder && placeholder.width()) || defaults.width,
+        canvasHeight = options.height = options.height || (placeholder && placeholder.height()) || defaults.height,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
