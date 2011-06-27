@@ -140,7 +140,9 @@
             hooks: {},
             width: 0,
             height: 0,
+            canvas: null,
             canvasCSSClass: "flot-base",
+            overlay: null,
             overlayCSSClass: "flot-overlay"
         },
         // Backwards compatibility: Convert multiple arguments to single object
@@ -159,9 +161,9 @@
                            // uses the single object call signature
                            : arguments[0]),
         placeholder = options.placeholder,
-        canvas = null,      // the canvas for the plot itself
-        overlay = null,     // canvas for interactive stuff on top of plot
-        eventHolder = null, // jQuery object that events should be bound to
+        canvas = options.canvas,   // the canvas for the plot itself
+        overlay = options.overlay, // canvas for interactive stuff on top of plot
+        eventHolder = null,        // jQuery object that events should be bound to
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
@@ -709,8 +711,8 @@
         }
 
         function makeCanvas(isOverlay) {
-            var c = document.createElement('canvas');
-            c.className = isOverlay ? options.overlayCSSClass : options.canvasCSSClass;
+            var c = ( isOverlay ? overlay : canvas ) || document.createElement('canvas');
+            c.className += ' ' + (isOverlay ? options.overlayCSSClass : options.canvasCSSClass);
             c.width = options.width;
             c.height = options.height;
 
