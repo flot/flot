@@ -139,9 +139,7 @@
             },
             hooks: {},
             width: 0,
-            height: 0,
-            canvasCSSClass: "flot-base",
-            overlayCSSClass: "flot-overlay"
+            height: 0
         },
         // Backwards compatibility: Convert multiple arguments to single object
         options = $.extend(true, {}, defaults,
@@ -165,8 +163,8 @@
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = options.width = options.width || (placeholder && placeholder.width()) || defaults.width,
-        canvasHeight = options.height = options.height || (placeholder && placeholder.height()) || defaults.height,
+        canvasWidth = options.width,
+        canvasHeight = options.height,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
@@ -708,13 +706,13 @@
             });
         }
 
-        function makeCanvas(options, isOverlay) {
-            var c = ( isOverlay ? options.overlay : options.canvas ) || document.createElement('canvas');
-            c.className += isOverlay ? options.overlayCSSClass : options.canvasCSSClass;
-            c.width = options.width;
-            c.height = options.height;
+        function makeCanvas(skipPositioning, cls) {
+            var c = document.createElement('canvas');
+            c.className = cls;
+            c.width = canvasWidth;
+            c.height = canvasHeight;
 
-            if (isOverlay)
+            if (!skipPositioning)
                 $(c).css({ position: 'absolute', left: 0, top: 0 });
 
             $(c).appendTo(placeholder);
@@ -756,8 +754,8 @@
 
         function setupCanvases() {
             var reused,
-                existingCanvas = placeholder.children("canvas." + options.canvasCSSClass),
-                existingOverlay = placeholder.children("canvas." + options.overlayCSSClass);
+                existingCanvas = placeholder.children("canvas.flot-base"),
+                existingOverlay = placeholder.children("canvas.flot-overlay");
 
             if (existingCanvas.length == 0 || existingOverlay == 0) {
                 // init everything
@@ -771,8 +769,8 @@
 
                 getCanvasDimensions();
 
-                canvas = makeCanvas(options);
-                overlay = makeCanvas(options, true); // overlay canvas for interactive features
+                canvas = makeCanvas(true, "flot-base");
+                overlay = makeCanvas(false, "flot-overlay"); // overlay canvas for interactive features
 
                 reused = false;
             }
