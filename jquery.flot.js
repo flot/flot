@@ -163,8 +163,8 @@
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = options.width = options.width || (placeholder && placeholder.width()) || defaults.width,
-        canvasHeight = options.height = options.height || (placeholder && placeholder.height()) || defaults.height,
+        canvasWidth = options.width,
+        canvasHeight = options.height,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
@@ -727,8 +727,8 @@
         }
 
         function getCanvasDimensions() {
-            canvasWidth = options.width || placeholder.width();
-            canvasHeight = options.height || placeholder.height();
+            canvasWidth = options.width = options.width || placeholder.width();
+            canvasHeight = options.height = options.height || (placeholder && placeholder.height());
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
                 throw "Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight;
