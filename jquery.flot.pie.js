@@ -372,13 +372,15 @@ More detail and specific examples can be found in the included HTML file.
 				ctx.restore();
 				
 				// draw slice outlines
-				ctx.save();
-				ctx.lineWidth = options.series.pie.stroke.width;
-				currentAngle = startAngle;
-				for (var i = 0; i < slices.length; ++i)
-					drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
-				ctx.restore();
-					
+				if (options.series.pie.stroke.width > 0){
+					ctx.save();
+					ctx.lineWidth = options.series.pie.stroke.width;
+					currentAngle = startAngle;
+					for (var i = 0; i < slices.length; ++i)
+						drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
+					ctx.restore();
+				}
+				
 				// draw donut hole
 				drawDonutHole(ctx);
 				
