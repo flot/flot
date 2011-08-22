@@ -232,7 +232,7 @@ More detail and specific examples can be found in the included HTML file.
 			var combined = 0;
 			var numCombined = 0;
 			var color = options.series.pie.combine.color;
-		
+			var newcolor = 0;
 	
 			var newdata = [];
 			for (var i = 0; i < data.length; ++i)
