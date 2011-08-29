@@ -251,7 +251,7 @@
 
             // Transform angle in radiants
             if (options.xaxis.labelAngle != null)
-                options.xaxis.labelAngle = (options.xaxis.labelAngle * 2 * Math.PI) / 360;
+                options.xaxis.labelAngle = ((options.xaxis.labelAngle % 180) * 2 * Math.PI) / 360;
 
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
@@ -883,12 +883,6 @@
                     // standard yet
                     line.height = m.height != null ? m.height : f.size;
 
-                    // add a bit of margin since font rendering is
-                    // not pixel perfect and cut off letters look
-                    // bad, this also doubles as spacing between
-                    // lines
-                    line.height += Math.round(f.size * 0.15);
-
                     var angle = opts.labelAngle;
                     if(angle) {
                         var abs = Math.abs, sin = Math.sin, cos = Math.cos,
@@ -896,6 +890,12 @@
                         line.height = abs(w * sin(angle)) + abs(h * cos(angle));
                         line.width = abs(w * cos(angle)) + abs(h * sin(angle));
                     }
+
+                    // add a bit of margin since font rendering is
+                    // not pixel perfect and cut off letters look
+                    // bad, this also doubles as spacing between
+                    // lines
+                    line.height += Math.round(f.size * 0.15);
 
                     t.width = Math.max(line.width, t.width);
                     t.height += line.height;
@@ -1148,7 +1148,8 @@
             else
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                // Increase factor if labels have an angle
+                noTicks = (0.3 + (opts.labelAngle ? Math.sin(opts.labelAngle) * .5 : 0)) * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
 
             var delta = (axis.max - axis.min) / noTicks,
                 size, generator, unit, formatter, i, magn, norm;
@@ -1733,8 +1734,8 @@
                             x = plotOffset.left + axis.p2c(tick.v);
                             y = box.top + 2 * box.padding;
                             if(angle > Math.PI/2) {
-                                x -= line.width - box.padding;
-                                y += line.height - box.padding;
+                                x -= line.width;
+                                y += line.height - 2* box.padding;
                                 angle += Math.PI;
                             }
                             ctx.translate(x, y);
