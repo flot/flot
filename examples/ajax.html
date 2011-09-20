@@ -87,7 +87,7 @@ $(function () {
         
         $.ajax({
             url: dataurl,
-            method: 'GET',
+            type: 'GET',
             dataType: 'json',
             success: onDataReceived
         });
@@ -121,7 +121,7 @@ $(function () {
                 // have static example files so we need to modify the
                 // URL
                 url: "data-eu-gdp-growth-" + iteration + ".json",
-                method: 'GET',
+                type: 'GET',
                 dataType: 'json',
                 success: onDataReceived
             });
