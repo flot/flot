@@ -666,13 +666,16 @@
                 if (s.bars.show) {
                     // make sure we got room for the bar on the dancing floor
                     var delta = s.bars.align == "left" ? 0 : -s.bars.barWidth/2;
+                    var barWidth = (points[points.length-1] && points[points.length-1]) > 0 ? 
+                        points[points.length-1] : s.bars.barWidth;
+                    
                     if (s.bars.horizontal) {
                         ymin += delta;
-                        ymax += delta + s.bars.barWidth;
+                        ymax += delta + barWidth;
                     }
                     else {
                         xmin += delta;
-                        xmax += delta + s.bars.barWidth;
+                        xmax += delta + barWidth;
                     }
                 }
                 
@@ -2185,6 +2188,8 @@
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
+                    
+                    barRight = (points[i + 3] && points[i + 3] > 0) ? (barLeft + points[i + 3]) : barRight;
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
@@ -2355,7 +2360,9 @@
                         var x = points[j], y = points[j + 1], b = points[j + 2];
                         if (x == null)
                             continue;
-  
+                        
+                        barRight = (points[j + 3] && points[j + 3]) > 0 ? (barLeft + points[j + 3]) : barRight;
+                        
                         // for a bar graph, the cursor must be inside the bar
                         if (series[i].bars.horizontal ? 
                             (mx <= Math.max(b, x) && mx >= Math.min(b, x) && 
@@ -2545,7 +2552,8 @@
             octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
             var fillStyle = $.color.parse(series.color).scale('a', 0.5).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            var barRight = point[3] && point[3] > 0 ? (barLeft + point[3]) : (barLeft + series.bars.barWidth);
+            drawBar(point[0], point[1], point[2] || 0, barLeft, barRight,
                     0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
         }
 
