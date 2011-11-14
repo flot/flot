@@ -13,6 +13,8 @@
         if (use_spline) {
             var points_count = (s === true ? default_poinst : parseInt(s));
 
+            console.log(datapoints);
+
             datapoints.points = (function(data, num) {
                 var xdata = [];
                 var ydata = [];
@@ -37,7 +39,7 @@
                 for (var i = 1; i < n - 1; ++i) {
                     var d = (xdata[i + 1] - xdata[i - 1]);
                     if (d == 0) {
-                        return null;
+                        throw "Not valid graph diff points in spline function";
                     }
 
                     var s = (xdata[i] - xdata[i - 1]) / d,
@@ -78,7 +80,7 @@
                     var h = (xdata[max] - xdata[min]);
 
                     if (h == 0) {
-                        return null;
+                        throw "Not valid graph diff points in spline function";
                     }
 
                     var a = (xdata[max] - xnew[j]) / h,
@@ -99,6 +101,13 @@
     $.plot.plugins.push({
         init: function(plot) {
             plot.hooks.processDatapoints.push(processRawData);
+        },
+        options: {
+            series: {
+                lines: {
+                    spline: false
+                }
+            }
         },
         name: 'spline',
         version: '0.1'
