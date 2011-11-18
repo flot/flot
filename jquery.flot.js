@@ -2228,7 +2228,13 @@
                 label = s.label;
                 if (!label)
                     continue;
-                
+
+                if (lf)
+                    label = lf(label, s);
+
+                if (!label)
+                    continue;
+
                 if (i % options.legend.noColumns == 0) {
                     if (rowStarted)
                         fragments.push('</tr>');
@@ -2236,9 +2242,6 @@
                     rowStarted = true;
                 }
 
-                if (lf)
-                    label = lf(label, s);
-                
                 fragments.push(
                     '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
                     '<td class="legendLabel">' + label + '</td>');
