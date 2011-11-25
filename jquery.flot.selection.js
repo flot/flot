@@ -143,6 +143,42 @@ The plugin allso adds the following methods to the plot object:
             return false;
         }
 
+        // Touch interface handling
+        function buildTouchEvent(e, touchEnd) {
+            var touches = null;
+            if (e.originalEvent && e.originalEvent.touches.length) {
+                // Ignore all fingers but first
+                touches = e.originalEvent.touches;
+                e.pageX = touches[0].pageX;
+                e.pageY = touches[0].pageY;
+                e.which = 1;
+                pageX = e.pageX;
+                pageY = e.pageY;
+            } else {
+                // Touch end
+                e.pageX = pageX;
+                e.pageY = pageY;
+            }
+            return e;
+        }
+
+        function onTouchStart(e) {
+            e = buildTouchEvent(e);
+            return onMouseDown(e);
+        }
+
+        function onTouchEnd(e) {
+            e = buildTouchEvent(e, true);
+            return onMouseUp(e);
+        }
+
+        function onTouchMove(e) {
+            e.preventDefault(); // To prevent panning
+            e = buildTouchEvent(e);
+            return onMouseMove(e);
+        }
+        // End of touch event handlers
+
         function getSelection() {
             if (!selectionIsSane())
                 return null;
@@ -288,6 +324,10 @@ The plugin allso adds the following methods to the plot object:
             if (o.selection.mode != null) {
                 eventHolder.mousemove(onMouseMove);
                 eventHolder.mousedown(onMouseDown);
+                // Touch
+                eventHolder.bind("touchstart", onTouchStart);
+                eventHolder.bind("touchmove", onTouchMove);
+                eventHolder.bind("touchend", onTouchEnd);
             }
         });
 
@@ -323,6 +363,9 @@ The plugin allso adds the following methods to the plot object:
         plot.hooks.shutdown.push(function (plot, eventHolder) {
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mousedown", onMouseDown);
+            eventHolder.unbind("touchstart", onTouchStart);
+            eventHolder.unbind("touchmove", onTouchMove);
+            eventHolder.unbind("touchend", onTouchEnd);
             
             if (mouseUpHandler)
                 $(document).unbind("mouseup", mouseUpHandler);
