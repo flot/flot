@@ -51,7 +51,8 @@
                     position: "ne", // position of default legend container within plot
                     margin: 5, // distance from grid edge to default legend container within plot
                     backgroundColor: null, // null means auto-detect
-                    backgroundOpacity: 0.85 // set to 0 to avoid background
+                    backgroundOpacity: 0.85, // set to 0 to avoid background
+                    togglable: false
                 },
                 xaxis: {
                     show: null, // null = auto-detect, true = always, false = never
@@ -98,7 +99,7 @@
                     },
                     lines: {
                         // we don't put in show: false so we can see
-                        // whether lines were actively disabled 
+                        // whether lines were actively disabled
                         lineWidth: 2, // in pixels
                         fill: false,
                         fillColor: null,
@@ -110,10 +111,11 @@
                         barWidth: 1, // in units of the x axis
                         fill: true,
                         fillColor: null,
-                        align: "left", // or "center" 
+                        align: "left", // or "center"
                         horizontal: false
                     },
-                    shadowSize: 3
+                    shadowSize: 3,
+                    enabled: true
                 },
                 grid: {
                     show: true,
@@ -1752,12 +1754,14 @@
         }
 
         function drawSeries(series) {
-            if (series.lines.show)
-                drawSeriesLines(series);
-            if (series.bars.show)
-                drawSeriesBars(series);
-            if (series.points.show)
-                drawSeriesPoints(series);
+            if (series.enabled) {
+                if (series.lines.show)
+                    drawSeriesLines(series);
+                if (series.bars.show)
+                    drawSeriesBars(series);
+                if (series.points.show)
+                    drawSeriesPoints(series);
+            }
         }
         
         function drawSeriesLines(series) {
@@ -2220,9 +2224,22 @@
 
             if (!options.legend.show)
                 return;
+                
+            if (options.legend.togglable) {
+                placeholder.delegate(".legendCheckbox", "change", function (event) {
+                    var index = event.target.value,
+                        s = series[index];
+                    if (s.enabled) {
+                        s.enabled = false;
+                    } else {
+                        s.enabled = true;
+                    }
+                    plot.draw();
+                });
+            }
             
             var fragments = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+                lf = options.legend.labelFormatter, s, label, checkbox;
             for (var i = 0; i < series.length; ++i) {
                 s = series[i];
                 label = s.label;
@@ -2239,10 +2256,28 @@
                 if (lf)
                     label = lf(label, s);
                 
-                fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + label + '</td>');
+                if (options.legend.togglable) {
+                    value = i;
+                    
+                    if (s.enabled) {
+                        checkbox = '<td class="legendCheckbox"><input type="checkbox" checked="checked" value="' + value + '" />';
+                    } else {
+                        checkbox = '<td class="legendCheckbox"><input type="checkbox" value="' + value + '" />';
+                    }
+                    
+                    fragments.push(
+                        checkbox +
+                        '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
+                        '<td class="legendLabel">' + label + '</td>'
+                    );
+                } else {
+                    fragments.push(
+                        '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
+                        '<td class="legendLabel">' + label + '</td>'
+                    );
+                }
             }
+            
             if (rowStarted)
                 fragments.push('</tr>');
             
@@ -2286,7 +2321,6 @@
                 }
             }
         }
-
 
         // interactive features
         
