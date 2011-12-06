@@ -1738,10 +1738,10 @@
                             var cos_angle = Math.cos(angle);
 
                             if (sin_angle < 0 && cos_angle < 0) {
-                                x += line.width - 2*box.padding;
+                                x += line.width;
                                 y += line.height - 2*box.padding;
                             } else if (sin_angle < 0 && cos_angle > 0) {
-                                x -= line.width - 2*box.padding;
+                                x -= line.width;
                                 y += line.height - 2*box.padding;
                             }
 
