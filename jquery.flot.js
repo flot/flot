@@ -251,7 +251,7 @@
 
             // Transform angle in radiants
             if (options.xaxis.labelAngle != null)
-                options.xaxis.labelAngle = ((options.xaxis.labelAngle % 180) * 2 * Math.PI) / 360;
+                options.xaxis.labelAngle = (options.xaxis.labelAngle * Math.PI) / 180;
 
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
@@ -1149,7 +1149,7 @@
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
                 // Increase factor if labels have an angle
-                noTicks = (0.3 + (opts.labelAngle ? Math.sin(opts.labelAngle) * .5 : 0)) * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                noTicks = (0.3 + (opts.labelAngle ? Math.abs(Math.sin(opts.labelAngle)) * .5 : 0)) * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
 
             var delta = (axis.max - axis.min) / noTicks,
                 size, generator, unit, formatter, i, magn, norm;
@@ -1733,11 +1733,18 @@
                             ctx.save();
                             x = plotOffset.left + axis.p2c(tick.v);
                             y = box.top + 2 * box.padding;
-                            if(angle > Math.PI/2) {
+
+                            var sin_angle = Math.sin(angle);
+                            var cos_angle = Math.cos(angle);
+
+                            if (sin_angle < 0 && cos_angle < 0) {
+                                x += line.width;
+                                y += line.height - 2*box.padding;
+                            } else if (sin_angle < 0 && cos_angle > 0) {
                                 x -= line.width;
-                                y += line.height - 2* box.padding;
-                                angle += Math.PI;
+                                y += line.height - 2*box.padding;
                             }
+
                             ctx.translate(x, y);
                             ctx.rotate(angle);
                             ctx.fillText(line.text, 0, 0);
