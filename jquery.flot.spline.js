@@ -12,10 +12,8 @@
         var use_spline = ((s === true) || (parseInt(s) > 0));
         if (use_spline) {
             var points_count = (s === true ? default_poinst : parseInt(s));
-
-            console.log(datapoints);
-
-            datapoints.points = (function(data, num) {
+            
+            series.datapoints.points = (function(data, num) {
                 var xdata = [];
                 var ydata = [];
 
@@ -94,7 +92,7 @@
                 }
 
                 return result;
-            })(datapoints.points, points_count);
+            })(series.datapoints.points, points_count);
         }
     }
 
@@ -110,6 +108,6 @@
             }
         },
         name: 'spline',
-        version: '0.1'
+        version: '0.2'
     });
 })(jQuery);
