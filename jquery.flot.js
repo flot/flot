@@ -186,6 +186,7 @@
         };
         plot.getXAxes = function () { return xaxes; };
         plot.getYAxes = function () { return yaxes; };
+        plot.findNearbyItem = findNearbyItem;
         plot.c2p = canvasToAxisCoords;
         plot.p2c = axisToCanvasCoords;
         plot.getOptions = function () { return options; };
