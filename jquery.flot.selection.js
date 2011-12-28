@@ -138,6 +138,7 @@ The plugin also adds the following methods to the plot object:
         // redraw
         selection.navigate = false;
         setSelectionPos(selection.first, e);
+        setSelectionPos(selection.second, e);
       }
 
       selection.active = true;
