@@ -40,6 +40,7 @@
         
         var series = [],
             options = {
+                chipToggle: false,
                 // the color theme used for graphs
                 colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
                 legend: {
@@ -113,7 +114,8 @@
                         align: "left", // or "center" 
                         horizontal: false
                     },
-                    shadowSize: 3
+                    shadowSize: 3,
+                    display: true
                 },
                 grid: {
                     show: true,
@@ -204,7 +206,9 @@
             resizeCanvas(canvas);
             resizeCanvas(overlay);
         };
-
+        plot.setChipToggle  = function() {
+          chipToggle();
+        }
         // public attributes
         plot.hooks = hooks;
         
@@ -285,7 +289,6 @@
                 $.extend(true, options.series.bars, options.bars);
             if (options.shadowSize != null)
                 options.series.shadowSize = options.shadowSize;
-
             // save options on axes for future reference
             for (i = 0; i < options.xaxes.length; ++i)
                 getOrCreateAxis(xaxes, i + 1).options = options.xaxes[i];
@@ -1752,12 +1755,15 @@
         }
 
         function drawSeries(series) {
+          console.info(series);
+          if(series.display) {
             if (series.lines.show)
                 drawSeriesLines(series);
             if (series.bars.show)
                 drawSeriesBars(series);
             if (series.points.show)
                 drawSeriesPoints(series);
+          }
         }
         
         function drawSeriesLines(series) {
@@ -2214,6 +2220,20 @@
             c.normalize();
             return c.toString();
         }
+
+        function chipToggle() {
+          $('.legendColorBox').click(function(){
+            var my_id = $(this).attr('id');
+            if (my_id === 'display_all') {
+              for (var i = 0; i < series.length; ++i) {
+                series[i].display = !series[i].display;
+              }
+            } else {
+              series[my_id].display = !series[my_id].display;
+            }
+            draw();
+          });
+        }
         
         function insertLegend() {
             placeholder.find(".legend").remove();
@@ -2240,11 +2260,18 @@
                     label = lf(label, s);
                 
                 fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
+                    '<td id="' + i + '" class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
                     '<td class="legendLabel">' + label + '</td>');
             }
             if (rowStarted)
                 fragments.push('</tr>');
+
+            if (options.chipToggle) {
+              fragments.push(
+                  '<tr><td id="display_all" class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid #CCCCCC;overflow:hidden"></div></div></td>' +
+                  '<td class="legendLabel">Toggle All</td></tr>');
+            }
+
             
             if (fragments.length == 0)
                 return;
@@ -2284,6 +2311,10 @@
                     var div = legend.children();
                     $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
                 }
+            }
+
+            if (options.chipToggle) {
+              chipToggle();
             }
         }
 
