@@ -1755,7 +1755,6 @@
         }
 
         function drawSeries(series) {
-          console.info(series);
           if(series.display) {
             if (series.lines.show)
                 drawSeriesLines(series);
@@ -2224,12 +2223,14 @@
         function chipToggle() {
           $('.legendColorBox').click(function(){
             var my_id = $(this).attr('id');
+            var pattern = new RegExp('[0-9]');
+            var selected  = pattern.exec(my_id);
             if (my_id === 'display_all') {
               for (var i = 0; i < series.length; ++i) {
                 series[i].display = !series[i].display;
               }
             } else {
-              series[my_id].display = !series[my_id].display;
+              series[selected].display = !series[selected].display;
             }
             draw();
           });
@@ -2237,6 +2238,7 @@
         
         function insertLegend() {
             placeholder.find(".legend").remove();
+            var legendIDBase  = placeholder.attr('id');
 
             if (!options.legend.show)
                 return;
@@ -2260,7 +2262,7 @@
                     label = lf(label, s);
                 
                 fragments.push(
-                    '<td id="' + i + '" class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
+                    '<td id="' + legendIDBase + i + '" class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
                     '<td class="legendLabel">' + label + '</td>');
             }
             if (rowStarted)
