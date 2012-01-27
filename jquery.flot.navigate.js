@@ -262,7 +262,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.draw();
             
             if (!args.preventEvent)
-                plot.getPlaceholder().trigger("plotzoom", [ plot ]);
+                plot.getPlaceholder().trigger("plotzoom", [ plot, args ]);
         }
 
         plot.pan = function (args) {
