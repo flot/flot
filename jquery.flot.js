@@ -1634,8 +1634,12 @@
                 }
 
                 // draw ticks
-                ctx.beginPath();
                 for (i = 0; i < axis.ticks.length; ++i) {
+                    ctx.beginPath();
+                    if( axis.options.tickColorArray ) {
+                        ctx.strokeStyle = axis.options.tickColorArray[ i % axis.options.tickColorArray.length ];
+                        }
+                
                     var v = axis.ticks[i].v;
                     
                     xoff = yoff = 0;
@@ -1670,9 +1674,9 @@
 
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
+                    ctx.stroke();
                 }
                 
-                ctx.stroke();
             }
             
             
