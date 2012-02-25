@@ -800,6 +800,9 @@
             if (options.grid.clickable)
                 eventHolder.click(onClick);
 
+            if (options.grid.rightclickable) 
+                eventHolder.rightClick(onRightClick);
+
             executeHooks(hooks.bindEvents, [eventHolder]);
         }
 
@@ -810,6 +813,7 @@
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
+            eventHolder.unbind("rightClick", onRightClick);
             
             executeHooks(hooks.shutdown, [eventHolder]);
         }
@@ -2397,6 +2401,12 @@
             triggerClickHoverEvent("plotclick", e,
                                    function (s) { return s["clickable"] != false; });
         }
+        
+        function onRightClick(e) {
+            triggerClickHoverEvent("plotrightclick", e,
+                                   function (s) { return s["rightclickable"] != false; });
+        }
+
 
         // trigger click or hover event (they send the same parameters
         // so we share their code)
