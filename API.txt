@@ -919,8 +919,8 @@ can call:
   - pointOffset({ x: xpos, y: ypos })
 
     Returns the calculated offset of the data point at (x, y) in data
-    space within the placeholder div. If you are working with multiple axes, you
-    can specify the x and y axis references, e.g. 
+    space within the placeholder div. If you are working with multiple
+    axes, you can specify the x and y axis references, e.g. 
 
       o = pointOffset({ x: xpos, y: ypos, xaxis: 2, yaxis: 3 })
       // o.left and o.top now contains the offset within the div
@@ -1114,6 +1114,25 @@ hooks in the plugins bundled with Flot.
    doesn't check it or do any normalization on it afterwards.
 
 
+ - processOffset  [phase 4]
+
+   function(plot, offset)
+
+   Called after Flot has initialized the plot's offset, but before it
+   draws any axes or plot elements. This hook is useful for customizing
+   the margins between the grid and the edge of the canvas. "offset" is
+   an object with attributes "top", "bottom", "left" and "right",
+   corresponding to the margins on the four sides of the plot.
+
+
+ - drawBackground [phase 5]
+
+   function(plot, canvascontext)
+
+   Called before all other drawing operations. Used to draw backgrounds
+   or other custom elements before the plot or axes have been draw.
+
+
  - drawSeries  [phase 5]
 
    function(plot, canvascontext, series)
@@ -1121,8 +1140,8 @@ hooks in the plugins bundled with Flot.
    Hook for custom drawing of a single series. Called just before the
    standard drawing routine has been called in the loop that draws
    each series.
-   
- 
+
+
  - draw  [phase 5]
 
    function(plot, canvascontext)

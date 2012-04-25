@@ -152,6 +152,8 @@
             processOptions: [],
             processRawData: [],
             processDatapoints: [],
+            processOffset: [],
+            drawBackground: [],
             drawSeries: [],
             draw: [],
             bindEvents: [],
@@ -1024,7 +1026,9 @@
             // init plot offset
             for (var a in plotOffset)
                 plotOffset[a] = showGrid ? options.grid.borderWidth : 0;
-            
+
+            executeHooks(hooks.processOffset, [plotOffset]);
+
             // init axes
             $.each(axes, function (_, axis) {
                 axis.show = axis.options.show;
@@ -1035,7 +1039,7 @@
 
                 setRange(axis);
             });
-            
+
             if (showGrid) {
                 // determine from the placeholder the font size ~ height of font ~ 1 em
                 var fontDefaults = {
@@ -1440,6 +1444,8 @@
       
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
 
