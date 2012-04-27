@@ -667,6 +667,7 @@ Customizing the grid
     aboveData: boolean
     color: color
     backgroundColor: color/gradient or null
+    margin: number or margin object
     labelMargin: number
     axisMargin: number
     markings: array of markings or (fn: axes -> array of markings)
@@ -693,6 +694,17 @@ the gradient documentation below.
 You can turn off the whole grid including tick labels by setting
 "show" to false. "aboveData" determines whether the grid is drawn
 above the data or below (below is default).
+
+"margin" is the space in pixels between the canvas edge and the grid,
+which can be either a number or an object with individual margins for
+each side, in the form:
+
+  margin: {
+    top: top margin in pixels
+    left: left margin in pixels
+    bottom: bottom margin in pixels
+    right: right margin in pixels
+  }
 
 "labelMargin" is the space in pixels between tick labels and axis
 line, and "axisMargin" is the space in pixels between axes when there

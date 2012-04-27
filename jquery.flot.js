@@ -122,6 +122,7 @@
                     backgroundColor: null, // null for transparent, else color
                     borderColor: null, // set if different from the grid color
                     tickColor: null, // color for the ticks, e.g. "rgba(0,0,0,0.15)"
+                    margin: 0, // distance from the canvas edge to the grid
                     labelMargin: 5, // in pixels
                     axisMargin: 8, // in pixels
                     borderWidth: 2, // in pixels
@@ -1023,11 +1024,19 @@
         function setupGrid() {
             var i, axes = allAxes(), showGrid = options.grid.show;
 
-            // init plot offset
-            for (var a in plotOffset)
-                plotOffset[a] = showGrid ? options.grid.borderWidth : 0;
+            // Initialize the plot's offset from the edge of the canvas
+
+            for (var a in plotOffset) {
+                var margin = options.grid.margin || 0;
+                plotOffset[a] = typeof margin == "number" ? margin : margin[a] || 0;
+            }
 
             executeHooks(hooks.processOffset, [plotOffset]);
+
+            // If the grid is visible, add its border width to the offset
+
+            for (var a in plotOffset)
+                plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
 
             // init axes
             $.each(axes, function (_, axis) {

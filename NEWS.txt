@@ -30,6 +30,11 @@ Changes:
 
 - Tick generators now get the whole axis rather than just min/max.
 
+- Added processOffset and drawBackground hooks (suggested in issue 639).
+
+- Added a grid "margin" option to set the space between the canvas edge
+  and the grid.
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
