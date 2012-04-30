@@ -1142,7 +1142,7 @@ hooks in the plugins bundled with Flot.
    function(plot, canvascontext)
 
    Called before all other drawing operations. Used to draw backgrounds
-   or other custom elements before the plot or axes have been draw.
+   or other custom elements before the plot or axes have been drawn.
 
 
  - drawSeries  [phase 5]
