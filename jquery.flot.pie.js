@@ -162,11 +162,14 @@ More detail and specific examples can be found in the included HTML file.
 		
 		function calcTotal(data)
 		{
-			for (var i = 0; i < data.length; ++i)
-			{
-				var item = parseFloat(data[i].data[0][1]);
-				if (item)
+			for (var i=0; i < data.length; i++) {
+				for (var k = 0; k < data[i].data.length; k++) {
+					var item = parseFloat(data[i].data[k][1]);
+					if (item) {
 					total += item;
+			}
+			
+				}
 			}
 		}	
 		
@@ -233,39 +236,48 @@ More detail and specific examples can be found in the included HTML file.
 			var color = options.series.pie.combine.color;
 			
 			var newdata = [];
-			for (var i = 0; i < data.length; ++i)
-			{
+
+			for (var i = 0; i < data.length; i++) {
+
+				var combined = 0;
+
+				for (var k = 0; k < data[i].data.length; k++) {
 				// make sure its a number
-				data[i].data[0][1] = parseFloat(data[i].data[0][1]);
-				if (!data[i].data[0][1])
-					data[i].data[0][1] = 0;
-					
-				if (data[i].data[0][1]/total<=options.series.pie.combine.threshold)
-				{
-					combined += data[i].data[0][1];
-					numCombined++;
-					if (!color)
-						color = data[i].color;
+					data[i].data[k][1] = parseFloat(data[i].data[k][1]);
+					if (!data[i].data[k][1]) {
+						data[i].data[k][1] = 0;
 				}				
-				else
-				{
+
+					combined += data[i].data[k][1];
+				}
+
+				if (typeof(combined) != 'undefined' && (combined/total <= options.series.pie.combine.threshold)) {
+					numCombined += combined;
+				} 
+
+				color = data[i].color;
+				
+				if (typeof(newdata[newdata.length+1]) == 'undefined' && (combined/total >= options.series.pie.combine.threshold)) {
 					newdata.push({
-						data: [[1,data[i].data[0][1]]], 
-						color: data[i].color, 
+						data: [[1, combined]],
+						color: color,
 						label: data[i].label,
-						angle: (data[i].data[0][1]*(Math.PI*2))/total,
-						percent: (data[i].data[0][1]/total*100)
+						angle: (combined*(Math.PI*2))/total,
+						percent: (combined/total*100)
 					});
 				}
+
 			}
-			if (numCombined>0)
+			
+			if (numCombined > 0) {
 				newdata.push({
-					data: [[1,combined]], 
+					data: [[1, numCombined]], 
 					color: color, 
 					label: options.series.pie.combine.label,
-					angle: (combined*(Math.PI*2))/total,
-					percent: (combined/total*100)
+					angle: (numCombined*(Math.PI*2))/total, 
+					percent: (numCombined/total*100) 
 				});
+			}
 			return newdata;
 		}		
 		
@@ -364,7 +376,7 @@ More detail and specific examples can be found in the included HTML file.
 				// draw slices
 				ctx.save();
 				var currentAngle = startAngle;
-				for (var i = 0; i < slices.length; ++i)
+				for (var i = 0; i < slices.length; i++)
 				{
 					slices[i].startAngle = currentAngle;
 					drawSlice(slices[i].angle, slices[i].color, true);
@@ -375,8 +387,9 @@ More detail and specific examples can be found in the included HTML file.
 				ctx.save();
 				ctx.lineWidth = options.series.pie.stroke.width;
 				currentAngle = startAngle;
-				for (var i = 0; i < slices.length; ++i)
+				for (var i = 0; i < slices.length; i++) {
 					drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
+				}
 				ctx.restore();
 					
 				// draw donut hole
@@ -391,11 +404,18 @@ More detail and specific examples can be found in the included HTML file.
 				
 				function drawSlice(angle, color, fill)
 				{	
-					if (angle <= 0 || isNaN(angle))
-						return;
 				
-					if (fill)
+					if (angle <= 0) {
+						return false;
+					}
+
+					if (isNaN(angle)) {
+						angle = currentAngle;
+					}
+					
+					if (fill) {
 						ctx.fillStyle = color;
+					}
 					else
 					{
 						ctx.strokeStyle = color;
