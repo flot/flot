@@ -13,7 +13,7 @@ In order to name the other series, you need to give it an id, like this
        { data: [ ... ], fillBetween: "foo" }, // use first dataset as bottom
        ];
 
-  $.plot($("#placeholder"), dataset, { line: { show: true, fill: true }});
+  $.plot($("#placeholder"), dataset, { lines: { show: true, fill: true }});
 
 As a convenience, if the id given is a number that doesn't appear as
 an id in the series, it is interpreted as the index in the array
