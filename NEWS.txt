@@ -50,6 +50,8 @@ Bug fixes
   (reported by Ara Anjargolian).
 - Fix bug with formats in the data processor (reported by Peter Hull,
   issue 534).
+- Prevent i from being declared global in extractRange (reported by
+  Alexander Obukhov, issue 627).
 
 
 Flot 0.7

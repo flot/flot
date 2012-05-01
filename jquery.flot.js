@@ -1483,7 +1483,7 @@
         function extractRange(ranges, coord) {
             var axis, from, to, key, axes = allAxes();
 
-            for (i = 0; i < axes.length; ++i) {
+            for (var i = 0; i < axes.length; ++i) {
                 axis = axes[i];
                 if (axis.direction == coord) {
                     key = coord + axis.n + "axis";
