@@ -58,6 +58,7 @@ Bug fixes
 
 - Prevent i from being declared global in extractRange (reported by
   Alexander Obukhov, issue 627).
+
 - Throw errors in a more cross-browser-compatible manner (patch by
   Eddie Kay)
 
