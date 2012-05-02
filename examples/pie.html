@@ -10,27 +10,30 @@
 	
 <script type="text/javascript">
 $(function () {
-	// data
-	/*var data = [
+	/*
+	// Example Data
+	var data = [
 		{ label: "Series1",  data: 10},
 		{ label: "Series2",  data: 30},
 		{ label: "Series3",  data: 90},
 		{ label: "Series4",  data: 70},
 		{ label: "Series5",  data: 80},
 		{ label: "Series6",  data: 110}
-	];*/
-	/*var data = [
+	];
+	var data = [
 		{ label: "Series1",  data: [[1,10]]},
 		{ label: "Series2",  data: [[1,30]]},
 		{ label: "Series3",  data: [[1,90]]},
 		{ label: "Series4",  data: [[1,70]]},
 		{ label: "Series5",  data: [[1,80]]},
 		{ label: "Series6",  data: [[1,0]]}
-	];*/
+	];
+	*/
+
+	// Randomly Generated Data
 	var data = [];
-	var series = Math.floor(Math.random()*10)+1;
-	for( var i = 0; i<series; i++)
-	{
+	var series = Math.floor(Math.random()*6)+3;
+	for( var i = 0; i<series; i++){
 		data[i] = { label: "Series"+(i+1), data: Math.floor(Math.random()*100)+1 }
 	}
 
@@ -512,7 +515,6 @@ $.plot($("#graph5"), data, <br/>
     <div id="graph6" class="graph"></div>
 	<label for="graph6">
 		Labels can be hidden if the slice is less than a given percentage of the pie (10% in this case).
-		<br><span style="color: red">Note: you may need to refresh the page to see this effect.</span>
 		<code>
 $.plot($("#graph6"), data, <br/>
 {<br/>
