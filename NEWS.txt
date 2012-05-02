@@ -39,19 +39,28 @@ Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
   issue 500).
+
 - Fix problem with threshold plugin and bars (based on patch by
   kaarlenkaski, issue 348).
+
 - Fix axis box calculations so the boxes include the outermost part of
   the labels too.
+
 - Fix problem with event clicking and hovering in IE 8 by updating
   Excanvas and removing previous work-around (test case by Ara
   Anjargolian).
+
 - Fix issues with blurry 1px border when some measures aren't integer
   (reported by Ara Anjargolian).
+
 - Fix bug with formats in the data processor (reported by Peter Hull,
   issue 534).
+
 - Prevent i from being declared global in extractRange (reported by
   Alexander Obukhov, issue 627).
+
+- Prevent pie slice outlines from being drawn when the stroke width is
+  zero (reported by Chris Minett, issue 585)
 
 
 Flot 0.7
