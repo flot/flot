@@ -35,6 +35,9 @@ Changes:
 - Added a grid "margin" option to set the space between the canvas edge
   and the grid.
 
+- Prevent the pie example page from generating single-slice pies (patch
+  by Shane Reustle).
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
