@@ -58,6 +58,8 @@ Bug fixes
 
 - Prevent i from being declared global in extractRange (reported by
   Alexander Obukhov, issue 627).
+- Throw errors in a more cross-browser-compatible manner (patch by
+  Eddie Kay)
 
 - Prevent pie slice outlines from being drawn when the stroke width is
   zero (reported by Chris Minett, issue 585)
