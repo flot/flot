@@ -667,8 +667,11 @@
                 }
                 
                 if (s.bars.show) {
+                    //store barLeft to prevent recalculation allowing overwrite in procDatapoints hook.
+                    if (s.bars.barLeft == undefined)
+                        s.bars.barLeft= s.bars.align == "left" ? 0 : -s.bars.barWidth/2;
                     // make sure we got room for the bar on the dancing floor
-                    var delta = s.bars.align == "left" ? 0 : -s.bars.barWidth/2;
+                    var delta = s.bars.barLeft;
                     if (s.bars.horizontal) {
                         ymin += delta;
                         ymax += delta + s.bars.barWidth;
@@ -2210,7 +2213,7 @@
             // FIXME: figure out a way to add shadows (for instance along the right edge)
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
-            var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+            var barLeft = series.bars.barLeft;
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
@@ -2363,7 +2366,7 @@
                 }
                     
                 if (s.bars.show && !item) { // no other point can be nearby
-                    var barLeft = s.bars.align == "left" ? 0 : -s.bars.barWidth/2,
+                    var barLeft = s.bars.barLeft,
                         barRight = barLeft + s.bars.barWidth;
                     
                     for (j = 0; j < points.length; j += ps) {
@@ -2559,8 +2562,7 @@
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
             var fillStyle = $.color.parse(series.color).scale('a', 0.5).toString();
-            var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            drawBar(point[0], point[1], point[2] || 0, series.bars.barLeft, series.bars.barLeft + series.bars.barWidth,
                     0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
         }
 
