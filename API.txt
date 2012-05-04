@@ -564,7 +564,7 @@ Customizing the data series
 
     bars: {
       barWidth: number
-      align: "left" or "center"
+      align: "left", "right" or "center"
       horizontal: boolean
     }
 
@@ -615,9 +615,9 @@ the y axis if "horizontal" is true), contrary to most other measures
 that are specified in pixels. For instance, for time series the unit
 is milliseconds so 24 * 60 * 60 * 1000 produces bars with the width of
 a day. "align" specifies whether a bar should be left-aligned
-(default) or centered on top of the value it represents. When
-"horizontal" is on, the bars are drawn horizontally, i.e. from the y
-axis instead of the x axis; note that the bar end points are still
+(default), right-aligned or centered on top of the value it represents. 
+When "horizontal" is on, the bars are drawn horizontally, i.e. from the 
+y axis instead of the x axis; note that the bar end points are still
 defined in the same way so you'll probably want to swap the
 coordinates if you've been plotting vertical bars first.
 
