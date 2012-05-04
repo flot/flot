@@ -38,6 +38,9 @@ Changes:
 - Prevent the pie example page from generating single-slice pies (patch
   by Shane Reustle).
 
+- In addition to "left" and "center", bars now recognize "right" as an
+  alignment option. (patch by Michael Mayer, issue 520)
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
