@@ -71,6 +71,9 @@ Bug fixes
 - Prevent pie slice outlines from being drawn when the stroke width is
   zero (reported by Chris Minett, issue 585)
 
+- Updated the navigate plugin's inline copy of jquery.mousewheel to fix
+  Webkit zoom problems (reported by Hau Nguyen, issue 685).
+
 
 Flot 0.7
 --------
