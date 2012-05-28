@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<html> 
+ <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>Flot Example</title> 
+    <link href="layout.css" rel="stylesheet" type="text/css"></link> 
+    <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]--> 
+    <script language="javascript" type="text/javascript" src="../jquery.js"></script> 
+
+    <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script> 
+    <script language="javascript" type="text/javascript" src="../jquery.flot.time.js"></script> 
+    <script language="javascript" type="text/javascript" src="../jquery.flot.selection.js"></script>
+ </head>
+    <body> 
+    <h1>Timezone Examples</h1> 
+    <table>
+        <tr><td>UTC</td><td><div id="placeholderUTC" style="width:600px;height:100px;"></div></td></tr>
+        <tr><td>Browser</td><td><div id="placeholderLocal" style="width:600px;height:100px;"></div></td></tr>
+        <tr><td>Chicago</td><td><div id="placeholderChicago" style="width:600px;height:100px;"></div></td></tr>
+    </table>
+    <script language="javascript" type="text/javascript" src="date.js"></script>
+<script id="source"> 
+$(function () {
+
+    timezoneJS.timezone.zoneFileBasePath = "tz";
+    timezoneJS.timezone.defaultZoneFile = [ ];
+    timezoneJS.timezone.init();
+
+
+    var d = [
+        [Date.UTC(2011, 2, 12, 14, 0, 0), 28],
+        [Date.UTC(2011, 2, 12, 15, 0, 0), 27],
+        [Date.UTC(2011, 2, 12, 16, 0, 0), 25],
+        [Date.UTC(2011, 2, 12, 17, 0, 0), 19],
+        [Date.UTC(2011, 2, 12, 18, 0, 0), 16],
+        [Date.UTC(2011, 2, 12, 19, 0, 0), 14],
+        [Date.UTC(2011, 2, 12, 20, 0, 0), 11],
+        [Date.UTC(2011, 2, 12, 21, 0, 0), 9],
+        [Date.UTC(2011, 2, 12, 22, 0, 0), 7.5],
+        [Date.UTC(2011, 2, 12, 23, 0, 0), 6],
+        [Date.UTC(2011, 2, 13, 0, 0, 0), 5],
+        [Date.UTC(2011, 2, 13, 1, 0, 0), 6],
+        [Date.UTC(2011, 2, 13, 2, 0, 0), 7.5],
+        [Date.UTC(2011, 2, 13, 3, 0, 0), 9],
+        [Date.UTC(2011, 2, 13, 4, 0, 0), 11],
+        [Date.UTC(2011, 2, 13, 5, 0, 0), 14],
+        [Date.UTC(2011, 2, 13, 6, 0, 0), 16],
+        [Date.UTC(2011, 2, 13, 7, 0, 0), 19],
+        [Date.UTC(2011, 2, 13, 8, 0, 0), 25],
+        [Date.UTC(2011, 2, 13, 9, 0, 0), 27],
+        [Date.UTC(2011, 2, 13, 10, 0, 0), 28],
+        [Date.UTC(2011, 2, 13, 11, 0, 0), 29],
+        [Date.UTC(2011, 2, 13, 12, 0, 0), 29.5],
+        [Date.UTC(2011, 2, 13, 13, 0, 0), 29],
+        [Date.UTC(2011, 2, 13, 14, 0, 0), 28],
+        [Date.UTC(2011, 2, 13, 15, 0, 0), 27],
+        [Date.UTC(2011, 2, 13, 16, 0, 0), 25],
+        [Date.UTC(2011, 2, 13, 17, 0, 0), 19],
+        [Date.UTC(2011, 2, 13, 18, 0, 0), 16],
+        [Date.UTC(2011, 2, 13, 19, 0, 0), 14],
+        [Date.UTC(2011, 2, 13, 20, 0, 0), 11],
+        [Date.UTC(2011, 2, 13, 21, 0, 0), 9],
+        [Date.UTC(2011, 2, 13, 22, 0, 0), 7.5],
+        [Date.UTC(2011, 2, 13, 23, 0, 0), 6]];
+
+    var plot = $.plot($("#placeholderUTC"), [d], { xaxis: { mode: "time" } });
+    var plot = $.plot($("#placeholderLocal"), [d], { xaxis: { mode: "time", timezone: "browser" } });
+    var plot = $.plot($("#placeholderChicago"), [d], { xaxis: { mode: "time", timezone: "America/Chicago" } });
+    
+});
+</script> 
+ 
+ </body> 
+</html>
