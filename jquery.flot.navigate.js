@@ -256,18 +256,22 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 // now also check against panRange limits if we have any
                 var pr = opts.panRange;
+                var pr_min_restricted = false;
                 if (pr) {
                     // check whether we hit the wall
                     if (pr[0] != null && pr[0] > min) {
                         // ok, put the new viewport up against the min edge
                         min = pr[0];
                         max = min + range;
+			pr_min_restricted = true;
                     }
                     
                     if (pr[1] != null && pr[1] < max) {
                         // ok, put the new viewport up against the max edge
                         max = pr[1];
-                        min = max - range;
+			if ( ! pr_min_restricted )
+                        	min = max - range;
+			// (else min is already on its limits)
                     }
                 }
             
