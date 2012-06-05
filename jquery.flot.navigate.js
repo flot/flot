@@ -253,6 +253,23 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     ((zr[0] != null && range < zr[0]) ||
                      (zr[1] != null && range > zr[1])))
                     return;
+
+                // now also check against panRange limits if we have any
+                var pr = opts.panRange;
+                if (pr) {
+                    // check whether we hit the wall
+                    if (pr[0] != null && pr[0] > min) {
+                        // ok, put the new viewport up against the min edge
+                        min = pr[0];
+                        max = min + range;
+                    }
+                    
+                    if (pr[1] != null && pr[1] < max) {
+                        // ok, put the new viewport up against the max edge
+                        max = pr[1];
+                        min = max - range;
+                    }
+                }
             
                 opts.min = min;
                 opts.max = max;
