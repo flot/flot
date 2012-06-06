@@ -174,7 +174,8 @@ Customizing the axes
   xaxis, yaxis: {
     show: null or true/false
     position: "bottom" or "top" or "left" or "right"
-    mode: null or "time"
+    mode: null or "time" ("time" requires jquery.flot.time.js plugin)
+    timezone: null, "browser" or timezone (only makes sense for mode: "time")
 
     color: null or color spec
     tickColor: null or color spec
@@ -214,8 +215,9 @@ false.
 The "position" option specifies where the axis is placed, bottom or
 top for x axes, left or right for y axes. The "mode" option determines
 how the data is interpreted, the default of null means as decimal
-numbers. Use "time" for time series data, see the time series data
-section.
+numbers. Use "time" for time series data; see the time series data
+section. The time plugin (jquery.flot.time.js) is required for time
+series support.
 
 The "color" option determines the color of the labels and ticks for
 the axis (default is the grid color). For more fine-grained control
@@ -410,9 +412,12 @@ either accept an xaxis/yaxis parameter to specify which axis number to
 use (starting from 1), or lets you specify the coordinate directly as
 x2/x3/... or x2axis/x3axis/... instead of "x" or "xaxis".
 
-  
+
 Time series data
 ================
+
+Please note that it is now required to include the time plugin,
+jquery.flot.time.js, for time series support.
 
 Time series are a bit more difficult than scalar data because
 calendars don't follow a simple base 10 system. For many cases, Flot
@@ -430,16 +435,19 @@ You can see a timestamp like this
 
   alert((new Date()).getTime())
 
-Normally you want the timestamps to be displayed according to a
-certain time zone, usually the time zone in which the data has been
-produced. However, Flot always displays timestamps according to UTC.
-It has to as the only alternative with core Javascript is to interpret
-the timestamps according to the time zone that the visitor is in,
-which means that the ticks will shift unpredictably with the time zone
-and daylight savings of each visitor.
+There are different schools of thought when it comes to diplay of
+timestamps. Many will want the timestamps to be displayed according to
+a certain time zone, usually the time zone in which the data has been
+produced. Some want the localized experience, where the timestamps are
+displayed according to the local time of the visitor. Flot supports
+both. Optionally you can include a third-party library to get
+additional timezone support.
 
-So given that there's no good support for custom time zones in
-Javascript, you'll have to take care of this server-side.
+Default behavior is that Flot always displays timestamps according to
+UTC. The reason being that the core Javascript Date object does not
+support other fixed time zones. Often your data is at another time
+zone, so it may take a little bit of tweaking to work around this
+limitation.
 
 The easiest way to think about it is to pretend that the data
 production time zone is UTC, even if it isn't. So if you have a
@@ -468,6 +476,18 @@ to the UTC timestamp you got. Then it'll look right on the plot. Most
 programming environments have some means of getting the timezone
 offset for a specific date (note that you need to get the offset for
 each individual timestamp to account for daylight savings).
+
+The alternative with core Javascript is to interpret the timestamps
+according to the time zone that the visitor is in, which means that
+the ticks will shift with the time zone and daylight savings of each
+visitor. This behavior is enabled by setting the axis option
+"timezone" to the value "browser".
+
+If you need more zime zone functionality than this, there is still
+another option. If you include the "timezone-js" library
+<https://github.com/mde/timezone-js> in the page and set axis.timezone
+to a value recognized by said library, Flot will use timezone-js to
+interpret the timestamps according to that time zone.
 
 Once you've gotten the timestamps into the data and specified "time"
 as the axis mode, Flot will automatically generate relevant ticks and

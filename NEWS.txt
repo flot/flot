@@ -3,6 +3,18 @@ Flot x.x
 
 API changes:
 
+Support for time series has been moved into a plugin,
+jquery.flot.time.js. This results in less code if time series are not
+used. The functionality remains the same (plus timezone support, as
+described below); however, the plugin must be included if axis.mode
+is set to "time".
+
+When the axis mode is "time", the axis option "timezone" can be set to
+null, "browser", or a particular timezone (e.g. "America/New_York") to
+control how the dates are displayed. If null, the dates are displayed
+as UTC. If "browser", the dates are displayed in the time zone of the
+user's browser.
+
 Axis labels are now drawn with canvas text with some parsing to
 support newlines. This solves various issues but also means that they
 no longer support HTML markup, can be accessed as DOM elements or
@@ -16,6 +28,11 @@ and "flot-overlay" to prevent accidental clashes (issue 540).
 
 
 Changes:
+
+- Support for time series moved to plugin (patch by Mark Cote).
+
+- Display time series in different time zones (patch by Knut Forkalsrud,
+  issue 141).
 
 - Canvas text support for labels (sponsored by YCharts.com).
 
