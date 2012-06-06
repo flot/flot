@@ -249,10 +249,32 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 var range = max - min;
-                if (zr &&
-                    ((zr[0] != null && range < zr[0]) ||
-                     (zr[1] != null && range > zr[1])))
-                    return;
+                if (zr)
+                {
+                    // Note these calculations are done in point-space, not canvas-space, so the center
+                    // may not be quite right when using a nonlinear transform function. The zoomRange is defined
+                    // in point-space coordinates and from what I can tell, getting the center right for an arbitrary
+                    // transform function would require some sort of numerical method. Which is overkill for a
+                    // corner case like this.
+                    // In fact, the "center" we take is the existing view's center. This stops users at maximum zoom
+                    // being able to "crawl" along the axis in a strange way.
+                    if (zr[0] != null && range < zr[0])
+                    {
+                        // so we'll choose a new max & min whose range will equal the min possible zoomRange
+                        var center = ( opts.min + opts.max ) / 2.0;
+			min = center - ( zr[0] / 2.0 );
+			max = min + zr[0];
+			range = zr[0];
+                    }
+                    if (zr[1] != null && range > zr[1])
+                    {
+                        // so we'll choose a new max & min whose range will equal the max possible zoomRange
+                        var center = ( opts.min + opts.max ) / 2.0;
+			min = center - ( zr[1] / 2.0 );
+			max = min + zr[1];
+			range = zr[1];
+                    }
+                }
 
                 // now also check against panRange limits if we have any
                 var pr = opts.panRange;
