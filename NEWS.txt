@@ -29,6 +29,8 @@ and "flot-overlay" to prevent accidental clashes (issue 540).
 
 Changes:
 
+- Fixed display of year ticks (patch by Mark Cote, issue 195).
+
 - Support for time series moved to plugin (patch by Mark Cote).
 
 - Display time series in different time zones (patch by Knut Forkalsrud,
