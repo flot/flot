@@ -163,18 +163,28 @@ for details.
                         
                         // special-case the possibility of several years
                         if (unit == "year") {
-                            var magn = Math.pow(10, Math.floor(Math.log(axis.delta / timeUnitSize.year) / Math.LN10));
-                            var norm = (axis.delta / timeUnitSize.year) / magn;
-                            if (norm < 1.5)
-                                size = 1;
-                            else if (norm < 3)
-                                size = 2;
-                            else if (norm < 7.5)
-                                size = 5;
-                            else
-                                size = 10;
+                            // if given a minTickSize in years, just use it,
+                            // ensuring that it's an integer
+                            if (opts.minTickSize != null && opts.minTickSize[1] == "year") {
+                                size = Math.floor(opts.minTickSize[0]);
+                            } else {
+                                var magn = Math.pow(10, Math.floor(Math.log(axis.delta / timeUnitSize.year) / Math.LN10));
+                                var norm = (axis.delta / timeUnitSize.year) / magn;
+                                if (norm < 1.5)
+                                    size = 1;
+                                else if (norm < 3)
+                                    size = 2;
+                                else if (norm < 7.5)
+                                    size = 5;
+                                else
+                                    size = 10;
                             
-                            size *= magn;
+                                size *= magn;
+                            }
+
+                            // minimum size for years is 1
+                            if (size < 1)
+                                size = 1;
                         }
 
                         axis.tickSize = opts.tickSize || [size, unit];

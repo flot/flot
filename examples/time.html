@@ -22,6 +22,7 @@
 
     <p>Zoom to: <button id="whole">Whole period</button>
       <button id="nineties">1990-2000</button>
+      <button id="latenineties">1996-2000</button>
       <button id="ninetynine">1999</button></p>
 
     <p>The timestamps must be specified as Javascript timestamps, as
@@ -50,6 +51,17 @@ $(function () {
             xaxis: {
                 mode: "time",
                 min: (new Date(1990, 1, 1)).getTime(),
+                max: (new Date(2000, 1, 1)).getTime()
+            }
+        });
+    });
+
+    $("#latenineties").click(function () {
+        $.plot($("#placeholder"), [d], {
+            xaxis: {
+                mode: "time",
+                minTickSize: [1, "year"],
+                min: (new Date(1996, 1, 1)).getTime(),
                 max: (new Date(2000, 1, 1)).getTime()
             }
         });
