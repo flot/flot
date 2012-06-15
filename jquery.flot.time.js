@@ -60,7 +60,6 @@ for details.
                 case 'Y': c = "" + d.getFullYear(); break;
                 case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
                 case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
-                case 'u': c = "" + (d.getDay() + 1); break;
                 case 'w': c = "" + d.getDay(); break;
                 }
                 r.push(c);
