@@ -15,6 +15,9 @@ for details.
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.
     function formatDate(d, fmt, monthNames, dayNames) {
+        if (typeof d.strftime == "function") {
+            return d.strftime(fmt);
+        }
         var leftPad = function(n, pad) {
             n = "" + n;
             pad = "" + (pad == null ? "0" : pad);
@@ -82,11 +85,14 @@ for details.
                                 targetMethod) {
             sourceObj[sourceMethod] = function() {
                 return targetObj[targetMethod].apply(targetObj, arguments);
-            }
+            };
         };
         var utc = {
             date: d
         };
+        // support strftime, if found
+        if (d.strftime != undefined)
+            addProxyMethod(utc, "strftime", d, "strftime");
         addProxyMethod(utc, "getTime", d, "getTime");
         addProxyMethod(utc, "setTime", d, "setTime");
         var props = [ "Date", "Day", "FullYear", "Hours", "Milliseconds", "Minutes", "Month", "Seconds" ];
