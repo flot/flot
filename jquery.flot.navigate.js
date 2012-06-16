@@ -352,6 +352,81 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 plot.getPlaceholder().trigger("plotpan", [ plot ]);
         }
 
+        plot.getRanges = function () {
+            var r = {};
+            $.each(plot.getAxes(), function (name, axis) {
+                if (axis.used) {
+                    r[name] = { from: axis.options.min, to: axis.options.max };
+                }
+            });
+            return r;
+        }
+
+        // function taken from selection plugin, in turn
+        // taken from markings support in Flot and then modified
+        function extractRange(ranges, coord) {
+            var axis, from, to, key, axes = plot.getAxes(), found_axis = false;
+
+            for (var k in axes) {
+                axis = axes[k];
+                if (axis.direction == coord) {
+                    key = coord + axis.n + "axis";
+                    if (!ranges[key] && axis.n == 1)
+                        key = coord + "axis"; // support x1axis as xaxis
+                    if (ranges[key]) {
+                        from = ranges[key].from;
+                        to = ranges[key].to;
+                        found_axis = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found_axis)
+                return null;
+
+            // auto-reverse as an added bonus
+            if (from != null && to != null && from > to) {
+                var tmp = from;
+                from = to;
+                to = tmp;
+            }
+
+            return { from: from, to: to, axis: axis };
+        }
+
+        plot.setRanges = function (ranges , preventEvent) {
+            var axis, o = plot.getOptions();
+
+            var x_range = extractRange(ranges, "x"),
+                y_range = extractRange(ranges, "y");
+
+            if ( (x_range === null ||
+                    ( x_range.axis.options.min === x_range.from && x_range.axis.options.max === x_range.to ) ) &&
+                (y_range === null ||
+                    ( y_range.axis.options.min === y_range.from && y_range.axis.options.max === y_range.to ) ) )
+                // there's nothing to change
+                return;
+
+            if (x_range !== null)
+                setMinMax ( x_range.axis, x_range.from, x_range.to,
+                    x_range.axis.options.min == x_range.from ?
+                    ALIGN_MIN : ( x_range.axis.options.max === x_range.to ? ALIGN_MAX : ALIGN_CENTER ) );
+
+            if (y_range !== null)
+                setMinMax ( y_range.axis, y_range.from, y_range.to,
+                    y_range.axis.options.min == y_range.from ?
+                    ALIGN_MIN : ( y_range.axis.options.max === y_range.to ? ALIGN_MAX : ALIGN_CENTER ) );
+
+            if ( ! preventEvent )
+                // argument is ranges object unlike other events here as we're trying to echo other plugins'
+                // behaviour when changing via ranges
+                plot.getPlaceholder().trigger ( "plotrangesset", [ plot.getRanges () ] );
+
+            plot.setupGrid();
+            plot.draw();
+        }
+
         function shutdown(plot, eventHolder) {
             eventHolder.unbind(plot.getOptions().zoom.trigger, onZoomClick);
             eventHolder.unbind("mousewheel", onMouseWheel);
