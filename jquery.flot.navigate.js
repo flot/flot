@@ -125,6 +125,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
     };
 
+    // the various ways we can sanitize a restriction problem
+    var ALIGN_MIN = 1 , ALIGN_MAX = 2 , ALIGN_CENTER = 3;
+
     function init(plot) {
         function onZoomClick(e, zoomOut) {
             var c = plot.offset();
@@ -195,6 +198,72 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
         }
 
+        function setMinMax ( axis , min , max , sanitize_alignment ) {
+            if ( ! sanitize_alignment )
+                sanitize_alignment = ALIGN_CENTER;
+
+            var opts = axis.options ,
+                zr = opts.zoomRange;
+
+            if (min > max) {
+                // make sure min < max
+                var tmp = min;
+                min = max;
+                max = tmp;
+            }
+
+            var range = max - min;
+            if (zr) {
+                // Note these calculations are done in point-space, not canvas-space, so the center
+                // may not be quite right when using a nonlinear transform function. The zoomRange is defined
+                // in point-space coordinates and from what I can tell, getting the center right for an arbitrary
+                // transform function would require some sort of numerical method. Which is overkill for a
+                // corner case like this.
+                // In fact, the "center" we take is the existing view's center. This stops users at maximum zoom
+                // being able to "crawl" along the axis in a strange way.
+                var center_proportion = sanitize_alignment === ALIGN_MIN ? 0.0 : sanitize_alignment === ALIGN_MAX ? 1.0 : 0.5;
+
+                if (zr[0] != null && range < zr[0])
+                {
+                    // so we'll choose a new max & min whose range will equal the min possible zoomRange
+                    min = opts.min + (( opts.max - opts.min ) - zr[0]) * center_proportion;
+                    max = min + zr[0];
+                    range = zr[0];
+                }
+                if (zr[1] != null && range > zr[1])
+                {
+                    // so we'll choose a new max & min whose range will equal the max possible zoomRange
+                    min = opts.min + (( opts.max - opts.min ) - zr[1]) * center_proportion;
+                    max = min + zr[1];
+                    range = zr[1];
+                }
+            }
+
+            // now also check against panRange limits if we have any
+            var pr = opts.panRange;
+            var pr_min_restricted = false;
+            if (pr) {
+                // check whether we hit the wall
+                if (pr[0] != null && pr[0] > min) {
+                    // ok, put the new viewport up against the min edge
+                    min = pr[0];
+                    max = min + range;
+                    pr_min_restricted = true;
+                }
+                
+                if (pr[1] != null && pr[1] < max) {
+                    // ok, put the new viewport up against the max edge
+                    max = pr[1];
+                    if ( ! pr_min_restricted )
+                            min = max - range;
+                    // (else min is already on its limits)
+                }
+            }
+        
+            opts.min = min;
+            opts.max = max;
+        }
+
         plot.zoomOut = function (args) {
             if (!args)
                 args = {};
@@ -241,64 +310,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     
                 min = axis.c2p(min);
                 max = axis.c2p(max);
-                if (min > max) {
-                    // make sure min < max
-                    var tmp = min;
-                    min = max;
-                    max = tmp;
-                }
-
-                var range = max - min;
-                if (zr)
-                {
-                    // Note these calculations are done in point-space, not canvas-space, so the center
-                    // may not be quite right when using a nonlinear transform function. The zoomRange is defined
-                    // in point-space coordinates and from what I can tell, getting the center right for an arbitrary
-                    // transform function would require some sort of numerical method. Which is overkill for a
-                    // corner case like this.
-                    // In fact, the "center" we take is the existing view's center. This stops users at maximum zoom
-                    // being able to "crawl" along the axis in a strange way.
-                    if (zr[0] != null && range < zr[0])
-                    {
-                        // so we'll choose a new max & min whose range will equal the min possible zoomRange
-                        var center = ( opts.min + opts.max ) / 2.0;
-			min = center - ( zr[0] / 2.0 );
-			max = min + zr[0];
-			range = zr[0];
-                    }
-                    if (zr[1] != null && range > zr[1])
-                    {
-                        // so we'll choose a new max & min whose range will equal the max possible zoomRange
-                        var center = ( opts.min + opts.max ) / 2.0;
-			min = center - ( zr[1] / 2.0 );
-			max = min + zr[1];
-			range = zr[1];
-                    }
-                }
-
-                // now also check against panRange limits if we have any
-                var pr = opts.panRange;
-                var pr_min_restricted = false;
-                if (pr) {
-                    // check whether we hit the wall
-                    if (pr[0] != null && pr[0] > min) {
-                        // ok, put the new viewport up against the min edge
-                        min = pr[0];
-                        max = min + range;
-			pr_min_restricted = true;
-                    }
-                    
-                    if (pr[1] != null && pr[1] < max) {
-                        // ok, put the new viewport up against the max edge
-                        max = pr[1];
-			if ( ! pr_min_restricted )
-                        	min = max - range;
-			// (else min is already on its limits)
-                    }
-                }
-            
-                opts.min = min;
-                opts.max = max;
+                
+                setMinMax ( axis , min , max );
             });
             
             plot.setupGrid();
@@ -326,27 +339,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 min = axis.c2p(axis.p2c(axis.min) + d),
                 max = axis.c2p(axis.p2c(axis.max) + d);
 
-                var pr = opts.panRange;
-                if (pr === false) // no panning on this axis
+                if (opts.panRange === false) // no panning on this axis
                     return;
                 
-                if (pr) {
-                    // check whether we hit the wall
-                    if (pr[0] != null && pr[0] > min) {
-                        d = pr[0] - min;
-                        min += d;
-                        max += d;
-                    }
-                    
-                    if (pr[1] != null && pr[1] < max) {
-                        d = pr[1] - max;
-                        min += d;
-                        max += d;
-                    }
-                }
-                
-                opts.min = min;
-                opts.max = max;
+                setMinMax ( axis , min , max );
             });
             
             plot.setupGrid();
