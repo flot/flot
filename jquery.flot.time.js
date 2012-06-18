@@ -12,51 +12,59 @@ for details.
         return base * Math.floor(n / base);
     }
 
-    // returns a string with the date d formatted according to fmt
-    function formatDate(d, fmt, monthNames) {
-        var leftPad = function(n) {
+    // Returns a string with the date d formatted according to fmt.
+    // A subset of the Open Group's strftime format is supported.
+    function formatDate(d, fmt, monthNames, dayNames) {
+        if (typeof d.strftime == "function") {
+            return d.strftime(fmt);
+        }
+        var leftPad = function(n, pad) {
             n = "" + n;
-            return n.length == 1 ? "0" + n : n;
+            pad = "" + (pad == null ? "0" : pad);
+            return n.length == 1 ? pad + n : n;
         };
         
         var r = [];
-        var escape = false, padNext = false;
+        var escape = false;
         var hours = d.getHours();
         var isAM = hours < 12;
         if (monthNames == null)
             monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        if (dayNames == null)
+            dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-        if (fmt.search(/%p|%P/) != -1) {
-            if (hours > 12) {
-                hours = hours - 12;
-            } else if (hours == 0) {
-                hours = 12;
-            }
+        var hours12;
+        if (hours > 12) {
+            hours12 = hours - 12;
+        } else if (hours == 0) {
+            hours12 = 12;
+        } else {
+            hours12 = hours;
         }
+
         for (var i = 0; i < fmt.length; ++i) {
             var c = fmt.charAt(i);
             
             if (escape) {
                 switch (c) {
-                case 'h': c = "" + hours; break;
+                case 'a': c = "" + dayNames[d.getDay()]; break;
+                case 'b': c = "" + monthNames[d.getMonth()]; break;
+                case 'd': c = leftPad(d.getDate()); break;
+                case 'e': c = leftPad(d.getDate(), " "); break;
                 case 'H': c = leftPad(hours); break;
+                case 'I': c = leftPad(hours12); break;
+                case 'l': c = leftPad(hours12, " "); break;
+                case 'm': c = leftPad(d.getMonth() + 1); break;
                 case 'M': c = leftPad(d.getMinutes()); break;
                 case 'S': c = leftPad(d.getSeconds()); break;
-                case 'd': c = "" + d.getDate(); break;
-                case 'm': c = "" + (d.getMonth() + 1); break;
-                case 'y': c = "" + d.getFullYear(); break;
-                case 'b': c = "" + monthNames[d.getMonth()]; break;
+                case 'y': c = leftPad(d.getFullYear() % 100); break;
+                case 'Y': c = "" + d.getFullYear(); break;
                 case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
                 case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
-                case '0': c = ""; padNext = true; break;
-                }
-                if (c && padNext) {
-                    c = leftPad(c);
-                    padNext = false;
+                case 'w': c = "" + d.getDay(); break;
                 }
                 r.push(c);
-                if (!padNext)
-                    escape = false;
+                escape = false;
             }
             else {
                 if (c == "%")
@@ -77,11 +85,14 @@ for details.
                                 targetMethod) {
             sourceObj[sourceMethod] = function() {
                 return targetObj[targetMethod].apply(targetObj, arguments);
-            }
+            };
         };
         var utc = {
             date: d
         };
+        // support strftime, if found
+        if (d.strftime != undefined)
+            addProxyMethod(utc, "strftime", d, "strftime");
         addProxyMethod(utc, "getTime", d, "getTime");
         addProxyMethod(utc, "setTime", d, "setTime");
         var props = [ "Date", "Day", "FullYear", "Hours", "Milliseconds", "Minutes", "Month", "Seconds" ];
@@ -254,19 +265,20 @@ for details.
 
                         // first check global format
                         if (opts.timeformat != null)
-                            return formatDate(d, opts.timeformat, opts.monthNames);
+                            return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames);
                         
                         var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
                         var span = axis.max - axis.min;
                         var suffix = (opts.twelveHourClock) ? " %p" : "";
+                        var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
                         
                         if (t < timeUnitSize.minute)
-                            fmt = "%h:%M:%S" + suffix;
+                            fmt = hourCode + ":%M:%S" + suffix;
                         else if (t < timeUnitSize.day) {
                             if (span < 2 * timeUnitSize.day)
-                                fmt = "%h:%M" + suffix;
+                                fmt = hourCode + ":%M" + suffix;
                             else
-                                fmt = "%b %d %h:%M" + suffix;
+                                fmt = "%b %d " + hourCode + ":%M" + suffix;
                         }
                         else if (t < timeUnitSize.month)
                             fmt = "%b %d";
@@ -274,12 +286,12 @@ for details.
                             if (span < timeUnitSize.year)
                                 fmt = "%b";
                             else
-                                fmt = "%b %y";
+                                fmt = "%b %Y";
                         }
                         else
-                            fmt = "%y";
+                            fmt = "%Y";
                         
-                        var rt = formatDate(d, fmt, opts.monthNames);
+                        var rt = formatDate(d, fmt, opts.monthNames, opts.dayNames);
                         return rt;
                     };
                 }
