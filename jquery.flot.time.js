@@ -53,6 +53,7 @@ for details.
                 case 'e': c = leftPad(d.getDate(), " "); break;
                 case 'H': c = leftPad(hours); break;
                 case 'I': c = leftPad(hours12); break;
+                case 'l': c = leftPad(hours12, " "); break;
                 case 'm': c = leftPad(d.getMonth() + 1); break;
                 case 'M': c = leftPad(d.getMinutes()); break;
                 case 'S': c = leftPad(d.getSeconds()); break;
