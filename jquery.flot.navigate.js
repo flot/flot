@@ -327,6 +327,7 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
             
             plot.setupGrid();
             plot.draw();
+            plot.triggerRedrawOverlay();
             
             if (!args.preventEvent)
                 plot.getPlaceholder().trigger("plotzoom", [ plot ]);
@@ -358,6 +359,7 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
             
             plot.setupGrid();
             plot.draw();
+            plot.triggerRedrawOverlay();
             
             if (!args.preventEvent)
                 plot.getPlaceholder().trigger("plotpan", [ plot ]);
@@ -436,6 +438,7 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
 
             plot.setupGrid();
             plot.draw();
+            plot.triggerRedrawOverlay();
         }
 
         function shutdown(plot, eventHolder) {
