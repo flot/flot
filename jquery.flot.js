@@ -103,7 +103,9 @@
                         lineWidth: 2, // in pixels
                         fill: false,
                         fillColor: null,
-                        steps: false
+                        steps: false,
+                        setupDrawContext: null,
+                        setupDrawFillContext: null
                     },
                     bars: {
                         show: false,
@@ -1877,11 +1879,24 @@
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
+                // push context on to the stack as we don't know what setupDrawFillContext
+                // will do to it (if anything)
+                ctx.save();
+                if ($.isFunction(series.lines.setupDrawFillContext))
+                    series.lines.setupDrawFillContext(series, ctx);
                 plotLineArea(series.datapoints, series.xaxis, series.yaxis);
+                ctx.restore();
             }
 
-            if (lw > 0)
+            if (lw > 0) {
+                // push context on to the stack as we don't know what setupDrawContext
+                // will do to it (if anything)
+                ctx.save();
+                if ($.isFunction(series.lines.setupDrawContext))
+                    series.lines.setupDrawContext(series, ctx);
                 plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
+                ctx.restore();
+            }
             ctx.restore();
         }
 
