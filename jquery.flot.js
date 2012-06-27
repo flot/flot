@@ -1883,7 +1883,7 @@
                 // will do to it (if anything)
                 ctx.save();
                 if ($.isFunction(series.lines.setupDrawFillContext))
-                    series.lines.setupDrawFillContext(series, ctx);
+                    series.lines.setupDrawFillContext(plot, series, ctx);
                 plotLineArea(series.datapoints, series.xaxis, series.yaxis);
                 ctx.restore();
             }
@@ -1893,7 +1893,7 @@
                 // will do to it (if anything)
                 ctx.save();
                 if ($.isFunction(series.lines.setupDrawContext))
-                    series.lines.setupDrawContext(series, ctx);
+                    series.lines.setupDrawContext(plot, series, ctx);
                 plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
                 ctx.restore();
             }
