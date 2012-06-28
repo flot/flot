@@ -237,14 +237,14 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
                 if (zr[0] != null && range < zr[0])
                 {
                     // so we'll choose a new max & min whose range will equal the min possible zoomRange
-                    min = opts.min + (( opts.max - opts.min ) - zr[0]) * center_proportion;
+                    min = axis.min + (( axis.max - axis.min ) - zr[0]) * center_proportion;
                     max = min + zr[0];
                     range = zr[0];
                 }
                 if (zr[1] != null && range > zr[1])
                 {
                     // so we'll choose a new max & min whose range will equal the max possible zoomRange
-                    min = opts.min + (( opts.max - opts.min ) - zr[1]) * center_proportion;
+                    min = axis.min + (( axis.max - axis.min ) - zr[1]) * center_proportion;
                     max = min + zr[1];
                     range = zr[1];
                 }
