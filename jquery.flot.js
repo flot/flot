@@ -2413,7 +2413,8 @@
             
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
-            octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
+            var color = series.highlightColor || series.color;
+            octx.strokeStyle = $.color.parse(color).scale('a', 0.5).toString();
             var radius = 1.5 * pointRadius,
                 x = axisx.p2c(x),
                 y = axisy.p2c(y);
@@ -2429,8 +2430,9 @@
 
         function drawBarHighlight(series, point) {
             octx.lineWidth = series.bars.lineWidth;
-            octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
-            var fillStyle = $.color.parse(series.color).scale('a', 0.5).toString();
+            var color = series.highlightColor || series.color;
+            octx.strokeStyle = $.color.parse(color).toString();
+            var fillStyle = $.color.parse(color).toString();
             var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
             drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                     0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
