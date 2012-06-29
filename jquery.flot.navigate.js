@@ -369,7 +369,7 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
             var r = {};
             $.each(plot.getAxes(), function (name, axis) {
                 if (axis.used) {
-                    r[name] = { from: axis.options.min, to: axis.options.max };
+                    r[name] = { from: axis.options.min != null ? axis.options.min : axis.min, to: axis.options.max != null ? axis.options.max : axis.max };
                 }
             });
             return r;
