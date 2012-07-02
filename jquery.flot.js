@@ -70,6 +70,7 @@
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
+                    labelAlign: "center", // or "left" or "right"
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
                     tickLength: null, // size in pixels of ticks, or "full" for whole line
                     alignTicksWithAxis: null, // axis number or null for no sync
@@ -84,6 +85,7 @@
                 },
                 yaxis: {
                     autoscaleMargin: 0.02,
+                    labelAlign: "center", // or "top" or "bottom"
                     position: "left" // or "right"
                 },
                 xaxes: [],
@@ -995,11 +997,19 @@
             // now that all axis boxes have been placed in one
             // dimension, we can set the remaining dimension coordinates
             if (axis.direction == "x") {
-                axis.box.left = plotOffset.left - axis.labelWidth / 2;
+                axis.box.left = plotOffset.left;
+                if (axis.options.labelAlign == "center")
+                    axis.box.left -= axis.labelWidth / 2;
+                else if (axis.options.labelAlign == "right")
+                    axis.box.left -= axis.labelWidth;
                 axis.box.width = canvasWidth - plotOffset.left - plotOffset.right + axis.labelWidth;
             }
             else {
-                axis.box.top = plotOffset.top - axis.labelHeight / 2;
+                axis.box.top = plotOffset.top;
+                if (axis.options.labelAlign == "center")
+                    axis.box.top -= axis.labelHeight / 2;
+                else if (axis.options.labelAlign == "bottom")
+                    axis.box.top -= axis.labelHeight;
                 axis.box.height = canvasHeight - plotOffset.bottom - plotOffset.top + axis.labelHeight;
             }
         }
@@ -1009,7 +1019,7 @@
             // inside the canvas and isn't clipped off
             
             var minMargin = options.grid.minBorderMargin,
-                margins = { x: 0, y: 0 }, i, axis;
+                margins = { left: 0, right: 0, top: 0, bottom: 0 }, i, axis;
 
             // check stuff from the plot (FIXME: this should just read
             // a value from the series, otherwise it's impossible to
@@ -1020,21 +1030,32 @@
                     minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
             }
 
-            margins.x = margins.y = Math.ceil(minMargin);
+            margins.left = margins.right = margins.top = margins.bottom = Math.ceil(minMargin);
             
             // check axis labels, note we don't check the actual
             // labels but instead use the overall width/height to not
             // jump as much around with replots
             $.each(allAxes(), function (_, axis) {
-                var dir = axis.direction;
-                if (axis.reserveSpace)
-                    margins[dir] = Math.ceil(Math.max(margins[dir], (dir == "x" ? axis.labelWidth : axis.labelHeight) / 2));
+                if (axis.reserveSpace) {
+                    if (axis.direction == "x") {
+                        if (axis.options.labelAlign != "left")
+                            margins.left = Math.ceil(Math.max(margins.left, axis.options.labelAlign == "right" ? axis.labelWidth : axis.labelWidth / 2));
+                        if (axis.options.labelAlign != "right")
+                            margins.right = Math.ceil(Math.max(margins.right, axis.options.labelAlign == "left" ? axis.labelWidth : axis.labelWidth / 2));
+                    }
+                    else {
+                        if (axis.options.labelAlign != "top")
+                            margins.top = Math.ceil(Math.max(margins.top, axis.options.labelAlign == "bottom" ? axis.labelHeight : axis.labelHeight / 2));
+                        if (axis.options.labelAlign != "bottom")
+                            margins.bottom = Math.ceil(Math.max(margins.bottom, axis.options.labelAlign == "top" ? axis.labelHeight : axis.labelHeight / 2));
+                    }
+                }
             });
 
-            plotOffset.left = Math.max(margins.x, plotOffset.left);
-            plotOffset.right = Math.max(margins.x, plotOffset.right);
-            plotOffset.top = Math.max(margins.y, plotOffset.top);
-            plotOffset.bottom = Math.max(margins.y, plotOffset.bottom);
+            plotOffset.left = Math.max(margins.left, plotOffset.left);
+            plotOffset.right = Math.max(margins.right, plotOffset.right);
+            plotOffset.top = Math.max(margins.top, plotOffset.top);
+            plotOffset.bottom = Math.max(margins.bottom, plotOffset.bottom);
         }
         
         function setupGrid() {
@@ -1585,14 +1606,26 @@
                         line = tick.lines[k];
                         
                         if (axis.direction == "x") {
-                            x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
+                            x = plotOffset.left + axis.p2c(tick.v);
+
+                            if (axis.options.labelAlign == "center")
+                                x -= line.width/2;
+                            else if (axis.options.labelAlign == "right")
+                                x -= line.width;
+
                             if (axis.position == "bottom")
                                 y = box.top + box.padding;
                             else
                                 y = box.top + box.height - box.padding - tick.height;
                         }
                         else {
-                            y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
+                            y = plotOffset.top + axis.p2c(tick.v);
+
+                            if (axis.options.labelAlign == "center")
+                                y -= tick.height/2;
+                            else if (axis.options.labelAlign == "bottom")
+                                y -= tick.height;
+
                             if (axis.position == "left")
                                 x = box.left + box.width - box.padding - line.width;
                             else
