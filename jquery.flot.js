@@ -146,6 +146,7 @@
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
+        canvasBackingScale,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
         canvasWidth = 0, canvasHeight = 0,
@@ -707,11 +708,25 @@
             });
         }
 
+        // Retina display support
+        function backingScale(cctx) {
+			if(window.devicePixelRatio > 1 && (cctx.webkitBackingStorePixelRatio === undefined || cctx.webkitBackingStorePixelRatio < 2)) {
+				return window.devicePixelRatio;
+			}
+			return 1;
+        }
+        
         function makeCanvas(skipPositioning, cls) {
             var c = document.createElement('canvas');
             c.className = cls;
-            c.width = canvasWidth;
-            c.height = canvasHeight;
+            
+            var cctx = c.getContext("2d");            
+            canvasBackingScale = backingScale(cctx); // Retina display support
+            
+            c.width = canvasBackingScale*canvasWidth;
+            c.height = canvasBackingScale*canvasHeight;
+            c.style.width = canvasWidth + "px";
+            c.style.height = canvasHeight + "px";
                     
             if (!skipPositioning)
                 $(c).css({ position: 'absolute', left: 0, top: 0 });
@@ -722,7 +737,10 @@
                 c = window.G_vmlCanvasManager.initElement(c);
 
             // used for resetting in case we get replotted
-            c.getContext("2d").save();
+            cctx.save();
+            
+            // Retina display support
+            cctx.scale(canvasBackingScale, canvasBackingScale);
             
             return c;
         }
@@ -736,21 +754,31 @@
         }
 
         function resizeCanvas(c) {
+        
+        	var cctx = c.getContext("2d");            
+            canvasBackingScale = backingScale(cctx); // Retina display support
+            
             // resizing should reset the state (excanvas seems to be
             // buggy though)
-            if (c.width != canvasWidth)
-                c.width = canvasWidth;
+            if (c.style.width != canvasWidth) {
+                c.width = canvasBackingScale*canvasWidth;
+                c.style.width = canvasWidth + "px";
+            }
 
-            if (c.height != canvasHeight)
-                c.height = canvasHeight;
+            if (c.style.height != canvasHeight) {
+                c.height = canvasBackingScale*canvasHeight;
+                c.style.height = canvasHeight + "px";
+            }
 
             // so try to get back to the initial state (even if it's
             // gone now, this should be safe according to the spec)
-            var cctx = c.getContext("2d");
             cctx.restore();
 
             // and save again
             cctx.save();
+            
+             // Retina display support
+            cctx.scale(canvasBackingScale, canvasBackingScale);
         }
         
         function setupCanvases() {
