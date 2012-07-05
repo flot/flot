@@ -2,9 +2,9 @@ Flot Reference
 --------------
 
 Consider a call to the plot function:
-
+	```js
     var plot = $.plot(placeholder, data, options)
-
+	```
 The placeholder is a jQuery object or DOM element or jQuery expression
 that the plot will be put into. This placeholder needs to have its
 width and height set as explained in the README (go read that now if
@@ -27,18 +27,18 @@ Data Format
 -----------
 
 The data is an array of data series:
-
+	```js
     [ series1, series2, ... ]
-
+	```
 A series can either be raw data or an object with properties. The raw
 data format is an array of points:
-
+	```js
     [ [x1, y1], [x2, y2], ... ]
-
+	```
 E.g.
-
+	```js
     [ [1, 3], [2, 14.01], [3.5, 3.14] ]
-
+	```
 Note that to simplify the internal logic in Flot both the x and y
 values must be numbers (even if specifying time series, see below for
 how to do this). This is a common problem because you might retrieve
