@@ -27,18 +27,18 @@ Data Format
 -----------
 
 The data is an array of data series:
-	```js
-    [ series1, series2, ... ]
-	```
+```js
+[ series1, series2, ... ]
+```
 A series can either be raw data or an object with properties. The raw
 data format is an array of points:
-	```js
+```js
     [ [x1, y1], [x2, y2], ... ]
-	```
+```
 E.g.
-	```js
+```js
     [ [1, 3], [2, 14.01], [3.5, 3.14] ]
-	```
+```
 Note that to simplify the internal logic in Flot both the x and y
 values must be numbers (even if specifying time series, see below for
 how to do this). This is a common problem because you might retrieve
@@ -57,7 +57,7 @@ can specify a third coordinate which is the bottom of the filled
 area/bar (defaults to 0).
 
 The format of a single series object is as follows:
-
+```js
     {
     color: color or number
     data: rawdata
@@ -71,15 +71,15 @@ The format of a single series object is as follows:
     hoverable: boolean
     shadowSize: number
     }
-
+```
 You don't have to specify any of them except the data, the rest are
 options that will get default values. Typically you'd only specify
 label and data, like this:
-
+```js
     {
     	label: "y = 3",
     }
-
+```
 The label is used for the legend, if you don't specify one, the series
 will not show up in the legend.
 
@@ -106,17 +106,17 @@ commmand. When you specify them for a specific data series, they will
 override the default options for the plot for that data series.
 
 Here's a complete example of a simple data specification:
-
+```js
     [ { label: "Foo", data: [ [10, 1], [17, -14], [30, 5] ] },
     	{ label: "Bar", data: [ [11, 13], [19, 11], [30, -7] ] } ]
-
+```
 
 Plot Options
 ------------
 
 All options are completely optional. They are documented individually
 below, to change them you just specify them in an object, e.g.
-
+```js
 	  var options = {
 	    series: {
 	      lines: { show: true },
@@ -125,8 +125,7 @@ below, to change them you just specify them in an object, e.g.
 	  };
 	
 	  $.plot(placeholder, data, options);
-
-
+```
 Customizing the legend
 ======================
 
