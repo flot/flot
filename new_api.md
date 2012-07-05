@@ -2,9 +2,9 @@ Flot Reference
 --------------
 
 Consider a call to the plot function:
-	```js
-    var plot = $.plot(placeholder, data, options)
-	```
+```js
+var plot = $.plot(placeholder, data, options)
+```
 The placeholder is a jQuery object or DOM element or jQuery expression
 that the plot will be put into. This placeholder needs to have its
 width and height set as explained in the README (go read that now if
