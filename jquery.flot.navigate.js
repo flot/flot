@@ -194,6 +194,21 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
         }
+
+        function processOffset(plot, options)
+        {
+            // enforce any panning/zooming restrictions for supplied min/max on init
+            $.each(plot.getAxes(), function (axisname, axis)
+            {
+                if (axis.min != null || axis.max != null)
+                    // we only want to enforce on first init - other changes
+                    // are enforced at change time
+                    return;
+
+                if (axis.used && (axis.options.zoomRange != null || axis.options.panRange != null))
+                    setMinMax(axis, axis.options.min != null ? axis.options.min : axis.datamin, axis.options.max != null ? axis.options.max : axis.datamax);
+            });
+        }
         
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
@@ -223,6 +238,12 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
                 max = tmp;
             }
 
+            // need to do this in case we're called before axis.min/max has been chosen
+            // in which case there isn't really an existing min/max to work with so we'll
+            // just use the requested one for these calculations
+            var existing_min = axis.min != null ? axis.min : min;
+            var existing_max = axis.max != null ? axis.max : max;
+
             var range = max - min;
             if (zr) {
                 // Note these calculations are done in point-space, not canvas-space, so the center
@@ -237,14 +258,14 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
                 if (zr[0] != null && range < zr[0])
                 {
                     // so we'll choose a new max & min whose range will equal the min possible zoomRange
-                    min = axis.min + (( axis.max - axis.min ) - zr[0]) * center_proportion;
+                    min = existing_min + (( existing_max - existing_min ) - zr[0]) * center_proportion;
                     max = min + zr[0];
                     range = zr[0];
                 }
                 if (zr[1] != null && range > zr[1])
                 {
                     // so we'll choose a new max & min whose range will equal the max possible zoomRange
-                    min = axis.min + (( axis.max - axis.min ) - zr[1]) * center_proportion;
+                    min = existing_min + (( existing_max - existing_min ) - zr[1]) * center_proportion;
                     max = min + zr[1];
                     range = zr[1];
                 }
@@ -451,6 +472,7 @@ arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend
                 clearTimeout(panTimeout);
         }
         
+        plot.hooks.processOffset.push(processOffset);
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
