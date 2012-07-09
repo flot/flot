@@ -2109,14 +2109,14 @@
                 return;
             
             var fragments = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+                lf = options.legend.labelFormatter, s, label, legendIndex=0;
             for (var i = 0; i < series.length; ++i) {
                 s = series[i];
                 label = s.label;
                 if (!label)
                     continue;
                 
-                if (i % options.legend.noColumns == 0) {
+                if (legendIndex % options.legend.noColumns == 0) {
                     if (rowStarted)
                         fragments.push('</tr>');
                     fragments.push('<tr>');
@@ -2129,6 +2129,7 @@
                 fragments.push(
                     '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + s.color + ';overflow:hidden"></div></div></td>' +
                     '<td class="legendLabel">' + label + '</td>');
+				legendIndex++;
             }
             if (rowStarted)
                 fragments.push('</tr>');
