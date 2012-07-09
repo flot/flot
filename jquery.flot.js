@@ -1577,7 +1577,7 @@
                 
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
-                    if (!tick.label || tick.v < axis.min || tick.v > axis.max)
+                    if (!tick.label || tick.v > axis.max)
                         continue;
 
                     var x, y, offset = 0, line;
