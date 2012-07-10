@@ -518,7 +518,7 @@
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 s.datapoints = { points: [] };
-                
+                s.extrapoints = [];
                 executeHooks(hooks.processRawData, [ s, s.data, s.datapoints ]);
             }
             
@@ -629,7 +629,7 @@
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 
-                executeHooks(hooks.processDatapoints, [ s, s.datapoints]);
+                executeHooks(hooks.processDatapoints, [ s, s.datapoints, s.extrapoints]);
             }
 
             // second pass: find datamax/datamin for auto-scaling
@@ -1885,29 +1885,40 @@
             ctx.restore();
         }
 
+	function arrayContains(array, obj) {
+	        var i = array.length;
+	        while (i--) {
+	                if (array[i] == obj) {
+		              return true;
+                        }
+	        }
+	        return false;
+        }
+
+
         function drawSeriesPoints(series) {
             function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
                 var points = datapoints.points, ps = datapoints.pointsize;
-
+		var extraPoints = series.extrapoints || [];
                 for (var i = 0; i < points.length; i += ps) {
-                    var x = points[i], y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
-                        continue;
-                    
-                    ctx.beginPath();
-                    x = axisx.p2c(x);
-                    y = axisy.p2c(y) + offset;
-                    if (symbol == "circle")
-                        ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    else
-                        symbol(ctx, x, y, radius, shadow);
-                    ctx.closePath();
-                    
-                    if (fillStyle) {
-                        ctx.fillStyle = fillStyle;
-                        ctx.fill();
-                    }
-                    ctx.stroke();
+			if (!arrayContains(extraPoints,points[i])){
+	                    var x = points[i], y = points[i + 1];
+	                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+	                        continue;
+	                    ctx.beginPath();
+	                    x = axisx.p2c(x);
+	                    y = axisy.p2c(y) + offset;
+	                    if (symbol == "circle")
+	                        ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+	                    else
+	                        symbol(ctx, x, y, radius, shadow);
+	                    ctx.closePath();
+	                    if (fillStyle) {
+	                        ctx.fillStyle = fillStyle;
+	                        ctx.fill();
+	                    }
+	                    ctx.stroke();
+	                }
                 }
             }
             
