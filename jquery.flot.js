@@ -44,7 +44,8 @@
                 colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
                 legend: {
                     show: true,
-                    noColumns: 1, // number of colums in legend table
+                    noColumns: 1, // number of columns in legend table
+                    reverse: false, // reverse the boxes in the legend container
                     labelFormatter: null, // fn: string -> string
                     labelBoxBorderColor: "#ccc", // border color for the little label boxes
                     container: null, // container (as jQuery object) to put legend in, null means default on top of graph
@@ -2111,7 +2112,8 @@
             var fragments = [], rowStarted = false,
                 lf = options.legend.labelFormatter, s, label, legendIndex=0;
             for (var i = 0; i < series.length; ++i) {
-                s = series[i];
+                var j = options.legend.reverse ? (series.length - i - 1) : i;
+                s = series[j];
                 label = s.label;
                 if (!label)
                     continue;
