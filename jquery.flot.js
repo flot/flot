@@ -1155,8 +1155,12 @@
 
         function setupTickGeneration(axis) {
             var opts = axis.options;
-                
+
             // estimate number of ticks
+
+            if (opts.ticks == "number" && opts.tickSize == "number")
+                throw new Error("Did you mean to set both ticks and ticksize? Specifing both values may be redundant.  ticksize setting is preferable.");
+
             var noTicks;
             if (typeof opts.ticks == "number" && opts.ticks > 0)
                 noTicks = opts.ticks;
