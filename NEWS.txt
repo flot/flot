@@ -69,6 +69,9 @@ Changes:
 - In addition to "left" and "center", bars now recognize "right" as an
   alignment option. (patch by Michael Mayer, issue 520)
 
+- Switched from toFixed to a much faster default tickFormatter (patch by
+  Clemens Stolle)
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
