@@ -1196,9 +1196,16 @@
                     size = 10;
 
                 size *= magn;
-                
+
                 if (opts.minTickSize != null && size < opts.minTickSize)
                     size = opts.minTickSize;
+
+                //add a checker to determine if we really have a decimeal or integer.  if axis.delta = int, dec =0
+                var integerChecker = axis.delta - Math.floor(axis.delta);
+
+                if (integerChecker < 0.00000001 || integerChecker > 0.999999999)
+	            dec = 0;
+                    //axis.delta is within floating point error of an integer
 
                 axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
                 axis.tickSize = opts.tickSize || size;
