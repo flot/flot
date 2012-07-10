@@ -1219,7 +1219,8 @@
                 };
 
                 axis.tickFormatter = function (v, axis) {
-                    return v.toFixed(axis.tickDecimals);
+                    var factor = Math.pow(10, axis.tickDecimals);
+                    return Math.round(v * factor) / factor;
                 };
             }
 
