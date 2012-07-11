@@ -36,7 +36,7 @@ Changes:
 
 - Date/time formatting follows proper subset of strftime specifiers,
   and support added for Date.prototype.strftime, if found (patch by
-  Mark Cote, issue 558).
+  Mark Cote, issues 419 and 558).
 
 - Fixed display of year ticks (patch by Mark Cote, issue 195).
 
@@ -69,8 +69,11 @@ Changes:
 - In addition to "left" and "center", bars now recognize "right" as an
   alignment option. (patch by Michael Mayer, issue 520)
 
-- Switched from toFixed to a much faster default tickFormatter (patch by
+- Switched from toFixed to a much faster default tickFormatter. (patch by
   Clemens Stolle)
+
+- Added to a more helpful error when using a time-mode axis without
+  including the flot.time plugin. (patch by Yael Elmatad)
 
 Bug fixes
 
@@ -104,6 +107,9 @@ Bug fixes
 
 - Updated the navigate plugin's inline copy of jquery.mousewheel to fix
   Webkit zoom problems (reported by Hau Nguyen, issue 685).
+
+- Axis labels no longer appear as decimals rather than integers in
+  certain cases. (patch by Clemens Stolle, issue 541)
 
 
 Flot 0.7
