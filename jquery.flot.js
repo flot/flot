@@ -1223,6 +1223,9 @@
                     return "" + Math.round(v * factor) / factor;
                 };
             }
+            else if (opts.mode == "time" && axis.tickGenerator == undefined) {
+                throw new Error("Time mode requires the flot.time plugin.");
+            }
 
             if ($.isFunction(opts.tickFormatter))
                 axis.tickFormatter = function (v, axis) { return "" + opts.tickFormatter(v, axis); };
