@@ -105,7 +105,9 @@
                         fillColor: null,
                         steps: false,
                         setupDrawContext: null,
-                        setupDrawFillContext: null
+                        finishDrawContext: null,
+                        setupDrawFillContext: null,
+                        finishDrawFillContext: null
                     },
                     bars: {
                         show: false,
@@ -1879,22 +1881,26 @@
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                // push context on to the stack as we don't know what setupDrawFillContext
+                // push context on to the stack as we don't know what setupDrawFillContext & finishDrawFillContext
                 // will do to it (if anything)
                 ctx.save();
                 if ($.isFunction(series.lines.setupDrawFillContext))
                     series.lines.setupDrawFillContext(plot, series, ctx);
                 plotLineArea(series.datapoints, series.xaxis, series.yaxis);
+                if ($.isFunction(series.lines.finishDrawFillContext))
+                    series.lines.finishDrawFillContext(plot, series, ctx);
                 ctx.restore();
             }
 
             if (lw > 0) {
-                // push context on to the stack as we don't know what setupDrawContext
+                // push context on to the stack as we don't know what setupDrawContext & finishDrawContext
                 // will do to it (if anything)
                 ctx.save();
                 if ($.isFunction(series.lines.setupDrawContext))
                     series.lines.setupDrawContext(plot, series, ctx);
                 plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
+                if ($.isFunction(series.lines.finishDrawContext))
+                    series.lines.finishDrawContext(plot, series, ctx);
                 ctx.restore();
             }
             ctx.restore();
