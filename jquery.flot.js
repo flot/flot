@@ -107,7 +107,7 @@
                     },
                     bars: {
                         show: false,
-                        lineWidth: 1, // in pixels
+                        lineWidth: 2, // in pixels
                         barWidth: 1, // in units of the x axis
                         fill: true,
                         fillColor: null,
