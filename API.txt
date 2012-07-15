@@ -451,7 +451,7 @@ You can see a timestamp like this
 
   alert((new Date()).getTime())
 
-There are different schools of thought when it comes to diplay of
+There are different schools of thought when it comes to display of
 timestamps. Many will want the timestamps to be displayed according to
 a certain time zone, usually the time zone in which the data has been
 produced. Some want the localized experience, where the timestamps are
