@@ -1168,10 +1168,18 @@
 
             axis.delta = (axis.max - axis.min) / noTicks;
 
-            // special modes are handled by plug-ins, e.g. "time". The default
-            // is base-10 numbers.
-            if (!opts.mode) {
-                // pretty rounding of base-10 numbers
+            // Time mode was moved to a plug-in in 0.8, but since so many people use this
+            // we'll add an especially friendly make sure they remembered to include it.
+
+            if (opts.mode == "time" && !axis.tickGenerator) {
+                throw new Error("Time mode requires the flot.time plugin.");
+            }
+
+            // Flot supports base-10 axes; any other mode else is handled by a plug-in,
+            // like flot.time.js.
+
+            if (!axis.tickGenerator) {
+
                 var maxDec = opts.tickDecimals;
                 var dec = -Math.floor(Math.log(axis.delta) / Math.LN10);
                 if (maxDec != null && dec > maxDec)
@@ -1180,7 +1188,7 @@
                 var magn = Math.pow(10, -dec);
                 var norm = axis.delta / magn; // norm is between 1.0 and 10.0
                 var size;
-                
+
                 if (norm < 1.5)
                     size = 1;
                 else if (norm < 3) {
@@ -1193,11 +1201,10 @@
                 }
                 else if (norm < 7.5)
                     size = 5;
-                else
-                    size = 10;
+                else size = 10;
 
                 size *= magn;
-                
+
                 if (opts.minTickSize != null && size < opts.minTickSize)
                     size = opts.minTickSize;
 
@@ -1205,10 +1212,7 @@
                 axis.tickSize = opts.tickSize || size;
 
                 axis.tickGenerator = function (axis) {
-                    var ticks = [];
-
-                    // spew out all possible ticks
-                    var start = floorInBase(axis.min, axis.tickSize),
+                    var ticks = [], start = floorInBase(axis.min, axis.tickSize),
                         i = 0, v = Number.NaN, prev;
                     do {
                         prev = v;
@@ -1223,9 +1227,6 @@
                     var factor = Math.pow(10, axis.tickDecimals);
                     return "" + Math.round(v * factor) / factor;
                 };
-            }
-            else if (opts.mode == "time" && axis.tickGenerator == undefined) {
-                throw new Error("Time mode requires the flot.time plugin.");
             }
 
             if ($.isFunction(opts.tickFormatter))
