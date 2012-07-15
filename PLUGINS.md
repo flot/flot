@@ -5,14 +5,14 @@ All you need to do to make a new plugin is creating an init function
 and a set of options (if needed), stuffing it into an object and
 putting it in the $.plot.plugins array. For example:
 
-  function myCoolPluginInit(plot) {
-    plot.coolstring = "Hello!";
-  };
+    function myCoolPluginInit(plot) {
+      plot.coolstring = "Hello!";
+    };
 
-  $.plot.plugins.push({ init: myCoolPluginInit, options: { ... } });
+    $.plot.plugins.push({ init: myCoolPluginInit, options: { ... } });
 
-  // if $.plot is called, it will return a plot object with the
-  // attribute "coolstring"
+    // if $.plot is called, it will return a plot object with the
+    // attribute "coolstring"
 
 Now, given that the plugin might run in many different places, it's
 a good idea to avoid leaking names. The usual trick here is wrap the
@@ -21,10 +21,10 @@ this: (function () { inner code ... })(). To make it even more robust
 in case $ is not bound to jQuery but some other Javascript library, we
 can write it as
 
-  (function ($) {
-    // plugin definition
-    // ...
-  })(jQuery);
+    (function ($) {
+      // plugin definition
+      // ...
+    })(jQuery);
 
 There's a complete example below, but you should also check out the
 plugins bundled with Flot.
@@ -37,37 +37,37 @@ Here is a simple debug plugin which alerts each of the series in the
 plot. It has a single option that control whether it is enabled and
 how much info to output:
 
-  (function ($) {
-    function init(plot) {
-      var debugLevel = 1;
-    
-      function checkDebugEnabled(plot, options) {
-        if (options.debug) {
-          debugLevel = options.debug;
-            
-          plot.hooks.processDatapoints.push(alertSeries);
+    (function ($) {
+      function init(plot) {
+        var debugLevel = 1;
+      
+        function checkDebugEnabled(plot, options) {
+          if (options.debug) {
+            debugLevel = options.debug;
+              
+            plot.hooks.processDatapoints.push(alertSeries);
+          }
         }
+
+        function alertSeries(plot, series, datapoints) {
+          var msg = "series " + series.label;
+          if (debugLevel > 1)
+            msg += " with " + series.data.length + " points";
+          alert(msg);
+        }
+      
+        plot.hooks.processOptions.push(checkDebugEnabled);
       }
 
-      function alertSeries(plot, series, datapoints) {
-        var msg = "series " + series.label;
-        if (debugLevel > 1)
-          msg += " with " + series.data.length + " points";
-        alert(msg);
-      }
-    
-      plot.hooks.processOptions.push(checkDebugEnabled);
-    }
-
-    var options = { debug: 0 };
-    
-    $.plot.plugins.push({
-        init: init,
-        options: options,
-        name: "simpledebug",
-        version: "0.1"
-    });
-  })(jQuery);
+      var options = { debug: 0 };
+      
+      $.plot.plugins.push({
+          init: init,
+          options: options,
+          name: "simpledebug",
+          version: "0.1"
+      });
+    })(jQuery);
 
 We also define "name" and "version". It's not used by Flot, but might
 be helpful for other plugins in resolving dependencies.
@@ -75,7 +75,7 @@ be helpful for other plugins in resolving dependencies.
 Put the above in a file named "jquery.flot.debug.js", include it in an
 HTML page and then it can be used with:
 
-  $.plot($("#placeholder"), [...], { debug: 2 });
+    $.plot($("#placeholder"), [...], { debug: 2 });
 
 This simple plugin illustrates a couple of points:
 
@@ -120,14 +120,14 @@ If the plugin needs options that are specific to each series, like the
 points or lines options in core Flot, you can put them in "series" in
 the options object, e.g.
 
-  var options = {
-    series: {
-      downsample: {
-        algorithm: null,
-        maxpoints: 1000
+    var options = {
+      series: {
+        downsample: {
+          algorithm: null,
+          maxpoints: 1000
+        }
       }
     }
-  }
 
 Then they will be copied by Flot into each series, providing default
 values in case none are specified.

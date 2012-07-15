@@ -2,7 +2,7 @@ Frequently asked questions
 --------------------------
 
 Q: How much data can Flot cope with?
-
+------------------------------------
 A: Flot will happily draw everything you send to it so the answer
 depends on the browser. The excanvas emulation used for IE (built with
 VML) makes IE by far the slowest browser so be sure to test with that
@@ -16,7 +16,7 @@ chart anyway. If you downsample server-side, you also save bandwidth.
 
 
 Q: Flot isn't working when I'm using JSON data as source!
-
+---------------------------------------------------------
 A: Actually, Flot loves JSON data, you just got the format wrong.
 Double check that you're not inputting strings instead of numbers,
 like [["0", "-2.13"], ["5", "4.3"]]. This is most common mistake, and
@@ -25,7 +25,7 @@ conversion automatically.
 
 
 Q: Can I export the graph?
-
+--------------------------
 A: You can grab the image rendered by the canvas element used by Flot
 as a PNG or JPEG (remember to set a background). Note that it won't
 include anything not drawn in the canvas (such as the legend). And it
@@ -34,7 +34,7 @@ Flashcanvas.
 
 
 Q: The bars are all tiny in time mode?
-
+--------------------------------------
 A: It's not really possible to determine the bar width automatically.
 So you have to set the width with the barWidth option which is NOT in
 pixels, but in the units of the x axis (or the y axis for horizontal
@@ -43,7 +43,7 @@ makes the bars 1 millisecond wide.
 
 
 Q: Can I use Flot with libraries like Mootools or Prototype?
-
+------------------------------------------------------------
 A: Yes, Flot supports it out of the box and it's easy! Just use jQuery
 instead of $, e.g. call jQuery.plot instead of $.plot and use
 jQuery(something) instead of $(something). As a convenience, you can
@@ -57,7 +57,7 @@ libraries") for details.
 
 
 Q: Flot doesn't work with [insert name of Javascript UI framework]!
-
+-------------------------------------------------------------------
 A: Flot is using standard HTML to make charts. If this is not working,
 it's probably because the framework you're using is doing something
 weird with the DOM or with the CSS that is interfering with Flot.
