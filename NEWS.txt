@@ -75,6 +75,9 @@ Changes:
 - Added to a more helpful error when using a time-mode axis without
   including the flot.time plugin. (patch by Yael Elmatad)
 
+- Added a legend "sorted" option to control sorting of legend entries
+  independent of their series order. (patch by Tom Cleaveland)
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
