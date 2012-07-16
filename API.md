@@ -77,6 +77,7 @@ The format of a single series object is as follows:
     clickable: boolean
     hoverable: boolean
     shadowSize: number
+    highlightColor: color or number
 }
 ```
 
@@ -680,6 +681,7 @@ series: {
     }
 
     shadowSize: number
+    highlightColor: color or number
 }
 
 colors: [ color1, color2, ... ]
@@ -760,6 +762,9 @@ ensures that all symbols have approximately the same visual weight.
 
 "shadowSize" is the default size of shadows in pixels. Set it to 0 to
 remove shadows.
+
+"highlightColor" is the default color of the translucent overlay used
+to highlight the series when the mouse hovers over it.
 
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
