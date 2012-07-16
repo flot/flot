@@ -2126,10 +2126,13 @@
             for (var i = 0; i < series.length; ++i) {
                 s = series[i];
                 if (s.label) {
-                    entries.push({
-                        label: lf ? lf(s.label, s) : s.label,
-                        color: s.color
-                    });
+                    label = lf ? lf(s.label, s) : s.label;
+                    if (label) {
+                        entries.push({
+                            label: label,
+                            color: s.color
+                        });
+                    }
                 }
             }
 
