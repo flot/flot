@@ -82,6 +82,10 @@ Changes:
   translucent overlay that identifies the dataset when the mouse hovers
   over it. (patch by Eric Wendelin and Nate Abele)
 
+- Added a plugin jquery.flot.errorbars, with an accompanying example,
+  that adds the ability to plot error bars, commonly used in many kinds
+  of statistical data visualizations. (patch by Rui Pereira)
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
