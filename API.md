@@ -1,5 +1,4 @@
-Flot Reference
-==============
+# Flot Reference #
 
 Consider a call to the plot function:
 
@@ -25,8 +24,7 @@ objects you pass in to the plot function or get out of it since
 they're not necessarily deep-copied.
 
 
-Data Format
------------
+## Data Format ##
 
 The data is an array of data series:
 
@@ -127,8 +125,7 @@ Here's a complete example of a simple data specification:
 ```
 
 
-Plot Options
-------------
+## Plot Options ##
 
 All options are completely optional. They are documented individually
 below, to change them you just specify them in an object, e.g.
@@ -145,8 +142,7 @@ $.plot(placeholder, data, options);
 ```
 
 
-Customizing the legend
-----------------------
+## Customizing the legend ##
 
 ```js
 legend: {
@@ -208,8 +204,7 @@ sorted: function(a, b) {
 ```
 
 
-Customizing the axes
---------------------
+## Customizing the axes ##
 
 ```js
 xaxis, yaxis: {
@@ -438,8 +433,7 @@ ends. The trade-off is that the forced ticks won't necessarily be at
 natural places.
 
 
-Multiple axes
--------------
+## Multiple axes ##
 
 If you need more than one x axis or y axis, you need to specify for
 each data series which axis they are to use, as described under the
@@ -474,8 +468,7 @@ use (starting from 1), or lets you specify the coordinate directly as
 x2/x3/... or x2axis/x3axis/... instead of "x" or "xaxis".
 
 
-Time series data
-----------------
+## Time series data ##
 
 Please note that it is now required to include the time plugin,
 jquery.flot.time.js, for time series support.
@@ -531,7 +524,7 @@ calendar.timegm(datetime_object.timetuple()) * 1000
 
 In .NET you can get it with something like:
 
-```aspx-cs
+```aspx
 public static int GetJavascriptTimestamp(System.DateTime input)
 {
     System.TimeSpan span = new System.TimeSpan(System.DateTime.Parse("1/1/1970").Ticks);
@@ -660,8 +653,7 @@ if axis.tickSize is [2, "day"] in the tick formatter, the ticks have
 been produced with two days in-between.
 
 
-Customizing the data series
----------------------------
+## Customizing the data series ##
 
 ```js
 series: {
@@ -781,8 +773,7 @@ If there are more data series than colors, Flot will try to generate
 extra colors by lightening and darkening colors in the theme.
 
 
-Customizing the grid
---------------------
+## Customizing the grid ##
 
 ```js
 grid: {
@@ -961,8 +952,7 @@ default is capped to 60 frames per second. You can set it to -1 to
 disable the rate limiting.
 
 
-Specifying gradients
---------------------
+## Specifying gradients ##
 
 A gradient is specified like this:
 
@@ -1004,8 +994,7 @@ Flot currently only supports vertical gradients drawn from top to
 bottom because that's what works with IE.
 
 
-Plot Methods
-------------
+## Plot Methods ##
 
 The Plot object returned from the plot function has some methods you
 can call:
@@ -1167,8 +1156,7 @@ Flot to keep track of its state, so be careful.
     setupGrid() or triggerRedrawOverlay() to see the change.
     
 
-Hooks
------
+## Hooks ##
 
 In addition to the public methods, the Plot object also has some hooks
 that can be used to modify the plotting process. You can install a
@@ -1374,8 +1362,7 @@ hooks in the plugins bundled with Flot.
     PLUGINS.txt for more info.
 
    
-Plugins
--------
+## Plugins ##
 
 Plugins extend the functionality of Flot. To use a plugin, simply
 include its Javascript file after Flot in the HTML page.
@@ -1398,7 +1385,6 @@ See the PLUGINS.txt file for details on how to write a plugin. As the
 above description hints, it's actually pretty easy.
 
 
-Version number
---------------
+## Version number ##
 
 The version number of Flot is available in ```$.plot.version```.
