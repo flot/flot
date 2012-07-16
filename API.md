@@ -2,9 +2,11 @@ Flot Reference
 ==============
 
 Consider a call to the plot function:
+
 ```js
 var plot = $.plot(placeholder, data, options)
 ```
+
 The placeholder is a jQuery object or DOM element or jQuery expression
 that the plot will be put into. This placeholder needs to have its
 width and height set as explained in the README (go read that now if
@@ -27,18 +29,24 @@ Data Format
 -----------
 
 The data is an array of data series:
+
 ```js
 [ series1, series2, ... ]
 ```
+
 A series can either be raw data or an object with properties. The raw
 data format is an array of points:
+
 ```js
 [ [x1, y1], [x2, y2], ... ]
 ```
+
 E.g.
+
 ```js
 [ [1, 3], [2, 14.01], [3.5, 3.14] ]
 ```
+
 Note that to simplify the internal logic in Flot both the x and y
 values must be numbers (even if specifying time series, see below for
 how to do this). This is a common problem because you might retrieve
@@ -57,6 +65,7 @@ can specify a third coordinate which is the bottom of the filled
 area/bar (defaults to 0).
 
 The format of a single series object is as follows:
+
 ```js
 {
     color: color or number
@@ -72,15 +81,18 @@ The format of a single series object is as follows:
     shadowSize: number
 }
 ```
+
 You don't have to specify any of them except the data, the rest are
 options that will get default values. Typically you'd only specify
 label and data, like this:
+
 ```js
 {
     label: "y = 3",
     data: [[0, 3], [10, 3]]
 }
 ```
+
 The label is used for the legend, if you don't specify one, the series
 will not show up in the legend.
 
@@ -107,6 +119,7 @@ commmand. When you specify them for a specific data series, they will
 override the default options for the plot for that data series.
 
 Here's a complete example of a simple data specification:
+
 ```js
 [ { label: "Foo", data: [ [10, 1], [17, -14], [30, 5] ] },
   { label: "Bar", data: [ [11, 13], [19, 11], [30, -7] ] }
@@ -119,6 +132,7 @@ Plot Options
 
 All options are completely optional. They are documented individually
 below, to change them you just specify them in an object, e.g.
+
 ```js
 var options = {
     series: {
@@ -133,6 +147,7 @@ $.plot(placeholder, data, options);
 
 Customizing the legend
 ----------------------
+
 ```js
 legend: {
     show: boolean
@@ -147,17 +162,20 @@ legend: {
     sorted: null/false, true, "ascending", "descending" or a comparator
 }
 ```
+
 The legend is generated as a table with the data series labels and
 small label boxes with the color of the series. If you want to format
 the labels in some way, e.g. make them to links, you can pass in a
 function for "labelFormatter". Here's an example that makes them
 clickable:
+
 ```js
 labelFormatter: function(label, series) {
     // series is the series object for the label
     return '<a href="#' + label + '">' + label + '</a>';
 }
 ```
+
 "noColumns" is the number of columns to divide the legend table into.
 "position" specifies the overall placement of the legend within the
 plot (top-right, top-left, etc.) and margin the distance to the plot
@@ -179,6 +197,7 @@ You can also provide your own comparator function that accepts two
 objects with "label" and "color" properties, and returns zero if they
 are equal, a positive value if the first is greater than the second,
 and a negative value if the first is less than the second.
+
 ```js
 sorted: function(a, b) {
     // sort alphabetically in ascending order
@@ -225,6 +244,7 @@ xaxis, yaxis: {
     alignTicksWithAxis: null or number
 }
 ```
+
 All axes have the same kind of options. The following describes how to
 configure one axis, see below for what to do if you've got more than
 one x axis or y axis.
@@ -252,6 +272,7 @@ directly with "font". The default value of null means that the font is
 read from the font style on the placeholder element (80% the size of
 that to be precise). If you set it directly with "font: { ... }", the
 format is like this:
+
 ```js
 {
     size: 11,
@@ -261,6 +282,7 @@ format is like this:
     variant: "small-caps"
 }
 ```
+
 The options "min"/"max" are the precise minimum/maximum value on the
 scale. If you don't specify either of them, a value will automatically
 be chosen based on the minimum/maximum data values. Note that Flot
@@ -283,20 +305,24 @@ suppress weekends or compress far away points with a logarithm or some
 other means. When Flot draws the plot, each value is first put through
 the transform function. Here's an example, the x axis can be turned
 into a natural logarithm axis with the following code:
+
 ```js
 xaxis: {
     transform: function (v) { return Math.log(v); },
     inverseTransform: function (v) { return Math.exp(v); }
 }
 ```
+
 Similarly, for reversing the y axis so the values appear in inverse
 order:
+
 ```js
 yaxis: {
     transform: function (v) { return -v; },
     inverseTransform: function (v) { return -v; }
 }
 ```
+
 Note that for finding extrema, Flot assumes that the transform
 function does not reorder values (it should be monotone).
 
@@ -329,13 +355,17 @@ see the next section.
 
 If you want to completely override the tick algorithm, you can specify
 an array for "ticks", either like this:
+
 ```js
 ticks: [0, 1.2, 2.4]
 ```
+
 Or like this where the labels are also customized:
+
 ```js
 ticks: [[0, "zero"], [1.2, "one mark"], [2.4, "two marks"]]
 ```
+
 You can mix the two if you like.
   
 For extra flexibility you can specify a function as the "ticks"
@@ -343,6 +373,7 @@ parameter. The function will be called with an object with the axis
 min and max and should return a ticks array. Here's a simplistic tick
 generator that spits out intervals of pi, suitable for use on the x
 axis for trigonometric functions:
+
 ```js
 function piTickGenerator(axis) {
     var res = [], i = Math.floor(axis.min / Math.PI);
@@ -354,6 +385,7 @@ function piTickGenerator(axis) {
     return res;
 }
 ```
+
 You can control how the ticks look like with "tickDecimals", the
 number of decimals to display (default is auto-detected).
 
@@ -361,16 +393,19 @@ Alternatively, for ultimate control over how ticks are formatted you can
 provide a function to "tickFormatter". The function is passed two
 parameters, the tick value and an axis object with information, and
 should return a string. The default formatter looks like this:
+
 ```js
 function formatter(val, axis) {
     return val.toFixed(axis.tickDecimals);
 }
 ```
+
 The axis object has "min" and "max" with the range of the axis,
 "tickDecimals" with the number of decimals to round the value to and
 "tickSize" with the size of the interval between ticks as calculated
 by the automatic axis scaling algorithm (or specified by you). Here's
 an example of a custom formatter:
+
 ```js
 function suffixFormatter(val, axis) {
     if (val > 1000000)
@@ -381,6 +416,7 @@ function suffixFormatter(val, axis) {
         return val.toFixed(axis.tickDecimals) + " B";
 }
 ```
+
 "labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several
 plots. "reserveSpace" means that even if an axis isn't shown, Flot
@@ -412,18 +448,22 @@ that a series should be plotted against the second y axis.
 
 To actually configure that axis, you can't use the xaxis/yaxis options
 directly - instead there are two arrays in the options:
+
 ```js
 xaxes: []
 yaxes: []
 ```
+
 Here's an example of configuring a single x axis and two y axes (we
 can leave options of the first y axis empty as the defaults are fine):
+
 ```js
 {
     xaxes: [ { position: "top" } ],
     yaxes: [ { }, { position: "right", min: 20 } ]
 }
 ```
+
 The arrays get their default values from the xaxis/yaxis settings, so
 say you want to have all y axes start at zero, you can simply specify
 yaxis: { min: 0 } instead of adding a min parameter to all the axes.
@@ -453,9 +493,11 @@ Javascript timestamp is the number of milliseconds since January 1,
 in milliseconds, so remember to multiply by 1000!
 
 You can see a timestamp like this
+
 ```js
 alert((new Date()).getTime())
 ```
+
 There are different schools of thought when it comes to diplay of
 timestamps. Many will want the timestamps to be displayed according to
 a certain time zone, usually the time zone in which the data has been
@@ -476,14 +518,19 @@ datapoint at 2002-02-20 08:00, you can generate a timestamp for eight
 o'clock UTC even if it really happened eight o'clock UTC+0200.
 
 In PHP you can get an appropriate timestamp with:
+
 ```php
 strtotime("2002-02-20 UTC") * 1000
 ```
+
 In Python you can get it with something like:
+
 ```python
 calendar.timegm(datetime_object.timetuple()) * 1000
 ```
+
 In .NET you can get it with something like:
+
 ```aspx-cs
 public static int GetJavascriptTimestamp(System.DateTime input)
 {
@@ -492,6 +539,7 @@ public static int GetJavascriptTimestamp(System.DateTime input)
     return (long)(time.Ticks / 10000);
 }
 ```
+
 Javascript also has some support for parsing date strings, so it is
 possible to generate the timestamps manually client-side.
 
@@ -523,6 +571,7 @@ Date objects.
 
 Tick generation and formatting can also be controlled separately
 through the following axis options:
+
 ```js
 minTickSize: array
 timeformat: null or format string
@@ -530,16 +579,20 @@ monthNames: null or array of size 12 of strings
 dayNames: null or array of size 7 of strings
 twelveHourClock: boolean
 ```
+
 Here "timeformat" is a format string to use. You might use it like
 this:
+
 ```js
 xaxis: {
     mode: "time"
     timeformat: "%Y/%m/%d"
 }
 ``` 
+
 This will result in tick labels like "2000/12/24". A subset of the 
 standard strftime specifiers are supported:
+
 ```js
 %a: weekday name (customizable)
 %b: month name (customizable)
@@ -556,16 +609,21 @@ standard strftime specifiers are supported:
 %P: AM/PM (uppercase version of %p)
 %w: weekday as number (0-6, 0 being Sunday)
 ```
+
 You can customize the month names with the "monthNames" option. For
 instance, for Danish you might specify:
+
 ```js
 monthNames: ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
 ```
+
 Similarly you can customize the weekday names with the "dayNames"
 option. An example in French:
+
 ```js
 dayNames: ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"]
 ```
+
 If you set "twelveHourClock" to true, the autogenerated timestamps
 will use 12 hour AM/PM timestamps instead of 24 hour. This only
 applies if you have not set "timeformat". Use the "%I" and "%p" or
@@ -580,19 +638,23 @@ more powerful date/time formatting.
 If everything else fails, you can control the formatting by specifying
 a custom tick formatter function as usual. Here's a simple example
 which will format December 24 as 24/12:
+
 ```js
 tickFormatter: function (val, axis) {
     var d = new Date(val);
     return d.getUTCDate() + "/" + (d.getUTCMonth() + 1);
 }
 ```
+
 Note that for the time mode "tickSize" and "minTickSize" are a bit
 special in that they are arrays on the form "[value, unit]" where unit
 is one of "second", "minute", "hour", "day", "month" and "year". So
 you can specify
+
 ```js
 minTickSize: [1, "month"]
 ```
+
 to get a tick interval size of at least 1 month and correspondingly,
 if axis.tickSize is [2, "day"] in the tick formatter, the ticks have
 been produced with two days in-between.
@@ -630,6 +692,7 @@ series: {
 
 colors: [ color1, color2, ... ]
 ```
+
 The options inside "series: {}" are copied to each of the series. So
 you can specify that all series should have bars by putting it in the
 global options, or override it for individual series by specifying
@@ -642,6 +705,7 @@ default to showing lines (you can turn this off with
 lines: { show: false }). You can specify the various types
 independently of each other, and Flot will happily draw each of them
 in turn (this is probably only useful for lines and points), e.g.
+
 ```js
 var options = {
     series: {
@@ -650,6 +714,7 @@ var options = {
     }
 };
 ```
+
 "lineWidth" is the thickness of the line or outline in pixels. You can
 set it to 0 to prevent a line or outline from being drawn; this will
 also hide the shadow.
@@ -682,6 +747,7 @@ data by adding extra points.
 For points, you can specify the radius and the symbol. The only
 built-in symbol type is circles, for other types you can use a plugin
 or define them yourself by specifying a callback:
+
 ```js
 function cross(ctx, x, y, radius, shadow) {
     var size = radius * Math.sqrt(Math.PI) / 2;
@@ -691,6 +757,7 @@ function cross(ctx, x, y, radius, shadow) {
     ctx.lineTo(x + size, y - size);
 }
 ```
+
 The parameters are the drawing context, x and y coordinates of the
 center of the point, a radius which corresponds to what the circle
 would have used and whether the call is to draw a shadow (due to
@@ -705,9 +772,11 @@ remove shadows.
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
 this:
+
 ```js
 colors: ["#d18b2c", "#dba255", "#919733"]
 ```
+
 If there are more data series than colors, Flot will try to generate
 extra colors by lightening and darkening colors in the theme.
 
@@ -738,6 +807,7 @@ interaction: {
     redrawOverlayInterval: number or -1
 }
 ```
+
 The grid is the thing with the axes and a number of ticks. Many of the
 things in the grid are configured under the individual axes, but not
 all. "color" is the color of the grid itself whereas "backgroundColor"
@@ -752,6 +822,7 @@ above the data or below (below is default).
 "margin" is the space in pixels between the canvas edge and the grid,
 which can be either a number or an object with individual margins for
 each side, in the form:
+
 ```js
 margin: {
     top: top margin in pixels
@@ -760,6 +831,7 @@ margin: {
     right: right margin in pixels
 }
 ```
+
 "labelMargin" is the space in pixels between tick labels and axis
 line, and "axisMargin" is the space in pixels between axes when there
 are two next to each other.
@@ -781,22 +853,27 @@ the axes for the plot in an object as the first parameter.
 
 You can set the color of markings by specifying "color" in the ranges
 object. Here's an example array:
+
 ```js
 markings: [ { xaxis: { from: 0, to: 2 }, yaxis: { from: 10, to: 10 }, color: "#bb0000" }, ... ]
 ```
+
 If you leave out one of the values, that value is assumed to go to the
 border of the plot. So for example if you only specify { xaxis: {
 from: 0, to: 2 } } it means an area that extends from the top to the
 bottom of the plot in the x range 0-2.
 
 A line is drawn if from and to are the same, e.g.
+
 ```js
 markings: [ { yaxis: { from: 1, to: 1 } }, ... ]
 ```
+
 would draw a line parallel to the x axis at y = 1. You can control the
 line width with "lineWidth" in the range object.
 
 An example function that makes vertical stripes might look like this:
+
 ```js
 markings: function (axes) {
     var markings = [];
@@ -805,6 +882,7 @@ markings: function (axes) {
     return markings;
 }
 ```
+
 If you set "clickable" to true, the plot will listen for click events
 on the plot area and fire a "plotclick" event on the placeholder with
 a position and a nearby data item object as parameters. The coordinates
@@ -819,6 +897,7 @@ If needed, you can disable highlighting and control it yourself with
 the highlight/unhighlight plot methods described elsewhere.
 
 You can use "plotclick" and "plothover" events like this:
+
 ```js
 $.plot($("#placeholder"), [ d ], { grid: { clickable: true } });
 
@@ -833,7 +912,9 @@ $("#placeholder").bind("plotclick", function (event, pos, item) {
     }
 });
 ```
+
 The item object in this example is either null or a nearby object on the form:
+
 ```js
 item: {
     datapoint: the point, e.g. [0, 2]
@@ -843,10 +924,13 @@ item: {
     pageX, pageY: the global screen coordinates of the point
 }
 ```
+
 For instance, if you have specified the data like this 
+
 ```js
 $.plot($("#placeholder"), [ { label: "Foo", data: [[0, 10], [7, 3]] } ], ...);
 ```
+
 and the mouse is near the point (7, 3), "datapoint" is [7, 3],
 "dataIndex" will be 1, "series" is a normalized series object with
 among other things the "Foo" label in series.label and the color in
@@ -866,9 +950,11 @@ radius, Flot chooses the closest item. For bars, the top-most bar
 If you want to disable interactivity for a specific data series, you
 can set "hoverable" and "clickable" to false in the options for that
 series, like this:
+
 ```js
 { data: [...], label: "Foo", clickable: false }
 ```
+
 "redrawOverlayInterval" specifies the maximum time to delay a redraw
 of interactive things (this works as a rate limiting device). The
 default is capped to 60 frames per second. You can set it to -1 to
@@ -879,25 +965,32 @@ Specifying gradients
 --------------------
 
 A gradient is specified like this:
+
 ```js
 { colors: [ color1, color2, ... ] }
 ```
+
 For instance, you might specify a background on the grid going from
 black to gray like this:
+
 ```js
 grid: {
     backgroundColor: { colors: ["#000", "#999"] }
 }
 ```
+
 For the series you can specify the gradient as an object that
 specifies the scaling of the brightness and the opacity of the series
 color, e.g.
+
 ```js
 { colors: [{ opacity: 0.8 }, { brightness: 0.6, opacity: 0.8 } ] }
 ```
+
 where the first color simply has its alpha scaled, whereas the second
 is also darkened. For instance, for bars the following makes the bars
 gradually disappear, without outline:
+
 ```js
 bars: {
     show: true,
@@ -906,6 +999,7 @@ bars: {
     fillColor: { colors: [ { opacity: 0.8 }, { opacity: 0.1 } ] }
 }
 ```
+
 Flot currently only supports vertical gradients drawn from top to
 bottom because that's what works with IE.
 
@@ -985,6 +1079,7 @@ can call:
     Returns the calculated offset of the data point at (x, y) in data
     space within the placeholder div. If you are working with multiple
     axes, you can specify the x and y axis references, e.g. 
+
     ```js
       o = pointOffset({ x: xpos, y: ypos, xaxis: 2, yaxis: 3 })
       // o.left and o.top now contains the offset within the div
@@ -1013,11 +1108,13 @@ Flot to keep track of its state, so be careful.
     form with missing settings filled in according to the global
     options. So for instance to find out what color Flot has assigned
     to the data series, you could do this:
+
     ```js
     var series = plot.getData();
     for (var i = 0; i < series.length; ++i)
         alert(series[i].color);
     ```
+
     A notable other interesting field besides color is datapoints
     which has a field "points" with the normalized data points in a
     flat array (the field "pointsize" is the increment in the flat
@@ -1103,6 +1200,7 @@ Each hook is simply a function which is put in the appropriate array.
 You can add them through the "hooks" option, and they are also available
 after the plot is constructed as the "hooks" attribute on the returned
 plot object, e.g.
+
 ```js
   // define a simple draw hook
   function hellohook(plot, canvascontext) { alert("hello!"); };
@@ -1113,6 +1211,7 @@ plot object, e.g.
   // we can now find it again in plot.hooks.draw[0] unless a plugin
   // has added other hooks
 ```
+
 The available hooks are described below. All hook callbacks get the
 plot object as first parameter. You can find some examples of defined
 hooks in the plugins bundled with Flot.
@@ -1141,12 +1240,14 @@ hooks in the plugins bundled with Flot.
     how it interferes with axis scaling.
 
     The default format array for points is something along the lines of:
+
     ```js
     [
         { x: true, number: true, required: true },
         { y: true, number: true, required: true }
     ]
     ```
+
     The first object means that for the first coordinate it should be
     taken into account when scaling the x axis, that it must be a
     number, and that it is required - so if it is null or cannot be
@@ -1158,15 +1259,15 @@ hooks in the plugins bundled with Flot.
 
  - processDatapoints  [phase 3]
 
-    ```js
-    function(plot, series, datapoints)
-    ```
+    ```function(plot, series, datapoints)```
+
     Called after normalization of the given series but before finding
     min/max of the data points. This hook is useful for implementing data
     transformations. "datapoints" contains the normalized data points in
     a flat array as datapoints.points with the size of a single point
     given in datapoints.pointsize. Here's a simple transform that
     multiplies all y coordinates by 2:
+
     ```js
     function multiply(plot, series, datapoints) {
         var points = datapoints.points, ps = datapoints.pointsize;
@@ -1174,6 +1275,7 @@ hooks in the plugins bundled with Flot.
             points[i + 1] *= 2;
     }
     ```
+
     Note that you must leave datapoints in a good condition as Flot
     doesn't check it or do any normalization on it afterwards.
 
@@ -1218,6 +1320,7 @@ hooks in the plugins bundled with Flot.
     Called after Flot has setup its event handlers. Should set any
     necessary event handlers on eventHolder, a jQuery object with the
     canvas, e.g.
+
     ```js
     function (plot, eventHolder) {
         eventHolder.mousedown(function (e) {
@@ -1225,6 +1328,7 @@ hooks in the plugins bundled with Flot.
         });
     }
     ```
+
     Interesting events include click, mousemove, mouseup/down. You can
     use all jQuery events. Usually, the event handlers will update the
     state by drawing something (add a drawOverlay hook and call
