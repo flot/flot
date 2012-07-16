@@ -1,5 +1,15 @@
 /*
-Flot plugin for error-bars
+Flot plugin for plotting error bars, i.e. to show standard deviation
+and other statistical properties in a plot.
+
+* Created by Rui Pereira  -  rui (dot) pereira (at) gmail (dot) com
+
+This plugin allows you to plot error-bars over points. Set "errorbars"
+inside the points series to the axis name over which there will be
+error values in your data array (*even* if you do not intend to plot
+them later, by setting "show: null" on xerr/yerr).
+
+Options for the plugin are
 
     series: { 
         points: {
@@ -13,11 +23,6 @@ Flot plugin for error-bars
             yerr: { same options as xerr }
         }
     }
-
-This plugin allows you to plot error-bars over points. Set "errorbars"
-inside the points series to the axis name over which there will be
-error values in your data array (*even* if you do not intend to plot
-them later, by setting "show: null" on xerr/yerr).
 
 Each data point array is expected to be of the type
 
@@ -51,8 +56,6 @@ the interconnecting points (with radius: 0), and still showing end
 caps on the error-bars. shadowSize and lineWidth are derived as well
 from the points series.
 
-Rui Pereira
-rui (dot) pereira (at) gmail (dot) com
 */
 
 (function ($) {
