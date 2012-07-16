@@ -80,11 +80,11 @@ Changes:
 
 - Added a series "highlightColor" option to control the color of the
   translucent overlay that identifies the dataset when the mouse hovers
-  over it. (patch by Eric Wendelin and Nate Abele)
+  over it. (patch by Eric Wendelin and Nate Abele, issues 168 and 299)
 
 - Added a plugin jquery.flot.errorbars, with an accompanying example,
   that adds the ability to plot error bars, commonly used in many kinds
-  of statistical data visualizations. (patch by Rui Pereira)
+  of statistical data visualizations. (patch by Rui Pereira, issue 215)
 
 Bug fixes
 
