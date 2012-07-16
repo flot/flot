@@ -1,5 +1,4 @@
-About
------
+## About ##
 
 Flot is a Javascript plotting library for jQuery.  
 Read more at the website: <http://code.google.com/p/flot/>
@@ -9,8 +8,7 @@ impression of what Flot can do and the source code of the examples is
 probably the fastest way to learn how to use Flot.
 
 
-Installation
-------------
+## Installation ##
 
 Just include the Javascript file after you've included jQuery.
 
@@ -40,8 +38,7 @@ You need at least jQuery 1.2.6, but try at least 1.3.2 for interactive
 charts because of performance improvements in event handling.
 
 
-Basic usage
------------
+## Basic usage ##
 
 Create a placeholder div to put the graph in:
 
@@ -84,8 +81,7 @@ The plot function immediately draws the chart and then returns a plot
 object with a couple of methods.
 
 
-What's with the name?
----------------------
+## What's with the name? ##
 
 First: it's pronounced with a short o, like "plot". Not like "flawed".
 
