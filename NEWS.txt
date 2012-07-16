@@ -86,6 +86,10 @@ Changes:
   that adds the ability to plot error bars, commonly used in many kinds
   of statistical data visualizations. (patch by Rui Pereira, issue 215)
 
+- The legend now omits entries whose labelFormatter returns null.
+  (patch by Tom Cleaveland, Christopher Lambert, and Simon Strandgaard)
+
+
 Bug fixes
 
 - Fix problem with null values and pie plugin (patch by gcruxifix,
