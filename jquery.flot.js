@@ -416,31 +416,36 @@
         }
 
         function fillInSeriesOptions() {
-            var i;
-            
-            // collect what we already got of colors
-            var neededColors = series.length,
-                usedColors = [],
-                assignedColors = [];
+
+            var neededColors = series.length, maxIndex = 0, i;
+
+            // Subtract the number of series that already have fixed
+            // colors from the number we need to generate.
+
             for (i = 0; i < series.length; ++i) {
                 var sc = series[i].color;
                 if (sc != null) {
-                    --neededColors;
-                    if (typeof sc == "number")
-                        assignedColors.push(sc);
-                    else
-                        usedColors.push($.color.parse(series[i].color));
+                    neededColors--;
+                    if (typeof sc == "number" && sc > maxIndex) {
+                        maxIndex = sc;
+                    }
                 }
             }
-            
-            // we might need to generate more colors if higher indices
-            // are assigned
-            for (i = 0; i < assignedColors.length; ++i) {
-                neededColors = Math.max(neededColors, assignedColors[i] + 1);
+
+            // If any of the user colors are numeric indexes, then we
+            // need to generate at least as many as the highest index.
+
+            if (maxIndex > neededColors) {
+                neededColors = maxIndex + 1;
             }
 
-            // produce colors as needed
+            // Generate as many colors as necessary, using the provided
+            // colors as a base and alternatingly increasing/decreasing
+            // their luminosity in steps that grow smaller each time we
+            // hit the edge of the color space.
+
             var colors = [], variation = 0;
+
             i = 0;
             while (colors.length < neededColors) {
                 var c;
@@ -464,7 +469,8 @@
                 }
             }
 
-            // fill in the options
+            // Finalize the series options, filling in their colors
+
             var colori = 0, s;
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
