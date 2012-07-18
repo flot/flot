@@ -3,14 +3,14 @@
  * Released under the MIT license by IOLA, December 2007.
  *
  */
-
+/*jshint undef:true */
 // first an inline dependency, jquery.colorhelpers.js, we inline it here
 // for convenience
 
 /* Plugin for jQuery for working with colors.
- * 
+ *
  * Version 1.1.
- * 
+ *
  * Inspiration from jQuery color animation plugin by John Resig.
  *
  * Released under the MIT license by Ole Laursen, October 2009.
@@ -27,7 +27,7 @@
  *
  * V. 1.1: Fix error handling so e.g. parsing an empty string does
  * produce a color rather than just crashing.
- */ 
+ */
 (function(B){B.color={};B.color.make=function(F,E,C,D){var G={};G.r=F||0;G.g=E||0;G.b=C||0;G.a=D!=null?D:1;G.add=function(J,I){for(var H=0;H<J.length;++H){G[J.charAt(H)]+=I}return G.normalize()};G.scale=function(J,I){for(var H=0;H<J.length;++H){G[J.charAt(H)]*=I}return G.normalize()};G.toString=function(){if(G.a>=1){return"rgb("+[G.r,G.g,G.b].join(",")+")"}else{return"rgba("+[G.r,G.g,G.b,G.a].join(",")+")"}};G.normalize=function(){function H(J,K,I){return K<J?J:(K>I?I:K)}G.r=H(0,parseInt(G.r),255);G.g=H(0,parseInt(G.g),255);G.b=H(0,parseInt(G.b),255);G.a=H(0,G.a,1);return G};G.clone=function(){return B.color.make(G.r,G.b,G.g,G.a)};return G.normalize()};B.color.extract=function(D,C){var E;do{E=D.css(C).toLowerCase();if(E!=""&&E!="transparent"){break}D=D.parent()}while(!B.nodeName(D.get(0),"body"));if(E=="rgba(0, 0, 0, 0)"){E="transparent"}return B.color.parse(E)};B.color.parse=function(F){var E,C=B.color.make;if(E=/rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(F)){return C(parseInt(E[1],10),parseInt(E[2],10),parseInt(E[3],10))}if(E=/rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(F)){return C(parseInt(E[1],10),parseInt(E[2],10),parseInt(E[3],10),parseFloat(E[4]))}if(E=/rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(F)){return C(parseFloat(E[1])*2.55,parseFloat(E[2])*2.55,parseFloat(E[3])*2.55)}if(E=/rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(F)){return C(parseFloat(E[1])*2.55,parseFloat(E[2])*2.55,parseFloat(E[3])*2.55,parseFloat(E[4]))}if(E=/#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(F)){return C(parseInt(E[1],16),parseInt(E[2],16),parseInt(E[3],16))}if(E=/#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(F)){return C(parseInt(E[1]+E[1],16),parseInt(E[2]+E[2],16),parseInt(E[3]+E[3],16))}var D=B.trim(F).toLowerCase();if(D=="transparent"){return C(255,255,255,0)}else{E=A[D]||[0,0,0];return C(E[0],E[1],E[2])}};var A={aqua:[0,255,255],azure:[240,255,255],beige:[245,245,220],black:[0,0,0],blue:[0,0,255],brown:[165,42,42],cyan:[0,255,255],darkblue:[0,0,139],darkcyan:[0,139,139],darkgrey:[169,169,169],darkgreen:[0,100,0],darkkhaki:[189,183,107],darkmagenta:[139,0,139],darkolivegreen:[85,107,47],darkorange:[255,140,0],darkorchid:[153,50,204],darkred:[139,0,0],darksalmon:[233,150,122],darkviolet:[148,0,211],fuchsia:[255,0,255],gold:[255,215,0],green:[0,128,0],indigo:[75,0,130],khaki:[240,230,140],lightblue:[173,216,230],lightcyan:[224,255,255],lightgreen:[144,238,144],lightgrey:[211,211,211],lightpink:[255,182,193],lightyellow:[255,255,224],lime:[0,255,0],magenta:[255,0,255],maroon:[128,0,0],navy:[0,0,128],olive:[128,128,0],orange:[255,165,0],pink:[255,192,203],purple:[128,0,128],violet:[128,0,128],red:[255,0,0],silver:[192,192,192],white:[255,255,255],yellow:[255,255,0]}})(jQuery);
 
 // the actual Flot code
@@ -100,7 +100,7 @@
                     },
                     lines: {
                         // we don't put in show: false so we can see
-                        // whether lines were actively disabled 
+                        // whether lines were actively disabled
                         lineWidth: 2, // in pixels
                         fill: false,
                         fillColor: null,
@@ -200,8 +200,8 @@
         plot.triggerRedrawOverlay = triggerRedrawOverlay;
         plot.pointOffset = function(point) {
             return {
-                left: parseInt(xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plotOffset.left),
-                top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top)
+                left: parseInt(xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plotOffset.left, 10),
+                top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
         plot.shutdown = shutdown;
@@ -244,19 +244,19 @@
             
             $.extend(true, options, opts);
             
-            if (options.xaxis.color == null)
+            if (options.xaxis.color === null)
                 options.xaxis.color = options.grid.color;
-            if (options.yaxis.color == null)
+            if (options.yaxis.color === null)
                 options.yaxis.color = options.grid.color;
             
-            if (options.xaxis.tickColor == null) // backwards-compatibility
+            if (options.xaxis.tickColor === null) // backwards-compatibility
                 options.xaxis.tickColor = options.grid.tickColor;
-            if (options.yaxis.tickColor == null) // backwards-compatibility
+            if (options.yaxis.tickColor === null) // backwards-compatibility
                 options.yaxis.tickColor = options.grid.tickColor;
 
-            if (options.grid.borderColor == null)
+            if (options.grid.borderColor === null)
                 options.grid.borderColor = options.grid.color;
-            if (options.grid.tickColor == null)
+            if (options.grid.tickColor === null)
                 options.grid.tickColor = $.color.parse(options.grid.color).scale('a', 0.22).toString();
             
             // fill in defaults in axes, copy at least always the
@@ -267,9 +267,9 @@
                 options.yaxes[i] = $.extend(true, {}, options.yaxis, options.yaxes[i]);
 
             // backwards compatibility, to be removed in future
-            if (options.xaxis.noTicks && options.xaxis.ticks == null)
+            if (options.xaxis.noTicks && options.xaxis.ticks === null)
                 options.xaxis.ticks = options.xaxis.noTicks;
-            if (options.yaxis.noTicks && options.yaxis.ticks == null)
+            if (options.yaxis.noTicks && options.yaxis.ticks === null)
                 options.yaxis.ticks = options.yaxis.noTicks;
             if (options.x2axis) {
                 options.xaxes[1] = $.extend(true, {}, options.xaxis, options.x2axis);
@@ -289,9 +289,9 @@
                 $.extend(true, options.series.points, options.points);
             if (options.bars)
                 $.extend(true, options.series.bars, options.bars);
-            if (options.shadowSize != null)
+            if (options.shadowSize !== null)
                 options.series.shadowSize = options.shadowSize;
-            if (options.highlightColor != null)
+            if (options.highlightColor !== null)
                 options.series.highlightColor = options.highlightColor;
 
             // save options on axes for future reference
@@ -319,7 +319,7 @@
             for (var i = 0; i < d.length; ++i) {
                 var s = $.extend(true, {}, options.series);
 
-                if (d[i].data != null) {
+                if (d[i].data !== null) {
                     s.data = d[i].data; // move the data instead of deep-copy
                     delete d[i].data;
 
@@ -350,7 +350,7 @@
         }
         
         function canvasToAxisCoords(pos) {
-            // return an object with x/y corresponding to all used axes 
+            // return an object with x/y corresponding to all used axes
             var res = {}, i, axis;
             for (i = 0; i < xaxes.length; ++i) {
                 axis = xaxes[i];
@@ -380,10 +380,10 @@
                 axis = xaxes[i];
                 if (axis && axis.used) {
                     key = "x" + axis.n;
-                    if (pos[key] == null && axis.n == 1)
+                    if (pos[key] === null && axis.n == 1)
                         key = "x";
 
-                    if (pos[key] != null) {
+                    if (pos[key] !== null) {
                         res.left = axis.p2c(pos[key]);
                         break;
                     }
@@ -394,10 +394,10 @@
                 axis = yaxes[i];
                 if (axis && axis.used) {
                     key = "y" + axis.n;
-                    if (pos[key] == null && axis.n == 1)
+                    if (pos[key] === null && axis.n == 1)
                         key = "y";
 
-                    if (pos[key] != null) {
+                    if (pos[key] !== null) {
                         res.top = axis.p2c(pos[key]);
                         break;
                     }
@@ -427,7 +427,8 @@
 
             for (i = 0; i < series.length; ++i) {
                 var sc = series[i].color;
-                if (sc != null) {
+
+                if (sc !== null) {
                     neededColors--;
                     if (typeof sc == "number" && sc > maxIndex) {
                         maxIndex = sc;
@@ -459,7 +460,7 @@
                 // Reset the variation after every few cycles, or else
                 // it will end up producing only white or black colors.
 
-                if (i % colorPoolSize == 0 && i) {
+                if (i % colorPoolSize === 0 && i) {
                     if (variation >= 0) {
                         if (variation < 0.5) {
                             variation = -variation - 0.2;
@@ -477,7 +478,7 @@
                 s = series[i];
                 
                 // assign colors
-                if (s.color == null) {
+                if (s.color === null) {
                     s.color = colors[colori].toString();
                     ++colori;
                 }
@@ -485,7 +486,7 @@
                     s.color = colors[s.color].toString();
 
                 // turn on lines automatically in case nothing is set
-                if (s.lines.show == null) {
+                if (s.lines.show === null) {
                     var v, show = true;
                     for (v in s)
                         if (s[v] && s[v].show) {
@@ -531,10 +532,12 @@
             }
             
             // first pass: clean and copy data
+            var data, format;
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
 
-                var data = s.data, format = s.datapoints.format;
+                data = s.data;
+                format = s.datapoints.format;
 
                 if (!format) {
                     format = [];
@@ -553,7 +556,7 @@
                     s.datapoints.format = format;
                 }
 
-                if (s.datapoints.pointsize != null)
+                if (s.datapoints.pointsize !== null)
                     continue; // already filled in
 
                 s.datapoints.pointsize = format.length;
@@ -567,14 +570,14 @@
                 for (j = k = 0; j < data.length; ++j, k += ps) {
                     p = data[j];
 
-                    var nullify = p == null;
+                    var nullify = p === null;
                     if (!nullify) {
                         for (m = 0; m < ps; ++m) {
                             val = p[m];
                             f = format[m];
 
                             if (f) {
-                                if (f.number && val != null) {
+                                if (f.number && val !== null) {
                                     val = +val; // convert to number
                                     if (isNaN(val))
                                         val = null;
@@ -584,11 +587,11 @@
                                         val = -fakeInfinity;
                                 }
 
-                                if (val == null) {
+                                if (val === null) {
                                     if (f.required)
                                         nullify = true;
                                     
-                                    if (f.defaultValue != null)
+                                    if (f.defaultValue !== null)
                                         val = f.defaultValue;
                                 }
                             }
@@ -600,7 +603,7 @@
                     if (nullify) {
                         for (m = 0; m < ps; ++m) {
                             val = points[k + m];
-                            if (val != null) {
+                            if (val !== null) {
                                 f = format[m];
                                 // extract min/max info
                                 if (f.x)
@@ -615,10 +618,8 @@
                         // a little bit of line specific stuff that
                         // perhaps shouldn't be here, but lacking
                         // better means...
-                        if (insertSteps && k > 0
-                            && points[k - ps] != null
-                            && points[k - ps] != points[k]
-                            && points[k - ps + 1] != points[k + 1]) {
+                        var testPoints = points[k - ps] !== null && points[k - ps] != points[k] && points[k - ps + 1] != points[k + 1];
+                        if (insertSteps && k > 0 && testPoints) {
                             // copy the point to make room for a middle point
                             for (m = 0; m < ps; ++m)
                                 points[k + ps + m] = points[k + m];
@@ -651,7 +652,7 @@
                     xmax = bottomSentry, ymax = bottomSentry;
                 
                 for (j = 0; j < points.length; j += ps) {
-                    if (points[j] == null)
+                    if (points[j] === null)
                         continue;
 
                     for (m = 0; m < ps; ++m) {
@@ -766,7 +767,7 @@
                 existingCanvas = placeholder.children("canvas.flot-base"),
                 existingOverlay = placeholder.children("canvas.flot-overlay");
 
-            if (existingCanvas.length == 0 || existingOverlay == 0) {
+            if (!existingCanvas.length || !existingOverlay) {
                 // init everything
                 
                 placeholder.html(""); // make sure placeholder is clear
@@ -902,7 +903,7 @@
                     line.width = m.width;
                     // m.height might not be defined, not in the
                     // standard yet
-                    line.height = m.height != null ? m.height : f.size;
+                    line.height = m.height !== null ? m.height : f.size;
 
                     // add a bit of margin since font rendering is
                     // not pixel perfect and cut off letters look
@@ -916,9 +917,9 @@
                     t.lines.push(line);
                 }
 
-                if (opts.labelWidth == null)
+                if (opts.labelWidth === null)
                     axisw = Math.max(axisw, t.width);
-                if (opts.labelHeight == null)
+                if (opts.labelHeight === null)
                     axish = Math.max(axish, t.height);
             }
             ctx.restore();
@@ -941,7 +942,9 @@
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction == "x" ? xaxes : yaxes,
-                index;
+                index,
+                innermost,
+                sameDirection;
 
             // determine axis margin
             var samePosition = $.grep(all, function (a) {
@@ -951,12 +954,12 @@
                 axisMargin = 0; // outermost
 
             // determine tick length - if we're innermost, we can use "full"
-            if (tickLength == null) {
-                var sameDirection = $.grep(all, function (a) {
+            if (tickLength === null) {
+                sameDirection = $.grep(all, function (a) {
                     return a && a.reserveSpace;
                 });
                 
-                var innermost = $.inArray(axis, sameDirection) == 0;
+                innermost = $.inArray(axis, sameDirection) === 0;
                 if (innermost)
                     tickLength = "full";
                 else
@@ -1022,7 +1025,7 @@
             // check stuff from the plot (FIXME: this should just read
             // a value from the series, otherwise it's impossible to
             // customize)
-            if (minMargin == null) {
+            if (minMargin === null) {
                 minMargin = 0;
                 for (i = 0; i < series.length; ++i)
                     minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
@@ -1059,13 +1062,13 @@
 
             // If the grid is visible, add its border width to the offset
 
-            for (var a in plotOffset)
-                plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
+            for (var b in plotOffset)
+                plotOffset[b] += showGrid ? options.grid.borderWidth : 0;
 
             // init axes
             $.each(axes, function (_, axis) {
                 axis.show = axis.options.show;
-                if (axis.show == null)
+                if (axis.show === null)
                     axis.show = axis.used; // by default an axis is visible if it's got data
                 
                 axis.reserveSpace = axis.show || axis.options.reserveSpace;
@@ -1124,35 +1127,35 @@
         
         function setRange(axis) {
             var opts = axis.options,
-                min = +(opts.min != null ? opts.min : axis.datamin),
-                max = +(opts.max != null ? opts.max : axis.datamax),
+                min = +(opts.min !== null ? opts.min : axis.datamin),
+                max = +(opts.max !== null ? opts.max : axis.datamax),
                 delta = max - min;
 
-            if (delta == 0.0) {
+            if (delta === 0) {
                 // degenerate case
-                var widen = max == 0 ? 1 : 0.01;
+                var widen = max === 0 ? 1 : 0.01;
 
-                if (opts.min == null)
+                if (opts.min === null)
                     min -= widen;
                 // always widen max if we couldn't widen min to ensure we
                 // don't fall into min == max which doesn't work
-                if (opts.max == null || opts.min != null)
+                if (opts.max === null || opts.min !== null)
                     max += widen;
             }
             else {
                 // consider autoscaling
                 var margin = opts.autoscaleMargin;
-                if (margin != null) {
-                    if (opts.min == null) {
+                if (margin !== null) {
+                    if (opts.min === null) {
                         min -= delta * margin;
                         // make sure we don't go below zero if all values
                         // are positive
-                        if (min < 0 && axis.datamin != null && axis.datamin >= 0)
+                        if (min < 0 && axis.datamin !== null && axis.datamin >= 0)
                             min = 0;
                     }
-                    if (opts.max == null) {
+                    if (opts.max === null) {
                         max += delta * margin;
-                        if (max > 0 && axis.datamax != null && axis.datamax <= 0)
+                        if (max > 0 && axis.datamax !== null && axis.datamax <= 0)
                             max = 0;
                     }
                 }
@@ -1189,7 +1192,7 @@
 
                 var maxDec = opts.tickDecimals;
                 var dec = -Math.floor(Math.log(axis.delta) / Math.LN10);
-                if (maxDec != null && dec > maxDec)
+                if (maxDec !== null && dec > maxDec)
                     dec = maxDec;
 
                 var magn = Math.pow(10, -dec);
@@ -1201,7 +1204,7 @@
                 else if (norm < 3) {
                     size = 2;
                     // special case for 2.5, requires an extra decimal
-                    if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
+                    if (norm > 2.25 && (maxDec === null || dec + 1 <= maxDec)) {
                         size = 2.5;
                         ++dec;
                     }
@@ -1212,10 +1215,10 @@
 
                 size *= magn;
 
-                if (opts.minTickSize != null && size < opts.minTickSize)
+                if (opts.minTickSize !== null && size < opts.minTickSize)
                     size = opts.minTickSize;
 
-                axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
+                axis.tickDecimals = Math.max(0, maxDec !== null ? maxDec : dec);
                 axis.tickSize = opts.tickSize || size;
 
                 axis.tickGenerator = function (axis) {
@@ -1239,15 +1242,15 @@
             if ($.isFunction(opts.tickFormatter))
                 axis.tickFormatter = function (v, axis) { return "" + opts.tickFormatter(v, axis); };
 
-            if (opts.alignTicksWithAxis != null) {
+            if (opts.alignTicksWithAxis !== null) {
                 var otherAxis = (axis.direction == "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
                 if (otherAxis && otherAxis.used && otherAxis != axis) {
                     // consider snapping min/max to outermost nice ticks
                     var niceTicks = axis.tickGenerator(axis);
                     if (niceTicks.length > 0) {
-                        if (opts.min == null)
+                        if (opts.min === null)
                             axis.min = Math.min(axis.min, niceTicks[0]);
-                        if (opts.max == null && niceTicks.length > 1)
+                        if (opts.max === null && niceTicks.length > 1)
                             axis.max = Math.max(axis.max, niceTicks[niceTicks.length - 1]);
                     }
                     
@@ -1264,7 +1267,7 @@
                     
                     // we might need an extra decimal since forced
                     // ticks don't necessarily fit naturally
-                    if (!axis.mode && opts.tickDecimals == null) {
+                    if (!axis.mode && opts.tickDecimals === null) {
                         var extraDec = Math.max(0, -Math.floor(Math.log(axis.delta) / Math.LN10) + 1),
                             ts = axis.tickGenerator(axis);
 
@@ -1280,7 +1283,7 @@
         
         function setTicks(axis) {
             var oticks = axis.options.ticks, ticks = [];
-            if (oticks == null || (typeof oticks == "number" && oticks > 0))
+            if (oticks === null || (typeof oticks == "number" && oticks > 0))
                 ticks = axis.tickGenerator(axis);
             else if (oticks) {
                 if ($.isFunction(oticks))
@@ -1303,7 +1306,7 @@
                 }
                 else
                     v = +t;
-                if (label == null)
+                if (label === null)
                     label = axis.tickFormatter(v, axis);
                 if (!isNaN(v))
                     axis.ticks.push({ v: v, label: label });
@@ -1313,9 +1316,9 @@
         function snapRangeToTicks(axis, ticks) {
             if (axis.options.autoscaleMargin && ticks.length > 0) {
                 // snap to ticks
-                if (axis.options.min == null)
+                if (axis.options.min === null)
                     axis.min = Math.min(axis.min, ticks[0].v);
-                if (axis.options.max == null && ticks.length > 1)
+                if (axis.options.max === null && ticks.length > 1)
                     axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
         }
@@ -1374,7 +1377,7 @@
             }
 
             // auto-reverse as an added bonus
-            if (from != null && to != null && from > to) {
+            if (from !== null && to !== null && from > to) {
                 var tmp = from;
                 from = to;
                 to = tmp;
@@ -1393,7 +1396,7 @@
         }
 
         function drawGrid() {
-            var i;
+            var i, axes, bw, m, xrange, yrange;
             
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
@@ -1402,7 +1405,7 @@
             var markings = options.grid.markings;
             if (markings) {
                 if ($.isFunction(markings)) {
-                    var axes = plot.getAxes();
+                    axes = plot.getAxes();
                     // xmin etc. is backwards compatibility, to be
                     // removed in the future
                     axes.xmin = axes.xaxis.min;
@@ -1414,18 +1417,18 @@
                 }
 
                 for (i = 0; i < markings.length; ++i) {
-                    var m = markings[i],
-                        xrange = extractRange(m, "x"),
-                        yrange = extractRange(m, "y");
+                    m = markings[i];
+                    xrange = extractRange(m, "x");
+                    yrange = extractRange(m, "y");
 
                     // fill in missing
-                    if (xrange.from == null)
+                    if (xrange.from === null)
                         xrange.from = xrange.axis.min;
-                    if (xrange.to == null)
+                    if (xrange.to === null)
                         xrange.to = xrange.axis.max;
-                    if (yrange.from == null)
+                    if (yrange.from === null)
                         yrange.from = yrange.axis.min;
-                    if (yrange.to == null)
+                    if (yrange.to === null)
                         yrange.to = yrange.axis.max;
 
                     // clip
@@ -1467,12 +1470,13 @@
             }
             
             // draw the ticks
-            var axes = allAxes(), bw = options.grid.borderWidth;
+            axes = allAxes();
+            bw = options.grid.borderWidth;
 
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box,
                     t = axis.tickLength, x, y, xoff, yoff;
-                if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show || axis.ticks.length === 0)
                     continue;
                 
                 ctx.strokeStyle = axis.options.tickColor || $.color.parse(axis.options.color).scale('a', 0.22).toString();
@@ -1523,7 +1527,7 @@
                     if (v < axis.min || v > axis.max
                         // skip those lying on the axes if we got a border
                         || (t == "full" && bw > 0
-                            && (v == axis.min || v == axis.max)))
+                        && (v == axis.min || v == axis.max)))
                         continue;
 
                     if (axis.direction == "x") {
@@ -1570,14 +1574,14 @@
             ctx.save();
 
             $.each(allAxes(), function (_, axis) {
-                if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show || !axis.ticks.length)
                     return;
                     
                 var box = axis.box, f = axis.font;
                 // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
 
                 ctx.fillStyle = axis.options.color;
-                // Important: Don't use quotes around axis.font.family! Just around single 
+                // Important: Don't use quotes around axis.font.family! Just around single
                 // font names like 'Times New Roman' that have a space or special character in it.
                 ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
                 ctx.textAlign = "start";
@@ -1655,7 +1659,7 @@
                     var x1 = points[i - ps], y1 = points[i - ps + 1],
                         x2 = points[i], y2 = points[i + 1];
                     
-                    if (x1 == null || x2 == null)
+                    if (x1 === null || x2 === null)
                         continue;
 
                     // clip with ymin
@@ -1746,7 +1750,7 @@
                         x2 = points[i], y2 = points[i + ypos];
 
                     if (areaOpen) {
-                        if (ps > 0 && x1 != null && x2 == null) {
+                        if (ps > 0 && x1 !== null && x2 === null) {
                             // at turning point
                             segmentEnd = i;
                             ps = -ps;
@@ -1765,7 +1769,7 @@
                         }
                     }
 
-                    if (x1 == null || x2 == null)
+                    if (x1 === null || x2 === null)
                         continue;
 
                     // clip x values
@@ -1904,7 +1908,7 @@
 
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i], y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+                    if (x === null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
                         continue;
                     
                     ctx.beginPath();
@@ -2067,7 +2071,7 @@
                 var points = datapoints.points, ps = datapoints.pointsize;
                 
                 for (var i = 0; i < points.length; i += ps) {
-                    if (points[i] == null)
+                    if (points[i] === null)
                         continue;
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
@@ -2129,6 +2133,7 @@
 
             for (var i = 0; i < series.length; ++i) {
                 s = series[i];
+
                 if (s.label) {
                     label = lf ? lf(s.label, s) : s.label;
                     if (label) {
@@ -2157,11 +2162,12 @@
 
             // Generate markup for the list of entries, in their final order
 
-            for (var i = 0; i < entries.length; ++i) {
+            for (var j = 0; j < entries.length; ++j) {
 
-                entry = entries[i];
+                entry = entries[j];
 
-                if (i % options.legend.noColumns == 0) {
+                if (j % options.legend.noColumns === 0) {
+
                     if (rowStarted)
                         fragments.push('</tr>');
                     fragments.push('<tr>');
@@ -2177,17 +2183,17 @@
             if (rowStarted)
                 fragments.push('</tr>');
 
-            if (fragments.length == 0)
+            if (!fragments.length)
                 return;
 
             var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
-            if (options.legend.container != null)
+            if (options.legend.container !== null)
                 $(options.legend.container).html(table);
             else {
                 var pos = "",
                     p = options.legend.position,
                     m = options.legend.margin;
-                if (m[0] == null)
+                if (m[0] === null)
                     m = [m, m];
                 if (p.charAt(0) == "n")
                     pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
@@ -2198,12 +2204,12 @@
                 else if (p.charAt(1) == "w")
                     pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
                 var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
-                if (options.legend.backgroundOpacity != 0.0) {
+                if (options.legend.backgroundOpacity !== 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
                     // label boxes
                     var c = options.legend.backgroundColor;
-                    if (c == null) {
+                    if (c === null) {
                         c = options.grid.backgroundColor;
                         if (c && typeof c == "string")
                             c = $.color.parse(c);
@@ -2228,21 +2234,23 @@
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
                 smallestDistance = maxDistance * maxDistance + 1,
-                item = null, foundPoint = false, i, j;
+                item = null, foundPoint = false, i, j, x, y, b,
+                s, axisx, axisy, points, ps,
+                mx, my, maxx, maxy;
 
             for (i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(series[i]))
                     continue;
                 
-                var s = series[i],
-                    axisx = s.xaxis,
-                    axisy = s.yaxis,
-                    points = s.datapoints.points,
-                    ps = s.datapoints.pointsize,
-                    mx = axisx.c2p(mouseX), // precompute some stuff to make the loop faster
-                    my = axisy.c2p(mouseY),
-                    maxx = maxDistance / axisx.scale,
-                    maxy = maxDistance / axisy.scale;
+                s = series[i],
+                axisx = s.xaxis;
+                axisy = s.yaxis;
+                points = s.datapoints.points;
+                ps = s.datapoints.pointsize;
+                mx = axisx.c2p(mouseX); // precompute some stuff to make the loop faster
+                my = axisy.c2p(mouseY);
+                maxx = maxDistance / axisx.scale;
+                maxy = maxDistance / axisy.scale;
 
                 // with inverse transforms, we can't use the maxx/maxy
                 // optimization, sadly
@@ -2253,8 +2261,9 @@
                 
                 if (s.lines.show || s.points.show) {
                     for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1];
-                        if (x == null)
+                        x = points[j];
+                        y = points[j + 1];
+                        if (x === null)
                             continue;
                         
                         // For points and lines, the cursor must be within a
@@ -2283,13 +2292,15 @@
                         barRight = barLeft + s.bars.barWidth;
                     
                     for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1], b = points[j + 2];
-                        if (x == null)
+                        x = points[j];
+                        y = points[j + 1];
+                        b = points[j + 2];
+                        if (x === null)
                             continue;
   
                         // for a bar graph, the cursor must be inside the bar
-                        if (series[i].bars.horizontal ? 
-                            (mx <= Math.max(b, x) && mx >= Math.min(b, x) && 
+                        if (series[i].bars.horizontal ?
+                            (mx <= Math.max(b, x) && mx >= Math.min(b, x) &&
                              my >= y + barLeft && my <= y + barRight) :
                             (mx >= x + barLeft && mx <= x + barRight &&
                              my >= Math.min(b, y) && my <= Math.max(b, y)))
@@ -2315,7 +2326,7 @@
         function onMouseMove(e) {
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", e,
-                                       function (s) { return s["hoverable"] != false; });
+                                       function (s) { return s["hoverable"] !== false; });
         }
 
         function onMouseLeave(e) {
@@ -2326,7 +2337,7 @@
 
         function onClick(e) {
             triggerClickHoverEvent("plotclick", e,
-                                   function (s) { return s["clickable"] != false; });
+                                   function (s) { return s["clickable"] !== false; });
         }
 
         // trigger click or hover event (they send the same parameters
@@ -2344,8 +2355,8 @@
 
             if (item) {
                 // fill in mouse pos for any listeners out there
-                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left);
-                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top);
+                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left, 10);
+                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top, 10);
             }
 
             if (options.grid.autoHighlight) {
@@ -2419,7 +2430,7 @@
         }
             
         function unhighlight(s, point) {
-            if (s == null && point == null) {
+            if (s === null && point === null) {
                 highlights = [];
                 triggerRedrawOverlay();
             }
@@ -2441,8 +2452,7 @@
         function indexOfHighlight(s, p) {
             for (var i = 0; i < highlights.length; ++i) {
                 var h = highlights[i];
-                if (h.series == s && h.point[0] == p[0]
-                    && h.point[1] == p[1])
+                if (h.series == s && h.point[0] == p[0] && h.point[1] == p[1])
                     return i;
             }
             return -1;
@@ -2450,7 +2460,7 @@
         
         function drawPointHighlight(series, point) {
             var x = point[0], y = point[1],
-                axisx = series.xaxis, axisy = series.yaxis;
+                axisx = series.xaxis, axisy = series.yaxis,
                 highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
             
             if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
@@ -2458,10 +2468,11 @@
             
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
+
             octx.strokeStyle = highlightColor;
-            var radius = 1.5 * pointRadius,
-                x = axisx.p2c(x),
-                y = axisy.p2c(y);
+            var radius = 1.5 * pointRadius;
+            x = axisx.p2c(x);
+            y = axisy.p2c(y);
             
             octx.beginPath();
             if (series.points.symbol == "circle")
@@ -2497,9 +2508,9 @@
                     var c = spec.colors[i];
                     if (typeof c != "string") {
                         var co = $.color.parse(defaultColor);
-                        if (c.brightness != null)
+                        if (c.brightness !== null)
                             co = co.scale('rgb', c.brightness);
-                        if (c.opacity != null)
+                        if (c.opacity !== null)
                             co.a *= c.opacity;
                         c = co.toString();
                     }
