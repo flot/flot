@@ -419,55 +419,59 @@
         }
 
         function fillInSeriesOptions() {
-            var i;
-            
-            // collect what we already got of colors
-            var neededColors = series.length,
-                usedColors = [],
-                assignedColors = [];
+
+            var neededColors = series.length, maxIndex = 0, i;
+
+            // Subtract the number of series that already have fixed
+            // colors from the number we need to generate.
+
             for (i = 0; i < series.length; ++i) {
                 var sc = series[i].color;
                 if (sc != null) {
-                    --neededColors;
-                    if (typeof sc == "number")
-                        assignedColors.push(sc);
-                    else
-                        usedColors.push($.color.parse(series[i].color));
-                }
-            }
-            
-            // we might need to generate more colors if higher indices
-            // are assigned
-            for (i = 0; i < assignedColors.length; ++i) {
-                neededColors = Math.max(neededColors, assignedColors[i] + 1);
-            }
-
-            // produce colors as needed
-            var colors = [], variation = 0;
-            i = 0;
-            while (colors.length < neededColors) {
-                var c;
-                if (options.colors.length == i) // check degenerate case
-                    c = $.color.make(100, 100, 100);
-                else
-                    c = $.color.parse(options.colors[i]);
-
-                // vary color if needed
-                var sign = variation % 2 == 1 ? -1 : 1;
-                c.scale('rgb', 1 + sign * Math.ceil(variation / 2) * 0.2);
-
-                // FIXME: if we're getting to close to something else,
-                // we should probably skip this one
-                colors.push(c);
-                
-                ++i;
-                if (i >= options.colors.length) {
-                    i = 0;
-                    ++variation;
+                    neededColors--;
+                    if (typeof sc == "number" && sc > maxIndex) {
+                        maxIndex = sc;
+                    }
                 }
             }
 
-            // fill in the options
+            // If any of the user colors are numeric indexes, then we
+            // need to generate at least as many as the highest index.
+
+            if (maxIndex > neededColors) {
+                neededColors = maxIndex + 1;
+            }
+
+            // Generate the needed colors, based on the option colors
+
+            var c, colors = [], colorPool = options.colors,
+                colorPoolSize = colorPool.length, variation = 0;
+
+            for (i = 0; i < neededColors; i++) {
+
+                c = $.color.parse(colorPool[i % colorPoolSize] || "#666");
+
+                // Each time we exhaust the colors in the pool we adjust
+                // a scaling factor used to produce more variations on
+                // those colors. The factor alternates negative/positive
+                // to produce lighter/darker colors.
+
+                // Reset the variation after every few cycles, or else
+                // it will end up producing only white or black colors.
+
+                if (i % colorPoolSize == 0 && i) {
+                    if (variation >= 0) {
+                        if (variation < 0.5) {
+                            variation = -variation - 0.2;
+                        } else variation = 0;
+                    } else variation = -variation;
+                }
+
+                colors[i] = c.scale('rgb', 1 + variation);
+            }
+
+            // Finalize the series options, filling in their colors
+
             var colori = 0, s;
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
