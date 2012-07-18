@@ -439,34 +439,32 @@
                 neededColors = maxIndex + 1;
             }
 
-            // Generate as many colors as necessary, using the provided
-            // colors as a base and alternatingly increasing/decreasing
-            // their luminosity in steps that grow smaller each time we
-            // hit the edge of the color space.
+            // Generate the needed colors, based on the option colors
 
-            var colors = [], variation = 0;
+            var c, colors = [], colorPool = options.colors,
+                colorPoolSize = colorPool.length, variation = 0;
 
-            i = 0;
-            while (colors.length < neededColors) {
-                var c;
-                if (options.colors.length == i) // check degenerate case
-                    c = $.color.make(100, 100, 100);
-                else
-                    c = $.color.parse(options.colors[i]);
+            for (i = 0; i < neededColors; i++) {
 
-                // vary color if needed
-                var sign = variation % 2 == 1 ? -1 : 1;
-                c.scale('rgb', 1 + sign * Math.ceil(variation / 2) * 0.2);
+                c = $.color.parse(colorPool[i % colorPoolSize] || "#666");
 
-                // FIXME: if we're getting to close to something else,
-                // we should probably skip this one
-                colors.push(c);
-                
-                ++i;
-                if (i >= options.colors.length) {
-                    i = 0;
-                    ++variation;
+                // Each time we exhaust the colors in the pool we adjust
+                // a scaling factor used to produce more variations on
+                // those colors. The factor alternates negative/positive
+                // to produce lighter/darker colors.
+
+                // Reset the variation after every few cycles, or else
+                // it will end up producing only white or black colors.
+
+                if (i % colorPoolSize == 0 && i) {
+                    if (variation >= 0) {
+                        if (variation < 0.5) {
+                            variation = -variation - 0.2;
+                        } else variation = 0;
+                    } else variation = -variation;
                 }
+
+                colors[i] = c.scale('rgb', 1 + variation);
             }
 
             // Finalize the series options, filling in their colors
