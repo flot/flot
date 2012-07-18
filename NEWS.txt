@@ -114,6 +114,9 @@ Bug fixes
 - Axis labels no longer appear as decimals rather than integers in
   certain cases. (patch by Clemens Stolle, issue 541)
 
+- Automatic color generation no longer produces only whites and blacks
+  when there are many series. (patch by David Schnur and Tom Cleaveland)
+
 
 Flot 0.7
 --------
