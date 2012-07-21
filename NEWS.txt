@@ -89,6 +89,9 @@ Changes:
 - The legend now omits entries whose labelFormatter returns null.
   (patch by Tom Cleaveland, Christopher Lambert, and Simon Strandgaard)
 
+- Added support for high pixel density (retina) displays, resulting in
+  much crisper charts on such devices. (patch by Olivier Guerriat)
+
 
 Bug fixes
 
