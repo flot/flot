@@ -148,7 +148,6 @@
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
-        canvasBackingScale,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
         canvasWidth = 0, canvasHeight = 0,
@@ -716,39 +715,57 @@
             });
         }
 
-        // Retina display support
-        function backingScale(cctx) {
-			if(window.devicePixelRatio > 1 && (cctx.webkitBackingStorePixelRatio === undefined || cctx.webkitBackingStorePixelRatio < 2)) {
-				return window.devicePixelRatio;
-			}
-			return 1;
+        //////////////////////////////////////////////////////////////////////////////////
+        // Returns the display's ratio between physical and device-independent pixels.
+        //
+        // This is the ratio between the width that the browser advertises and the number
+        // of pixels actually available in that space.  The iPhone 4, for example, has a
+        // device-independent width of 320px, but its screen is actually 640px wide.  It
+        // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
+
+        function getPixelRatio(cctx) {
+            if (window.devicePixelRatio > 1 && (cctx.webkitBackingStorePixelRatio === undefined || cctx.webkitBackingStorePixelRatio < 2)) {
+                return window.devicePixelRatio;
+            }
+            return 1;
         }
-        
+
         function makeCanvas(skipPositioning, cls) {
+
             var c = document.createElement('canvas');
             c.className = cls;
-            
+
             var cctx = c.getContext("2d");            
-            canvasBackingScale = backingScale(cctx); // Retina display support
-            
-            c.width = canvasBackingScale*canvasWidth;
-            c.height = canvasBackingScale*canvasHeight;
+
+            // Increase the canvas density based on the display's pixel ratio; basically
+            // giving the canvas more pixels without increasing the size of its element,
+            // to take advantage of the fact that retina displays have that many more
+            // pixels than they actually use for page & element widths.
+
+            var pixelRatio = getPixelRatio(cctx);
+
+            c.width = canvasWidth * pixelRatio;
+            c.height = canvasHeight * pixelRatio;
             c.style.width = canvasWidth + "px";
             c.style.height = canvasHeight + "px";
-                    
+
             if (!skipPositioning)
                 $(c).css({ position: 'absolute', left: 0, top: 0 });
-                
+
             $(c).appendTo(placeholder);
-                
+
             if (!c.getContext) // excanvas hack
                 c = window.G_vmlCanvasManager.initElement(c);
 
-            // used for resetting in case we get replotted
+            // Save the context so we can reset in case we get replotted
+
             cctx.save();
-            
-            // Retina display support
-            cctx.scale(canvasBackingScale, canvasBackingScale);
+
+            // Scale the coordinate space to match the display density; so even though we
+            // may have twice as many pixels, we still want lines and other drawing to
+            // appear at the same size; the extra pixels will just make them crisper.
+
+            cctx.scale(pixelRatio, pixelRatio);
             
             return c;
         }
@@ -762,19 +779,22 @@
         }
 
         function resizeCanvas(c) {
-        
+
         	var cctx = c.getContext("2d");            
-            canvasBackingScale = backingScale(cctx); // Retina display support
-            
-            // resizing should reset the state (excanvas seems to be
-            // buggy though)
+
+            // Handle pixel ratios > 1 for retina displays, as explained in makeCanvas
+
+            var pixelRatio = getPixelRatio(cctx);
+
+            // Resizing should reset the state (excanvas seems to be buggy though)
+
             if (c.style.width != canvasWidth) {
-                c.width = canvasBackingScale*canvasWidth;
+                c.width = canvasWidth * pixelRatio;
                 c.style.width = canvasWidth + "px";
             }
 
             if (c.style.height != canvasHeight) {
-                c.height = canvasBackingScale*canvasHeight;
+                c.height = canvasHeight * pixelRatio;
                 c.style.height = canvasHeight + "px";
             }
 
@@ -784,9 +804,10 @@
 
             // and save again
             cctx.save();
-            
-             // Retina display support
-            cctx.scale(canvasBackingScale, canvasBackingScale);
+
+            // Apply scaling for retina displays, as explained in makeCanvas
+
+            cctx.scale(pixelRatio, pixelRatio);
         }
         
         function setupCanvases() {
