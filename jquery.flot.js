@@ -1719,6 +1719,7 @@
                     i = 0, top, areaOpen = false,
                     ypos = 1, segmentStart = 0, segmentEnd = 0;
 
+                ctx.beginPath();
                 // we process each segment in two turns, first forward
                 // direction to sketch out top, then once we hit the
                 // end we go backwards to sketch the bottom
