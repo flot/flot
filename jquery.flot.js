@@ -735,6 +735,9 @@
             var c = document.createElement('canvas');
             c.className = cls;
 
+            if (!c.getContext) // excanvas hack
+                c = window.G_vmlCanvasManager.initElement(c);
+
             var cctx = c.getContext("2d");            
 
             // Increase the canvas density based on the display's pixel ratio; basically
@@ -753,9 +756,6 @@
                 $(c).css({ position: 'absolute', left: 0, top: 0 });
 
             $(c).appendTo(placeholder);
-
-            if (!c.getContext) // excanvas hack
-                c = window.G_vmlCanvasManager.initElement(c);
 
             // Save the context so we can reset in case we get replotted
 
