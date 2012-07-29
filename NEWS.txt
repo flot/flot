@@ -132,6 +132,9 @@ Bug fixes
 - Automatic color generation no longer produces only whites and blacks
   when there are many series. (patch by David Schnur and Tom Cleaveland)
 
+- Fixed an error when custom tick labels weren't provided as strings.
+  (patch by Shad Downey)
+
 
 Flot 0.7
 --------
