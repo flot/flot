@@ -943,7 +943,7 @@
                 // accept various kinds of newlines, including HTML ones
                 // (you can actually split directly on regexps in Javascript,
                 // but IE is unfortunately broken)
-                var lines = t.label.replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
+                var lines = String(t.label).replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
                 for (var j = 0; j < lines.length; ++j) {
                     var line = { text: lines[j] },
                         m = ctx.measureText(line.text);
