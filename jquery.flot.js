@@ -93,7 +93,10 @@
                     shadowSize: 3,
                     highlightColor: null,
                     findNearbyItem: findNearbyItemDefault,  
-                    drawHighlight: drawHighlightDefault     
+                    editMode: 'none',   //could be none, x, y, xy, v
+                    drawHighlight: drawHighlightDefault,     
+                    drawEditHighlight: drawEditHighlightDefault,
+                    justEditing: false
                 },
                 grid: {
                     show: true,
@@ -113,6 +116,7 @@
                     // interactive stuff
                     clickable: false,
                     hoverable: false,
+                    editable: false,
                     autoHighlight: true, // highlight in case mouse is near
                     mouseActiveRadius: 10 // how far the mouse can be away to activate an item
                 },
@@ -853,6 +857,11 @@
 
             if (options.grid.clickable)
                 eventHolder.click(onClick);
+
+            if (options.grid.editable) {  
+                eventHolder.mousedown(onMouseDown);
+                eventHolder.mouseup(onMouseUp);
+            }
 
             executeHooks(hooks.bindEvents, [eventHolder]);
         }
@@ -1778,7 +1787,6 @@
             }
         }
 
-
         // interactive features
         
         var highlights = [],
@@ -1789,6 +1797,7 @@
         { var item = null,v;
           for(var i = 0; i < series.length; i++)
           { var s = series[i];
+            s.justEditing = options.series.justEditing;  
             if(!seriesFilter(s)) continue;
             if(s.findNearbyItem != null) item = s.findNearbyItem(mouseX, mouseY, i, s);
             if(item) break;
@@ -1807,6 +1816,7 @@
             }
             return null;
         }
+
         function findNearbyItemDefault(mouseX,mouseY,i,series) 
         { var maxDistance = options.grid.mouseActiveRadius,
               smallestDistance = maxDistance * maxDistance + 1,
@@ -1848,26 +1858,74 @@
           return item;
         }
 
-        function onMouseMove(e) {
+        function onMouseDown(e) { 
+            if (options.grid.editable)
+            {    var positem = triggerMouseEvent("plotdown",e,
+                                       function(s) { return s["editMode"] != 'none'});
+                 if (positem[1]) {
+                   options.series.justEditing = positem;
+                 }
+            }    
+        }
+        
+        function onMouseUp(e){ 
+          if (options.series.justEditing)
+          {   var positem = triggerMouseEvent("plotup",e,
+                                      function(s) { return s["editMode"] != 'none '});
+              placeholder.trigger("datadrop",options.series.justEditing);
+          }
+          options.series.justEditing = false;
+          triggerRedrawOverlay();
+        }
+        
+        function onMouseMove(e) {  
             if (options.grid.hoverable)
-                triggerClickHoverEvent("plothover", e,
+                var positem = triggerMouseEvent("plothover", e, 
                                        function (s) { return s["hoverable"] != false; });
+            if(options.series.justEditing)
+            {   var i = options.series.justEditing[1].seriesIndex;         
+                switch(series[i].editMode)
+                {   case "none":
+                        break;
+                    case "x":
+                        options.series.justEditing[0].x = positem[0].x;
+                        options.series.justEditing[0].x1 = positem[0].x1;
+                        options.series.justEditing[0].pageX = positem[0].pageX;
+                        break;
+                    case "y":
+                        options.series.justEditing[0].y = positem[0].y;
+                        options.series.justEditing[0].y1 = positem[0].y1;
+                        options.series.justEditing[0].pageY = positem[0].pageY;
+                        break;
+                    case "v":
+                        if(positem[1])
+                        {   options.series.justEditing[0] = positem[0];
+                            options.series.justEditing[0].value = positem[1].value;
+                        }
+                        break;
+                    default:
+                        options.series.justEditing[0] = positem[0];
+                }
+                triggerRedrawOverlay(); 
+            }                   
         }
 
         function onMouseLeave(e) {
             if (options.grid.hoverable)
-                triggerClickHoverEvent("plothover", e,
+            {    triggerMouseEvent("plothover", e,
                                        function (s) { return false; });
+                 options.series.justEditing = false;
+            }
         }
 
         function onClick(e) {
-            triggerClickHoverEvent("plotclick", e,
+            triggerMouseEvent("plotclick", e,  
                                    function (s) { return s["clickable"] != false; });
         }
 
         // trigger click or hover event (they send the same parameters
         // so we share their code)
-        function triggerClickHoverEvent(eventname, event, seriesFilter) {
+        function triggerMouseEvent(eventname, event, seriesFilter) {  
             var offset = eventHolder.offset(),
                 canvasX = event.pageX - offset.left - plotOffset.left,
                 canvasY = event.pageY - offset.top - plotOffset.top,
@@ -1900,6 +1958,8 @@
             }
             
             placeholder.trigger(eventname, [ pos, item ]);
+            
+            return [pos, item];  
         }
 
         function triggerRedrawOverlay() {
@@ -1913,7 +1973,7 @@
                 redrawTimeout = setTimeout(drawOverlay, t);
         }
 
-        function drawOverlay() { 
+        function drawOverlay() {
             redrawTimeout = null;
 
             // draw highlights
@@ -1925,6 +1985,11 @@
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];
                 hi.series.drawHighlight(octx,hi.series, hi.point, hi.dataIndex);
+            }
+            if (options.series.justEditing)  
+            {   hi = options.series.justEditing;
+                pos = [hi[0].x1,hi[0].y1];
+                series[hi[1].seriesIndex].drawEditHighlight(octx,series[hi[1].seriesIndex],pos,series[hi[1].dataIndex]);
             }
             octx.restore();
             
@@ -2012,41 +2077,8 @@
             return -1;
         }
         
-        function drawPointHighlight(series, point) {
-            var x = point[0], y = point[1],
-                axisx = series.xaxis, axisy = series.yaxis;
-                highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
-            
-            if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
-                return;
-            
-            var pointRadius = series.points.radius + series.points.lineWidth / 2;
-            octx.lineWidth = pointRadius;
-            octx.strokeStyle = highlightColor;
-            var radius = 1.5 * pointRadius,
-                x = axisx.p2c(x),
-                y = axisy.p2c(y);
-            
-            octx.beginPath();
-            if (series.points.symbol == "circle")
-                octx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            else
-                series.points.symbol(octx, x, y, radius, false);
-            octx.closePath();
-            octx.stroke();
-        }
-
-        function drawBarHighlight(series, point) {
-            var highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString(),
-                fillStyle = highlightColor,
-                barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-                
-            octx.lineWidth = series.bars.lineWidth;
-            octx.strokeStyle = highlightColor;
-            
-            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
-                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
-        }
+        function drawEditHighlightDefault(octx,series,point,dataIndex)
+        { drawHighlightDefault(octx,series,point,dataIndex,true); }   
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
             if (typeof spec == "string")
@@ -2522,7 +2554,7 @@
     function processRawData(plot,s,data,datapoints){ 
       if(s.bars.show == true)
       { s.findNearbyItem = findNearbyItemBars;
-        s.drawHighlight = drawHighlightBar;     
+        s.drawHighlight = drawHighlightBar;    
       }
     }
   }  
