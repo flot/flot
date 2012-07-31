@@ -92,7 +92,8 @@
                 series: {
                     shadowSize: 3,
                     highlightColor: null,
-                    findNearbyItem: findNearbyItemDefault, 
+                    findNearbyItem: findNearbyItemDefault,  
+                    drawHighlight: drawHighlightDefault     
                 },
                 grid: {
                     show: true,
@@ -146,7 +147,7 @@
         plot.setData = setData;
         plot.setupGrid = setupGrid;
         plot.draw = draw;
-        plot.getFillStyle = getFillStyle;                                   
+        plot.getFillStyle = getFillStyle;                                  
         plot.getPlaceholder = function() { return placeholder; };
         plot.getCanvas = function() { return canvas; };
         plot.getPlotOffset = function() { return plotOffset; };
@@ -1784,7 +1785,7 @@
             redrawTimeout = null;
         
         // returns the data item the mouse is over, or null if none is found
-        function findNearbyItem(mouseX, mouseY, seriesFilter)
+        function findNearbyItem(mouseX, mouseY, seriesFilter) 
         { var item = null,v;
           for(var i = 0; i < series.length; i++)
           { var s = series[i];
@@ -1912,7 +1913,7 @@
                 redrawTimeout = setTimeout(drawOverlay, t);
         }
 
-        function drawOverlay() {
+        function drawOverlay() { 
             redrawTimeout = null;
 
             // draw highlights
@@ -1920,18 +1921,46 @@
             octx.clearRect(0, 0, canvasWidth, canvasHeight);
             octx.translate(plotOffset.left, plotOffset.top);
             
-            var i, hi;
+            var i, hi, pos;
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];
-
-                if (hi.series.bars.show)
-                    drawBarHighlight(hi.series, hi.point);
-                else
-                    drawPointHighlight(hi.series, hi.point);
+                hi.series.drawHighlight(octx,hi.series, hi.point, hi.dataIndex);
             }
             octx.restore();
             
             executeHooks(hooks.drawOverlay, [octx]);
+        }
+
+        function drawHighlightDefault(octx,series,point,dataIndex,edit)
+        { var x = point[0], y = point[1],
+              axisx = series.xaxis, axisy = series.yaxis;
+            
+          if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) return;
+            
+          var pointRadius = series.points.radius + series.points.lineWidth / 2;
+          octx.lineWidth = pointRadius;
+          octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
+          var radius = 1.5 * pointRadius,
+              x = axisx.p2c(x),
+              y = axisy.p2c(y);
+            
+          octx.beginPath();
+          if (series.points.symbol == "circle")
+          { octx.arc(x, y, radius, 0, 2 * Math.PI, false);
+            if(edit)
+            { octx.fillStyle = "#ff8080";
+              octx.fill();
+              octx.lineWidth = 2;
+              octx.moveTo(x,y-radius);
+              octx.lineTo(x,y+radius);
+              octx.moveTo(x-radius,y);
+              octx.lineTo(x+radius,y);
+            }
+          }
+          else
+            series.points.symbol(octx, x, y, radius, false);
+          octx.closePath();
+          octx.stroke();
         }
         
         function highlight(s, point, auto) {
@@ -2448,7 +2477,7 @@
       }
     }
   };
-  function findNearbyItemBars(mouseX,mouseY,i,serie) 
+  function findNearbyItemBars(mouseX,mouseY,i,serie)
   { var j, item = null;
     var barLeft = serie.bars.align == "left" ? 0 : -serie.bars.barWidth/2,
         barRight = barLeft + serie.bars.barWidth;
@@ -2473,154 +2502,163 @@
     }
     return item;
   }
+  function drawHighlightBar(octx,series, point,dataIndex) { 
+    octx.lineWidth = series.bars.lineWidth;
+    octx.strokeStyle = $.color.parse(series.color).scale('a', 0.5).toString();
+    var fillStyle = $.color.parse(series.color).scale('a', 0.5).toString();
+    var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+        drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+                0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
+  }
   function init(plot){
     var plotOffset = null;
     plot.hooks.processOptions.push(checkBarsEnabled);
     function checkBarsEnabled(plot, options){
       if(options.series.bars.active){
         plot.hooks.processRawData.push(processRawData); 
-        plot.hooks.drawSeries.push(drawSeriesBars);
+        plot.hooks.drawSeries.push(drawSeriesBars);    
       }
     }
-    function processRawData(plot,s,data,datapoints){
+    function processRawData(plot,s,data,datapoints){ 
       if(s.bars.show == true)
       { s.findNearbyItem = findNearbyItemBars;
+        s.drawHighlight = drawHighlightBar;     
       }
     }
-    function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
-      var left, right, bottom, top,
-          drawLeft, drawRight, drawTop, drawBottom,
-          tmp;
+  }  
+  function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
+    var left, right, bottom, top,
+        drawLeft, drawRight, drawTop, drawBottom,
+        tmp;
+        // in horizontal mode, we start the bar from the left
+        // instead of from the bottom so it appears to be
+        // horizontal rather than vertical
+    if (horizontal) {
+      drawBottom = drawRight = drawTop = true;
+      drawLeft = false;
+      left = b;
+      right = x;
+      top = y + barLeft;
+      bottom = y + barRight;
 
-          // in horizontal mode, we start the bar from the left
-          // instead of from the bottom so it appears to be
-          // horizontal rather than vertical
-      if (horizontal) {
-        drawBottom = drawRight = drawTop = true;
-        drawLeft = false;
-        left = b;
-        right = x;
-        top = y + barLeft;
-        bottom = y + barRight;
-
-        // account for negative bars
-        if (right < left) {
-          tmp = right;
-          right = left;
-          left = tmp;
-          drawLeft = true;
-          drawRight = false;
-        }
-      }
-      else {
-        drawLeft = drawRight = drawTop = true;
-        drawBottom = false;
-        left = x + barLeft;
-        right = x + barRight;
-        bottom = b;
-        top = y;
-
-        // account for negative bars
-        if (top < bottom) {
-          tmp = top;
-          top = bottom;
-          bottom = tmp;
-          drawBottom = true;
-          drawTop = false;
-        }
-      }
-           
-      // clip
-      if (right < axisx.min || left > axisx.max ||
-            top < axisy.min || bottom > axisy.max)
-        return;
-            
-      if (left < axisx.min) {
-        left = axisx.min;
-        drawLeft = false;
-      }
-
-      if (right > axisx.max) {
-        right = axisx.max;
+      // account for negative bars
+      if (right < left) {
+        tmp = right;
+        right = left;
+        left = tmp;
+        drawLeft = true;
         drawRight = false;
       }
+    }
+    else {
+      drawLeft = drawRight = drawTop = true;
+      drawBottom = false;
+      left = x + barLeft;
+      right = x + barRight;
+      bottom = b;
+      top = y;
 
-      if (bottom < axisy.min) {
-        bottom = axisy.min;
-        drawBottom = false;
-      }
-            
-      if (top > axisy.max) {
-        top = axisy.max;
+      // account for negative bars
+      if (top < bottom) {
+        tmp = top;
+        top = bottom;
+        bottom = tmp;
+        drawBottom = true;
         drawTop = false;
       }
-
-      left = axisx.p2c(left);
-      bottom = axisy.p2c(bottom);
-      right = axisx.p2c(right);
-      top = axisy.p2c(top);
-            
-      // fill the bar
-      if (fillStyleCallback) {
-        c.beginPath();
-        c.moveTo(left, bottom);
-        c.lineTo(left, top);
-        c.lineTo(right, top);
-        c.lineTo(right, bottom);
-        c.fillStyle = fillStyleCallback(bottom, top);
-        c.fill();
-      }
-
-      // draw outline
-      if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
-        c.beginPath();
-
-        // FIXME: inline moveTo is buggy with excanvas
-        c.moveTo(left, bottom + offset);
-        if (drawLeft)
-          c.lineTo(left, top + offset);
-        else
-          c.moveTo(left, top + offset);
-        if (drawTop)
-          c.lineTo(right, top + offset);
-        else
-          c.moveTo(right, top + offset);
-        if (drawRight)
-          c.lineTo(right, bottom + offset);
-        else
-          c.moveTo(right, bottom + offset);
-        if (drawBottom)
-          c.lineTo(left, bottom + offset);
-        else
-          c.moveTo(left, bottom + offset);
-        c.stroke();
-      }
     }
-    function drawSeriesBars(plot,ctx,series) {
-      function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
-        var points = datapoints.points, ps = datapoints.pointsize;
-                
-        for (var i = 0; i < points.length; i += ps) {
-          if (points[i] == null) continue;
-          drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
-        }
-      }
-      if(series.bars.show)
-      { plotOffset = plot.getPlotOffset();
+           
+    // clip
+    if (right < axisx.min || left > axisx.max ||
+          top < axisy.min || bottom > axisy.max)
+      return;
+            
+    if (left < axisx.min) {
+      left = axisx.min;
+      drawLeft = false;
+    }
 
-        ctx.save();
-        ctx.translate(plotOffset.left, plotOffset.top);
+    if (right > axisx.max) {
+      right = axisx.max;
+      drawRight = false;
+    }
 
-        // FIXME: figure out a way to add shadows (for instance along the right edge)
-        ctx.lineWidth = series.bars.lineWidth;
-        ctx.strokeStyle = series.color;
-        var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
-        var fillStyleCallback = series.bars.fill ? function (bottom, top) { return plot.getFillStyle(series.bars, series.color, bottom, top); } : null;
-        plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
-        ctx.restore();
-      }
+    if (bottom < axisy.min) {
+      bottom = axisy.min;
+      drawBottom = false;
+    }
+            
+    if (top > axisy.max) {
+      top = axisy.max;
+      drawTop = false;
+    }
+    
+    left = axisx.p2c(left);
+    bottom = axisy.p2c(bottom);
+    right = axisx.p2c(right);
+    top = axisy.p2c(top);
+            
+    // fill the bar
+    if (fillStyleCallback) {
+      c.beginPath();
+      c.moveTo(left, bottom);
+      c.lineTo(left, top);
+      c.lineTo(right, top);
+      c.lineTo(right, bottom);
+      c.fillStyle = fillStyleCallback(bottom, top);
+      c.fill();
+    }
+
+    // draw outline
+    if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
+      c.beginPath();
+      // FIXME: inline moveTo is buggy with excanvas
+      c.moveTo(left, bottom + offset);
+      if (drawLeft)
+        c.lineTo(left, top + offset);
+      else
+        c.moveTo(left, top + offset);
+      if (drawTop)
+        c.lineTo(right, top + offset);
+      else
+        c.moveTo(right, top + offset);
+      if (drawRight)
+        c.lineTo(right, bottom + offset);
+      else
+        c.moveTo(right, bottom + offset);
+      if (drawBottom)
+        c.lineTo(left, bottom + offset);
+      else
+        c.moveTo(left, bottom + offset);
+      c.stroke();
     }
   }
+  function drawSeriesBars(plot,ctx,series) {
+    function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
+      var points = datapoints.points, ps = datapoints.pointsize;
+              
+      for (var i = 0; i < points.length; i += ps) {
+        if (points[i] == null) continue;
+        drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+      }
+    }
+    if(series.bars.show)
+    { plotOffset = plot.getPlotOffset();
+
+      ctx.save();
+      ctx.translate(plotOffset.left, plotOffset.top);
+
+
+      // FIXME: figure out a way to add shadows (for instance along the right edge)
+      ctx.lineWidth = series.bars.lineWidth;
+      ctx.strokeStyle = series.color;
+      var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+      var fillStyleCallback = series.bars.fill ? function (bottom, top) { return plot.getFillStyle(series.bars, series.color, bottom, top); } : null;
+      plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
+      ctx.restore();
+    }
+  }
+
   $.plot.plugins.push({
             init: init,
             options: options,
