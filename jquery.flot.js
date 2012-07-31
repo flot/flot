@@ -90,31 +90,6 @@
                 xaxes: [],
                 yaxes: [],
                 series: {
-                    points: {
-                        show: false,
-                        radius: 3,
-                        lineWidth: 2, // in pixels
-                        fill: true,
-                        fillColor: "#ffffff",
-                        symbol: "circle" // or callback
-                    },
-                    lines: {
-                        // we don't put in show: false so we can see
-                        // whether lines were actively disabled 
-                        lineWidth: 2, // in pixels
-                        fill: false,
-                        fillColor: null,
-                        steps: false
-                    },
-                    bars: {
-                        show: false,
-                        lineWidth: 2, // in pixels
-                        barWidth: 1, // in units of the x axis
-                        fill: true,
-                        fillColor: null,
-                        align: "left", // "left", "right", or "center"
-                        horizontal: false
-                    },
                     shadowSize: 3,
                     highlightColor: null
                 },
@@ -170,6 +145,7 @@
         plot.setData = setData;
         plot.setupGrid = setupGrid;
         plot.draw = draw;
+        plot.getFillStyle = getFillStyle;                                   
         plot.getPlaceholder = function() { return placeholder; };
         plot.getCanvas = function() { return canvas; };
         plot.getPlotOffset = function() { return plotOffset; };
@@ -943,7 +919,7 @@
                 // accept various kinds of newlines, including HTML ones
                 // (you can actually split directly on regexps in Javascript,
                 // but IE is unfortunately broken)
-                var lines = (t.label + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
+                var lines = t.label.replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
                 for (var j = 0; j < lines.length; ++j) {
                     var line = { text: lines[j] },
                         m = ctx.measureText(line.text);
@@ -1387,7 +1363,6 @@
 
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
-                drawSeries(series[i]);
             }
 
             executeHooks(hooks.draw, [ctx]);
@@ -1684,472 +1659,6 @@
             ctx.restore();
         }
 
-        function drawSeries(series) {
-            if (series.lines.show)
-                drawSeriesLines(series);
-            if (series.bars.show)
-                drawSeriesBars(series);
-            if (series.points.show)
-                drawSeriesPoints(series);
-        }
-        
-        function drawSeriesLines(series) {
-            function plotLine(datapoints, xoffset, yoffset, axisx, axisy) {
-                var points = datapoints.points,
-                    ps = datapoints.pointsize,
-                    prevx = null, prevy = null;
-                
-                ctx.beginPath();
-                for (var i = ps; i < points.length; i += ps) {
-                    var x1 = points[i - ps], y1 = points[i - ps + 1],
-                        x2 = points[i], y2 = points[i + 1];
-                    
-                    if (x1 == null || x2 == null)
-                        continue;
-
-                    // clip with ymin
-                    if (y1 <= y2 && y1 < axisy.min) {
-                        if (y2 < axisy.min)
-                            continue;   // line segment is outside
-                        // compute new intersection point
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.min;
-                    }
-                    else if (y2 <= y1 && y2 < axisy.min) {
-                        if (y1 < axisy.min)
-                            continue;
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.min;
-                    }
-
-                    // clip with ymax
-                    if (y1 >= y2 && y1 > axisy.max) {
-                        if (y2 > axisy.max)
-                            continue;
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.max;
-                    }
-                    else if (y2 >= y1 && y2 > axisy.max) {
-                        if (y1 > axisy.max)
-                            continue;
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.max;
-                    }
-
-                    // clip with xmin
-                    if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min)
-                            continue;
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.min;
-                    }
-                    else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min)
-                            continue;
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.min;
-                    }
-
-                    // clip with xmax
-                    if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max)
-                            continue;
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.max;
-                    }
-                    else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max)
-                            continue;
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.max;
-                    }
-
-                    if (x1 != prevx || y1 != prevy)
-                        ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
-                    
-                    prevx = x2;
-                    prevy = y2;
-                    ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
-                }
-                ctx.stroke();
-            }
-
-            function plotLineArea(datapoints, axisx, axisy) {
-                var points = datapoints.points,
-                    ps = datapoints.pointsize,
-                    bottom = Math.min(Math.max(0, axisy.min), axisy.max),
-                    i = 0, top, areaOpen = false,
-                    ypos = 1, segmentStart = 0, segmentEnd = 0;
-
-                // we process each segment in two turns, first forward
-                // direction to sketch out top, then once we hit the
-                // end we go backwards to sketch the bottom
-                while (true) {
-                    if (ps > 0 && i > points.length + ps)
-                        break;
-
-                    i += ps; // ps is negative if going backwards
-
-                    var x1 = points[i - ps],
-                        y1 = points[i - ps + ypos],
-                        x2 = points[i], y2 = points[i + ypos];
-
-                    if (areaOpen) {
-                        if (ps > 0 && x1 != null && x2 == null) {
-                            // at turning point
-                            segmentEnd = i;
-                            ps = -ps;
-                            ypos = 2;
-                            continue;
-                        }
-
-                        if (ps < 0 && i == segmentStart + ps) {
-                            // done with the reverse sweep
-                            ctx.fill();
-                            areaOpen = false;
-                            ps = -ps;
-                            ypos = 1;
-                            i = segmentStart = segmentEnd + ps;
-                            continue;
-                        }
-                    }
-
-                    if (x1 == null || x2 == null)
-                        continue;
-
-                    // clip x values
-                    
-                    // clip with xmin
-                    if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min)
-                            continue;
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.min;
-                    }
-                    else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min)
-                            continue;
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.min;
-                    }
-
-                    // clip with xmax
-                    if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max)
-                            continue;
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.max;
-                    }
-                    else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max)
-                            continue;
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.max;
-                    }
-
-                    if (!areaOpen) {
-                        // open area
-                        ctx.beginPath();
-                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
-                        areaOpen = true;
-                    }
-                    
-                    // now first check the case where both is outside
-                    if (y1 >= axisy.max && y2 >= axisy.max) {
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
-                        continue;
-                    }
-                    else if (y1 <= axisy.min && y2 <= axisy.min) {
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
-                        continue;
-                    }
-                    
-                    // else it's a bit more complicated, there might
-                    // be a flat maxed out rectangle first, then a
-                    // triangular cutout or reverse; to find these
-                    // keep track of the current x values
-                    var x1old = x1, x2old = x2;
-
-                    // clip the y values, without shortcutting, we
-                    // go through all cases in turn
-                    
-                    // clip with ymin
-                    if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.min;
-                    }
-                    else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.min;
-                    }
-
-                    // clip with ymax
-                    if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.max;
-                    }
-                    else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.max;
-                    }
-
-                    // if the x value was changed we got a rectangle
-                    // to fill
-                    if (x1 != x1old) {
-                        ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
-                        // it goes to (x1, y1), but we fill that below
-                    }
-                    
-                    // fill triangular section, this sometimes result
-                    // in redundant points if (x1, y1) hasn't changed
-                    // from previous line to, but we just ignore that
-                    ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
-                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
-
-                    // fill the other rectangle if it's there
-                    if (x2 != x2old) {
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
-                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
-                    }
-                }
-            }
-
-            ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
-            ctx.lineJoin = "round";
-
-            var lw = series.lines.lineWidth,
-                sw = series.shadowSize;
-            // FIXME: consider another form of shadow when filling is turned on
-            if (lw > 0 && sw > 0) {
-                // draw shadow as a thick and thin line with transparency
-                ctx.lineWidth = sw;
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                // position shadow at angle from the mid of line
-                var angle = Math.PI/18;
-                plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/2), Math.cos(angle) * (lw/2 + sw/2), series.xaxis, series.yaxis);
-                ctx.lineWidth = sw/2;
-                plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/4), Math.cos(angle) * (lw/2 + sw/4), series.xaxis, series.yaxis);
-            }
-
-            ctx.lineWidth = lw;
-            ctx.strokeStyle = series.color;
-            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
-            if (fillStyle) {
-                ctx.fillStyle = fillStyle;
-                plotLineArea(series.datapoints, series.xaxis, series.yaxis);
-            }
-
-            if (lw > 0)
-                plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
-            ctx.restore();
-        }
-
-        function drawSeriesPoints(series) {
-            function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
-                var points = datapoints.points, ps = datapoints.pointsize;
-
-                for (var i = 0; i < points.length; i += ps) {
-                    var x = points[i], y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
-                        continue;
-                    
-                    ctx.beginPath();
-                    x = axisx.p2c(x);
-                    y = axisy.p2c(y) + offset;
-                    if (symbol == "circle")
-                        ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    else
-                        symbol(ctx, x, y, radius, shadow);
-                    ctx.closePath();
-                    
-                    if (fillStyle) {
-                        ctx.fillStyle = fillStyle;
-                        ctx.fill();
-                    }
-                    ctx.stroke();
-                }
-            }
-            
-            ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
-
-            var lw = series.points.lineWidth,
-                sw = series.shadowSize,
-                radius = series.points.radius,
-                symbol = series.points.symbol;
-            if (lw > 0 && sw > 0) {
-                // draw shadow in two steps
-                var w = sw / 2;
-                ctx.lineWidth = w;
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, null, w + w/2, true,
-                           series.xaxis, series.yaxis, symbol);
-
-                ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, null, w/2, true,
-                           series.xaxis, series.yaxis, symbol);
-            }
-
-            ctx.lineWidth = lw;
-            ctx.strokeStyle = series.color;
-            plotPoints(series.datapoints, radius,
-                       getFillStyle(series.points, series.color), 0, false,
-                       series.xaxis, series.yaxis, symbol);
-            ctx.restore();
-        }
-
-        function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
-            var left, right, bottom, top,
-                drawLeft, drawRight, drawTop, drawBottom,
-                tmp;
-
-            // in horizontal mode, we start the bar from the left
-            // instead of from the bottom so it appears to be
-            // horizontal rather than vertical
-            if (horizontal) {
-                drawBottom = drawRight = drawTop = true;
-                drawLeft = false;
-                left = b;
-                right = x;
-                top = y + barLeft;
-                bottom = y + barRight;
-
-                // account for negative bars
-                if (right < left) {
-                    tmp = right;
-                    right = left;
-                    left = tmp;
-                    drawLeft = true;
-                    drawRight = false;
-                }
-            }
-            else {
-                drawLeft = drawRight = drawTop = true;
-                drawBottom = false;
-                left = x + barLeft;
-                right = x + barRight;
-                bottom = b;
-                top = y;
-
-                // account for negative bars
-                if (top < bottom) {
-                    tmp = top;
-                    top = bottom;
-                    bottom = tmp;
-                    drawBottom = true;
-                    drawTop = false;
-                }
-            }
-           
-            // clip
-            if (right < axisx.min || left > axisx.max ||
-                top < axisy.min || bottom > axisy.max)
-                return;
-            
-            if (left < axisx.min) {
-                left = axisx.min;
-                drawLeft = false;
-            }
-
-            if (right > axisx.max) {
-                right = axisx.max;
-                drawRight = false;
-            }
-
-            if (bottom < axisy.min) {
-                bottom = axisy.min;
-                drawBottom = false;
-            }
-            
-            if (top > axisy.max) {
-                top = axisy.max;
-                drawTop = false;
-            }
-
-            left = axisx.p2c(left);
-            bottom = axisy.p2c(bottom);
-            right = axisx.p2c(right);
-            top = axisy.p2c(top);
-            
-            // fill the bar
-            if (fillStyleCallback) {
-                c.beginPath();
-                c.moveTo(left, bottom);
-                c.lineTo(left, top);
-                c.lineTo(right, top);
-                c.lineTo(right, bottom);
-                c.fillStyle = fillStyleCallback(bottom, top);
-                c.fill();
-            }
-
-            // draw outline
-            if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
-                c.beginPath();
-
-                // FIXME: inline moveTo is buggy with excanvas
-                c.moveTo(left, bottom + offset);
-                if (drawLeft)
-                    c.lineTo(left, top + offset);
-                else
-                    c.moveTo(left, top + offset);
-                if (drawTop)
-                    c.lineTo(right, top + offset);
-                else
-                    c.moveTo(right, top + offset);
-                if (drawRight)
-                    c.lineTo(right, bottom + offset);
-                else
-                    c.moveTo(right, bottom + offset);
-                if (drawBottom)
-                    c.lineTo(left, bottom + offset);
-                else
-                    c.moveTo(left, bottom + offset);
-                c.stroke();
-            }
-        }
-        
-        function drawSeriesBars(series) {
-            function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
-                var points = datapoints.points, ps = datapoints.pointsize;
-                
-                for (var i = 0; i < points.length; i += ps) {
-                    if (points[i] == null)
-                        continue;
-                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
-                }
-            }
-
-            ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
-
-            // FIXME: figure out a way to add shadows (for instance along the right edge)
-            ctx.lineWidth = series.bars.lineWidth;
-            ctx.strokeStyle = series.color;
-
-            var barLeft;
-
-            switch (series.bars.align) {
-                case "left":
-                    barLeft = 0;
-                    break;
-                case "right":
-                    barLeft = -series.bars.barWidth;
-                    break;
-                case "center":
-                    barLeft = -series.bars.barWidth / 2;
-                    break;
-                default:
-                    throw new Error("Invalid bar alignment: " + series.bars.align);
-            }
-
-            var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
-            ctx.restore();
-        }
-
         function getFillStyle(filloptions, seriesColor, bottom, top) {
             var fill = filloptions.fill;
             if (!fill)
@@ -2266,7 +1775,6 @@
                 }
             }
         }
-
 
         // interactive features
         
@@ -2577,3 +2085,540 @@
     }
     
 })(jQuery);
+(function ($){ //points Plugin
+  var options = {
+    series: {
+      points: {
+        active: true,
+        show: false,
+        radius: 3,
+        lineWidth: 2, // in pixels
+        fill: true,
+        fillColor: "#ffffff",
+        symbol: "circle" // or callback
+      }
+    }
+  };
+  function init(plot){
+    var plotOffset = null;
+      plot.hooks.processOptions.push(checkPointsEnabled);
+    function checkPointsEnabled(plot, options){
+      if(options.series.points.active){
+        plot.hooks.drawSeries.push(drawSeriesPoints);
+      }
+    }
+  }
+  function drawSeriesPoints(plot,ctx,series) {
+    function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
+      var points = datapoints.points, ps = datapoints.pointsize;
+
+      for (var i = 0; i < points.length; i += ps) {
+        var x = points[i], y = points[i + 1];
+        if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+          continue;
+                    
+        ctx.beginPath();
+        x = axisx.p2c(x);
+        y = axisy.p2c(y) + offset;
+        if (symbol == "circle")
+          ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+        else
+          symbol(ctx, x, y, radius, shadow);
+        ctx.closePath();
+                    
+        if (fillStyle) {
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+        }
+        ctx.stroke();
+      }
+    }
+    if(series.points.show)
+    { plotOffset = plot.getPlotOffset();
+            
+      ctx.save();
+      ctx.translate(plotOffset.left, plotOffset.top);
+
+      var lw = series.points.lineWidth,
+      sw = series.shadowSize,
+      radius = series.points.radius,
+      symbol = series.points.symbol;
+      if (lw > 0 && sw > 0) {
+        // draw shadow in two steps
+        var w = sw / 2;
+        ctx.lineWidth = w;
+        ctx.strokeStyle = "rgba(0,0,0,0.1)";
+        plotPoints(series.datapoints, radius, null, w + w/2, true,
+                   series.xaxis, series.yaxis, symbol);
+
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+        plotPoints(series.datapoints, radius, null, w/2, true,
+                   series.xaxis, series.yaxis, symbol);
+      }
+
+      ctx.lineWidth = lw;
+      ctx.strokeStyle = series.color;
+      plotPoints(series.datapoints, radius,
+                 plot.getFillStyle(series.points, series.color), 0, false,
+                 series.xaxis, series.yaxis, symbol);
+      ctx.restore();
+    }
+  }
+  $.plot.plugins.push({
+            init: init,
+            options: options,
+            name: 'points',
+            version: '0.1'
+  });
+})(jQuery);
+(function ($){ //lines Plugin
+  var options = {
+    series: {
+      lines:{
+        active: true,
+        lineWidth: 2, // in pixels
+        fill: false,
+        fillColor: null,
+        steps: false
+      }
+    }
+  };
+  function init(plot){
+    var plotOffset = null;
+      plot.hooks.processOptions.push(checkLinesEnabled);
+    function checkLinesEnabled(plot, options){
+      if(options.series.lines.active){
+        plot.hooks.drawSeries.push(drawSeriesLines);
+      }
+    }
+    function drawSeriesLines(plot,ctx,series) {
+      function plotLine(datapoints, xoffset, yoffset, axisx, axisy) {
+        var points = datapoints.points,
+        ps = datapoints.pointsize,
+        prevx = null, prevy = null;
+        
+        ctx.beginPath();
+        for (var i = ps; i < points.length; i += ps) {
+          var x1 = points[i - ps], y1 = points[i - ps + 1],
+          x2 = points[i], y2 = points[i + 1];
+          
+          if (x1 == null || x2 == null)
+            continue;
+          
+          // clip with ymin
+          if (y1 <= y2 && y1 < axisy.min) {
+            if (y2 < axisy.min)
+              continue;   // line segment is outside
+            // compute new intersection point
+            x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y1 = axisy.min;
+          }
+          else if (y2 <= y1 && y2 < axisy.min) {
+            if (y1 < axisy.min)
+              continue;
+            x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y2 = axisy.min;
+          }
+
+          // clip with ymax
+          if (y1 >= y2 && y1 > axisy.max) {
+            if (y2 > axisy.max)
+              continue;
+            x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y1 = axisy.max;
+          }
+          else if (y2 >= y1 && y2 > axisy.max) {
+            if (y1 > axisy.max)
+              continue;
+            x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y2 = axisy.max;
+          }
+
+          // clip with xmin
+          if (x1 <= x2 && x1 < axisx.min) {
+            if (x2 < axisx.min)
+              continue;
+            y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x1 = axisx.min;
+          }
+          else if (x2 <= x1 && x2 < axisx.min) {
+            if (x1 < axisx.min)
+              continue;
+            y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x2 = axisx.min;
+          }
+
+          // clip with xmax
+          if (x1 >= x2 && x1 > axisx.max) {
+            if (x2 > axisx.max)
+              continue;
+            y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x1 = axisx.max;
+          }
+          else if (x2 >= x1 && x2 > axisx.max) {
+            if (x1 > axisx.max)
+              continue;
+            y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x2 = axisx.max;
+          }
+
+          if (x1 != prevx || y1 != prevy)
+            ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
+                    
+          prevx = x2;
+          prevy = y2;
+          ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
+        }
+        ctx.stroke();
+      }
+
+      function plotLineArea(datapoints, axisx, axisy) {
+        var points = datapoints.points,
+        ps = datapoints.pointsize,
+        bottom = Math.min(Math.max(0, axisy.min), axisy.max),
+        i = 0, top, areaOpen = false,
+        ypos = 1, segmentStart = 0, segmentEnd = 0;
+
+        // we process each segment in two turns, first forward
+        // direction to sketch out top, then once we hit the
+        // end we go backwards to sketch the bottom
+        while (true) {
+          if (ps > 0 && i > points.length + ps)
+            break;
+
+          i += ps; // ps is negative if going backwards
+
+          var x1 = points[i - ps],
+              y1 = points[i - ps + ypos],
+              x2 = points[i], y2 = points[i + ypos];
+
+          if (areaOpen) {
+            if (ps > 0 && x1 != null && x2 == null) {
+              // at turning point
+              segmentEnd = i;
+              ps = -ps;
+              ypos = 2;
+              continue;
+            }
+
+            if (ps < 0 && i == segmentStart + ps) {
+              // done with the reverse sweep
+              ctx.fill();
+              areaOpen = false;
+              ps = -ps;
+              ypos = 1;
+              i = segmentStart = segmentEnd + ps;
+              continue;
+            }
+          }
+
+          if (x1 == null || x2 == null)
+            continue;
+
+          // clip x values
+                    
+          // clip with xmin
+          if (x1 <= x2 && x1 < axisx.min) {
+            if (x2 < axisx.min)
+              continue;
+            y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x1 = axisx.min;
+          }
+          else if (x2 <= x1 && x2 < axisx.min) {
+            if (x1 < axisx.min)
+              continue;
+            y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x2 = axisx.min;
+          }
+
+          // clip with xmax
+          if (x1 >= x2 && x1 > axisx.max) {
+            if (x2 > axisx.max)
+              continue;
+            y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x1 = axisx.max;
+          }
+          else if (x2 >= x1 && x2 > axisx.max) {
+            if (x1 > axisx.max)
+              continue;
+            y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+            x2 = axisx.max;
+          }
+
+          if (!areaOpen) {
+            // open area
+            ctx.beginPath();
+            ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
+            areaOpen = true;
+          }
+                    
+          // now first check the case where both is outside
+          if (y1 >= axisy.max && y2 >= axisy.max) {
+            ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
+            ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
+            continue;
+          }
+          else if (y1 <= axisy.min && y2 <= axisy.min) {
+            ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
+            ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
+            continue;
+          }
+                    
+          // else it's a bit more complicated, there might
+          // be a flat maxed out rectangle first, then a
+          // triangular cutout or reverse; to find these
+          // keep track of the current x values
+          var x1old = x1, x2old = x2;
+
+          // clip the y values, without shortcutting, we
+          // go through all cases in turn
+                    
+          // clip with ymin
+          if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
+            x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y1 = axisy.min;
+          }
+          else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
+            x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y2 = axisy.min;
+          }
+
+          // clip with ymax
+          if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
+            x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y1 = axisy.max;
+          }
+          else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
+            x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+            y2 = axisy.max;
+          }
+
+          // if the x value was changed we got a rectangle
+          // to fill
+          if (x1 != x1old) {
+            ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
+            // it goes to (x1, y1), but we fill that below
+          }
+                    
+          // fill triangular section, this sometimes result
+          // in redundant points if (x1, y1) hasn't changed
+          // from previous line to, but we just ignore that
+          ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
+          ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+
+          // fill the other rectangle if it's there
+          if (x2 != x2old) {
+            ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+            ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
+          }
+        }
+      }
+
+      if(series.lines.show)
+      { plotOffset = plot.getPlotOffset();
+        ctx.save();
+        ctx.translate(plotOffset.left, plotOffset.top);
+        ctx.lineJoin = "round";
+
+        var lw = series.lines.lineWidth,
+            sw = series.shadowSize;
+      // FIXME: consider another form of shadow when filling is turned on
+        if (lw > 0 && sw > 0) {
+        // draw shadow as a thick and thin line with transparency
+          ctx.lineWidth = sw;
+          ctx.strokeStyle = "rgba(0,0,0,0.1)";
+        // position shadow at angle from the mid of line
+          var angle = Math.PI/18;
+          plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/2), Math.cos(angle) * (lw/2 + sw/2), series.xaxis, series.yaxis);
+          ctx.lineWidth = sw/2;
+          plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/4), Math.cos(angle) * (lw/2 + sw/4), series.xaxis, series.yaxis);
+        }
+
+        ctx.lineWidth = lw;
+        ctx.strokeStyle = series.color;
+        var fillStyle = plot.getFillStyle(series.lines, series.color, 0, plot.height);
+        if (fillStyle) {
+          ctx.fillStyle = fillStyle;
+          plotLineArea(series.datapoints, series.xaxis, series.yaxis);
+        }
+
+        if (lw > 0)
+          plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
+        ctx.restore();
+      } 
+    }
+  }
+  $.plot.plugins.push({
+            init: init,
+            options: options,
+            name: 'lines',
+            version: '0.1'
+  });
+})(jQuery);
+(function ($){ //bars Plugin
+  var options = {
+    series: {
+      bars: {
+        active: true,
+        show: false,
+        lineWidth: 2, // in pixels
+        barWidth: 1, // in units of the x axis
+        fill: true,
+        fillColor: null,
+        align: "left", // or "center" 
+        horizontal: false
+      }
+    }
+  };
+  function init(plot){
+    var plotOffset = null;
+    plot.hooks.processOptions.push(checkBarsEnabled);
+    function checkBarsEnabled(plot, options){
+      if(options.series.bars.active){
+        plot.hooks.drawSeries.push(drawSeriesBars);
+      }
+    }
+    function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
+      var left, right, bottom, top,
+          drawLeft, drawRight, drawTop, drawBottom,
+          tmp;
+
+          // in horizontal mode, we start the bar from the left
+          // instead of from the bottom so it appears to be
+          // horizontal rather than vertical
+      if (horizontal) {
+        drawBottom = drawRight = drawTop = true;
+        drawLeft = false;
+        left = b;
+        right = x;
+        top = y + barLeft;
+        bottom = y + barRight;
+
+        // account for negative bars
+        if (right < left) {
+          tmp = right;
+          right = left;
+          left = tmp;
+          drawLeft = true;
+          drawRight = false;
+        }
+      }
+      else {
+        drawLeft = drawRight = drawTop = true;
+        drawBottom = false;
+        left = x + barLeft;
+        right = x + barRight;
+        bottom = b;
+        top = y;
+
+        // account for negative bars
+        if (top < bottom) {
+          tmp = top;
+          top = bottom;
+          bottom = tmp;
+          drawBottom = true;
+          drawTop = false;
+        }
+      }
+           
+      // clip
+      if (right < axisx.min || left > axisx.max ||
+            top < axisy.min || bottom > axisy.max)
+        return;
+            
+      if (left < axisx.min) {
+        left = axisx.min;
+        drawLeft = false;
+      }
+
+      if (right > axisx.max) {
+        right = axisx.max;
+        drawRight = false;
+      }
+
+      if (bottom < axisy.min) {
+        bottom = axisy.min;
+        drawBottom = false;
+      }
+            
+      if (top > axisy.max) {
+        top = axisy.max;
+        drawTop = false;
+      }
+
+      left = axisx.p2c(left);
+      bottom = axisy.p2c(bottom);
+      right = axisx.p2c(right);
+      top = axisy.p2c(top);
+            
+      // fill the bar
+      if (fillStyleCallback) {
+        c.beginPath();
+        c.moveTo(left, bottom);
+        c.lineTo(left, top);
+        c.lineTo(right, top);
+        c.lineTo(right, bottom);
+        c.fillStyle = fillStyleCallback(bottom, top);
+        c.fill();
+      }
+
+      // draw outline
+      if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
+        c.beginPath();
+
+        // FIXME: inline moveTo is buggy with excanvas
+        c.moveTo(left, bottom + offset);
+        if (drawLeft)
+          c.lineTo(left, top + offset);
+        else
+          c.moveTo(left, top + offset);
+        if (drawTop)
+          c.lineTo(right, top + offset);
+        else
+          c.moveTo(right, top + offset);
+        if (drawRight)
+          c.lineTo(right, bottom + offset);
+        else
+          c.moveTo(right, bottom + offset);
+        if (drawBottom)
+          c.lineTo(left, bottom + offset);
+        else
+          c.moveTo(left, bottom + offset);
+        c.stroke();
+      }
+    }
+    function drawSeriesBars(plot,ctx,series) {
+      function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
+        var points = datapoints.points, ps = datapoints.pointsize;
+                
+        for (var i = 0; i < points.length; i += ps) {
+          if (points[i] == null) continue;
+          drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+        }
+      }
+      if(series.bars.show)
+      { plotOffset = plot.getPlotOffset();
+
+        ctx.save();
+        ctx.translate(plotOffset.left, plotOffset.top);
+
+        // FIXME: figure out a way to add shadows (for instance along the right edge)
+        ctx.lineWidth = series.bars.lineWidth;
+        ctx.strokeStyle = series.color;
+        var barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
+        var fillStyleCallback = series.bars.fill ? function (bottom, top) { return plot.getFillStyle(series.bars, series.color, bottom, top); } : null;
+        plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
+        ctx.restore();
+      }
+    }
+  }
+  $.plot.plugins.push({
+            init: init,
+            options: options,
+            name: 'bars',
+            version: '0.1'
+  });
+})(jQuery);
+
+
+
