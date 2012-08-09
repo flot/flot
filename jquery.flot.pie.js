@@ -116,6 +116,10 @@ More detail and specific examples can be found in the included HTML file.
 				
 				// add draw hook
 				plot.hooks.draw.push(draw);
+
+				// monkey-patch the plot object to enable direct highlighting of pie slices
+				plot.highlight = highlight;
+				plot.unhighlight = unhighlight;
 			}
 		}
 	
@@ -697,6 +701,10 @@ More detail and specific examples can be found in the included HTML file.
 				octx.arc(0,0,radius,series.startAngle,series.startAngle+series.angle,false);
 				octx.closePath();
 				octx.fill();
+				if(options.series.pie.highlight.stroke) {
+					octx.strokeStyle = options.series.pie.highlight.stroke;
+					octx.stroke();
+				}
 			}
 			
 		}	
@@ -739,6 +747,7 @@ More detail and specific examples can be found in the included HTML file.
 				},
 				highlight: {
 					//color: '#FFF',		// will add this functionality once parseColor is available
+					stroke: null,			// stroke the outline of the pie when highlighted
 					opacity: 0.5
 				}
 			}
