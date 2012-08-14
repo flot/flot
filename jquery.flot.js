@@ -999,8 +999,6 @@
                 tickLength = axis.options.tickLength,
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
-                bw = options.grid.borderWidth,
-                bwTop = 0, bwRight = 0, bwBottom = 0, bwLeft = 0,
                 all = axis.direction == "x" ? xaxes : yaxes,
                 index;
 
@@ -1027,44 +1025,29 @@
             if (!isNaN(+tickLength))
                 padding += +tickLength;
 
-            if (bw) {
-                if ($.isArray(bw)) {
-                    bwTop = bw[0];
-                    bwRight = bw[1];
-                    bwBottom = bw[2];
-                    bwLeft = bw[3];
-                }
-                else {
-                    bwTop = bwBottom = bwRight = bwLeft = bw;
-                }
-            }
-
-            // prep box
-            axis.box = { top:0, left:0, width:0, height:0, padding:0 };
-
             // compute box
             if (axis.direction == "x") {
-                axis.box.height = lh + padding + axisMargin;
-
+                lh += padding;
+                
                 if (pos == "bottom") {
-                    plotOffset.bottom += axis.box.height;
-                    axis.box.top = canvasHeight - (plotOffset.bottom - bwBottom);
+                    plotOffset.bottom += lh + axisMargin;
+                    axis.box = { top: canvasHeight - plotOffset.bottom, height: lh };
                 }
                 else {
-                    axis.box.top = (plotOffset.top - bwTop);
-                    plotOffset.top += axis.box.height;
+                    axis.box = { top: plotOffset.top + axisMargin, height: lh };
+                    plotOffset.top += lh + axisMargin;
                 }
             }
             else {
-                axis.box.width = lw + padding + axisMargin;
-
+                lw += padding;
+                
                 if (pos == "left") {
-                    axis.box.left = (plotOffset.left - bwLeft);
-                    plotOffset.left += axis.box.width;
+                    axis.box = { left: plotOffset.left + axisMargin, width: lw };
+                    plotOffset.left += lw + axisMargin;
                 }
                 else {
-                    plotOffset.right += axis.box.width;
-                    axis.box.left = canvasWidth - (plotOffset.right - bwRight);
+                    plotOffset.right += lw + axisMargin;
+                    axis.box = { left: canvasWidth - plotOffset.right, width: lw };
                 }
             }
 
@@ -1122,8 +1105,7 @@
         }
         
         function setupGrid() {
-            var i, axes = allAxes(), showGrid = options.grid.show,
-                bw = options.grid.borderWidth;
+            var i, axes = allAxes(), showGrid = options.grid.show;
 
             // Initialize the plot's offset from the edge of the canvas
 
@@ -1136,19 +1118,8 @@
 
             // If the grid is visible, add its border width to the offset
 
-            if (showGrid) {
-                // if borderWidth is an array, evaluate side
-                if ($.isArray(bw)) {
-                    plotOffset.top += bw[0];
-                    plotOffset.right += bw[1];
-                    plotOffset.bottom += bw[2];
-                    plotOffset.left += bw[3];
-                }
-                else {
-                    for (var a in plotOffset)
-                        plotOffset[a] += bw;
-                }
-            }
+            for (var a in plotOffset)
+                plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
 
             // init axes
             $.each(axes, function (_, axis) {
@@ -1562,33 +1533,13 @@
             }
             
             // draw the ticks
-            var axes = allAxes(), bw = options.grid.borderWidth,
-                borderWidthIsArray = $.isArray(options.grid.borderWidth),
-                bwTop = 0, bwRight = 0, bwBottom = 0, bwLeft = 0;
-
-            // borders based on css [top, right, bottom, left]
-            if (borderWidthIsArray) {
-                bwTop = bw[0];
-                bwRight = bw[1];
-                bwBottom = bw[2];
-                bwLeft = bw[3];
-            }
+            var axes = allAxes(), bw = options.grid.borderWidth;
 
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box,
                     t = axis.tickLength, x, y, xoff, yoff;
                 if (!axis.show || axis.ticks.length == 0)
                     continue;
-
-                // numeric or array border, used by tick drawing
-                var hasBorderOnAxis = (!borderWidthIsArray && bw > 0) // default case (short circuit here if possible)
-                    || (borderWidthIsArray && (
-                        // x axis, check border on the appropriate position
-                        axis.direction == "x" && ((axis.position == "bottom" && bwBottom > 0) || (bwTop > 0))
-                        ||
-                        // y axis, check border on appropriate position
-                        axis.direction == "y" && ((axis.position == "left" && bwLeft > 0) || (bwRight > 0))
-                    ));
                 
                 ctx.strokeStyle = axis.options.tickColor || $.color.parse(axis.options.color).scale('a', 0.22).toString();
                 ctx.lineWidth = 1;
@@ -1637,7 +1588,7 @@
 
                     if (v < axis.min || v > axis.max
                         // skip those lying on the axes if we got a border
-                        || (t == "full" && hasBorderOnAxis
+                        || (t == "full" && bw > 0
                             && (v == axis.min || v == axis.max)))
                         continue;
 
@@ -1673,51 +1624,9 @@
             
             // draw border
             if (bw) {
-                if (borderWidthIsArray) {
-                    ctx.strokeStyle = options.grid.borderColor;
-
-                    // drop TOP border between the INNER edges
-                    if (bwTop > 0) {
-                        ctx.beginPath();
-                        ctx.lineWidth = bwTop;
-                        ctx.moveTo( 0, -bwTop / 2 );
-                        ctx.lineTo( plotWidth, -bwTop / 2 );
-                        ctx.stroke();
-                    }
-                    // draw the RIGHT border between the OUTER edges
-                    if (bwRight > 0) {
-                        ctx.beginPath();
-                        ctx.lineWidth = bwRight;
-                        // outer top edge: 0 - bwTop
-                        // outer bottom edge: plotHeight + bwBottom
-                        ctx.moveTo( plotWidth + bwRight / 2, 0 - bwTop );
-                        ctx.lineTo( plotWidth + bwRight / 2, plotHeight + bwBottom );
-                        ctx.stroke();
-                    }
-                    // draw the BOTTOM border between the INNER edges
-                    if (bwBottom > 0) {
-                        ctx.beginPath();
-                        ctx.lineWidth = bwBottom;
-                        ctx.moveTo( plotWidth, plotHeight + bwBottom / 2 );
-                        ctx.lineTo( 0, plotHeight + bwBottom / 2 );
-                        ctx.stroke();
-                    }
-                    // draw the LEFT border between the OUTER edges
-                    if (bwLeft > 0) {
-                        ctx.beginPath();
-                        ctx.lineWidth = bwLeft;
-                        // outer top edge: plotHeight + bwBottom
-                        // outer bottom edge: 0 - bwTop
-                        ctx.moveTo( -bwLeft / 2, plotHeight + bwBottom );
-                        ctx.lineTo( -bwLeft / 2, 0 - bwTop );
-                        ctx.stroke();
-                    }
-                }
-                else {
-                    ctx.lineWidth = bw;
-                    ctx.strokeStyle = options.grid.borderColor;
-                    ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
-                }
+                ctx.lineWidth = bw;
+                ctx.strokeStyle = options.grid.borderColor;
+                ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
             }
 
             ctx.restore();
