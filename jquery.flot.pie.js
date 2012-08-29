@@ -187,7 +187,7 @@ More detail and specific examples can be found in the included HTML file.
 		function setupPie()
 		{
 			legendWidth = target.children().filter('.legend').children().width();
-		
+			if(!legendWidth) legendWidth = null;
 			// calculate maximum radius and center point
 			maxRadius =  Math.min(canvas.width,(canvas.height/options.series.pie.tilt))/2;
 			centerTop = (canvas.height/2)+options.series.pie.offset.top;
