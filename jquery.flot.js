@@ -1563,45 +1563,61 @@
                 }
 
                 // draw ticks
-                ctx.beginPath();
-                for (i = 0; i < axis.ticks.length; ++i) {
-                    var v = axis.ticks[i].v;
+                var drawTicks = function(isShadow) {
+                    ctx.beginPath();
+                    for (i = 0; i < axis.ticks.length; ++i) {
+                        var v = axis.ticks[i].v;
+                        
+                        xoff = yoff = 0;
+
+                        if (v < axis.min || v > axis.max
+                            // skip those lying on the axes if we got a border
+                            || (t == "full" && bw > 0
+                                && (v == axis.min || v == axis.max)))
+                            continue;
+
+                        if (axis.direction == "x") {
+                            x = axis.p2c(v);
+                            yoff = t == "full" ? -plotHeight : t;
+                            
+                            if (axis.position == "top")
+                                yoff = -yoff;
+                        }
+                        else {
+                            y = axis.p2c(v);
+                            xoff = t == "full" ? -plotWidth : t;
+                            
+                            if (axis.position == "left")
+                                xoff = -xoff;
+                        }
+
+                        if (ctx.lineWidth == 1) {
+                            if (axis.direction == "x")
+                                x = Math.floor(x) + 0.5;
+                            else
+                                y = Math.floor(y) + 0.5;
+                        }
+
+                        //The tick shadows are a single aditional line after the tick
+                        if (isShadow) {
+                            if (axis.direction == 'x')
+                                x++;
+                            else
+                                y++;
+                        }
+
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x + xoff, y + yoff);
+                    }
                     
-                    xoff = yoff = 0;
-
-                    if (v < axis.min || v > axis.max
-                        // skip those lying on the axes if we got a border
-                        || (t == "full" && bw > 0
-                            && (v == axis.min || v == axis.max)))
-                        continue;
-
-                    if (axis.direction == "x") {
-                        x = axis.p2c(v);
-                        yoff = t == "full" ? -plotHeight : t;
-                        
-                        if (axis.position == "top")
-                            yoff = -yoff;
-                    }
-                    else {
-                        y = axis.p2c(v);
-                        xoff = t == "full" ? -plotWidth : t;
-                        
-                        if (axis.position == "left")
-                            xoff = -xoff;
-                    }
-
-                    if (ctx.lineWidth == 1) {
-                        if (axis.direction == "x")
-                            x = Math.floor(x) + 0.5;
-                        else
-                            y = Math.floor(y) + 0.5;
-                    }
-
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + xoff, y + yoff);
+                    ctx.stroke();
+                };
+                drawTicks();
+                //Only render the tick shadow if the axis has a color defined for it
+                if (axis.options.tickShadowColor) { 
+                    ctx.strokeStyle = axis.options.tickShadowColor;
+                    drawTicks(true);
                 }
-                
-                ctx.stroke();
             }
             
             
