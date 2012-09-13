@@ -551,7 +551,7 @@ the ticks will shift with the time zone and daylight savings of each
 visitor. This behavior is enabled by setting the axis option
 "timezone" to the value "browser".
 
-If you need more zime zone functionality than this, there is still
+If you need more time zone functionality than this, there is still
 another option. If you include the "timezone-js" library
 <https://github.com/mde/timezone-js> in the page and set axis.timezone
 to a value recognized by said library, Flot will use timezone-js to
