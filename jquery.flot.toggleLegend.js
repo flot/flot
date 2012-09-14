@@ -3,14 +3,18 @@
 	Allows series to be toggled using their entries in the chart legend.
 	Supports series groups.
 
-	Usage:
+	TODO:
+	 * Allow toggling to be disabled for individual series
+	 * Disable visual feedback (usually so dev can implement their own)
 
 
  */
 
 (function ( $ ) {
 
-	var options = {
+	var datasets,
+		plot,
+		options = {
 			series: {
 				toggle: {
 					enabled: true,
@@ -21,8 +25,6 @@
 		setupSwatch = function ( swatch ) {
 
 			swatch.data("flotcolor", swatch.find("div div").css("border-color"));
-
-			console.log(swatch.data("flotcolor"));
 
 		},
 		toggleSwatch = function ( swatch, show ) {
@@ -38,17 +40,99 @@
 			}
 
 		},
-		init = function ( plot ) {
+		redraw = function ( ) {
 
-			plot.hooks.legendInserted.push(function ( plot, legend ) {
+			plot.setData(datasets.visible);
+			plot.draw();
+
+		},
+		getSeries = function ( label ) {
+
+			for ( var i = 0; i < datasets.all.length; i++ ) {
+
+				if ( datasets.all[i].label === label ) {
+
+					return datasets.all[i];
+
+				}
+
+			}
+
+		},
+		hideSeries = function ( label ) {
+
+			for ( var i = 0; i < datasets.visible.length; i++ ) {
+
+				if ( datasets.visible[i].label === label ) {
+	
+					// Hide this series
+					datasets.visible.splice(i, 1);
+					break;
+
+				}
+
+			}
+
+			redraw();
+
+		},
+		showSeries = function ( label ) {
+
+			var i, j,
+				outDataset = [];
+
+			// Find the series we want to show
+			for ( var i = 0; i < datasets.all.length; i++ ) {
+
+				if ( datasets.all[i].label === label ) {
+
+					datasets.visible.push(datasets.all[i]);
+
+				}
+
+			}
+
+			// Sometimes the order of items in the datasets array is important
+			// (especially when lines or areas overlap one another)
+			for ( i = 0; i < datasets.all.length; i++ ) {
+
+				for ( j = 0; j < datasets.visible.length; j++ ) {
+
+					if ( datasets.all[i].label === datasets.visible[j].label ) {
+
+						outDataset.push(datasets.all[i]);
+						break;
+
+					}
+
+				}
+
+			}
+
+			datasets.visible = outDataset;
+
+			redraw();
+
+		},
+		init = function ( _plot ) {
+
+			_plot.hooks.legendInserted.push(function ( _plot, legend ) {
 
 				// Get all the legend cells
 				var cells = legend.find("td"),
 					entries = [];
 
+				plot = _plot;
+
+				datasets = {
+					visible: plot.getData(),
+					toggle: [],
+					all: plot.getData().slice()
+				};
+
 				// Split into objects containing each legend item's
 				// colour box and label.
-				for ( var i = 0; i < cells.length; i+=2 ) {
+				for ( var i = 0; i < cells.length; i += 2 ) {
 					entries.push({
 						swatch: $(cells[i]),
 						label: $(cells[i+1])
@@ -96,17 +180,25 @@
 
 							}
 
-						}
+							var series = getSeries(label.text());
 
-						if ( label.hasClass("flotSeriesHidden") ) {
+							if ( series.toggle.enabled ) {
 
-							label.removeClass("flotSeriesHidden");
-							toggleSwatch(swatch, true);
+								if ( label.hasClass("flotSeriesHidden") ) {
 
-						} else {
+									label.removeClass("flotSeriesHidden");
+									toggleSwatch(swatch, true);
+									showSeries(label.text());
 
-							label.addClass("flotSeriesHidden");
-							toggleSwatch(swatch);
+								} else {
+
+									label.addClass("flotSeriesHidden");
+									toggleSwatch(swatch);
+									hideSeries(label.text());
+
+								}
+
+							}
 
 						}
 
@@ -121,7 +213,7 @@
 		init: init,
 		options: options,
 		name: 'toggleLegend',
-		version: '1.0'
+		version: '0.1'
 	});
 
 }(jQuery));
