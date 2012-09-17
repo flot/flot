@@ -243,11 +243,21 @@ can set the default in the options.
                     }
                 }
 
-                var range = max - min;
-                if (zr &&
-                    ((zr[0] != null && range < zr[0] && amount > 1) ||
-                     (zr[1] != null && range > zr[1] && amount < 1))) {
-                    return;
+                if (opts.absoluteZoomRange) {
+                  // interpret zoom range to be an absolute range
+                  if (zr && zr[0] != null && min < zr[0]) {
+                    min = zr[0];
+                  }
+                  if (zr && zr[1] != null && max > zr[1]) {
+                    max = zr[1];
+                  }
+                } else {
+                  var range = max - min;
+                  if (zr &&
+                      ((zr[0] != null && range < zr[0] && amount > 1) ||
+                       (zr[1] != null && range > zr[1] && amount < 1))) {
+                      return;
+                  }
                 }
 
                 opts.min = min;
