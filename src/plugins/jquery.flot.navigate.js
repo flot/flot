@@ -213,6 +213,20 @@ can set the default in the options.
                     }
                 };
 
+            // if zooming in when the mouse is close to an edge ('close' meaning
+            // within 10% of the total width) then keep that same edge after
+            // zoom (as opposed to ending up slightly inset from that edge)
+            if (amount > 1) {
+              // zooming in
+              if (xf > 0.9) {
+                // close to the right side
+                minmax.x.max = w;
+              } else if (xf < 0.1) {
+                // close to the left side
+                minmax.x.min = 0;
+              }
+            }
+
             $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
