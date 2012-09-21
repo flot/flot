@@ -586,10 +586,10 @@ More detail and specific examples can be found in the included HTML file.
 			triggerClickHoverEvent('plothover', e);
 		}
 		
-        function onClick(e) 
+		function onClick(e) 
 		{
 			triggerClickHoverEvent('plotclick', e);
-        }
+		}
 
 		// trigger click or hover event (they send the same parameters so we share their code)
 		function triggerClickHoverEvent(eventname, e) 
@@ -612,7 +612,7 @@ More detail and specific examples can be found in the included HTML file.
 			
 			// highlight the slice
 			if (item) 
-			    highlight(item.series, eventname);
+				highlight(item.series, eventname);
 				
 			// trigger any hover bind events
 			var pos = { pageX: e.pageX, pageY: e.pageY };
@@ -744,7 +744,7 @@ More detail and specific examples can be found in the included HTML file.
 			}
 		}
 	};
-    
+	
 	$.plot.plugins.push({
 		init: init,
 		options: options,
