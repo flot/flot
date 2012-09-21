@@ -724,9 +724,11 @@
         // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
 
         function getPixelRatio(cctx) {
-            if (window.devicePixelRatio > 1 && (cctx.webkitBackingStorePixelRatio === undefined || cctx.webkitBackingStorePixelRatio < 2)) {
+            if (window.devicePixelRatio > 1 &&
+                (cctx.webkitBackingStorePixelRatio === undefined ||
+                 cctx.webkitBackingStorePixelRatio < 2))
                 return window.devicePixelRatio;
-            }
+
             return 1;
         }
 
