@@ -737,6 +737,11 @@
             var c = document.createElement('canvas');
             c.className = cls;
 
+            if (!skipPositioning)
+                $(c).css({ position: 'absolute', left: 0, top: 0 });
+
+            $(c).appendTo(placeholder);
+
             if (!c.getContext) // excanvas hack
                 c = window.G_vmlCanvasManager.initElement(c);
 
@@ -753,11 +758,6 @@
             c.height = canvasHeight * pixelRatio;
             c.style.width = canvasWidth + "px";
             c.style.height = canvasHeight + "px";
-
-            if (!skipPositioning)
-                $(c).css({ position: 'absolute', left: 0, top: 0 });
-
-            $(c).appendTo(placeholder);
 
             // Save the context so we can reset in case we get replotted
 
