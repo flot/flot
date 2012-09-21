@@ -780,7 +780,7 @@
 
         function resizeCanvas(c) {
 
-        	var cctx = c.getContext("2d");            
+            var cctx = c.getContext("2d");            
 
             // Handle pixel ratios > 1 for retina displays, as explained in makeCanvas
 
