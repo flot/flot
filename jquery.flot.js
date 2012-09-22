@@ -724,9 +724,11 @@
         // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
 
         function getPixelRatio(cctx) {
-            if (window.devicePixelRatio > 1 && (cctx.webkitBackingStorePixelRatio === undefined || cctx.webkitBackingStorePixelRatio < 2)) {
+            if (window.devicePixelRatio > 1 &&
+                (cctx.webkitBackingStorePixelRatio === undefined ||
+                 cctx.webkitBackingStorePixelRatio < 2))
                 return window.devicePixelRatio;
-            }
+
             return 1;
         }
 
@@ -734,6 +736,11 @@
 
             var c = document.createElement('canvas');
             c.className = cls;
+
+            if (!skipPositioning)
+                $(c).css({ position: 'absolute', left: 0, top: 0 });
+
+            $(c).appendTo(placeholder);
 
             if (!c.getContext) // excanvas hack
                 c = window.G_vmlCanvasManager.initElement(c);
@@ -751,11 +758,6 @@
             c.height = canvasHeight * pixelRatio;
             c.style.width = canvasWidth + "px";
             c.style.height = canvasHeight + "px";
-
-            if (!skipPositioning)
-                $(c).css({ position: 'absolute', left: 0, top: 0 });
-
-            $(c).appendTo(placeholder);
 
             // Save the context so we can reset in case we get replotted
 
@@ -780,7 +782,7 @@
 
         function resizeCanvas(c) {
 
-        	var cctx = c.getContext("2d");            
+            var cctx = c.getContext("2d");            
 
             // Handle pixel ratios > 1 for retina displays, as explained in makeCanvas
 
