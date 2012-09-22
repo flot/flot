@@ -85,7 +85,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    Tom Cleaveland, Christopher Lambert, and Simon Strandgaard)
 
  - Added support for high pixel density (retina) displays, resulting in much
-   crisper charts on such devices. (patch by Olivier Guerriat)
+   crisper charts on such devices. (patch by Olivier Guerriat, additional
+   fix by Julien Thomas)
 
 ### Bug fixes ###
 
@@ -127,7 +128,6 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 
  - Fixed an error when custom tick labels weren't provided as strings. (patch
    by Shad Downey)
-
 
 
 ## Flot 0.7 ##
