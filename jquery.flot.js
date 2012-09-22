@@ -1,4 +1,4 @@
-/*! Javascript plotting library for jQuery, v. 0.7.
+/*! Javascript plotting library for jQuery, version 0.8 alpha.
  *
  * Released under the MIT license by IOLA, December 2007.
  *
