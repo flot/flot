@@ -310,10 +310,10 @@ More detail and specific examples can be found in the included HTML file.
 			
 			function drawShadow()
 			{
-				var shadowLeft = 5;
-				var shadowTop = 15;
+				var shadowLeft = options.series.pie.shadow.left;
+				var shadowTop = options.series.pie.shadow.top;
 				var edge = 10;
-				var alpha = 0.02;
+				var alpha = options.series.pie.shadow.alpha;
 			
 				// set radius
 				if (options.series.pie.radius>1)
@@ -586,10 +586,10 @@ More detail and specific examples can be found in the included HTML file.
 			triggerClickHoverEvent('plothover', e);
 		}
 		
-        function onClick(e) 
+		function onClick(e) 
 		{
 			triggerClickHoverEvent('plotclick', e);
-        }
+		}
 
 		// trigger click or hover event (they send the same parameters so we share their code)
 		function triggerClickHoverEvent(eventname, e) 
@@ -612,7 +612,7 @@ More detail and specific examples can be found in the included HTML file.
 			
 			// highlight the slice
 			if (item) 
-			    highlight(item.series, eventname);
+				highlight(item.series, eventname);
 				
 			// trigger any hover bind events
 			var pos = { pageX: e.pageX, pageY: e.pageY };
@@ -712,6 +712,11 @@ More detail and specific examples can be found in the included HTML file.
 				innerRadius:0, /* for donut */
 				startAngle: 3/2,
 				tilt: 1,
+				shadow: {
+					left: 5,     // shadow left offset
+					top: 15,     // shadow top offset
+					alpha: 0.02, // shadow alpha
+				},
 				offset: {
 					top: 0,
 					left: 'auto'
@@ -744,7 +749,7 @@ More detail and specific examples can be found in the included HTML file.
 			}
 		}
 	};
-    
+	
 	$.plot.plugins.push({
 		init: init,
 		options: options,

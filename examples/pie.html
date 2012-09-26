@@ -671,6 +671,11 @@ $("#interactive").bind("plotclick", pieClick);</b><br/>
 		<li><b>innerRadius:</b> <i>0</i> - Sets the radius of the donut hole. If value is between 0 and 1 (inclusive) then it will use that as a percentage of the radius, otherwise it will use the value as a direct pixel length.</li>
 		<li><b>startAngle:</b> <i>3/2</i> - Factor of PI used for the starting angle (in radians) It can range between 0 and 2 (where 0 and 2 have the same result).</li>
 		<li><b>tilt:</b> <i>1</i> - Percentage of tilt ranging from 0 and 1, where 1 has no change (fully vertical) and 0 is completely flat (fully horizontal -- in which case nothing actually gets drawn).</li>
+		<li><b>shadow:</b> <ul>
+			<li><b>top:</b> <i>5</i> - Vertical distance in pixel of the tilted pie shadow.</li>
+			<li><b>left:</b> <i>15</i> - Horizontal distance in pixel of the tilted pie shadow.</li>
+			<li><b>alpha:</b> <i>0.02</i> - Alpha value of the tilted pie shadow.</li>
+		</ul>
 		<li><b>offset:</b> <ul>
 			<li><b>top:</b> <i>0</i> - Pixel distance to move the pie up and down (relative to the center).</li>
 			<li><b>left:</b> <i>'auto'</i> - Pixel distance to move the pie left and right (relative to the center).</li>
