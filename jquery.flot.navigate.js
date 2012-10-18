@@ -18,7 +18,11 @@ Options:
   pan: {
     interactive: false
     cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-    frameRate: 20
+    frameRate: 20,
+	eventOnPanEnd: function (plot)
+	{
+        Whatever you want your function to do.
+    }
   }
 
   xaxis, yaxis, x2axis, y2axis: {
@@ -121,7 +125,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         pan: {
             interactive: false,
             cursor: "move",
-            frameRate: 20
+            frameRate: 20,
+            eventOnPanEnd: null
         }
     };
 
@@ -193,6 +198,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 eventHolder.bind("drag", onDrag);
                 eventHolder.bind("dragend", onDragEnd);
             }
+            if (plot.getOptions().pan.eventOnPanEnd) {
+                plot.getOptions().pan.eventOnPanEnd(plot);
+            } 
         }
 
         plot.zoomOut = function (args) {
