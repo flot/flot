@@ -18,11 +18,7 @@ Options:
   pan: {
     interactive: false
     cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-    frameRate: 20,
-	eventOnPanEnd: function (plot)
-	{
-        Whatever you want your function to do.
-    }
+    frameRate: 20
   }
 
   xaxis, yaxis, x2axis, y2axis: {
@@ -125,8 +121,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         pan: {
             interactive: false,
             cursor: "move",
-            frameRate: 20,
-            eventOnPanEnd: null
+            frameRate: 20
         }
     };
 
@@ -184,9 +179,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
-            if (plot.getOptions().pan.eventOnPanEnd) {
-                plot.getOptions().pan.eventOnPanEnd(plot);
-            }
         }
         
         function bindEvents(plot, eventHolder) {
