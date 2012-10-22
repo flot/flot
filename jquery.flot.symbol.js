@@ -50,6 +50,18 @@ choice:
                 ctx.lineTo(x + size, y + size);
                 ctx.moveTo(x - size, y + size);
                 ctx.lineTo(x + size, y - size);
+            },
+            plus: function(ctx, x, y, radius, shadow) {
+                // pi * r^2 = 2s^2  =>  s = r * sqrt(pi/2)
+                var size = radius * Math.sqrt(Math.PI / 2);
+                ctx.moveTo(x - size, y);
+                ctx.lineTo(x + size, y);
+                ctx.moveTo(x, y - size);
+                ctx.lineTo(x, y + size);
+            },
+            star: function (ctx, x, y, radius, shadow) {
+                handlers.plus(ctx, x, y, radius, shadow);
+                handlers.cross(ctx, x, y, radius, shadow);
             }
         }
 
@@ -65,6 +77,6 @@ choice:
     $.plot.plugins.push({
         init: init,
         name: 'symbols',
-        version: '1.0'
+        version: '1.1'
     });
 })(jQuery);
