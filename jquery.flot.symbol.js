@@ -32,15 +32,31 @@ choice:
                 ctx.lineTo(x, y + size);
                 ctx.lineTo(x - size, y);
             },
-            triangle: function (ctx, x, y, radius, shadow) {
+            triangle: function (ctx, x, y, radius, shadow, flip) {
                 // pi * r^2 = 1/2 * s^2 * sin (pi / 3)  =>  s = r * sqrt(2 * pi / sin(pi / 3))
                 var size = radius * Math.sqrt(2 * Math.PI / Math.sin(Math.PI / 3));
                 var height = size * Math.sin(Math.PI / 3);
-                ctx.moveTo(x - size/2, y + height/2);
-                ctx.lineTo(x + size/2, y + height/2);
-                if (!shadow) {
-                    ctx.lineTo(x, y - height/2);
-                    ctx.lineTo(x - size/2, y + height/2);
+                var half_x = size / 2;
+                var half_y = height / 2;
+
+                if (flip)
+                {
+                    ctx.moveTo(x, y + half_y);
+                    ctx.lineTo(x + half_x, y - half_y);
+                    if (!shadow)
+                    {
+                        ctx.lineTo(x - half_x, y - half_y);
+                        ctx.lineTo(x, y + half_y);
+                    }
+                }
+                else
+                {
+                    ctx.moveTo(x - half_x, y + half_y);
+                    ctx.lineTo(x + half_x, y + half_y);
+                    if (!shadow) {
+                        ctx.lineTo(x, y - half_y);
+                        ctx.lineTo(x - half_x, y + half_y);
+                    }
                 }
             },
             cross: function (ctx, x, y, radius, shadow) {

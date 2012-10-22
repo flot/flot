@@ -96,7 +96,8 @@
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
-                        symbol: "circle" // or callback
+                        symbol: "circle", // or callback
+                        flip: false // flip symbol upside-down
                     },
                     lines: {
                         // we don't put in show: false so we can see
@@ -1950,7 +1951,7 @@
         }
 
         function drawSeriesPoints(series) {
-            function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
+            function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol, flip) {
                 var points = datapoints.points, ps = datapoints.pointsize;
 
                 for (var i = 0; i < points.length; i += ps) {
@@ -1964,7 +1965,7 @@
                     if (symbol == "circle")
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
                     else
-                        symbol(ctx, x, y, radius, shadow);
+                        symbol(ctx, x, y, radius, shadow, flip);
                     ctx.closePath();
                     
                     if (fillStyle) {
@@ -1981,25 +1982,26 @@
             var lw = series.points.lineWidth,
                 sw = series.shadowSize,
                 radius = series.points.radius,
-                symbol = series.points.symbol;
+                symbol = series.points.symbol,
+                flip = series.points.flip;
             if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
                 plotPoints(series.datapoints, radius, null, w + w/2, true,
-                           series.xaxis, series.yaxis, symbol);
+                           series.xaxis, series.yaxis, symbol, flip);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
                 plotPoints(series.datapoints, radius, null, w/2, true,
-                           series.xaxis, series.yaxis, symbol);
+                           series.xaxis, series.yaxis, symbol, flip);
             }
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
             plotPoints(series.datapoints, radius,
                        getFillStyle(series.points, series.color), 0, false,
-                       series.xaxis, series.yaxis, symbol);
+                       series.xaxis, series.yaxis, symbol, flip);
             ctx.restore();
         }
 
@@ -2518,7 +2520,7 @@
             if (series.points.symbol == "circle")
                 octx.arc(x, y, radius, 0, 2 * Math.PI, false);
             else
-                series.points.symbol(octx, x, y, radius, false);
+                series.points.symbol(octx, x, y, radius, false, series.points.flip);
             octx.closePath();
             octx.stroke();
         }
