@@ -17,8 +17,7 @@
 		options = {
 			series: {
 				toggle: {
-					enabled: true,
-					visual: true
+					enabled: true
 				}
 			}
 		},
@@ -52,6 +51,7 @@
 
 				if ( datasets.all[i].label === label ) {
 
+					console.log(datasets.all[i]);
 					return datasets.all[i];
 
 				}
@@ -75,6 +75,9 @@
 
 			redraw();
 
+		},
+		showAll = function ( ) {
+			plot.setData(datasets.all);
 		},
 		showSeries = function ( label ) {
 

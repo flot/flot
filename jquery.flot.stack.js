@@ -51,6 +51,7 @@ adjusted (e.g for bar charts or filled areas).
         }
         
         function stackData(plot, s, datapoints) {
+
             if (s.stack == null)
                 return;
 
