@@ -2126,10 +2126,12 @@
                     	var currPoint = dataseries[j];
                     	var barColor = series.bars.colorCallback(currPoint);
                     	
-                    	ctx.strokeStyle = barColor;
-                    	fillStyleCallback = function() {
-                    		return barColor;
-                    	};
+						if (barColor) {
+							ctx.strokeStyle = barColor;
+							fillStyleCallback = function() {
+								return barColor;
+							};
+						}
                     }
 					
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
