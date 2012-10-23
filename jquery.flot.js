@@ -2114,13 +2114,26 @@
         }
         
         function drawSeriesBars(series) {
-            function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
+            function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, dataseries) {
                 var points = datapoints.points, ps = datapoints.pointsize;
                 
+				var j = 0;
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
+					
+					if (series.bars.colorCallback) {
+                    	var currPoint = dataseries[j];
+                    	var barColor = series.bars.colorCallback(currPoint);
+                    	
+                    	ctx.strokeStyle = barColor;
+                    	fillStyleCallback = function() {
+                    		return barColor;
+                    	};
+                    }
+					
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+					j++;
                 }
             }
 
@@ -2148,7 +2161,7 @@
             }
 
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
+            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis, series.data);
             ctx.restore();
         }
 
