@@ -12,9 +12,7 @@
 
 (function ( $ ) {
 
-	var datasets,
-		plot,
-		options = {
+	var options = {
 			series: {
 				toggle: {
 					enabled: true
@@ -39,19 +37,18 @@
 			}
 
 		},
-		redraw = function ( ) {
+		redraw = function ( plot, datasets ) {
 
 			plot.setData(datasets.visible);
 			plot.draw();
 
 		},
-		getSeries = function ( label ) {
+		getSeries = function ( label, datasets ) {
 
 			for ( var i = 0; i < datasets.all.length; i++ ) {
 
 				if ( datasets.all[i].label === label ) {
 
-					console.log(datasets.all[i]);
 					return datasets.all[i];
 
 				}
@@ -59,7 +56,7 @@
 			}
 
 		},
-		hideSeries = function ( label ) {
+		hideSeries = function ( label, plot, datasets ) {
 
 			for ( var i = 0; i < datasets.visible.length; i++ ) {
 
@@ -73,13 +70,13 @@
 
 			}
 
-			redraw();
+			redraw(plot, datasets);
 
 		},
 		showAll = function ( ) {
 			plot.setData(datasets.all);
 		},
-		showSeries = function ( label ) {
+		showSeries = function ( label, plot, datasets ) {
 
 			var i, j,
 				outDataset = [];
@@ -114,7 +111,7 @@
 
 			datasets.visible = outDataset;
 
-			redraw();
+			redraw(plot, datasets);
 
 		},
 		init = function ( _plot ) {
@@ -123,11 +120,12 @@
 
 				// Get all the legend cells
 				var cells = legend.find("td"),
-					entries = [];
+					entries = [],
+					datasets;
 
-				plot = _plot;
+				var plot = _plot;
 
-				datasets = {
+				var datasets = {
 					visible: plot.getData(),
 					toggle: [],
 					all: plot.getData().slice()
@@ -183,7 +181,7 @@
 
 							}
 
-							var series = getSeries(label.text());
+							var series = getSeries(label.text(), datasets);
 
 							if ( series.toggle.enabled ) {
 
@@ -191,13 +189,13 @@
 
 									label.removeClass("flotSeriesHidden");
 									toggleSwatch(swatch, true);
-									showSeries(label.text());
+									showSeries(label.text(), plot, datasets);
 
 								} else {
 
 									label.addClass("flotSeriesHidden");
 									toggleSwatch(swatch);
-									hideSeries(label.text());
+									hideSeries(label.text(), plot, datasets);
 
 								}
 

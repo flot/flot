@@ -15,18 +15,9 @@
 
     <div id="placeholder" style="width:600px;height:300px;"></div>
 
+    <div id="placeholder2" style="width:600px;height:300px;"></div>
+
     <p>With the toggleLegend plugin, you can click on legend colour boxes to show or hide those series on the chart.</p>
-
-    <p class="stackControls">
-    <input type="button" value="With stacking">
-    <input type="button" value="Without stacking">
-    </p>
-
-    <p class="graphControls">
-    <input type="button" value="Bars">
-    <input type="button" value="Lines">
-    <input type="button" value="Lines with steps">
-    </p>
 
 <script id="source">
 $(function () {
@@ -48,31 +39,18 @@ $(function () {
         $.plot($("#placeholder"), [ d1, d2, d3 ], {
             legend: {
                 toggle: true
-            },
-            series: {
-                stack: stack,
-                lines: { show: lines, fill: true, steps: steps },
-                bars: { show: bars, barWidth: 0.6 }
+            }
+        });
+
+        $.plot($("#placeholder2"), [ d1, d2, d3 ], {
+            legend: {
+                toggle: true
             }
         });
     }
 
     plotWithOptions();
-    
-    $(".stackControls input").click(function (e) {
-        e.preventDefault();
-        stack = $(this).val() == "With stacking" ? true : null;
-        plotWithOptions();
-    });
-    $(".graphControls input").click(function (e) {
-        e.preventDefault();
-        bars = $(this).val().indexOf("Bars") != -1;
-        lines = $(this).val().indexOf("Lines") != -1;
-        steps = $(this).val().indexOf("steps") != -1;
-        plotWithOptions();
-    });
 });
 </script>
-<div class="legend"></div>
  </body>
 </html>
