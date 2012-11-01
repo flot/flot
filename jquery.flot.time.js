@@ -272,6 +272,7 @@ for details.
                         var suffix = (opts.twelveHourClock) ? " %p" : "";
                         var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
                         
+                        var fmt;
                         if (t < timeUnitSize.minute)
                             fmt = hourCode + ":%M:%S" + suffix;
                         else if (t < timeUnitSize.day) {

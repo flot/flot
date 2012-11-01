@@ -561,7 +561,7 @@
                 ps = s.datapoints.pointsize;
                 points = s.datapoints.points;
 
-                insertSteps = s.lines.show && s.lines.steps;
+                var insertSteps = s.lines.show && s.lines.steps;
                 s.xaxis.used = s.yaxis.used = true;
                 
                 for (j = k = 0; j < data.length; ++j, k += ps) {
