@@ -132,6 +132,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Fixed an error when custom tick labels weren't provided as strings. (patch
    by Shad Downey)
 
+ - Prevented the local insertSteps and fmt variables from becoming global.
+   (first reported by Marc Bennewitz, patch by Nick Campbell)
 
 ## Flot 0.7 ##
 
