@@ -1210,11 +1210,8 @@
             }
             axis.min = min;
             axis.max = max;
-        }
 
-        function setupTickGeneration(axis) {
-            var opts = axis.options;
-                
+            // Set axis.delta, which is a function of axis.min and axis.max
             // estimate number of ticks
             var noTicks;
             if (typeof opts.ticks == "number" && opts.ticks > 0)
@@ -1223,68 +1220,22 @@
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
                 noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
-
             axis.delta = (axis.max - axis.min) / noTicks;
+        }
+
+        function setupTickGeneration(axis) {
+            var opts = axis.options;
 
             // Time mode was moved to a plug-in in 0.8, but since so many people use this
             // we'll add an especially friendly make sure they remembered to include it.
-
             if (opts.mode == "time" && !axis.tickGenerator) {
                 throw new Error("Time mode requires the flot.time plugin.");
             }
 
-            // Flot supports base-10 axes; any other mode else is handled by a plug-in,
-            // like flot.time.js.
-
+            // The default base-10 behavior moved to an inline plugin (see
+            // below), so we should always have an axis.tickGenerator function.
             if (!axis.tickGenerator) {
-
-                var maxDec = opts.tickDecimals;
-                var dec = -Math.floor(Math.log(axis.delta) / Math.LN10);
-                if (maxDec != null && dec > maxDec)
-                    dec = maxDec;
-
-                var magn = Math.pow(10, -dec);
-                var norm = axis.delta / magn; // norm is between 1.0 and 10.0
-                var size;
-
-                if (norm < 1.5)
-                    size = 1;
-                else if (norm < 3) {
-                    size = 2;
-                    // special case for 2.5, requires an extra decimal
-                    if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
-                        size = 2.5;
-                        ++dec;
-                    }
-                }
-                else if (norm < 7.5)
-                    size = 5;
-                else size = 10;
-
-                size *= magn;
-
-                if (opts.minTickSize != null && size < opts.minTickSize)
-                    size = opts.minTickSize;
-
-                axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
-                axis.tickSize = opts.tickSize || size;
-
-                axis.tickGenerator = function (axis) {
-                    var ticks = [], start = floorInBase(axis.min, axis.tickSize),
-                        i = 0, v = Number.NaN, prev;
-                    do {
-                        prev = v;
-                        v = start + i * axis.tickSize;
-                        ticks.push(v);
-                        ++i;
-                    } while (v < axis.max && v != prev);
-                    return ticks;
-                };
-
-                axis.tickFormatter = function (v, axis) {
-                    var factor = Math.pow(10, axis.tickDecimals);
-                    return "" + Math.round(v * factor) / factor;
-                };
+                throw new Error("How is axis.tickGenerator not a function?!")
             }
 
             if ($.isFunction(opts.tickFormatter))
@@ -2570,12 +2521,83 @@
     };
 
     $.plot.version = "0.7";
-    
     $.plot.plugins = [];
+})(jQuery);
+
+// An inlined, default plugin for handling base-10 axes.  This is not an
+// external file to preserve backwards compatibility.  Any axes with a mode set
+// to "base10" or null will be handled by this plugin.
+(function ($) {
+    var options = {};
 
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
         return base * Math.floor(n / base);
     }
-    
+
+    function init(plot) {
+        plot.hooks.processDatapoints.push(function (plot, series, datapoints) {
+            $.each(plot.getAxes(), function(axisName, axis) {
+                var opts = axis.options;
+                if (opts.mode == null || opts.mode == "base10") {
+                    axis.tickGenerator = function (axis) {
+                        var maxDec = opts.tickDecimals;
+                        var dec = -Math.floor(Math.log(axis.delta) / Math.LN10);
+                        if (maxDec != null && dec > maxDec)
+                            dec = maxDec;
+
+                        var magn = Math.pow(10, -dec);
+                        var norm = axis.delta / magn; // norm is between 1.0 and 10.0
+                        var size;
+
+                        if (norm < 1.5)
+                            size = 1;
+                        else if (norm < 3) {
+                            size = 2;
+                            // special case for 2.5, requires an extra decimal
+                            if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
+                                size = 2.5;
+                                ++dec;
+                            }
+                        }
+                        else if (norm < 7.5)
+                            size = 5;
+                        else size = 10;
+
+                        size *= magn;
+
+                        if (opts.minTickSize != null && size < opts.minTickSize)
+                            size = opts.minTickSize;
+
+                        axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
+                        axis.tickSize = opts.tickSize || size;
+
+                        var ticks = [], start = floorInBase(axis.min, axis.tickSize),
+                            i = 0, v = Number.NaN, prev;
+                        do {
+                            prev = v;
+                            v = start + i * axis.tickSize;
+                            ticks.push(v);
+                            ++i;
+                        } while (v < axis.max && v != prev);
+                        return ticks;
+                    };
+
+                    axis.tickFormatter = function (v, axis) {
+                        var factor = Math.pow(10, axis.tickDecimals);
+                        return "" + Math.round(v * factor) / factor;
+                    };
+                }
+            });
+        });
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'base10',
+        version: '1.0'
+    });
 })(jQuery);
+
+
