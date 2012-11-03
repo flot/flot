@@ -2120,6 +2120,13 @@
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
+                    if (series.bars.timeMode === "month") {
+                        cur_month = new Date(points[i]),
+                        next_month = new Date(points[i]);
+                        // Now set it to next month; this works also at the end of year
+                        next_month.setMonth(next_month.getMonth()+1);
+                        barRight = next_month-cur_month;
+                    }
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
