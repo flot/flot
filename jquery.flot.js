@@ -152,6 +152,7 @@
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
         canvasWidth = 0, canvasHeight = 0,
         plotWidth = 0, plotHeight = 0,
+        measureTextSpan = null,
         hooks = {
             processOptions: [],
             processRawData: [],
@@ -930,12 +931,13 @@
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
                 f = axis.font;
 
-            ctx.save();
-            ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
+            // * unused while using child-span solution
+            //ctx.save();
+            //ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
 
             for (var i = 0; i < ticks.length; ++i) {
                 var t = ticks[i];
-                
+
                 t.lines = [];
                 t.width = t.height = 0;
 
@@ -947,13 +949,20 @@
                 // but IE is unfortunately broken)
                 var lines = (t.label + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
                 for (var j = 0; j < lines.length; ++j) {
-                    var line = { text: lines[j] },
-                        m = ctx.measureText(line.text);
-                    
-                    line.width = m.width;
+                    var line = { text: lines[j] };
+                    // * unused while using child-span solution
+                    //var m = ctx.measureText(line.text);
+
+                    // measure label dimensions dimensions
+                    measureTextSpan.text(line.text);
+                    line.width = measureTextSpan.width();
+                    line.height = measureTextSpan.height();
+
+                    // * unused while using child-span solution
+                    //line.width = m.width;
                     // m.height might not be defined, not in the
                     // standard yet
-                    line.height = m.height != null ? m.height : f.size;
+                    //line.height = m.height != null ? m.height : f.size;
 
                     // add a bit of margin since font rendering is
                     // not pixel perfect and cut off letters look
@@ -972,7 +981,8 @@
                 if (opts.labelHeight == null)
                     axish = Math.max(axish, t.height);
             }
-            ctx.restore();
+            // * unused while using child-span solution
+            //ctx.restore();
 
             axis.labelWidth = Math.ceil(axisw);
             axis.labelHeight = Math.ceil(axish);
@@ -1136,6 +1146,10 @@
 
                 var allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
 
+                // fix for measureText cross-browser inconsistency - use temporary placeholder child-span
+                measureTextSpan = $('<span style="visibility:hidden; padding:0; margin:0; width:auto; font-size:'+ fontDefaults.size+'px;"></span>');
+                $(placeholder).append(measureTextSpan);
+
                 $.each(allocatedAxes, function (_, axis) {
                     // make the ticks
                     setupTickGeneration(axis);
@@ -1146,6 +1160,9 @@
                     axis.font = $.extend({}, fontDefaults, axis.options.font);
                     measureTickLabels(axis);
                 });
+
+                // remove the measureText placeholder
+                measureTextSpan.remove();
 
                 // with all dimensions calculated, we can compute the
                 // axis bounding boxes, start from the outside
