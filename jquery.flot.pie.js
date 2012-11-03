@@ -50,6 +50,10 @@ series: {
 		}
 		highlight: {
 			opacity: 0-1
+		},
+		gradient: {
+		    radial: true/false, indicating radial or linear gradient, respectively.
+			colors: either an array of string color values ( ["#fff", "#000"] ) to use as color steps for the gradient or an object with the following structure that tells what modifications to apply to the default series color : { brightness:1, opacity:1}. Consult the bar chart specifications about gradient fill for more examples.
 		}
 	}
 }
@@ -392,13 +396,55 @@ More detail and specific examples can be found in the included HTML file.
 				// restore to original state
 				ctx.restore();
 
+                function getColorOrGradient(spec, bottom, top, defaultColor, radius) {
+                    // Most of this code is copied from the function with the
+                    // same name in jquery.flot.js.  I therefore believe that
+                    // this (common) code should be restructured to avoid
+                    // duplication of errors and an increase in maintenance
+                    // efforts.  However, I hope that one of the project
+                    // maintainers can do that.
+                    if (typeof spec === 'string') {
+                        return spec;
+                    } else if ((spec === null) || (spec.colors === null)) {
+                        return defaultColor;
+                    }
+                    else {
+                        // assume this is a gradient spec; IE currently only
+                        // supports a simple vertical gradient properly, so that's
+                        // what we support too
+                        var gradient;
+
+                        if (radius) {
+                            gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+                        } else {
+                            gradient = ctx.createLinearGradient(0, top, 0, bottom);
+                        }
+
+                        for (var i = 0, l = spec.colors.length; i < l; ++i) {
+                            var c = spec.colors[i];
+                            if (typeof c !== 'string') {
+                                var co = $.color.parse(defaultColor);
+                                if (c.brightness != null)
+                                    co = co.scale('rgb', c.brightness);
+                                if (c.opacity != null)
+                                    co.a *= c.opacity;
+                                c = co.toString();
+                            }
+                            gradient.addColorStop(i / (l - 1), c);
+                        }
+
+                        return gradient;
+                    }
+                }
+
 				function drawSlice(angle, color, fill)
 				{	
 					if (angle <= 0 || isNaN(angle))
 						return;
 				
-					if (fill)
-						ctx.fillStyle = color;
+					if (fill) {
+                        ctx.fillStyle = getColorOrGradient(options.series.pie.gradient, plot.height(), 0, color, options.series.pie.gradient.radial && radius);
+                    }
 					else
 					{
 						ctx.strokeStyle = color;
@@ -715,7 +761,7 @@ More detail and specific examples can be found in the included HTML file.
 				shadow: {
 					left: 5,     // shadow left offset
 					top: 15,     // shadow top offset
-					alpha: 0.02, // shadow alpha
+					alpha: 0.02  // shadow alpha
 				},
 				offset: {
 					top: 0,
@@ -745,7 +791,11 @@ More detail and specific examples can be found in the included HTML file.
 				highlight: {
 					//color: '#FFF',		// will add this functionality once parseColor is available
 					opacity: 0.5
-				}
+				},
+                gradient: {
+                    radial: true,   // boolean, indicating radial or linear gradient
+                    colors: null    // e.g., [{opacity: 0.1, brightness: 1.0}, {opacity: 1.0, brightness: 1.0}]
+                }
 			}
 		}
 	};
@@ -757,3 +807,4 @@ More detail and specific examples can be found in the included HTML file.
 		version: "1.0"
 	});
 })(jQuery);
+//

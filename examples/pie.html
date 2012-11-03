@@ -46,7 +46,24 @@ $(function () {
 			}
 		}
 	});
-	
+
+  // DEFAULT
+  $.plot($("#default_gradient"), data,
+      {
+        series: {
+          pie: {
+            show: true,
+            gradient: {
+              radial: true,
+              colors: [
+                {opacity: 0.5},
+                {opacity: 1.0}
+              ]
+            }
+          }
+        }
+      });
+
 	// GRAPH 1
 	$.plot($("#graph1"), data, 
 	{
@@ -252,7 +269,28 @@ $(function () {
 		}
 	});
 
-	// INTERACTIVE
+  // DONUT GRADIENT
+  $.plot($("#donut_gradient"), data,
+      {
+        series: {
+          pie: {
+            innerRadius: 0.5,
+            show: true,
+            gradient: {
+              radial: true,
+              colors: [
+                {opacity: 1.0},
+                {opacity: 1.0},
+                {opacity: 1.0},
+                {opacity: 0.5},
+                {opacity: 1.0}
+              ]
+            }
+          }
+        }
+      });
+
+  // INTERACTIVE
     $.plot($("#interactive"), data, 
 	{
 		series: {
@@ -375,6 +413,27 @@ $.plot($("#default"), data,<br/>
 });<br/>
 		</code>
 	</label>
+
+    <h2>Default with Legend And Gradient</h2>
+    <div id="default_gradient" class="graph"></div>
+    <label for="default_gradient">
+      Default pie graph with a radial gradient.
+      <code>
+        $.plot($("#default"), data,<br/>
+        {<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;series: {<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pie: { <br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;show: true,<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>gradient: {<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radial: true,<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors: [ {opacity: 0.5}, {opacity: 1.0} ]<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</b><br />
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+        });<br/>
+      </code>
+    </label>
 
 	<h2>Default without Legend</h2>
     <div id="graph1" class="graph"></div>
@@ -639,7 +698,28 @@ $.plot($("#donut"), data,<br/>
 });<br/>
 		</code>
 	</label>
-	
+
+    <h2>Donut with Gradient</h2>
+    <div id="donut_gradient" class="graph"></div>
+    <label for="donut_gradient">
+    A gradient can be added to the donut.
+		<code>
+$.plot($("#donut_gradient"), data,<br/>
+{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;series: {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pie: { <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;innerRadius: 0.5,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;show: true,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>gradient: {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radial: true,<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors: [ {opacity: 1.0}, {opacity: 1.0}, {opacity: 1.0}, {opacity: 0.5}, {opacity: 1.0} ]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</b><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+});<br/>
+		</code>
+	</label>
+
 	<h2>Interactive</h2>
     <div id="interactive" class="graph"></div>
 	<label for="interactive">
@@ -707,7 +787,17 @@ $("#interactive").bind("plotclick", pieClick);</b><br/>
 	
 	<h2>Changes/Features</h2>
 	<ul>
-		<li style="list-style: none;"><i>v1.0 - November 20th, 2009 - Brian Medendorp</i></li>
+    <li
+        style="list-style: none;"><i>v1.1 - November 2nd, 2012 - Martin Thorsen Ranang</i></li>
+    <li>Added support for rendering pies with gradients, either radial or
+      linear.  The changes are based on combination of the suggestions
+      proposed by <a
+          href="http://stackoverflow.com/users/3485/hoffmann">Hoffman
+      </a> in an answer on <a
+          href="http://stackoverflow.com/questions/12844159/gradients-on-flot">Stack Overflow</a> and <a href="http://code.google.com/p/flot/issues/attachmentText?id=276&aid=-7836171024142142196&name=jquery.flot.pie.js.diff&token=zvwDds_wCA3X0PhU3RXRO33iVNs%3A1351815189916">a patch</a> suggested in <a href="https://github.com/flot/flot/issues/355">reported issue #355</a> by <a href="http://code.google.com/u/lucboudreau/">Luc Boudreau</a>.
+    </li>
+
+    <li style="list-style: none;"><i>v1.0 - November 20th, 2009 - Brian Medendorp</i></li>
 		<li>The pie plug-in is now part of the Flot repository! This should make it a lot easier to deal with.</li>
 		<li>Added a new option (innerRadius) to add a "donut hole" to the center of the pie, based on comtributions from Anthony Aragues. I was a little reluctant to add this feature because it doesn't work very well with the shadow created for the tilted pie, but figured it was worthwhile for non-tilted pies. Also, excanvas apparently doesn't support compositing, so it will fall back to using the stroke color to fill in the center (but I recommend setting the stroke color to the background color anyway).</li>
 		<li>Changed the lineJoin for the border of the pie slices to use the 'round' option. This should make the center of the pie look better, particularly when there are numerous thin slices.</li>
