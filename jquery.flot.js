@@ -2414,7 +2414,11 @@
                     highlight(item.series, item.datapoint, eventname);
             }
             
-            placeholder.trigger(eventname, [ pos, item ]);
+            event.type = eventname;
+            
+            // The jQuery docs do not say that you can pass an event and extraParameters, but the source code shows
+            // that extra parameters are passed regardless of whether a string or jQuery Event is passed in.
+            placeholder.trigger(event, [ pos, item ]);
         }
 
         function triggerRedrawOverlay() {
