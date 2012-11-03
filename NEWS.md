@@ -133,7 +133,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    by Shad Downey)
 
  - Prevented the local insertSteps and fmt variables from becoming global.
-   (first reported by Marc Bennewitz, patch by Nick Campbell)
+   (first reported by Marc Bennewitz and Szymon Barglowski, patch by Nick
+   Campbell, issues #825 and #831, pull request #851)
 
 ## Flot 0.7 ##
 
