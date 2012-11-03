@@ -71,6 +71,7 @@
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
+                    labelAngle: null,
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
                     tickLength: null, // size in pixels of ticks, or "full" for whole line
                     alignTicksWithAxis: null, // axis number or null for no sync
@@ -253,6 +254,10 @@
                 options.xaxis.tickColor = options.grid.tickColor;
             if (options.yaxis.tickColor == null) // backwards-compatibility
                 options.yaxis.tickColor = options.grid.tickColor;
+
+            // Transform angle in radiants
+            if (options.xaxis.labelAngle != null)
+                options.xaxis.labelAngle = (options.xaxis.labelAngle * Math.PI) / 180;
 
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
@@ -951,9 +956,18 @@
                         m = ctx.measureText(line.text);
                     
                     line.width = m.width;
+
                     // m.height might not be defined, not in the
                     // standard yet
                     line.height = m.height != null ? m.height : f.size;
+
+                    var angle = opts.labelAngle;
+                    if(angle) {
+                        var abs = Math.abs, sin = Math.sin, cos = Math.cos,
+                        w = line.width, h = line.height;
+                        line.height = abs(w * sin(angle)) + abs(h * cos(angle));
+                        line.width = abs(w * cos(angle)) + abs(h * sin(angle));
+                    }
 
                     // add a bit of margin since font rendering is
                     // not pixel perfect and cut off letters look
@@ -1222,7 +1236,8 @@
             else
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                // Increase factor if labels have an angle
+                noTicks = (0.3 + (opts.labelAngle ? Math.abs(Math.sin(opts.labelAngle)) * .5 : 0)) * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
 
             axis.delta = (axis.max - axis.min) / noTicks;
 
@@ -1644,41 +1659,64 @@
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
 
-                    var x, y, offset = 0, line;
+                    var x, y, offset = 0, line, angle;
                     for (var k = 0; k < tick.lines.length; ++k) {
                         line = tick.lines[k];
-                        
-                        if (axis.direction == "x") {
-                            x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
-                            if (axis.position == "bottom")
-                                y = box.top + box.padding;
-                            else
-                                y = box.top + box.height - box.padding - tick.height;
-                        }
-                        else {
-                            y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
-                            if (axis.position == "left")
-                                x = box.left + box.width - box.padding - line.width;
-                            else
-                                x = box.left + box.padding;
-                        }
+                        angle = axis.options.labelAngle
 
-                        // account for middle aligning and line number
-                        y += line.height/2 + offset;
-                        offset += line.height;
+                        if(angle) {
+                            ctx.save();
+                            x = plotOffset.left + axis.p2c(tick.v);
+                            y = box.top + 2 * box.padding;
 
-                        if ($.browser.opera) {
-                            // FIXME: UGLY BROWSER DETECTION
-                            // round the coordinates since Opera
-                            // otherwise switches to more ugly
-                            // rendering (probably non-hinted) and
-                            // offset the y coordinates since it seems
-                            // to be off pretty consistently compared
-                            // to the other browsers
-                            x = Math.floor(x);
-                            y = Math.ceil(y - 2);
+                            var sin_angle = Math.sin(angle);
+                            var cos_angle = Math.cos(angle);
+
+                            if (sin_angle < 0 && cos_angle < 0) {
+                                x += line.width;
+                                y += line.height - 2*box.padding;
+                            } else if (sin_angle < 0 && cos_angle > 0) {
+                                x -= line.width;
+                                y += line.height - 2*box.padding;
+                            }
+
+                            ctx.translate(x, y);
+                            ctx.rotate(angle);
+                            ctx.fillText(line.text, 0, 0);
+                            ctx.restore();
+                        } else {
+                            if (axis.direction == "x") {
+                                x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
+                                if (axis.position == "bottom")
+                                    y = box.top + box.padding;
+                                else
+                                    y = box.top + box.height - box.padding - tick.height;
+                            }
+                            else {
+                                y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
+                                if (axis.position == "left")
+                                    x = box.left + box.width - box.padding - line.width;
+                                else
+                                    x = box.left + box.padding;
+                            }
+
+                            // account for middle aligning and line number
+                            y += line.height/2 + offset;
+                            offset += line.height;
+
+                            if ($.browser.opera) {
+                                // FIXME: UGLY BROWSER DETECTION
+                                // round the coordinates since Opera
+                                // otherwise switches to more ugly
+                                // rendering (probably non-hinted) and
+                                // offset the y coordinates since it seems
+                                // to be off pretty consistently compared
+                                // to the other browsers
+                                x = Math.floor(x);
+                                y = Math.ceil(y - 2);
+                            }
+                            ctx.fillText(line.text, x, y);
                         }
-                        ctx.fillText(line.text, x, y);
                     }
                 }
             });
