@@ -50,7 +50,7 @@ adjusted (e.g for bar charts or filled areas).
             return res;
         }
         
-        function stackData(plot, s, datapoints) {
+        function stackData(plot, s, datapoints, extraPoints) {
             if (s.stack == null)
                 return;
 
@@ -124,6 +124,7 @@ adjusted (e.g for bar charts or filled areas).
                         if (withlines && i > 0 && points[i - ps] != null) {
                             intery = py + (points[i - ps + accumulateOffset] - py) * (qx - px) / (points[i - ps + keyOffset] - px);
                             newpoints.push(qx);
+                            extraPoints.push(qx);
                             newpoints.push(intery + qy);
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
@@ -168,7 +169,7 @@ adjusted (e.g for bar charts or filled areas).
                     newpoints[l + 1] = newpoints[l - ps + 1];
                 }
             }
-
+			s.extrapoints = extraPoints;
             datapoints.points = newpoints;
         }
         
