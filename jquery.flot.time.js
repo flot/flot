@@ -222,7 +222,7 @@ for details.
                         if (step >= timeUnitSize.hour)
                             d.setMinutes(0);
                         if (step >= timeUnitSize.day)
-                            d.setHours(0);
+                            d.setHours(d.date.getTimezoneOffset()/60);
                         if (step >= timeUnitSize.day * 4)
                             d.setDate(1);
                         if (step >= timeUnitSize.year)
