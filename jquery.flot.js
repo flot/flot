@@ -878,6 +878,9 @@
             if (options.grid.clickable)
                 eventHolder.click(onClick);
 
+            if (options.grid.rightclickable) 
+                eventHolder.rightClick(onRightClick);
+
             executeHooks(hooks.bindEvents, [eventHolder]);
         }
 
@@ -888,6 +891,7 @@
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
+            eventHolder.unbind("rightClick", onRightClick);
             
             executeHooks(hooks.shutdown, [eventHolder]);
         }
@@ -1565,8 +1569,12 @@
                 }
 
                 // draw ticks
-                ctx.beginPath();
                 for (i = 0; i < axis.ticks.length; ++i) {
+                    ctx.beginPath();
+                    if( axis.options.tickColorArray ) {
+                        ctx.strokeStyle = axis.options.tickColorArray[ i % axis.options.tickColorArray.length ];
+                        }
+                
                     var v = axis.ticks[i].v;
                     
                     xoff = yoff = 0;
@@ -1601,9 +1609,9 @@
 
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
+                    ctx.stroke();
                 }
                 
-                ctx.stroke();
             }
             
             
@@ -2379,6 +2387,12 @@
             triggerClickHoverEvent("plotclick", e,
                                    function (s) { return s["clickable"] != false; });
         }
+        
+        function onRightClick(e) {
+            triggerClickHoverEvent("plotrightclick", e,
+                                   function (s) { return s["rightclickable"] != false; });
+        }
+
 
         // trigger click or hover event (they send the same parameters
         // so we share their code)
