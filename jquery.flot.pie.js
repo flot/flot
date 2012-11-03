@@ -47,6 +47,7 @@ series: {
 			threshold: 0-1 for the percentage value at which to combine slices (if they're too small)
 			color: any hexidecimal color value (other formats may or may not work, so best to stick with something like '#CCC'), if null, the plugin will automatically use the color of the first slice to be combined
 			label: any text value of what the combined slice should be labeled
+			recolor: automatically assign colors to the remaining slices as if they were the original data set 
 		}
 		highlight: {
 			opacity: 0-1
@@ -231,7 +232,8 @@ More detail and specific examples can be found in the included HTML file.
 			var combined = 0;
 			var numCombined = 0;
 			var color = options.series.pie.combine.color;
-			
+			var newcolor = 0;
+	
 			var newdata = [];
 			for (var i = 0; i < data.length; ++i)
 			{
@@ -249,15 +251,28 @@ More detail and specific examples can be found in the included HTML file.
 				}				
 				else
 				{
+					if (options.series.pie.combine.recolor) 
+					{
+						newcolor = newdata.size();
+					}
+					else
+					{
+						newcolor = data[i].color;
+					}
+
 					newdata.push({
 						data: [[1,data[i].data[0][1]]], 
-						color: data[i].color, 
+						color: newcolor, 
 						label: data[i].label,
 						angle: (data[i].data[0][1]*(Math.PI*2))/total,
 						percent: (data[i].data[0][1]/total*100)
 					});
 				}
 			}
+
+			if( !options.series.pie.combine.color && options.series.pie.combine.recolor )
+				color = newdata.size()
+
 			if (numCombined>0)
 				newdata.push({
 					data: [[1,combined]], 
