@@ -54,21 +54,23 @@ $(function () {
     var bars = [[[13 * 365 * 24 * 3600 * 1000, null],
                  [13 * 365 * 24 * 3600 * 1000, null]]];
 
-    $.plot($("#placeholder"), [{label: 'foo', data: d},
-                               {label: 'bar', data: ranges,
-                                ranges: {show: true, opacity: 0.4}},
-                               {label: 'baz', data: ranges2,
-                                ranges: {show: true}},
-                               {label: 'foobar', data: bars,
-                                ranges: {show: true}}],
+    var data = [{label: 'foo', data: d},
+                {label: 'bar', data: ranges,
+                 ranges: {show: true, opacity: 0.4}},
+                {label: 'baz', data: ranges2,
+                 ranges: {show: true}},
+                {label: 'foobar', data: bars,
+                 ranges: {show: true}}];
+
+    $.plot($("#placeholder"), data,
            { xaxis: { mode: "time" } });
 
     $("#whole").click(function () {
-        $.plot($("#placeholder"), [d], { xaxis: { mode: "time" } });
+        $.plot($("#placeholder"), data, { xaxis: { mode: "time" } });
     });
 
     $("#nineties").click(function () {
-        $.plot($("#placeholder"), [d], {
+        $.plot($("#placeholder"), data, {
             xaxis: {
                 mode: "time",
                 min: (new Date(1990, 0, 1)).getTime(),
@@ -78,7 +80,7 @@ $(function () {
     });
 
     $("#latenineties").click(function () {
-        $.plot($("#placeholder"), [d], {
+        $.plot($("#placeholder"), data, {
             xaxis: {
                 mode: "time",
                 minTickSize: [1, "year"],
@@ -89,7 +91,7 @@ $(function () {
     });
 
     $("#ninetynine").click(function () {
-        $.plot($("#placeholder"), [d], {
+        $.plot($("#placeholder"), data, {
             xaxis: {
                 mode: "time",
                 minTickSize: [1, "month"],
@@ -100,7 +102,7 @@ $(function () {
     });
 
     $("#lastweekninetynine").click(function () {
-        $.plot($("#placeholder"), [d], {
+        $.plot($("#placeholder"), data, {
             xaxis: {
                 mode: "time",
                 minTickSize: [1, "day"],
@@ -112,7 +114,7 @@ $(function () {
     });
 
     $("#lastdayninetynine").click(function () {
-        $.plot($("#placeholder"), [d], {
+        $.plot($("#placeholder"), data, {
             xaxis: {
                 mode: "time",
                 minTickSize: [1, "hour"],
