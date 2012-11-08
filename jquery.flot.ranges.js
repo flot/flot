@@ -46,6 +46,7 @@
     var inf = Number.MAX_VALUE;
 
     function mutateInfinity (value) {
+        value = +value;
         if (value == Infinity)
             return inf;
         else if (value == -Infinity)
