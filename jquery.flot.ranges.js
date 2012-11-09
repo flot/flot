@@ -43,91 +43,128 @@
 //  - opacity: Opacity of fill colour respective to series.color
 
 (function ($) {
+    var inf = Number.MAX_VALUE;
+
+    function mutateInfinity (value) {
+        if (value == Infinity)
+            return inf;
+        else if (value == -Infinity)
+            return -inf;
+        else
+            return value;
+    }
+
+    function processRawData (plot, series, data, datapoints)
+    {
+        if (!series.ranges.show)
+            return;
+
+        var formats = [];
+
+        datapoints.pointsize = 4;
+        datapoints.points = [];
+        datapoints.format = [
+            {x: true, number: true, required: true},
+            {y: true, number: true, required: true},
+            {x: true, number: true, required: true},
+            {y: true, number: true, required: true}
+        ];
+
+        for (var i=0; i<data.length; i++) {
+            var from_point = data[i][0];
+            var to_point = data[i][1];
+
+            var from_x = mutateInfinity (from_point[0]);
+            var from_y = mutateInfinity (from_point[1]);
+            var to_x = mutateInfinity (to_point[0]);
+            var to_y = mutateInfinity (to_point[1]);
+
+            datapoints.points.push (from_x, from_y, to_x, to_y);
+        }
+    }
+
+    function drawSeries (plot, ctx, series)
+    {
+        if (!series.ranges.show)
+            return;
+
+        var plot_offset = plot.getPlotOffset ();
+        var color = $.color.parse (series.color);
+
+        var axesinfo = {xaxis: series.xaxis,
+                        yaxis: series.yaxis};
+
+        ctx.save ();
+        ctx.strokeStyle = color.toString ();
+        ctx.lineWidth = series.lineWidth;
+        ctx.lineJoin = "round";
+
+        if (series.ranges.fill)
+            ctx.fillStyle = color.scale ('a',
+                                         series.ranges.opacity).toString ();
+        else
+            ctx.fillStyle = "none";
+
+        var points = series.datapoints.points;
+        for (var i=0; i<points.length; i+=series.datapoints.pointsize) {
+            var range = {
+                from: {x: points[i], y: points[i+1]},
+                to: {x: points[i+2], y:points[i+3]},
+                axes: axesinfo
+            };
+
+            drawRange (plot, ctx, range);
+        }
+
+        ctx.restore ();
+    }
+
+    function drawRange (plot, ctx, range)
+    {
+        var from = $.extend ({}, range.from, range.axes);
+        var to = $.extend ({}, range.to, range.axes);
+        var plot_offset = plot.getPlotOffset ();
+
+        // Get top/left coords for these points
+        $.extend (from, plot.pointOffset (from));
+        $.extend (to, plot.pointOffset (to));
+
+        // Fix up top/left coords for infinity points
+        var points = [from, to];
+        for (var i=0; i<points.length; i++) {
+            if (points[i].x == inf)
+                points[i].left = plot_offset.left;
+            else if (points[i].x == -inf)
+                points[i].left = plot_offset.left + plot.width ();
+
+            if (points[i].y == inf)
+                points[i].top = plot_offset.top;
+            else if (points[i].y == -inf)
+                points[i].top = plot_offset.top + plot.height ();
+        }
+
+        var x = Math.min (from.left, to.left);
+        var y = Math.min (from.top, to.top);
+        var w = Math.abs (from.left - to.left);
+        var h = Math.abs (from.top - to.top);
+
+        if (w == 0 || h == 0) {
+            // line mode
+            ctx.beginPath ();
+            ctx.moveTo (x, y);
+            ctx.lineTo (x + w, y + h);
+            ctx.stroke ();
+        } else {
+            // rect mode
+            ctx.fillRect (x, y, w, h);
+            ctx.strokeRect (x, y, w, h);
+        }
+    }
+
     function init (plot)
     {
-        function drawSeries (plot, ctx, series)
-        {
-            if (!series.ranges.show)
-                return;
-
-            var plot_offset = plot.getPlotOffset ();
-            var color = $.color.parse (series.color);
-
-            var axesinfo = {xaxis: series.xaxis,
-                            yaxis: series.yaxis};
-            var datapoints = series.data;
-
-            ctx.save ();
-
-            // Set up styling for drawing the selection
-            ctx.strokeStyle = color.toString ();
-            ctx.lineWidth = series.lineWidth;
-            ctx.lineJoin = "round";
-            if (series.ranges.fill)
-                ctx.fillStyle = color.scale ('a',
-                                             series.ranges.opacity).toString ();
-            else
-                ctx.fillStyle = 'none';
-
-            for (var i=0; i<datapoints.length; i++) {
-                var offsets = getOffsets (datapoints[i], axesinfo);
-                drawRange (ctx, offsets[0], offsets[1]);
-            }
-
-             ctx.restore ();
-        }
-
-        plot.hooks.drawSeries.push (drawSeries)
-
-        function getOffsets (points, axesinfo)
-        {
-            var offsets = [];
-
-            for (var i=0; i<points.length; i++) {
-                var point = $.extend ({x: points[i][0],
-                                       y: points[i][1]}, axesinfo);
-                offsets[i] = plot.pointOffset (point);
-            }
-
-            var plot_offset = plot.getPlotOffset ();
-
-            // detect -1 coordinates
-            if (points[0][0] === null || points[1][0] === null) {
-                offsets[0].left = plot_offset.left;
-                offsets[1].left = plot_offset.left + plot.width ()
-            }
-
-            if (points[0][1] === null || points[1][1] === null) {
-                offsets[0].top = plot_offset.top + plot.height ();
-                offsets[1].top = plot_offset.top;
-            }
-
-            return offsets;
-        }
-
-        function drawRange (ctx, from, to)
-        {
-            var x = Math.min (from.left, to.left);
-            var y = Math.min (from.top, to.top);
-            var w = Math.abs (from.left - to.left);
-            var h = Math.abs (from.top - to.top);
-
-            if (w == 0 || h == 0) {
-                // line mode
-                ctx.save ();
-
-                ctx.beginPath ();
-                ctx.moveTo (x, y);
-                ctx.lineTo (x + w, y + h);
-                ctx.stroke ();
-
-                ctx.restore ();
-            } else {
-                // rect mode
-                ctx.fillRect (x, y, w, h);
-                ctx.strokeRect (x, y, w, h);
-            }
-        }
+        plot.hooks.processRawData.push (processRawData);
+        plot.hooks.drawSeries.push (drawSeries);
     }
 
     $.plot.plugins.push ({
