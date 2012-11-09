@@ -165,6 +165,43 @@
     {
         plot.hooks.processRawData.push (processRawData);
         plot.hooks.drawSeries.push (drawSeries);
+        plot.findRanges = function (point)
+        {
+            var series_list = plot.getData ();
+
+            var retval = [];
+
+            for (var i=0; i<series_list.length; i++) {
+                var series = series_list[i];
+                var datapoints = series.datapoints;
+
+                for (var j=0; j<datapoints.length; j+=datapoints.pointsize) {
+                    var left = Math.min (datapoints.points[j],
+                                         datapoints.points[j+2]);
+                    var bottom = Math.min (datapoints.points[j+1],
+                                           datapoints.points[j+3]);
+                    var right = Math.max (datapoints.points[j],
+                                          datapoints.points[j+2]);
+                    var top = Math.max (datapoints.points[j+1],
+                                        datapoints.points[j+3]);
+
+
+                    if ((point.x == null || (left <= point.x &&
+                                             point.x <= right)) &&
+                        (point.y == null || (top <= point.y &&
+                                             point.y <= bottom)))
+                        retval.push ({datapoint: [datapoints.points[j],
+                                                  datapoints.points[j+1],
+                                                  datapoints.points[j+2],
+                                                  datapoints.points[j+3]],
+                                      dataIndex: j / datapoints.pointsize,
+                                      series: series,
+                                      seriesIndex: i});
+                }
+            }
+
+            return retval;
+        };
     }
 
     $.plot.plugins.push ({
