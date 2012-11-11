@@ -91,6 +91,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Added the ability to control pie shadow position and alpha via a new pie
    'shadow' option. (patch by Julien Thomas)
 
+ - Added the ability to set width and color for individual sides of the grid.
+   (patch by Ara Anjargolian)
+
 ### Bug fixes ###
 
  - Fix problem with null values and pie plugin. (patch by gcruxifix,
