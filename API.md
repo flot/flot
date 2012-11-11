@@ -790,8 +790,8 @@ grid: {
     labelMargin: number
     axisMargin: number
     markings: array of markings or (fn: axes -> array of markings)
-    borderWidth: number
-    borderColor: color or null
+    borderWidth: number or object with "top", "right", "bottom" and "left" properties with different widths
+    borderColor: color or null or object with "top", "right", "bottom" and "left" properties with different colors
     minBorderMargin: number or null
     clickable: boolean
     hoverable: boolean
@@ -833,12 +833,14 @@ line, and "axisMargin" is the space in pixels between axes when there
 are two next to each other.
 
 "borderWidth" is the width of the border around the plot. Set it to 0
-to disable the border. You can also set "borderColor" if you want the
-border to have a different color than the grid lines.
-"minBorderMargin" controls the default minimum margin around the
-border - it's used to make sure that points aren't accidentally
-clipped by the canvas edge so by default the value is computed from
-the point radius.
+to disable the border. Set it to an object with "top", "right",
+"bottom" and "left" properties to use different widths. You can
+also set "borderColor" if you want the border to have a different color
+than the grid lines. Set it to an object with "top", "right", "bottom"
+and "left" properties to use different colors. "minBorderMargin" controls
+the default minimum margin around the border - it's used to make sure
+that points aren't accidentally clipped by the canvas edge so by default
+the value is computed from the point radius.
 
 "markings" is used to draw simple lines and rectangular areas in the
 background of the plot. You can either specify an array of ranges on
