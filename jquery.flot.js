@@ -1110,8 +1110,14 @@
 
             // If the grid is visible, add its border width to the offset
 
-            for (var a in plotOffset)
-                plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
+            for (var a in plotOffset) {
+                if(typeof(options.grid.borderWidth) == "object") {
+                    plotOffset[a] = showGrid ? options.grid.borderWidth[a] : 0;
+                }
+                else {
+                    plotOffset[a] = showGrid ? options.grid.borderWidth : 0;
+                }
+            }
 
             // init axes
             $.each(axes, function (_, axis) {
@@ -1573,7 +1579,8 @@
 
                     if (v < axis.min || v > axis.max
                         // skip those lying on the axes if we got a border
-                        || (t == "full" && bw > 0
+                        || (t == "full"
+                            && ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0)
                             && (v == axis.min || v == axis.max)))
                         continue;
 
@@ -1609,9 +1616,43 @@
             
             // draw border
             if (bw) {
-                ctx.lineWidth = bw;
-                ctx.strokeStyle = options.grid.borderColor;
-                ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
+                // If either borderWidth or borderColor is an object, then draw the border
+                // line by line instead of as one rectangle
+                bc = options.grid.borderColor;
+                if(typeof bw == "object" || typeof bc == "object") {
+                    ctx.beginPath();
+                    ctx.strokeStyle = (typeof bc == "object" ? bc.top : bc);
+                    ctx.lineWidth = (typeof bw == "object" ? bw.top : bw);
+                    ctx.moveTo(0 - bw.left, 0 - bw.top/2);
+                    ctx.lineTo(plotWidth, 0 - bw.top/2);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = (typeof bc == "object" ? bc.right : bc);
+                    ctx.lineWidth = (typeof bw == "object" ? bw.right : bw)
+                    ctx.moveTo(plotWidth + bw.right / 2, 0 - bw.top);
+                    ctx.lineTo(plotWidth + bw.right / 2, plotHeight);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = (typeof bc == "object" ? bc.bottom : bc);
+                    ctx.lineWidth = (typeof bw == "object" ? bw.bottom : bw)
+                    ctx.moveTo(plotWidth + bw.right, plotHeight + bw.bottom / 2);
+                    ctx.lineTo(0, plotHeight + bw.bottom / 2);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.strokeStyle = (typeof bc == "object" ? bc.left : bc);
+                    ctx.lineWidth = (typeof bw == "object" ? bw.left : bw)
+                    ctx.moveTo(0 - bw.left/2, plotHeight + bw.bottom);
+                    ctx.lineTo(0- bw.left/2, 0);
+                    ctx.stroke();
+                }
+                else {
+                    ctx.lineWidth = bw;
+                    ctx.strokeStyle = options.grid.borderColor;
+                    ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
+                }
             }
 
             ctx.restore();
