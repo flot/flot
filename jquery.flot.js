@@ -724,19 +724,15 @@
         // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
 
         function getPixelRatio(cctx) {
-    		if('devicePixelRatio' in window) {
-				var devicePixelRatio = window.devicePixelRatio || 1, 
-					backingStoreRatio = 
-						cctx.webkitBackingStorePixelRatio ||
-						cctx.mozBackingStorePixelRatio ||
-						cctx.msBackingStorePixelRatio ||
-						cctx.oBackingStorePixelRatio ||
-						cctx.backingStorePixelRatio || 1;
+			var devicePixelRatio = window.devicePixelRatio || 1;
+			var backingStoreRatio = 
+				cctx.webkitBackingStorePixelRatio || 
+				cctx.mozBackingStorePixelRatio || 
+				cctx.msBackingStorePixelRatio || 
+				cctx.oBackingStorePixelRatio || 
+				cctx.backingStorePixelRatio || 1;
 
-				return devicePixelRatio / backingStoreRatio;
-            }
-
-            return 1;
+			return devicePixelRatio / backingStoreRatio;
         }
 
         function makeCanvas(skipPositioning, cls) {
