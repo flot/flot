@@ -96,6 +96,11 @@
                         yaxis: series.yaxis};
 
         ctx.save ();
+        ctx.beginPath ();
+        ctx.rect (plot_offset.left, plot_offset.top,
+                  plot.width (), plot.height ());
+        ctx.closePath ();
+        ctx.clip ();
         ctx.strokeStyle = color.toString ();
         ctx.lineWidth = series.lineWidth;
         ctx.lineJoin = "round";
@@ -154,6 +159,7 @@
             ctx.beginPath ();
             ctx.moveTo (x, y);
             ctx.lineTo (x + w, y + h);
+            ctx.closePath ();
             ctx.stroke ();
         } else {
             // rect mode
