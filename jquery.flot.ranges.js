@@ -186,7 +186,8 @@
 
                 var datapoints = series.datapoints;
 
-                for (var j=0; j<datapoints.length; j+=datapoints.pointsize) {
+                for (var j=0; j<datapoints.points.length;
+                     j+=datapoints.pointsize) {
                     var left = Math.min (datapoints.points[j],
                                          datapoints.points[j+2]);
                     var bottom = Math.min (datapoints.points[j+1],
