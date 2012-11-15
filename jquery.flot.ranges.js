@@ -180,6 +180,10 @@
 
             for (var i=0; i<series_list.length; i++) {
                 var series = series_list[i];
+
+                if (!series.ranges.show)
+                    continue;
+
                 var datapoints = series.datapoints;
 
                 for (var j=0; j<datapoints.length; j+=datapoints.pointsize) {
