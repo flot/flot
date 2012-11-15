@@ -197,6 +197,18 @@
                     var top = Math.max (datapoints.points[j+1],
                                         datapoints.points[j+3]);
 
+                    var xaxis = series.xaxis;
+                    var yaxis = series.yaxis;
+                    var radius = plot.getOptions ().grid.mouseActiveRadius;
+                    if (left == right) {
+                        left = xaxis.c2p (xaxis.p2c (left) - radius);
+                        right = xaxis.c2p (xaxis.p2c (right) + radius);
+                    }
+
+                    if (top == bottom) {
+                        top = yaxis.c2p (xaxis.p2c (top) - radius);
+                        bottom = yaxis.c2p (xaxis.p2c (bottom) + radius);
+                    }
 
                     if ((point.x == null || (left <= point.x &&
                                              point.x <= right)) &&
