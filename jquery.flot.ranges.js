@@ -200,8 +200,8 @@
 
                     if ((point.x == null || (left <= point.x &&
                                              point.x <= right)) &&
-                        (point.y == null || (top <= point.y &&
-                                             point.y <= bottom)))
+                        (point.y == null || (bottom <= point.y &&
+                                             point.y <= top)))
                         retval.push ({datapoint: [datapoints.points[j],
                                                   datapoints.points[j+1],
                                                   datapoints.points[j+2],
