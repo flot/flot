@@ -2514,8 +2514,11 @@
 
                 if (hi.series.bars.show)
                     drawBarHighlight(hi.series, hi.point);
-                else
+                else {
+                    if (hi.series.lines.show && hi.series.lines.fill && options.grid.trackByArea)
+                        drawAreaHighlight(hi.series);
                     drawPointHighlight(hi.series, hi.point);
+                }
             }
             octx.restore();
             
@@ -2569,6 +2572,15 @@
                     return i;
             }
             return -1;
+        }
+
+        function drawAreaHighlight(series) {
+            octx.strokeStyle = series.color;
+            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
+            if (fillStyle) {
+                octx.fillStyle = fillStyle;
+                plotLineArea(series.datapoints, series.xaxis, series.yaxis, octx);
+            }
         }
         
         function drawPointHighlight(series, point) {
