@@ -797,6 +797,7 @@ grid: {
     hoverable: boolean
     autoHighlight: boolean
     mouseActiveRadius: number
+    trackByArea: boolean
 }
 
 interaction: {
@@ -944,6 +945,9 @@ also need to listen to "mouseout" events on the placeholder div.
 and still activate it. If there are two or more points within this
 radius, Flot chooses the closest item. For bars, the top-most bar
 (from the latest specified data series) is chosen.
+
+"trackByArea" only applies to filled line plots. When it is set
+(defaults to false), mouse can be over the filled area to activate it.
 
 If you want to disable interactivity for a specific data series, you
 can set "hoverable" and "clickable" to false in the options for that

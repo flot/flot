@@ -137,7 +137,8 @@
                     clickable: false,
                     hoverable: false,
                     autoHighlight: true, // highlight in case mouse is near
-                    mouseActiveRadius: 10 // how far the mouse can be away to activate an item
+                    mouseActiveRadius: 10, // how far the mouse can be away to activate an item
+                    trackByArea: false // hover/click tracking by filled area
                 },
                 interaction: {
                     redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
@@ -2315,7 +2316,7 @@
         
         var highlights = [],
             redrawTimeout = null;
-        
+
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
@@ -2348,24 +2349,54 @@
                         var x = points[j], y = points[j + 1];
                         if (x == null)
                             continue;
-                        
-                        // For points and lines, the cursor must be within a
-                        // certain distance to the data point
-                        if (x - mx > maxx || x - mx < -maxx ||
-                            y - my > maxy || y - my < -maxy)
-                            continue;
 
-                        // We have to calculate distances in pixels, not in
-                        // data units, because the scales of the axes may be different
-                        var dx = Math.abs(axisx.p2c(x) - mouseX),
-                            dy = Math.abs(axisy.p2c(y) - mouseY),
-                            dist = dx * dx + dy * dy; // we save the sqrt
+                        // Tracking by area: only for filled line segments - point size
+                        // at least 3. Check segment between current and next data point.
+                        if (options.grid.trackByArea &&
+                            ps >= 3 &&
+                            j+ps < points.length)
+                        {
+                            var b = points[j+2];
+                            var x2 = points[j+ps], y2 = points[j+ps+1], b2 = points[j+ps+2];
+                            // Cursor must hit the segment horizontally
+                            if (mx < x || mx > x2)
+                                continue;
 
-                        // use <= to ensure last point takes precedence
-                        // (last generally means on top of)
-                        if (dist < smallestDistance) {
-                            smallestDistance = dist;
-                            item = [i, j / ps];
+                            // Interpolate vertical segment values based on horizontal
+                            // cursor position
+                            var t = x==x2 ? 0.0 : (mx-x) / (x2-x);
+                            var yt = y + t * (y2-y);
+                            var bt = b + t * (b2-b);
+
+                            // Check if cursor falls within vertical bounds
+                            if (my < Math.min(bt, yt) || my > Math.max(bt, yt))
+                                continue;
+
+                            smallestDistance = 0;
+                            // Pick current or next data point, depending on which
+                            // one is closer.
+                            var dataIndex = t > 0.5 ? (j / ps)+1 : j / ps;
+                            item = [i, dataIndex];
+
+                        } else {
+                            // For points and lines, the cursor must be within a
+                            // certain distance to the data point
+                            if (x - mx > maxx || x - mx < -maxx ||
+                                y - my > maxy || y - my < -maxy)
+                                continue;
+
+                            // We have to calculate distances in pixels, not in
+                            // data units, because the scales of the axes may be different
+                            var dx = Math.abs(axisx.p2c(x) - mouseX),
+                                dy = Math.abs(axisy.p2c(y) - mouseY),
+                                dist = dx * dx + dy * dy; // we save the sqrt
+
+                            // use <= to ensure last point takes precedence
+                            // (last generally means on top of)
+                            if (dist < smallestDistance) {
+                                smallestDistance = dist;
+                                item = [i, j / ps];
+                            }
                         }
                     }
                 }
