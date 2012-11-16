@@ -157,6 +157,7 @@ legend: {
     backgroundOpacity: number between 0 and 1
     container: null or jQuery object/DOM element/jQuery expression
     sorted: null/false, true, "ascending", "descending" or a comparator
+    reversed: boolean
 }
 ```
 
@@ -203,6 +204,9 @@ sorted: function(a, b) {
     )
 }
 ```
+
+Legend entries can be shown in reverse order if "reversed" is set to
+true. This can be useful for stacked plots.
 
 
 ## Customizing the axes ##
