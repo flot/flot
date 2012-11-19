@@ -110,7 +110,6 @@
 		}
 
 	    var cp = [],   // array of control points
-	    	len,
 	    	tension = series.lines.tension || 0.5,
 	    	idx,
 	    	x,
@@ -118,15 +117,16 @@
 	    	points = series.datapoints.points,
 	    	ps = series.datapoints.pointsize,
 	    	plotOffset = plot.getPlotOffset(),
+	    	len = points.length,
 	    	pts = [];
 
 	    // Cannot display a linespline/areaspline if there are less than 3 points
-	    if ((points.length / ps) < 4) {
+	    if (len / ps < 4) {
 	    	$.extend(series.lines, series.splines);
 	    	return;
 	    }
 
-        for (idx = 0, len = points.length; idx < len; idx += ps) {
+        for (idx = 0; idx < len; idx += ps) {
             x = points[idx];
             y = points[idx + 1];
             if (x == null || x < series.xaxis.min || x > series.xaxis.max ||
@@ -136,6 +136,8 @@
 
        		pts.push(series.xaxis.p2c(x), series.yaxis.p2c(y));
         }
+
+        len = pts.length;
 
 	    // Draw an open curve, not connected at the ends
 	    for (idx = 0; idx < len - 4; idx += 2) {
