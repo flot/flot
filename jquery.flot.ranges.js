@@ -168,6 +168,42 @@
         }
     }
 
+    function point2RangeDistance (point, range, xaxis, yaxis)
+    {
+        var left = Math.min (range[0], range[2]);
+        var bottom = Math.min (range[1], range[3]);
+        var right = Math.max (range[0], range[2]);
+        var top = Math.max (range[1], range[3]);
+
+        var offsetx = xaxis.p2c (point.x);
+        var offsety = xaxis.p2c (point.y);
+
+        var offsetleft = xaxis.p2c (left);
+        var offsetright = xaxis.p2c (right);
+        var offsettop = xaxis.p2c (top);
+        var offsetbottom = xaxis.p2c (bottom);
+
+        var xdist = Math.min (Math.abs (offsetx - offsetleft),
+                              Math.abs (offsetx - offsetright));
+        var ydist = Math.min (Math.abs (offsety - offsetbottom),
+                              Math.abs (offsety - offsettop));
+
+        if (left <= point.x && point.x <= right) {
+            if (bottom <= point.y && point.y <= top)
+                return 0;
+            else
+                return ydist;
+        } else {
+            if (bottom <= point.y && point.y <= top)
+                return xdist;
+            else {
+                // Neither x nor y within range, so find distance to nearest
+                // corner
+                return Math.sqrt (xdist * xdist + ydist * ydist);
+            }
+        }
+    }
+
     function init (plot)
     {
         plot.hooks.processRawData.push (processRawData);
@@ -185,43 +221,33 @@
                     continue;
 
                 var datapoints = series.datapoints;
-
+                var distance = inf;
+                var found_range = null;
                 for (var j=0; j<datapoints.points.length;
                      j+=datapoints.pointsize) {
-                    var left = Math.min (datapoints.points[j],
-                                         datapoints.points[j+2]);
-                    var bottom = Math.min (datapoints.points[j+1],
-                                           datapoints.points[j+3]);
-                    var right = Math.max (datapoints.points[j],
-                                          datapoints.points[j+2]);
-                    var top = Math.max (datapoints.points[j+1],
-                                        datapoints.points[j+3]);
+                    var range = [datapoints.points[j],
+                                 datapoints.points[j+1],
+                                 datapoints.points[j+2],
+                                 datapoints.points[j+3]];
+                    var radius = plot.getOptions ().grid.mouseActiveRadius;
+
 
                     var xaxis = series.xaxis;
                     var yaxis = series.yaxis;
-                    var radius = plot.getOptions ().grid.mouseActiveRadius;
-                    if (left == right) {
-                        left = xaxis.c2p (xaxis.p2c (left) - radius);
-                        right = xaxis.c2p (xaxis.p2c (right) + radius);
-                    }
 
-                    if (top == bottom) {
-                        top = yaxis.c2p (xaxis.p2c (top) - radius);
-                        bottom = yaxis.c2p (xaxis.p2c (bottom) + radius);
+                    var newdistance = point2RangeDistance (point, range,
+                                                           xaxis, yaxis);
+                    if (newdistance < distance && newdistance <= radius) {
+                        distance = newdistance;
+                        found_range = {datapoint: range,
+                                       dataIndex: j / datapoints.pointsize,
+                                       series: series,
+                                       seriesIndex: i};
                     }
-
-                    if ((point.x == null || (left <= point.x &&
-                                             point.x <= right)) &&
-                        (point.y == null || (bottom <= point.y &&
-                                             point.y <= top)))
-                        retval.push ({datapoint: [datapoints.points[j],
-                                                  datapoints.points[j+1],
-                                                  datapoints.points[j+2],
-                                                  datapoints.points[j+3]],
-                                      dataIndex: j / datapoints.pointsize,
-                                      series: series,
-                                      seriesIndex: i});
                 }
+
+                if (found_range != null)
+                    retval.push (found_range);
             }
 
             return retval;
