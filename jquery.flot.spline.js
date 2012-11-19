@@ -120,6 +120,12 @@
 	    	plotOffset = plot.getPlotOffset(),
 	    	pts = [];
 
+	    // Cannot display a linespline/areaspline if there are less than 3 points
+	    if ((points.length / ps) < 4) {
+	    	$.extend(series.lines, series.splines);
+	    	return;
+	    }
+
         for (idx = 0, len = points.length; idx < len; idx += ps) {
             x = points[idx];
             y = points[idx + 1];
