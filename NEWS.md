@@ -139,6 +139,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    (first reported by Marc Bennewitz and Szymon Barglowski, patch by Nick
    Campbell, issues #825 and #831, pull request #851)
 
+ - Prevented several threshold plugin variables from becoming global. (patch
+   by Lasse Dahl Ebert)
+
 ## Flot 0.7 ##
 
 ### API changes ###
