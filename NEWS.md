@@ -86,7 +86,7 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 
  - Added support for high pixel density (retina) displays, resulting in much
    crisper charts on such devices. (patch by Olivier Guerriat, additional
-   fix by Julien Thomas)
+   fixes by Julien Thomas and maimairel)
 
  - Added the ability to control pie shadow position and alpha via a new pie
    'shadow' option. (patch by Julien Thomas)
