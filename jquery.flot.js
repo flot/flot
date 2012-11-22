@@ -1290,9 +1290,23 @@
                     return ticks;
                 };
 
-                axis.tickFormatter = function (v, axis) {
-                    var factor = Math.pow(10, axis.tickDecimals);
-                    return "" + Math.round(v * factor) / factor;
+				axis.tickFormatter = function (value, axis) {
+
+					var factor = Math.pow(10, axis.tickDecimals);
+					var formatted = "" + Math.round(value * factor) / factor;
+
+					// If tickDecimals was specified, ensure that we have exactly that
+					// much precision; otherwise default to the value's own precision.
+
+					if (axis.tickDecimals != null) {
+						var decimal = formatted.indexOf(".");
+						var precision = decimal == -1 ? 0 : formatted.length - decimal - 1;
+						if (precision < axis.tickDecimals) {
+							return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
+						}
+					}
+
+                    return formatted;
                 };
             }
 
