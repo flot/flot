@@ -1,0 +1,30 @@
+{
+	"name": "flot",
+	"version": "0.8.0-alpha",
+	"title": "Flot",
+	"author": {
+		"name": "Ole Laursen",
+		"url": "https://github.com/OleLaursen"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "https://github.com/flot/flot/blob/master/LICENSE.txt"
+		}
+	],
+	"dependencies": {
+			"jquery": ">=1.3.2"
+	},
+	"description": "Flot is a pure JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks and interactive features.",
+	"keywords": ["plot", "chart", "graph", "visualization", "canvas", "graphics"],
+	"homepage": "https://flotcharts.org",
+	"docs": "https://github.com/flot/flot/blob/master/API.md",
+	"demo": "http://people.iola.dk/olau/flot/examples",
+	"maintainers": [
+		{
+			"name": "David Schnur",
+			"email": "dnschnur@gmail.com",
+			"url": "http://github.com/dnschnur"
+		}
+	]
+}
