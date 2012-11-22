@@ -5,7 +5,7 @@ Set axis.mode to "time" to enable. See the section "Time series data" in API.txt
 for details.
 */
 
-(function ($) {
+(function($) {
 
 	var options = {};
 
@@ -35,10 +35,13 @@ for details.
 		var hours = d.getHours();
 		var isAM = hours < 12;
 
-		if (monthNames == null)
+		if (monthNames == null) {
 			monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-		if (dayNames == null)
+		}
+
+		if (dayNames == null) {
 			dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+		}
 
 		var hours12;
 
@@ -56,29 +59,30 @@ for details.
 
 			if (escape) {
 				switch (c) {
-				case 'a': c = "" + dayNames[d.getDay()]; break;
-				case 'b': c = "" + monthNames[d.getMonth()]; break;
-				case 'd': c = leftPad(d.getDate()); break;
-				case 'e': c = leftPad(d.getDate(), " "); break;
-				case 'H': c = leftPad(hours); break;
-				case 'I': c = leftPad(hours12); break;
-				case 'l': c = leftPad(hours12, " "); break;
-				case 'm': c = leftPad(d.getMonth() + 1); break;
-				case 'M': c = leftPad(d.getMinutes()); break;
-				case 'S': c = leftPad(d.getSeconds()); break;
-				case 'y': c = leftPad(d.getFullYear() % 100); break;
-				case 'Y': c = "" + d.getFullYear(); break;
-				case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
-				case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
-				case 'w': c = "" + d.getDay(); break;
+					case 'a': c = "" + dayNames[d.getDay()]; break;
+					case 'b': c = "" + monthNames[d.getMonth()]; break;
+					case 'd': c = leftPad(d.getDate()); break;
+					case 'e': c = leftPad(d.getDate(), " "); break;
+					case 'H': c = leftPad(hours); break;
+					case 'I': c = leftPad(hours12); break;
+					case 'l': c = leftPad(hours12, " "); break;
+					case 'm': c = leftPad(d.getMonth() + 1); break;
+					case 'M': c = leftPad(d.getMinutes()); break;
+					case 'S': c = leftPad(d.getSeconds()); break;
+					case 'y': c = leftPad(d.getFullYear() % 100); break;
+					case 'Y': c = "" + d.getFullYear(); break;
+					case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
+					case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
+					case 'w': c = "" + d.getDay(); break;
 				}
 				r.push(c);
 				escape = false;
 			} else {
-				if (c == "%")
+				if (c == "%") {
 					escape = true;
-				else
+				} else {
 					r.push(c);
+				}
 			}
 		}
 
@@ -92,8 +96,7 @@ for details.
 
 	function makeUtcWrapper(d) {
 
-		function addProxyMethod(sourceObj, sourceMethod, targetObj,
-								targetMethod) {
+		function addProxyMethod(sourceObj, sourceMethod, targetObj, targetMethod) {
 			sourceObj[sourceMethod] = function() {
 				return targetObj[targetMethod].apply(targetObj, arguments);
 			};
@@ -105,13 +108,14 @@ for details.
 
 		// support strftime, if found
 
-		if (d.strftime != undefined)
+		if (d.strftime != undefined) {
 			addProxyMethod(utc, "strftime", d, "strftime");
+		}
 
 		addProxyMethod(utc, "getTime", d, "getTime");
 		addProxyMethod(utc, "setTime", d, "setTime");
 
-		var props = [ "Date", "Day", "FullYear", "Hours", "Milliseconds", "Minutes", "Month", "Seconds" ];
+		var props = ["Date", "Day", "FullYear", "Hours", "Milliseconds", "Minutes", "Month", "Seconds"];
 
 		for (var p = 0; p < props.length; p++) {
 			addProxyMethod(utc, "get" + props[p], d, "getUTC" + props[p]);
@@ -176,22 +180,26 @@ for details.
 
 				if (opts.mode == "time") {
 					axis.tickGenerator = function(axis) {
-						var ticks = [],
-							d = dateGenerator(axis.min, opts),
-							minSize = 0;
+
+						var ticks = [];
+						var d = dateGenerator(axis.min, opts);
+						var minSize = 0;
 
 						if (opts.minTickSize != null) {
-							if (typeof opts.tickSize == "number")
+							if (typeof opts.tickSize == "number") {
 								minSize = opts.tickSize;
-							else
+							} else {
 								minSize = opts.minTickSize[0] * timeUnitSize[opts.minTickSize[1]];
+							}
 						}
 
-						for (var i = 0; i < spec.length - 1; ++i)
+						for (var i = 0; i < spec.length - 1; ++i) {
 							if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]]
 											  + spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2
-								&& spec[i][0] * timeUnitSize[spec[i][1]] >= minSize)
+								&& spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
 								break;
+							}
+						}
 
 						var size = spec[i][0];
 						var unit = spec[i][1];
@@ -206,23 +214,28 @@ for details.
 							if (opts.minTickSize != null && opts.minTickSize[1] == "year") {
 								size = Math.floor(opts.minTickSize[0]);
 							} else {
+
 								var magn = Math.pow(10, Math.floor(Math.log(axis.delta / timeUnitSize.year) / Math.LN10));
 								var norm = (axis.delta / timeUnitSize.year) / magn;
-								if (norm < 1.5)
+
+								if (norm < 1.5) {
 									size = 1;
-								else if (norm < 3)
+								} else if (norm < 3) {
 									size = 2;
-								else if (norm < 7.5)
+								} else if (norm < 7.5) {
 									size = 5;
-								else
+								} else {
 									size = 10;
-							
+								}
+
 								size *= magn;
 							}
 
 							// minimum size for years is 1
-							if (size < 1)
+
+							if (size < 1) {
 								size = 1;
+							}
 						}
 
 						axis.tickSize = opts.tickSize || [size, unit];
@@ -231,43 +244,51 @@ for details.
 
 						var step = tickSize * timeUnitSize[unit];
 
-						if (unit == "second")
+						if (unit == "second") {
 							d.setSeconds(floorInBase(d.getSeconds(), tickSize));
-						if (unit == "minute")
+						} else if (unit == "minute") {
 							d.setMinutes(floorInBase(d.getMinutes(), tickSize));
-						if (unit == "hour")
+						} else if (unit == "hour") {
 							d.setHours(floorInBase(d.getHours(), tickSize));
-						if (unit == "month")
+						} else if (unit == "month") {
 							d.setMonth(floorInBase(d.getMonth(), tickSize));
-						if (unit == "year")
+						} else if (unit == "year") {
 							d.setFullYear(floorInBase(d.getFullYear(), tickSize));
+						}
 
 						// reset smaller components
 
 						d.setMilliseconds(0);
 
-						if (step >= timeUnitSize.minute)
+						if (step >= timeUnitSize.minute) {
 							d.setSeconds(0);
-						if (step >= timeUnitSize.hour)
+						} else if (step >= timeUnitSize.hour) {
 							d.setMinutes(0);
-						if (step >= timeUnitSize.day)
+						} else if (step >= timeUnitSize.day) {
 							d.setHours(0);
-						if (step >= timeUnitSize.day * 4)
+						} else if (step >= timeUnitSize.day * 4) {
 							d.setDate(1);
-						if (step >= timeUnitSize.year)
+						} else if (step >= timeUnitSize.year) {
 							d.setMonth(0);
+						}
 
-						var carry = 0, v = Number.NaN, prev;
+						var carry = 0;
+						var v = Number.NaN;
+						var prev;
 
 						do {
+
 							prev = v;
 							v = d.getTime();
 							ticks.push(v);
+
 							if (unit == "month") {
 								if (tickSize < 1) {
+
 									// a bit complicated - we'll divide the month
 									// up but we need to take care of fractions
 									// so we don't end up in the middle of a day
+
 									d.setDate(1);
 									var start = d.getTime();
 									d.setMonth(d.getMonth() + 1);
@@ -275,52 +296,54 @@ for details.
 									d.setTime(v + carry * timeUnitSize.hour + (end - start) * tickSize);
 									carry = d.getHours();
 									d.setHours(0);
-								}
-								else
+								} else {
 									d.setMonth(d.getMonth() + tickSize);
-							}
-							else if (unit == "year") {
+								}
+							} else if (unit == "year") {
 								d.setFullYear(d.getFullYear() + tickSize);
-							}
-							else
+							} else {
 								d.setTime(v + step);
+							}
 						} while (v < axis.max && v != prev);
 
 						return ticks;
 					};
 
 					axis.tickFormatter = function (v, axis) {
+
 						var d = dateGenerator(v, axis.options);
 
 						// first check global format
-						if (opts.timeformat != null)
+
+						if (opts.timeformat != null) {
 							return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames);
+						}
 
 						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
 						var span = axis.max - axis.min;
 						var suffix = (opts.twelveHourClock) ? " %p" : "";
 						var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
-
 						var fmt;
 
-						if (t < timeUnitSize.minute)
+						if (t < timeUnitSize.minute) {
 							fmt = hourCode + ":%M:%S" + suffix;
-						else if (t < timeUnitSize.day) {
-							if (span < 2 * timeUnitSize.day)
+						} else if (t < timeUnitSize.day) {
+							if (span < 2 * timeUnitSize.day) {
 								fmt = hourCode + ":%M" + suffix;
-							else
+							} else {
 								fmt = "%b %d " + hourCode + ":%M" + suffix;
-						}
-						else if (t < timeUnitSize.month)
+							}
+						} else if (t < timeUnitSize.month) {
 							fmt = "%b %d";
-						else if (t < timeUnitSize.year) {
-							if (span < timeUnitSize.year)
+						} else if (t < timeUnitSize.year) {
+							if (span < timeUnitSize.year) {
 								fmt = "%b";
-							else
+							} else {
 								fmt = "%b %Y";
-						}
-						else
+							}
+						} else {
 							fmt = "%Y";
+						}
 
 						var rt = formatDate(d, fmt, opts.monthNames, opts.dayNames);
 
