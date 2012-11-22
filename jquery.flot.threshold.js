@@ -56,8 +56,9 @@ events.
             var origpoints = datapoints.points,
                 addCrossingPoints = s.lines.show;
 
-            threspoints = [];
-            newpoints = [];
+            var threspoints = [];
+            var newpoints = [];
+            var m;
 
             for (i = 0; i < origpoints.length; i += ps) {
                 x = origpoints[i]
