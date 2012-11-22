@@ -63,6 +63,8 @@ More detail and specific examples can be found in the included HTML file.
 	function init(plot) // this is the "body" of the plugin
 	{
 		var canvas = null;
+		var canvasWidth = 0;
+		var canvasHeight = 0;
 		var target = null;
 		var maxRadius = null;
 		var centerLeft = null;
@@ -175,11 +177,14 @@ More detail and specific examples can be found in the included HTML file.
 			if (!processed)
 			{
 				processed = true;
-			
+
 				canvas = plot.getCanvas();
 				target = $(canvas).parent();
 				options = plot.getOptions();
-			
+
+                                canvasWidth = plot.getPlaceholder().width();
+                                canvasHeight = plot.getPlaceholder().height();
+
 				plot.setData(combine(plot.getData()));
 			}
 		}
@@ -189,9 +194,9 @@ More detail and specific examples can be found in the included HTML file.
 			legendWidth = target.children().filter('.legend').children().width();
 		
 			// calculate maximum radius and center point
-			maxRadius =  Math.min(canvas.width,(canvas.height/options.series.pie.tilt))/2;
-			centerTop = (canvas.height/2)+options.series.pie.offset.top;
-			centerLeft = (canvas.width/2);
+			maxRadius =  Math.min(canvasWidth,(canvasHeight/options.series.pie.tilt))/2;
+			centerTop = (canvasHeight/2)+options.series.pie.offset.top;
+			centerLeft = (canvasWidth/2);
 			
 			if (options.series.pie.offset.left=='auto')
 				if (options.legend.position.match('w'))
@@ -203,8 +208,8 @@ More detail and specific examples can be found in the included HTML file.
 					
 			if (centerLeft<maxRadius)
 				centerLeft = maxRadius;
-			else if (centerLeft>canvas.width-maxRadius)
-				centerLeft = canvas.width-maxRadius;
+			else if (centerLeft>canvasWidth-maxRadius)
+				centerLeft = canvasWidth-maxRadius;
 		}
 		
 		function fixData(data)
@@ -304,7 +309,7 @@ More detail and specific examples can be found in the included HTML file.
 			
 			function clear()
 			{
-				ctx.clearRect(0,0,canvas.width,canvas.height);
+				ctx.clearRect(0,0,canvasWidth,canvasHeight);
 				target.children().filter('.pieLabel, .pieLabelBackground').remove();
 			}
 			
@@ -321,7 +326,7 @@ More detail and specific examples can be found in the included HTML file.
 				else
 					var radius = maxRadius * options.series.pie.radius;
 					
-				if (radius>=(canvas.width/2)-shadowLeft || radius*options.series.pie.tilt>=(canvas.height/2)-shadowTop || radius<=edge)
+				if (radius>=(canvasWidth/2)-shadowLeft || radius*options.series.pie.tilt>=(canvasHeight/2)-shadowTop || radius<=edge)
 					return;	// shadow would be outside canvas, so don't draw it
 			
 				ctx.save();
@@ -466,7 +471,7 @@ More detail and specific examples can be found in the included HTML file.
 						label.css('left', labelLeft);
 						
 						// check to make sure that the label is not outside the canvas
-						if (0-labelTop>0 || 0-labelLeft>0 || canvas.height-(labelTop+label.height())<0 || canvas.width-(labelLeft+label.width())<0)
+						if (0-labelTop>0 || 0-labelLeft>0 || canvasHeight-(labelTop+label.height())<0 || canvasWidth-(labelLeft+label.width())<0)
 							redraw = true;
 						
 						if (options.series.pie.label.background.opacity != 0) {
