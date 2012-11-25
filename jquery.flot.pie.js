@@ -762,9 +762,9 @@ More detail and specific examples can be found in the included HTML file.
 				startAngle: 3/2,
 				tilt: 1,
 				shadow: {
-					left: 5,     // shadow left offset
-					top: 15,     // shadow top offset
-					alpha: 0.02, // shadow alpha
+					left: 5,	// shadow left offset
+					top: 15,	// shadow top offset
+					alpha: 0.02	// shadow alpha
 				},
 				offset: {
 					top: 0,
