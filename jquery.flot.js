@@ -745,10 +745,17 @@
 
             $(c).appendTo(placeholder);
 
-            if (!c.getContext) // excanvas hack
-                c = window.G_vmlCanvasManager.initElement(c);
+			// If HTML5 Canvas isn't available, fall back to Excanvas
 
-            var cctx = c.getContext("2d");            
+			if (!c.getContext) {
+				if (window.G_vmlCanvasManager) {
+					c = window.G_vmlCanvasManager.initElement(c);
+				} else {
+					throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
+				}
+			}
+
+            var cctx = c.getContext("2d");
 
             // Increase the canvas density based on the display's pixel ratio; basically
             // giving the canvas more pixels without increasing the size of its element,
