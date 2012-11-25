@@ -61,7 +61,7 @@ More detail and specific examples can be found in the included HTML file.
 
 */
 
-(function ($) {
+(function($) {
 
 	function init(plot) {
 
@@ -163,12 +163,10 @@ More detail and specific examples can be found in the included HTML file.
 					depth = 0;
 				}
 
-				for (var i = 0; i < obj.length; ++i)
-				{
+				for (var i = 0; i < obj.length; ++i) {
 					for (var j = 0; j < depth; j++) {
 						msg += "\t";
 					}
-
 					if( typeof obj[i] == "object") {
 						msg += "" + i + ":\n";
 						traverse(obj[i], depth + 1);
@@ -289,6 +287,7 @@ More detail and specific examples can be found in the included HTML file.
 					angle: combined * Math.PI * 2 / total,
 					percent: combined / total * 100
 				});
+			}
 
 			return newdata;
 		}
@@ -640,6 +639,7 @@ More detail and specific examples can be found in the included HTML file.
 		// trigger click or hover event (they send the same parameters so we share their code)
 
 		function triggerClickHoverEvent(eventname, e) {
+
 			var offset = plot.offset();
 			var canvasX = parseInt(e.pageX - offset.left);
 			var canvasY =  parseInt(e.pageY - offset.top);
@@ -749,6 +749,7 @@ More detail and specific examples can be found in the included HTML file.
 	} // end init (plugin body)
 
 	// define pie specific options and their default values
+
 	var options = {
 		series: {
 			pie: {
