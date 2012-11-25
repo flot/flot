@@ -436,7 +436,8 @@ More detail and specific examples can be found in the included HTML file.
 					}
 
 					//ctx.arc(0, 0, radius, 0, angle, false); // This doesn't work properly in Opera
-					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle, false);
+					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
+					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle + angle, false);
 					ctx.closePath();
 					//ctx.rotate(angle); // This doesn't work properly in Opera
 					currentAngle += angle;
@@ -576,7 +577,8 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.beginPath();
 					ctx.moveTo(0, 0); // Center of the pie
 					//ctx.scale(1, options.series.pie.tilt);	// this actually seems to break everything when here.
-					ctx.arc(0, 0, radius, s.startAngle, s.startAngle + s.angle, false);
+					ctx.arc(0, 0, radius, s.startAngle, s.startAngle + s.angle / 2, false);
+					ctx.arc(0, 0, radius, s.startAngle + s.angle / 2, s.startAngle + s.angle, false);
 					ctx.closePath();
 					x = mouseX - centerLeft;
 					y = mouseY - centerTop;
@@ -741,7 +743,8 @@ More detail and specific examples can be found in the included HTML file.
 				if (Math.abs(series.angle - Math.PI * 2) > 0.000000001) {
 					octx.moveTo(0, 0); // Center of the pie
 				}
-				octx.arc(0, 0, radius, series.startAngle, series.startAngle + series.angle, false);
+				octx.arc(0, 0, radius, series.startAngle, series.startAngle + series.angle / 2, false);
+				octx.arc(0, 0, radius, series.startAngle + series.angle / 2, series.startAngle + series.angle, false);
 				octx.closePath();
 				octx.fill();
 			}
