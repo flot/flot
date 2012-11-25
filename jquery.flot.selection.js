@@ -146,6 +146,8 @@ The plugin allso adds the following methods to the plot object:
         function getSelection() {
             if (!selectionIsSane())
                 return null;
+            
+            if (!selection.show) return null;
 
             var r = {}, c1 = selection.first, c2 = selection.second;
             $.each(plot.getAxes(), function (name, axis) {
