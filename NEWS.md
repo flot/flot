@@ -142,6 +142,13 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Prevented several threshold plugin variables from becoming global. (patch
    by Lasse Dahl Ebert)
 
+ - Fixed various jQuery 1.8 compatibility issues. (issues #814 and #819,
+   pull request #877)
+
+ - Pie charts with a slice equal to or approaching 100% of the pie no longer
+   appear invisible. (patch by David Schnur, issues #444, #658, #726, #824
+   and #850, pull request #879)
+
 ## Flot 0.7 ##
 
 ### API changes ###
