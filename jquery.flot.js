@@ -200,8 +200,8 @@
         plot.triggerRedrawOverlay = triggerRedrawOverlay;
         plot.pointOffset = function(point) {
             return {
-                left: parseInt(xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plotOffset.left),
-                top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top)
+                left: parseInt(xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plotOffset.left, 10),
+                top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
         plot.shutdown = shutdown;
@@ -507,7 +507,8 @@
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m, length,
-                s, points, ps, x, y, axis, val, f, p;
+                s, points, ps, x, y, axis, val, f, p,
+                data, format;
 
             function updateAxis(axis, min, max) {
                 if (min < axis.datamin && min != -fakeInfinity)
@@ -534,7 +535,8 @@
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
 
-                var data = s.data, format = s.datapoints.format;
+                data = s.data;
+                format = s.datapoints.format;
 
                 if (!format) {
                     format = [];
@@ -1002,7 +1004,7 @@
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction == "x" ? xaxes : yaxes,
-                index;
+                index, innermost;
 
             // determine axis margin
             var samePosition = $.grep(all, function (a) {
@@ -1017,7 +1019,7 @@
                     return a && a.reserveSpace;
                 });
 
-                var innermost = $.inArray(axis, sameDirection) == 0;
+                innermost = $.inArray(axis, sameDirection) == 0;
                 if (innermost)
                     tickLength = "full";
                 else
@@ -2344,7 +2346,7 @@
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
                 smallestDistance = maxDistance * maxDistance + 1,
-                item = null, foundPoint = false, i, j;
+                item = null, foundPoint = false, i, j, ps;
 
             for (i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(series[i]))
@@ -2354,12 +2356,12 @@
                     axisx = s.xaxis,
                     axisy = s.yaxis,
                     points = s.datapoints.points,
-                    ps = s.datapoints.pointsize,
                     mx = axisx.c2p(mouseX), // precompute some stuff to make the loop faster
                     my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
                     maxy = maxDistance / axisy.scale;
 
+                ps = s.datapoints.pointsize;
                 // with inverse transforms, we can't use the maxx/maxy
                 // optimization, sadly
                 if (axisx.options.inverseTransform)
@@ -2431,7 +2433,7 @@
         function onMouseMove(e) {
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", e,
-                                       function (s) { return s["hoverable"] != false; });
+                                       function (s) { return !!s["hoverable"]; });
         }
 
         function onMouseLeave(e) {
@@ -2442,7 +2444,7 @@
 
         function onClick(e) {
             triggerClickHoverEvent("plotclick", e,
-                                   function (s) { return s["clickable"] != false; });
+                                   function (s) { return !!s["clickable"]; });
         }
 
         // trigger click or hover event (they send the same parameters
@@ -2460,8 +2462,8 @@
 
             if (item) {
                 // fill in mouse pos for any listeners out there
-                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left);
-                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top);
+                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left + plotOffset.left, 10);
+                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top + plotOffset.top, 10);
             }
 
             if (options.grid.autoHighlight) {
@@ -2575,9 +2577,9 @@
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
             octx.strokeStyle = highlightColor;
-            var radius = 1.5 * pointRadius,
-                x = axisx.p2c(x),
-                y = axisy.p2c(y);
+            var radius = 1.5 * pointRadius;
+            x = axisx.p2c(x);
+            y = axisy.p2c(y);
 
             octx.beginPath();
             if (series.points.symbol == "circle")
