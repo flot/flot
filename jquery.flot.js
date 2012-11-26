@@ -1476,7 +1476,7 @@
         }
 
         function drawGrid() {
-            var i;
+            var i, axes, bw, bc;
 
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
@@ -1485,7 +1485,7 @@
             var markings = options.grid.markings;
             if (markings) {
                 if ($.isFunction(markings)) {
-                    var axes = plot.getAxes();
+                    axes = plot.getAxes();
                     // xmin etc. is backwards compatibility, to be
                     // removed in the future
                     axes.xmin = axes.xaxis.min;
@@ -1550,7 +1550,8 @@
             }
 
             // draw the ticks
-            var axes = allAxes(), bw = options.grid.borderWidth;
+            axes = allAxes();
+            bw = options.grid.borderWidth;
 
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box,
@@ -1646,33 +1647,48 @@
                 // line by line instead of as one rectangle
                 bc = options.grid.borderColor;
                 if(typeof bw == "object" || typeof bc == "object") {
-                    ctx.beginPath();
-                    ctx.strokeStyle = (typeof bc == "object" ? bc.top : bc);
-                    ctx.lineWidth = (typeof bw == "object" ? bw.top : bw);
-                    ctx.moveTo(0 - bw.left, 0 - bw.top/2);
-                    ctx.lineTo(plotWidth, 0 - bw.top/2);
-                    ctx.stroke();
+                    if (typeof bw !== "object") {
+                        bw = {top: bw, right: bw, bottom: bw, left: bw};
+                    }
+                    if (typeof bc !== "object") {
+                        bc = {top: bc, right: bc, bottom: bc, left: bc};
+                    }
 
-                    ctx.beginPath();
-                    ctx.strokeStyle = (typeof bc == "object" ? bc.right : bc);
-                    ctx.lineWidth = (typeof bw == "object" ? bw.right : bw);
-                    ctx.moveTo(plotWidth + bw.right / 2, 0 - bw.top);
-                    ctx.lineTo(plotWidth + bw.right / 2, plotHeight);
-                    ctx.stroke();
+                    if (bw.top > 0) {
+                        ctx.strokeStyle = bc.top;
+                        ctx.lineWidth = bw.top;
+                        ctx.beginPath();
+                        ctx.moveTo(0 - bw.left, 0 - bw.top/2);
+                        ctx.lineTo(plotWidth, 0 - bw.top/2);
+                        ctx.stroke();
+                    }
 
-                    ctx.beginPath();
-                    ctx.strokeStyle = (typeof bc == "object" ? bc.bottom : bc);
-                    ctx.lineWidth = (typeof bw == "object" ? bw.bottom : bw);
-                    ctx.moveTo(plotWidth + bw.right, plotHeight + bw.bottom / 2);
-                    ctx.lineTo(0, plotHeight + bw.bottom / 2);
-                    ctx.stroke();
+                    if (bw.right > 0) {
+                        ctx.strokeStyle = bc.right;
+                        ctx.lineWidth = bw.right;
+                        ctx.beginPath();
+                        ctx.moveTo(plotWidth + bw.right / 2, 0 - bw.top);
+                        ctx.lineTo(plotWidth + bw.right / 2, plotHeight);
+                        ctx.stroke();
+                    }
 
-                    ctx.beginPath();
-                    ctx.strokeStyle = (typeof bc == "object" ? bc.left : bc);
-                    ctx.lineWidth = (typeof bw == "object" ? bw.left : bw);
-                    ctx.moveTo(0 - bw.left/2, plotHeight + bw.bottom);
-                    ctx.lineTo(0- bw.left/2, 0);
-                    ctx.stroke();
+                    if (bw.bottom > 0) {
+                        ctx.strokeStyle = bc.bottom;
+                        ctx.lineWidth = bw.bottom;
+                        ctx.beginPath();
+                        ctx.moveTo(plotWidth + bw.right, plotHeight + bw.bottom / 2);
+                        ctx.lineTo(0, plotHeight + bw.bottom / 2);
+                        ctx.stroke();
+                    }
+
+                    if (bw.left > 0) {
+                        ctx.strokeStyle = bc.left;
+                        ctx.lineWidth = bw.left;
+                        ctx.beginPath();
+                        ctx.moveTo(0 - bw.left/2, plotHeight + bw.bottom);
+                        ctx.lineTo(0- bw.left/2, 0);
+                        ctx.stroke();
+                    }
                 }
                 else {
                     ctx.lineWidth = bw;
