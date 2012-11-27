@@ -137,7 +137,8 @@
                     clickable: false,
                     hoverable: false,
                     autoHighlight: true, // highlight in case mouse is near
-                    mouseActiveRadius: 10 // how far the mouse can be away to activate an item
+                    mouseActiveRadius: 10, // how far the mouse can be away to activate an item
+                    trackByArea: false // hover/click tracking by filled area
                 },
                 interaction: {
                     redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
@@ -1759,6 +1760,148 @@
             if (series.points.show)
                 drawSeriesPoints(series);
         }
+
+        function plotLineArea(datapoints, axisx, axisy, ctx) {
+            var points = datapoints.points,
+                ps = datapoints.pointsize,
+                bottom = Math.min(Math.max(0, axisy.min), axisy.max),
+                i = 0, top, areaOpen = false,
+                ypos = 1, segmentStart = 0, segmentEnd = 0;
+
+            // we process each segment in two turns, first forward
+            // direction to sketch out top, then once we hit the
+            // end we go backwards to sketch the bottom
+            while (true) {
+                if (ps > 0 && i > points.length + ps)
+                    break;
+
+                i += ps; // ps is negative if going backwards
+
+                var x1 = points[i - ps],
+                    y1 = points[i - ps + ypos],
+                    x2 = points[i], y2 = points[i + ypos];
+
+                if (areaOpen) {
+                    if (ps > 0 && x1 != null && x2 == null) {
+                        // at turning point
+                        segmentEnd = i;
+                        ps = -ps;
+                        ypos = 2;
+                        continue;
+                    }
+
+                    if (ps < 0 && i == segmentStart + ps) {
+                        // done with the reverse sweep
+                        ctx.fill();
+                        areaOpen = false;
+                        ps = -ps;
+                        ypos = 1;
+                        i = segmentStart = segmentEnd + ps;
+                        continue;
+                    }
+                }
+
+                if (x1 == null || x2 == null)
+                    continue;
+
+                // clip x values
+                
+                // clip with xmin
+                if (x1 <= x2 && x1 < axisx.min) {
+                    if (x2 < axisx.min)
+                        continue;
+                    y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.min;
+                }
+                else if (x2 <= x1 && x2 < axisx.min) {
+                    if (x1 < axisx.min)
+                        continue;
+                    y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.min;
+                }
+
+                // clip with xmax
+                if (x1 >= x2 && x1 > axisx.max) {
+                    if (x2 > axisx.max)
+                        continue;
+                    y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.max;
+                }
+                else if (x2 >= x1 && x2 > axisx.max) {
+                    if (x1 > axisx.max)
+                        continue;
+                    y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.max;
+                }
+
+                if (!areaOpen) {
+                    // open area
+                    ctx.beginPath();
+                    ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
+                    areaOpen = true;
+                }
+                
+                // now first check the case where both is outside
+                if (y1 >= axisy.max && y2 >= axisy.max) {
+                    ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
+                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
+                    continue;
+                }
+                else if (y1 <= axisy.min && y2 <= axisy.min) {
+                    ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
+                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
+                    continue;
+                }
+                
+                // else it's a bit more complicated, there might
+                // be a flat maxed out rectangle first, then a
+                // triangular cutout or reverse; to find these
+                // keep track of the current x values
+                var x1old = x1, x2old = x2;
+
+                // clip the y values, without shortcutting, we
+                // go through all cases in turn
+                
+                // clip with ymin
+                if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
+                    x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.min;
+                }
+                else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
+                    x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.min;
+                }
+
+                // clip with ymax
+                if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
+                    x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.max;
+                }
+                else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
+                    x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.max;
+                }
+
+                // if the x value was changed we got a rectangle
+                // to fill
+                if (x1 != x1old) {
+                    ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
+                    // it goes to (x1, y1), but we fill that below
+                }
+                
+                // fill triangular section, this sometimes result
+                // in redundant points if (x1, y1) hasn't changed
+                // from previous line to, but we just ignore that
+                ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
+                ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+
+                // fill the other rectangle if it's there
+                if (x2 != x2old) {
+                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+                    ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
+                }
+            }
+        }        
         
         function drawSeriesLines(series) {
             function plotLine(datapoints, xoffset, yoffset, axisx, axisy) {
@@ -1841,148 +1984,6 @@
                 ctx.stroke();
             }
 
-            function plotLineArea(datapoints, axisx, axisy) {
-                var points = datapoints.points,
-                    ps = datapoints.pointsize,
-                    bottom = Math.min(Math.max(0, axisy.min), axisy.max),
-                    i = 0, top, areaOpen = false,
-                    ypos = 1, segmentStart = 0, segmentEnd = 0;
-
-                // we process each segment in two turns, first forward
-                // direction to sketch out top, then once we hit the
-                // end we go backwards to sketch the bottom
-                while (true) {
-                    if (ps > 0 && i > points.length + ps)
-                        break;
-
-                    i += ps; // ps is negative if going backwards
-
-                    var x1 = points[i - ps],
-                        y1 = points[i - ps + ypos],
-                        x2 = points[i], y2 = points[i + ypos];
-
-                    if (areaOpen) {
-                        if (ps > 0 && x1 != null && x2 == null) {
-                            // at turning point
-                            segmentEnd = i;
-                            ps = -ps;
-                            ypos = 2;
-                            continue;
-                        }
-
-                        if (ps < 0 && i == segmentStart + ps) {
-                            // done with the reverse sweep
-                            ctx.fill();
-                            areaOpen = false;
-                            ps = -ps;
-                            ypos = 1;
-                            i = segmentStart = segmentEnd + ps;
-                            continue;
-                        }
-                    }
-
-                    if (x1 == null || x2 == null)
-                        continue;
-
-                    // clip x values
-                    
-                    // clip with xmin
-                    if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min)
-                            continue;
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.min;
-                    }
-                    else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min)
-                            continue;
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.min;
-                    }
-
-                    // clip with xmax
-                    if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max)
-                            continue;
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.max;
-                    }
-                    else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max)
-                            continue;
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.max;
-                    }
-
-                    if (!areaOpen) {
-                        // open area
-                        ctx.beginPath();
-                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
-                        areaOpen = true;
-                    }
-                    
-                    // now first check the case where both is outside
-                    if (y1 >= axisy.max && y2 >= axisy.max) {
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
-                        continue;
-                    }
-                    else if (y1 <= axisy.min && y2 <= axisy.min) {
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
-                        continue;
-                    }
-                    
-                    // else it's a bit more complicated, there might
-                    // be a flat maxed out rectangle first, then a
-                    // triangular cutout or reverse; to find these
-                    // keep track of the current x values
-                    var x1old = x1, x2old = x2;
-
-                    // clip the y values, without shortcutting, we
-                    // go through all cases in turn
-                    
-                    // clip with ymin
-                    if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.min;
-                    }
-                    else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.min;
-                    }
-
-                    // clip with ymax
-                    if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.max;
-                    }
-                    else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.max;
-                    }
-
-                    // if the x value was changed we got a rectangle
-                    // to fill
-                    if (x1 != x1old) {
-                        ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
-                        // it goes to (x1, y1), but we fill that below
-                    }
-                    
-                    // fill triangular section, this sometimes result
-                    // in redundant points if (x1, y1) hasn't changed
-                    // from previous line to, but we just ignore that
-                    ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
-                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
-
-                    // fill the other rectangle if it's there
-                    if (x2 != x2old) {
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
-                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
-                    }
-                }
-            }
-
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
@@ -2006,7 +2007,7 @@
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(series.datapoints, series.xaxis, series.yaxis);
+                plotLineArea(series.datapoints, series.xaxis, series.yaxis, ctx);
             }
 
             if (lw > 0)
@@ -2339,7 +2340,7 @@
         
         var highlights = [],
             redrawTimeout = null;
-        
+
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
@@ -2372,24 +2373,54 @@
                         var x = points[j], y = points[j + 1];
                         if (x == null)
                             continue;
-                        
-                        // For points and lines, the cursor must be within a
-                        // certain distance to the data point
-                        if (x - mx > maxx || x - mx < -maxx ||
-                            y - my > maxy || y - my < -maxy)
-                            continue;
 
-                        // We have to calculate distances in pixels, not in
-                        // data units, because the scales of the axes may be different
-                        var dx = Math.abs(axisx.p2c(x) - mouseX),
-                            dy = Math.abs(axisy.p2c(y) - mouseY),
-                            dist = dx * dx + dy * dy; // we save the sqrt
+                        // Tracking by area: only for filled line segments - point size
+                        // at least 3. Check segment between current and next data point.
+                        if (options.grid.trackByArea &&
+                            ps >= 3 &&
+                            j+ps < points.length)
+                        {
+                            var b = points[j+2];
+                            var x2 = points[j+ps], y2 = points[j+ps+1], b2 = points[j+ps+2];
+                            // Cursor must hit the segment horizontally
+                            if (mx < x || mx > x2)
+                                continue;
 
-                        // use <= to ensure last point takes precedence
-                        // (last generally means on top of)
-                        if (dist < smallestDistance) {
-                            smallestDistance = dist;
-                            item = [i, j / ps];
+                            // Interpolate vertical segment values based on horizontal
+                            // cursor position
+                            var t = x==x2 ? 0.0 : (mx-x) / (x2-x);
+                            var yt = y + t * (y2-y);
+                            var bt = b + t * (b2-b);
+
+                            // Check if cursor falls within vertical bounds
+                            if (my < Math.min(bt, yt) || my > Math.max(bt, yt))
+                                continue;
+
+                            smallestDistance = 0;
+                            // Pick current or next data point, depending on which
+                            // one is closer.
+                            var dataIndex = t > 0.5 ? (j / ps)+1 : j / ps;
+                            item = [i, dataIndex];
+
+                        } else {
+                            // For points and lines, the cursor must be within a
+                            // certain distance to the data point
+                            if (x - mx > maxx || x - mx < -maxx ||
+                                y - my > maxy || y - my < -maxy)
+                                continue;
+
+                            // We have to calculate distances in pixels, not in
+                            // data units, because the scales of the axes may be different
+                            var dx = Math.abs(axisx.p2c(x) - mouseX),
+                                dy = Math.abs(axisy.p2c(y) - mouseY),
+                                dist = dx * dx + dy * dy; // we save the sqrt
+
+                            // use <= to ensure last point takes precedence
+                            // (last generally means on top of)
+                            if (dist < smallestDistance) {
+                                smallestDistance = dist;
+                                item = [i, j / ps];
+                            }
                         }
                     }
                 }
@@ -2507,8 +2538,11 @@
 
                 if (hi.series.bars.show)
                     drawBarHighlight(hi.series, hi.point);
-                else
+                else {
+                    if (hi.series.lines.show && hi.series.lines.fill && options.grid.trackByArea)
+                        drawAreaHighlight(hi.series);
                     drawPointHighlight(hi.series, hi.point);
+                }
             }
             octx.restore();
             
@@ -2562,6 +2596,15 @@
                     return i;
             }
             return -1;
+        }
+
+        function drawAreaHighlight(series) {
+            octx.strokeStyle = series.color;
+            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
+            if (fillStyle) {
+                octx.fillStyle = fillStyle;
+                plotLineArea(series.datapoints, series.xaxis, series.yaxis, octx);
+            }
         }
         
         function drawPointHighlight(series, point) {
