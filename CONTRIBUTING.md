@@ -1,7 +1,26 @@
 ## Contributing to Flot ##
 
-We welcome all contributions, but these simple rules will greatly reduce the
-amount of work and time that it takes to process your pull request:
+We welcome all contributions, but following these guidelines results in less
+work for Flot's maintainers, and ensures a faster and better response.
+
+### Issues ###
+
+Issues are not a way to ask general questions about Flot. If you see unexpected
+behavior but are not 100% certain that it is a bug, please try posting to the
+[forum](http://groups.google.com/group/flot-graphs) first, and confirm that
+what you see is really a Flot problem before creating a new issue for it.
+
+When reporting a bug, please include a working demonstration of the problem, if
+possible, or at least a clear description of the options you're using and the
+environment (browser and version, jQuery version, other libraries) that you're
+running under.
+
+If you have suggestions for new features, or changes to existing ones, we'd
+love to hear them! Please submit each suggestion as a separate new issue.
+
+### Pull Requests ###
+
+To make merging as easy as possible, please keep these rules in mind:
 
  1. Divide larger changes into a series of small, logical commits with
 	descriptive messages.
