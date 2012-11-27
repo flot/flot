@@ -92,7 +92,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    'shadow' option. (patch by Julien Thomas, pull request #78)
 
  - Added the ability to set width and color for individual sides of the grid.
-   (patch by Ara Anjargolian, pull request #855)
+   (patch by Ara Anjargolian, additional fixes by Karl Swedberg, pull requests
+   #855 and #880)
 
  - The selection plugin's getSelection now returns null when the selection
    has been cleared. (patch by Nick Campbell, pull request #852)
