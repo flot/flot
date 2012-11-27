@@ -110,7 +110,7 @@
 		}
 
 	    var cp = [],   // array of control points
-	    	tension = series.lines.tension || 0.5,
+	    	tension = series.splines.tension || 0.5,
 	    	idx,
 	    	x,
 	    	y,
