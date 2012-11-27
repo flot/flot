@@ -1,7 +1,7 @@
 ## Contributing to Flot ##
 
 We welcome all contributions, but following these guidelines results in less
-work for Flot's maintainers, and ensures a faster and better response.
+work for us, and a faster and better response.
 
 ### Issues ###
 
