@@ -234,7 +234,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
-                    zr = opts.zoomRange;
+                    zr = opts.zoomRange,
+                    pr = opts.panRange;
 
                 if (zr === false) // no zooming on this axis
                     return;
@@ -246,6 +247,16 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     var tmp = min;
                     min = max;
                     max = tmp;
+                }
+
+                //Check that we are in panRange
+                if (pr) {
+                    if (pr[0] != null && min < pr[0]) {
+                        min = pr[0];
+                    }
+                    if (pr[1] != null && max > pr[1]) {
+                        max = pr[1];
+                    }
                 }
 
                 var range = max - min;
@@ -262,7 +273,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.draw();
             
             if (!args.preventEvent)
-                plot.getPlaceholder().trigger("plotzoom", [ plot ]);
+                plot.getPlaceholder().trigger("plotzoom", [ plot, args ]);
         }
 
         plot.pan = function (args) {
