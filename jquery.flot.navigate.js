@@ -12,6 +12,7 @@ Options:
   zoom: {
     interactive: false
     trigger: "dblclick" // or "click" for single click
+    mousewheel: true, // whether mousewheel events should be caught for zooming
     amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
   }
   
@@ -84,11 +85,22 @@ range, so 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is
 // jquery.mousewheel.js, we put them inline here to save people the
 // effort of downloading them.
 
-/*
-jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)  
-Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-LICENSE.txt
-*/
-(function(E){E.fn.drag=function(L,K,J){if(K){this.bind("dragstart",L)}if(J){this.bind("dragend",J)}return !L?this.trigger("drag"):this.bind("drag",K?K:L)};var A=E.event,B=A.special,F=B.drag={not:":input",distance:0,which:1,dragging:false,setup:function(J){J=E.extend({distance:F.distance,which:F.which,not:F.not},J||{});J.distance=I(J.distance);A.add(this,"mousedown",H,J);if(this.attachEvent){this.attachEvent("ondragstart",D)}},teardown:function(){A.remove(this,"mousedown",H);if(this===F.dragging){F.dragging=F.proxy=false}G(this,true);if(this.detachEvent){this.detachEvent("ondragstart",D)}}};B.dragstart=B.dragend={setup:function(){},teardown:function(){}};function H(L){var K=this,J,M=L.data||{};if(M.elem){K=L.dragTarget=M.elem;L.dragProxy=F.proxy||K;L.cursorOffsetX=M.pageX-M.left;L.cursorOffsetY=M.pageY-M.top;L.offsetX=L.pageX-L.cursorOffsetX;L.offsetY=L.pageY-L.cursorOffsetY}else{if(F.dragging||(M.which>0&&L.which!=M.which)||E(L.target).is(M.not)){return }}switch(L.type){case"mousedown":E.extend(M,E(K).offset(),{elem:K,target:L.target,pageX:L.pageX,pageY:L.pageY});A.add(document,"mousemove mouseup",H,M);G(K,false);F.dragging=null;return false;case !F.dragging&&"mousemove":if(I(L.pageX-M.pageX)+I(L.pageY-M.pageY)<M.distance){break}L.target=M.target;J=C(L,"dragstart",K);if(J!==false){F.dragging=K;F.proxy=L.dragProxy=E(J||K)[0]}case"mousemove":if(F.dragging){J=C(L,"drag",K);if(B.drop){B.drop.allowed=(J!==false);B.drop.handler(L)}if(J!==false){break}L.type="mouseup"}case"mouseup":A.remove(document,"mousemove mouseup",H);if(F.dragging){if(B.drop){B.drop.handler(L)}C(L,"dragend",K)}G(K,true);F.dragging=F.proxy=M.elem=false;break}return true}function C(M,K,L){M.type=K;var J=E.event.handle.call(L,M);return J===false?false:J||M.result}function I(J){return Math.pow(J,2)}function D(){return(F.dragging===false)}function G(K,J){if(!K){return }K.unselectable=J?"off":"on";K.onselectstart=function(){return J};if(K.style){K.style.MozUserSelect=J?"":"none"}}})(jQuery);
+/*!
+ * jquery.event.drag - v 2.2 (de7ad443f09b56cda9a505592cedb9bd69b99d82)
+ * Copyright (c) 2010 Three Dub Media - http://threedubmedia.com
+ * Open Source MIT License - http://threedubmedia.com/code/license
+ */
+// REQUIRES: jquery 1.7.x
+(function(f){f.fn.drag=function(b,a,c){var d="string"==typeof b?b:"",h=f.isFunction(b)?b:f.isFunction(a)?a:null;0!==d.indexOf("drag")&&(d="drag"+d);c=(b==h?a:c)||{};return h?this.bind(d,c,h):this.trigger(d)};var h=f.event,g=h.special,c=g.drag={defaults:{which:1,distance:0,not:":input",handle:null,relative:!1,drop:!0,click:!1},datakey:"dragdata",noBubble:!0,add:function(b){var a=f.data(this,c.datakey),e=b.data||{};a.related+=1;f.each(c.defaults,function(b){void 0!==e[b]&&(a[b]=e[b])})},remove:function(){f.data(this,
+c.datakey).related-=1},setup:function(){if(!f.data(this,c.datakey)){var b=f.extend({related:0},c.defaults);f.data(this,c.datakey,b);h.add(this,"touchstart mousedown",c.init,b);this.attachEvent&&this.attachEvent("ondragstart",c.dontstart)}},teardown:function(){(f.data(this,c.datakey)||{}).related||(f.removeData(this,c.datakey),h.remove(this,"touchstart mousedown",c.init),c.textselect(!0),this.detachEvent&&this.detachEvent("ondragstart",c.dontstart))},init:function(b){if(!c.touched){var a=b.data,e;
+if(!(0!=b.which&&0<a.which&&b.which!=a.which)&&!f(b.target).is(a.not)&&(!a.handle||f(b.target).closest(a.handle,b.currentTarget).length))if(c.touched="touchstart"==b.type?this:null,a.propagates=1,a.mousedown=this,a.interactions=[c.interaction(this,a)],a.target=b.target,a.pageX=b.pageX,a.pageY=b.pageY,a.dragging=null,e=c.hijack(b,"draginit",a),a.propagates){if((e=c.flatten(e))&&e.length)a.interactions=[],f.each(e,function(){a.interactions.push(c.interaction(this,a))});a.propagates=a.interactions.length;
+!1!==a.drop&&g.drop&&g.drop.handler(b,a);c.textselect(!1);c.touched?h.add(c.touched,"touchmove touchend",c.handler,a):h.add(document,"mousemove mouseup",c.handler,a);if(!c.touched||a.live)return!1}}},interaction:function(b,a){var e=f(b)[a.relative?"position":"offset"]()||{top:0,left:0};return{drag:b,callback:new c.callback,droppable:[],offset:e}},handler:function(b){var a=b.data;switch(b.type){case !a.dragging&&"touchmove":b.preventDefault();case !a.dragging&&"mousemove":if(Math.pow(b.pageX-a.pageX,
+2)+Math.pow(b.pageY-a.pageY,2)<Math.pow(a.distance,2))break;b.target=a.target;c.hijack(b,"dragstart",a);a.propagates&&(a.dragging=!0);case "touchmove":b.preventDefault();case "mousemove":if(a.dragging){c.hijack(b,"drag",a);if(a.propagates){!1!==a.drop&&g.drop&&g.drop.handler(b,a);break}b.type="mouseup"}default:c.touched?h.remove(c.touched,"touchmove touchend",c.handler):h.remove(document,"mousemove mouseup",c.handler),a.dragging&&(!1!==a.drop&&g.drop&&g.drop.handler(b,a),c.hijack(b,"dragend",a)),
+c.textselect(!0),!1===a.click&&a.dragging&&f.data(a.mousedown,"suppress.click",(new Date).getTime()+5),a.dragging=c.touched=!1}},hijack:function(b,a,e,d,g){if(e){var n=b.originalEvent,o=b.type,l=a.indexOf("drop")?"drag":"drop",j,m=d||0,i,k,d=!isNaN(d)?d:e.interactions.length;b.type=a;b.originalEvent=null;e.results=[];do if((i=e.interactions[m])&&!("dragend"!==a&&i.cancelled))k=c.properties(b,e,i),i.results=[],f(g||i[l]||e.droppable).each(function(d,g){k.target=g;b.isPropagationStopped=function(){return!1};
+j=g?h.dispatch.call(g,b,k):null;!1===j?("drag"==l&&(i.cancelled=!0,e.propagates-=1),"drop"==a&&(i[l][d]=null)):"dropinit"==a&&i.droppable.push(c.element(j)||g);"dragstart"==a&&(i.proxy=f(c.element(j)||i.drag)[0]);i.results.push(j);delete b.result;if("dropinit"!==a)return j}),e.results[m]=c.flatten(i.results),"dropinit"==a&&(i.droppable=c.flatten(i.droppable)),"dragstart"==a&&!i.cancelled&&k.update();while(++m<d);b.type=o;b.originalEvent=n;return c.flatten(e.results)}},properties:function(b,a,e){var d=
+e.callback;d.drag=e.drag;d.proxy=e.proxy||e.drag;d.startX=a.pageX;d.startY=a.pageY;d.deltaX=b.pageX-a.pageX;d.deltaY=b.pageY-a.pageY;d.originalX=e.offset.left;d.originalY=e.offset.top;d.offsetX=d.originalX+d.deltaX;d.offsetY=d.originalY+d.deltaY;d.drop=c.flatten((e.drop||[]).slice());d.available=c.flatten((e.droppable||[]).slice());return d},element:function(b){if(b&&(b.jquery||1==b.nodeType))return b},flatten:function(b){return f.map(b,function(a){return a&&a.jquery?f.makeArray(a):a&&a.length?c.flatten(a):
+a})},textselect:function(b){f(document)[b?"unbind":"bind"]("selectstart",c.dontstart).css("MozUserSelect",b?"":"none");document.unselectable=b?"off":"on"},dontstart:function(){return!1},callback:function(){}};c.callback.prototype={update:function(){g.drop&&this.available.length&&f.each(this.available,function(b){g.drop.locate(this,b)})}};var n=h.dispatch;h.dispatch=function(b){if(0<f.data(this,"suppress."+b.type)-(new Date).getTime())f.removeData(this,"suppress."+b.type);else return n.apply(this,
+arguments)};var o=h.fixHooks.touchstart=h.fixHooks.touchmove=h.fixHooks.touchend=h.fixHooks.touchcancel={props:"clientX clientY pageX pageY screenX screenY".split(" "),filter:function(b,a){if(a){var c=a.touches&&a.touches[0]||a.changedTouches&&a.changedTouches[0]||null;c&&f.each(o.props,function(a,f){b[f]=c[f]})}return b}};g.draginit=g.dragstart=g.dragend=c})(jQuery);
 
 
 /* jquery.mousewheel.min.js
@@ -116,6 +128,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         zoom: {
             interactive: false,
             trigger: "dblclick", // or "click" for single click
+            mousewheel: true, // whether mousewheel events should be caught for zooming
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
@@ -124,6 +137,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             frameRate: 20
         }
     };
+
+    // the various ways we can sanitize a restriction problem
+    var ALIGN_MIN = 1 , ALIGN_MAX = 2 , ALIGN_CENTER = 3;
 
     function init(plot) {
         function onZoomClick(e, zoomOut) {
@@ -180,12 +196,28 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
         }
+
+        function processOffset(plot, options)
+        {
+            // enforce any panning/zooming restrictions for supplied min/max on init
+            $.each(plot.getAxes(), function (axisname, axis)
+            {
+                if (axis.min != null || axis.max != null)
+                    // we only want to enforce on first init - other changes
+                    // are enforced at change time
+                    return;
+
+                if (axis.used && (axis.options.zoomRange != null || axis.options.panRange != null))
+                    setMinMax(axis, axis.options.min != null ? axis.options.min : axis.datamin, axis.options.max != null ? axis.options.max : axis.datamax);
+            });
+        }
         
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
                 eventHolder[o.zoom.trigger](onZoomClick);
-                eventHolder.mousewheel(onMouseWheel);
+                if (o.zoom.mousewheel)
+                    eventHolder.mousewheel(onMouseWheel);
             }
 
             if (o.pan.interactive) {
@@ -193,6 +225,78 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 eventHolder.bind("drag", onDrag);
                 eventHolder.bind("dragend", onDragEnd);
             }
+        }
+
+        function setMinMax ( axis , min , max , sanitize_alignment ) {
+            if ( ! sanitize_alignment )
+                sanitize_alignment = ALIGN_CENTER;
+
+            var opts = axis.options ,
+                zr = opts.zoomRange;
+
+            if (min > max) {
+                // make sure min < max
+                var tmp = min;
+                min = max;
+                max = tmp;
+            }
+
+            // need to do this in case we're called before axis.min/max has been chosen
+            // in which case there isn't really an existing min/max to work with so we'll
+            // just use the requested one for these calculations
+            var existing_min = axis.min != null ? axis.min : min;
+            var existing_max = axis.max != null ? axis.max : max;
+
+            var range = max - min;
+            if (zr) {
+                // Note these calculations are done in point-space, not canvas-space, so the center
+                // may not be quite right when using a nonlinear transform function. The zoomRange is defined
+                // in point-space coordinates and from what I can tell, getting the center right for an arbitrary
+                // transform function would require some sort of numerical method. Which is overkill for a
+                // corner case like this.
+                // In fact, the "center" we take is the existing view's center. This stops users at maximum zoom
+                // being able to "crawl" along the axis in a strange way.
+                var center_proportion = sanitize_alignment === ALIGN_MIN ? 0.0 : sanitize_alignment === ALIGN_MAX ? 1.0 : 0.5;
+
+                if (zr[0] != null && range < zr[0])
+                {
+                    // so we'll choose a new max & min whose range will equal the min possible zoomRange
+                    min = existing_min + (( existing_max - existing_min ) - zr[0]) * center_proportion;
+                    max = min + zr[0];
+                    range = zr[0];
+                }
+                if (zr[1] != null && range > zr[1])
+                {
+                    // so we'll choose a new max & min whose range will equal the max possible zoomRange
+                    min = existing_min + (( existing_max - existing_min ) - zr[1]) * center_proportion;
+                    max = min + zr[1];
+                    range = zr[1];
+                }
+            }
+
+            // now also check against panRange limits if we have any
+            var pr = opts.panRange;
+            var pr_min_restricted = false;
+            if (pr) {
+                // check whether we hit the wall
+                if (pr[0] != null && pr[0] > min) {
+                    // ok, put the new viewport up against the min edge
+                    min = pr[0];
+                    max = min + range;
+                    pr_min_restricted = true;
+                }
+                
+                if (pr[1] != null && pr[1] < max) {
+                    // ok, put the new viewport up against the max edge
+                    max = pr[1];
+                    if ( ! pr_min_restricted )
+                            min = max - range;
+                    // (else min is already on its limits)
+                }
+            }
+        
+            opts.min = min;
+            opts.max = max;
         }
 
         plot.zoomOut = function (args) {
@@ -241,25 +345,13 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     
                 min = axis.c2p(min);
                 max = axis.c2p(max);
-                if (min > max) {
-                    // make sure min < max
-                    var tmp = min;
-                    min = max;
-                    max = tmp;
-                }
-
-                var range = max - min;
-                if (zr &&
-                    ((zr[0] != null && range < zr[0]) ||
-                     (zr[1] != null && range > zr[1])))
-                    return;
-            
-                opts.min = min;
-                opts.max = max;
+                
+                setMinMax ( axis , min , max );
             });
             
             plot.setupGrid();
             plot.draw();
+            plot.triggerRedrawOverlay();
             
             if (!args.preventEvent)
                 plot.getPlaceholder().trigger("plotzoom", [ plot ]);
@@ -283,34 +375,94 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 min = axis.c2p(axis.p2c(axis.min) + d),
                 max = axis.c2p(axis.p2c(axis.max) + d);
 
-                var pr = opts.panRange;
-                if (pr === false) // no panning on this axis
+                if (opts.panRange === false) // no panning on this axis
                     return;
                 
-                if (pr) {
-                    // check whether we hit the wall
-                    if (pr[0] != null && pr[0] > min) {
-                        d = pr[0] - min;
-                        min += d;
-                        max += d;
-                    }
-                    
-                    if (pr[1] != null && pr[1] < max) {
-                        d = pr[1] - max;
-                        min += d;
-                        max += d;
-                    }
-                }
-                
-                opts.min = min;
-                opts.max = max;
+                setMinMax ( axis , min , max );
             });
             
             plot.setupGrid();
             plot.draw();
+            plot.triggerRedrawOverlay();
             
             if (!args.preventEvent)
                 plot.getPlaceholder().trigger("plotpan", [ plot ]);
+        }
+
+        plot.getRanges = function () {
+            var r = {};
+            $.each(plot.getAxes(), function (name, axis) {
+                if (axis.used) {
+                    r[name] = { from: axis.options.min != null ? axis.options.min : axis.min, to: axis.options.max != null ? axis.options.max : axis.max };
+                }
+            });
+            return r;
+        }
+
+        // function taken from selection plugin, in turn
+        // taken from markings support in Flot and then modified
+        function extractRange(ranges, coord) {
+            var axis, from, to, key, axes = plot.getAxes(), found_axis = false;
+
+            for (var k in axes) {
+                axis = axes[k];
+                if (axis.direction == coord) {
+                    key = coord + axis.n + "axis";
+                    if (!ranges[key] && axis.n == 1)
+                        key = coord + "axis"; // support x1axis as xaxis
+                    if (ranges[key]) {
+                        from = ranges[key].from;
+                        to = ranges[key].to;
+                        found_axis = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found_axis)
+                return null;
+
+            // auto-reverse as an added bonus
+            if (from != null && to != null && from > to) {
+                var tmp = from;
+                from = to;
+                to = tmp;
+            }
+
+            return { from: from, to: to, axis: axis };
+        }
+
+        plot.setRanges = function (ranges , preventEvent) {
+            var axis, o = plot.getOptions();
+
+            var x_range = extractRange(ranges, "x"),
+                y_range = extractRange(ranges, "y");
+
+            if ( (x_range === null ||
+                    ( x_range.axis.options.min === x_range.from && x_range.axis.options.max === x_range.to ) ) &&
+                (y_range === null ||
+                    ( y_range.axis.options.min === y_range.from && y_range.axis.options.max === y_range.to ) ) )
+                // there's nothing to change
+                return;
+
+            if (x_range !== null)
+                setMinMax ( x_range.axis, x_range.from, x_range.to,
+                    x_range.axis.options.min == x_range.from ?
+                    ALIGN_MIN : ( x_range.axis.options.max === x_range.to ? ALIGN_MAX : ALIGN_CENTER ) );
+
+            if (y_range !== null)
+                setMinMax ( y_range.axis, y_range.from, y_range.to,
+                    y_range.axis.options.min == y_range.from ?
+                    ALIGN_MIN : ( y_range.axis.options.max === y_range.to ? ALIGN_MAX : ALIGN_CENTER ) );
+
+            if ( ! preventEvent )
+                // argument is ranges object unlike other events here as we're trying to echo other plugins'
+                // behaviour when changing via ranges
+                plot.getPlaceholder().trigger ( "plotrangesset", [ plot.getRanges () ] );
+
+            plot.setupGrid();
+            plot.draw();
+            plot.triggerRedrawOverlay();
         }
 
         function shutdown(plot, eventHolder) {
@@ -323,6 +475,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 clearTimeout(panTimeout);
         }
         
+        plot.hooks.processOffset.push(processOffset);
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
