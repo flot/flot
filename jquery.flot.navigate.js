@@ -18,7 +18,8 @@ Options:
   pan: {
     interactive: false
     cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-    frameRate: 20
+    frameRate: 20,
+    panEnd: //a function to be called once the plugin has detected the user is no longer panning the graph
   }
 
   xaxis, yaxis, x2axis, y2axis: {
@@ -121,7 +122,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         pan: {
             interactive: false,
             cursor: "move",
-            frameRate: 20
+            frameRate: 20,
+            panEnd: false     // A function to be called when user is done panning a graph
         }
     };
 
@@ -179,6 +181,14 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
+                       
+                       
+            var o = plot.getOptions();
+            
+            if(o.pan.panEnd){
+              o.pan.panEnd();
+            }
+                       
         }
         
         function bindEvents(plot, eventHolder) {
