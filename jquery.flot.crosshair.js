@@ -6,6 +6,7 @@ over the plot.
     mode: null or "x" or "y" or "xy"
     color: color
     lineWidth: number
+    lineStyle : "solid" or "dashed"
   }
 
 Set the mode to one of "x", "y" or "xy". The "x" mode enables a
@@ -13,7 +14,7 @@ vertical crosshair that lets you trace the values on the x axis, "y"
 enables a horizontal crosshair and "xy" enables them both. "color" is
 the color of the crosshair (default is "rgba(170, 0, 0, 0.80)"),
 "lineWidth" is the width of the drawn lines (default is 1).
-
+"lineStyle" is to choose a solid line or a dashed line
 The plugin also adds four public methods:
 
   - setCrosshair(pos)
@@ -58,7 +59,8 @@ The plugin also adds four public methods:
         crosshair: {
             mode: null, // one of null, "x", "y" or "xy",
             color: "rgba(170, 0, 0, 0.80)",
-            lineWidth: 1
+            lineWidth: 1,
+            lineStyle : "solid"
         }
     };
     
@@ -135,17 +137,48 @@ The plugin also adds four public methods:
 
             if (crosshair.x != -1) {
                 ctx.strokeStyle = c.color;
-                ctx.lineWidth = c.lineWidth;
                 ctx.lineJoin = "round";
+                ctx.lineWidth = c.lineWidth;
+
 
                 ctx.beginPath();
                 if (c.mode.indexOf("x") != -1) {
-                    ctx.moveTo(crosshair.x, 0);
-                    ctx.lineTo(crosshair.x, plot.height());
+
+                    //dashed
+                    if(c.lineStyle=="dashed"){
+                        var n=0;
+                        ctx.moveTo(crosshair.x, 0);
+                        while(n<plot.height()){
+                            ctx.lineTo(crosshair.x, 10+n*10);
+                            ctx.moveTo(crosshair.x, 20+n*10);
+                            n+=2;
+                        }
+                    }
+
+                    //plain
+                    if(c.lineStyle=="solid"){
+                      ctx.moveTo(crosshair.x, 0);
+                      ctx.lineTo(crosshair.x, plot.height());
+                    }
                 }
                 if (c.mode.indexOf("y") != -1) {
-                    ctx.moveTo(0, crosshair.y);
-                    ctx.lineTo(plot.width(), crosshair.y);
+
+                    //dashed
+                    if(c.lineStyle=="dashed"){
+                        var n=0;
+                        ctx.moveTo(0, crosshair.y);
+                        while(n<plot.width()){
+                            ctx.lineTo(10+n*10, crosshair.y);
+                            ctx.moveTo(20+n*10, crosshair.y);
+                            n+=2;
+                        }
+                    }
+
+                    //plain
+                    if(c.lineStyle=="solid"){
+                        ctx.moveTo(0, crosshair.y);
+                        ctx.lineTo(plot.width(), crosshair.y);
+                    }
                 }
                 ctx.stroke();
             }
@@ -162,6 +195,6 @@ The plugin also adds four public methods:
         init: init,
         options: options,
         name: 'crosshair',
-        version: '1.0'
+        version: '1.1'
     });
 })(jQuery);
