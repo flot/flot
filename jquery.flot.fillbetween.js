@@ -123,7 +123,7 @@ plugin, possibly some code could be shared.
                         if (withlines && i > 0 && points[i - ps] != null) {
                             intery = py + (points[i - ps + 1] - py) * (qx - px) / (points[i - ps] - px);
                             newpoints.push(qx);
-                            newpoints.push(intery)
+                            newpoints.push(intery);
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
                             bottom = qy; 
