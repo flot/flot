@@ -84,11 +84,11 @@ The plugin also adds four public methods:
             if (pos)
                 plot.setCrosshair(pos);
             crosshair.locked = true;
-        }
+        };
 
         plot.unlockCrosshair = function unlockCrosshair() {
             crosshair.locked = false;
-        }
+        };
 
         function onMouseOut(e) {
             if (crosshair.locked)

@@ -2293,7 +2293,7 @@
 
             for (var i = 0; i < entries.length; ++i) {
 
-                entry = entries[i];
+                var entry = entries[i];
 
                 if (i % options.legend.noColumns == 0) {
                     if (rowStarted)
@@ -2584,7 +2584,7 @@
 
         function drawPointHighlight(series, point) {
             var x = point[0], y = point[1],
-                axisx = series.xaxis, axisy = series.yaxis;
+                axisx = series.xaxis, axisy = series.yaxis,
                 highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
 
             if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
