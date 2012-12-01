@@ -51,7 +51,7 @@ choice:
                 ctx.moveTo(x - size, y + size);
                 ctx.lineTo(x + size, y - size);
             }
-        }
+        };
 
         var s = series.points.symbol;
         if (handlers[s])
