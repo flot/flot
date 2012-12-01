@@ -674,9 +674,9 @@ More detail and specific examples can be found in the included HTML file.
 		}
 
 		function highlight(s, auto) {
-			if (typeof s == "number") {
-				s = series[s];
-			}
+			//if (typeof s == "number") {
+			//	s = series[s];
+			//}
 
 			var i = indexOfHighlight(s);
 
@@ -694,9 +694,9 @@ More detail and specific examples can be found in the included HTML file.
 				plot.triggerRedrawOverlay();
 			}
 
-			if (typeof s == "number") {
-				s = series[s];
-			}
+			//if (typeof s == "number") {
+			//	s = series[s];
+			//}
 
 			var i = indexOfHighlight(s);
 
