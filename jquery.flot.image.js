@@ -110,7 +110,7 @@ images (like Google Maps).
 
             $('<img />').load(handler).error(handler).attr('src', url);
         });
-    }
+    };
     
     function drawSeries(plot, ctx, series) {
         var plotOffset = plot.getPlotOffset();
