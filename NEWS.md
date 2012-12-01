@@ -153,6 +153,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    appear invisible. (patch by David Schnur, issues #444, #658, #726, #824
    and #850, pull request #879)
 
+ - Prevented several local variables from becoming global. (patch by aaa707)
+
 ## Flot 0.7 ##
 
 ### API changes ###
