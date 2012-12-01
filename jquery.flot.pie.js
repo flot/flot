@@ -65,20 +65,21 @@ More detail and specific examples can be found in the included HTML file.
 
 	function init(plot) {
 
-		var canvas = null;
-		var canvasWidth = 0;
-		var canvasHeight = 0;
-		var target = null;
-		var maxRadius = null;
-		var centerLeft = null;
-		var centerTop = null;
-		var total = 0;
-		var redraw = true;
-		var redrawAttempts = 10;
-		var shrink = 0.95;
-		var legendWidth = 0;
-		var processed = false;
-		var raw = false;
+		var canvas = null,
+			canvasWidth = 0,
+			canvasHeight = 0,
+			target = null,
+			maxRadius = null,
+			centerLeft = null,
+			centerTop = null,
+			total = 0,
+			redraw = true,
+			redrawAttempts = 10,
+			shrink = 0.95,
+			legendWidth = 0,
+			processed = false,
+			raw = false,
+			ctx = null;
 
 		// interactive variables
 
@@ -528,7 +529,7 @@ More detail and specific examples can be found in the included HTML file.
 				// subtract the center
 
 				layer.save();
-				innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
+				var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
 				layer.globalCompositeOperation = "destination-out"; // this does not work with excanvas, but it will fall back to using the stroke color
 				layer.beginPath();
 				layer.fillStyle = options.series.pie.stroke.color;
@@ -563,9 +564,10 @@ More detail and specific examples can be found in the included HTML file.
 
 		function findNearbySlice(mouseX, mouseY) {
 
-			var slices = plot.getData();
-			var options = plot.getOptions();
-			var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+			var slices = plot.getData(),
+				options = plot.getOptions(),
+				radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius,
+				x, y;
 
 			for (var i = 0; i < slices.length; ++i) {
 
@@ -597,18 +599,18 @@ More detail and specific examples can be found in the included HTML file.
 
 						// excanvas for IE doesn;t support isPointInPath, this is a workaround.
 
-						p1X = radius * Math.cos(s.startAngle);
-						p1Y = radius * Math.sin(s.startAngle);
-						p2X = radius * Math.cos(s.startAngle + s.angle / 4);
-						p2Y = radius * Math.sin(s.startAngle + s.angle / 4);
-						p3X = radius * Math.cos(s.startAngle + s.angle / 2);
-						p3Y = radius * Math.sin(s.startAngle + s.angle / 2);
-						p4X = radius * Math.cos(s.startAngle + s.angle / 1.5);
-						p4Y = radius * Math.sin(s.startAngle + s.angle / 1.5);
-						p5X = radius * Math.cos(s.startAngle + s.angle);
-						p5Y = radius * Math.sin(s.startAngle + s.angle);
-						arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]];
-						arrPoint = [x, y];
+						var p1X = radius * Math.cos(s.startAngle),
+							p1Y = radius * Math.sin(s.startAngle),
+							p2X = radius * Math.cos(s.startAngle + s.angle / 4),
+							p2Y = radius * Math.sin(s.startAngle + s.angle / 4),
+							p3X = radius * Math.cos(s.startAngle + s.angle / 2),
+							p3Y = radius * Math.sin(s.startAngle + s.angle / 2),
+							p4X = radius * Math.cos(s.startAngle + s.angle / 1.5),
+							p4Y = radius * Math.sin(s.startAngle + s.angle / 1.5),
+							p5X = radius * Math.cos(s.startAngle + s.angle),
+							p5Y = radius * Math.sin(s.startAngle + s.angle),
+							arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]],
+							arrPoint = [x, y];
 
 						// TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?
 
@@ -672,9 +674,9 @@ More detail and specific examples can be found in the included HTML file.
 		}
 
 		function highlight(s, auto) {
-			if (typeof s == "number") {
-				s = series[s];
-			}
+			//if (typeof s == "number") {
+			//	s = series[s];
+			//}
 
 			var i = indexOfHighlight(s);
 
@@ -692,9 +694,9 @@ More detail and specific examples can be found in the included HTML file.
 				plot.triggerRedrawOverlay();
 			}
 
-			if (typeof s == "number") {
-				s = series[s];
-			}
+			//if (typeof s == "number") {
+			//	s = series[s];
+			//}
 
 			var i = indexOfHighlight(s);
 
@@ -723,7 +725,7 @@ More detail and specific examples can be found in the included HTML file.
 			octx.translate(centerLeft, centerTop);
 			octx.scale(1, options.series.pie.tilt);
 
-			for (i = 0; i < highlights.length; ++i) {
+			for (var i = 0; i < highlights.length; ++i) {
 				drawHighlight(highlights[i].series);
 			}
 
