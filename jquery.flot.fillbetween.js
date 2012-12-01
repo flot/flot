@@ -70,7 +70,7 @@ plugin, possibly some code could be shared.
                 withbottom = ps > 2 && datapoints.format[2].y,
                 withsteps = withlines && s.lines.steps,
                 fromgap = true,
-                i = 0, j = 0, l;
+                i = 0, j = 0, l, m;
 
             while (true) {
                 if (i >= points.length)
