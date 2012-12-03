@@ -1,95 +1,93 @@
-/*
-Flot plugin for adding panning and zooming capabilities to a plot.
+/* Flot plugin for adding the ability to pan and zoom the plot.
 
-The default behaviour is double click and scrollwheel up/down to zoom
-in, drag to pan. The plugin defines plot.zoom({ center }),
-plot.zoomOut() and plot.pan(offset) so you easily can add custom
-controls. It also fires a "plotpan" and "plotzoom" event when
-something happens, useful for synchronizing plots.
+Copyright (c) 2007-2012 IOLA and Ole Laursen.
+Licensed under the MIT license.
 
-Options:
+The default behaviour is double click and scrollwheel up/down to zoom in, drag
+to pan. The plugin defines plot.zoom({ center }), plot.zoomOut() and
+plot.pan( offset ) so you easily can add custom controls. It also fires
+"plotpan" and "plotzoom" events, useful for synchronizing plots.
 
-  zoom: {
-    interactive: false
-    trigger: "dblclick" // or "click" for single click
-    amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
-  }
-  
-  pan: {
-    interactive: false
-    cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-    frameRate: 20
-  }
+The plugin supports these options:
 
-  xaxis, yaxis, x2axis, y2axis: {
-    zoomRange: null  // or [number, number] (min range, max range) or false
-    panRange: null   // or [number, number] (min, max) or false
-  }
-  
+	zoom: {
+		interactive: false
+		trigger: "dblclick" // or "click" for single click
+		amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+	}
+
+	pan: {
+		interactive: false
+		cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
+		frameRate: 20
+	}
+
+	xaxis, yaxis, x2axis, y2axis: {
+		zoomRange: null  // or [ number, number ] (min range, max range) or false
+		panRange: null   // or [ number, number ] (min, max) or false
+	}
+
 "interactive" enables the built-in drag/click behaviour. If you enable
-interactive for pan, then you'll have a basic plot that supports
-moving around; the same for zoom.
+interactive for pan, then you'll have a basic plot that supports moving
+around; the same for zoom.
 
-"amount" specifies the default amount to zoom in (so 1.5 = 150%)
-relative to the current viewport.
+"amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
+the current viewport.
 
-"cursor" is a standard CSS mouse cursor string used for visual
-feedback to the user when dragging.
+"cursor" is a standard CSS mouse cursor string used for visual feedback to the
+user when dragging.
 
-"frameRate" specifies the maximum number of times per second the plot
-will update itself while the user is panning around on it (set to null
-to disable intermediate pans, the plot will then not update until the
-mouse button is released).
+"frameRate" specifies the maximum number of times per second the plot will
+update itself while the user is panning around on it (set to null to disable
+intermediate pans, the plot will then not update until the mouse button is
+released).
 
-"zoomRange" is the interval in which zooming can happen, e.g. with
-zoomRange: [1, 100] the zoom will never scale the axis so that the
-difference between min and max is smaller than 1 or larger than 100.
-You can set either end to null to ignore, e.g. [1, null]. If you set
-zoomRange to false, zooming on that axis will be disabled.
+"zoomRange" is the interval in which zooming can happen, e.g. with zoomRange:
+[1, 100] the zoom will never scale the axis so that the difference between min
+and max is smaller than 1 or larger than 100. You can set either end to null
+to ignore, e.g. [1, null]. If you set zoomRange to false, zooming on that axis
+will be disabled.
 
-"panRange" confines the panning to stay within a range, e.g. with
-panRange: [-10, 20] panning stops at -10 in one end and at 20 in the
-other. Either can be null, e.g. [-10, null]. If you set
-panRange to false, panning on that axis will be disabled.
+"panRange" confines the panning to stay within a range, e.g. with panRange:
+[-10, 20] panning stops at -10 in one end and at 20 in the other. Either can
+be null, e.g. [-10, null]. If you set panRange to false, panning on that axis
+will be disabled.
 
 Example API usage:
 
-  plot = $.plot(...);
-  
-  // zoom default amount in on the pixel (10, 20) 
-  plot.zoom({ center: { left: 10, top: 20 } });
+	plot = $.plot(...);
 
-  // zoom out again
-  plot.zoomOut({ center: { left: 10, top: 20 } });
+	// zoom default amount in on the pixel ( 10, 20 )
+	plot.zoom({ center: { left: 10, top: 20 } });
 
-  // zoom 200% in on the pixel (10, 20) 
-  plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
-  
-  // pan 100 pixels to the left and 20 down
-  plot.pan({ left: -100, top: 20 })
+	// zoom out again
+	plot.zoomOut({ center: { left: 10, top: 20 } });
 
-Here, "center" specifies where the center of the zooming should
-happen. Note that this is defined in pixel space, not the space of the
-data points (you can use the p2c helpers on the axes in Flot to help
-you convert between these).
+	// zoom 200% in on the pixel (10, 20)
+	plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
 
-"amount" is the amount to zoom the viewport relative to the current
-range, so 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is
-70% (zoom out). You can set the default in the options.
-  
+	// pan 100 pixels to the left and 20 down
+	plot.pan({ left: -100, top: 20 })
+
+Here, "center" specifies where the center of the zooming should happen. Note
+that this is defined in pixel space, not the space of the data points (you can
+use the p2c helpers on the axes in Flot to help you convert between these).
+
+"amount" is the amount to zoom the viewport relative to the current range, so
+1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
+can set the default in the options.
+
 */
-
 
 // First two dependencies, jquery.event.drag.js and
 // jquery.mousewheel.js, we put them inline here to save people the
 // effort of downloading them.
 
 /*
-jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)  
+jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)
 Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-LICENSE.txt
 */
 (function(E){E.fn.drag=function(L,K,J){if(K){this.bind("dragstart",L)}if(J){this.bind("dragend",J)}return !L?this.trigger("drag"):this.bind("drag",K?K:L)};var A=E.event,B=A.special,F=B.drag={not:":input",distance:0,which:1,dragging:false,setup:function(J){J=E.extend({distance:F.distance,which:F.which,not:F.not},J||{});J.distance=I(J.distance);A.add(this,"mousedown",H,J);if(this.attachEvent){this.attachEvent("ondragstart",D)}},teardown:function(){A.remove(this,"mousedown",H);if(this===F.dragging){F.dragging=F.proxy=false}G(this,true);if(this.detachEvent){this.detachEvent("ondragstart",D)}}};B.dragstart=B.dragend={setup:function(){},teardown:function(){}};function H(L){var K=this,J,M=L.data||{};if(M.elem){K=L.dragTarget=M.elem;L.dragProxy=F.proxy||K;L.cursorOffsetX=M.pageX-M.left;L.cursorOffsetY=M.pageY-M.top;L.offsetX=L.pageX-L.cursorOffsetX;L.offsetY=L.pageY-L.cursorOffsetY}else{if(F.dragging||(M.which>0&&L.which!=M.which)||E(L.target).is(M.not)){return }}switch(L.type){case"mousedown":E.extend(M,E(K).offset(),{elem:K,target:L.target,pageX:L.pageX,pageY:L.pageY});A.add(document,"mousemove mouseup",H,M);G(K,false);F.dragging=null;return false;case !F.dragging&&"mousemove":if(I(L.pageX-M.pageX)+I(L.pageY-M.pageY)<M.distance){break}L.target=M.target;J=C(L,"dragstart",K);if(J!==false){F.dragging=K;F.proxy=L.dragProxy=E(J||K)[0]}case"mousemove":if(F.dragging){J=C(L,"drag",K);if(B.drop){B.drop.allowed=(J!==false);B.drop.handler(L)}if(J!==false){break}L.type="mouseup"}case"mouseup":A.remove(document,"mousemove mouseup",H);if(F.dragging){if(B.drop){B.drop.handler(L)}C(L,"dragend",K)}G(K,true);F.dragging=F.proxy=M.elem=false;break}return true}function C(M,K,L){M.type=K;var J=E.event.handle.call(L,M);return J===false?false:J||M.result}function I(J){return Math.pow(J,2)}function D(){return(F.dragging===false)}function G(K,J){if(!K){return }K.unselectable=J?"off":"on";K.onselectstart=function(){return J};if(K.style){K.style.MozUserSelect=J?"":"none"}}})(jQuery);
-
 
 /* jquery.mousewheel.min.js
  * Copyright (c) 2011 Brandon Aaron (http://brandonaaron.net)
@@ -99,7 +97,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
  * Thanks to: Seamus Leahy for adding deltaX and deltaY
  *
  * Version: 3.0.6
- * 
+ *
  * Requires: 1.2.2+
  */
 (function(d){function e(a){var b=a||window.event,c=[].slice.call(arguments,1),f=0,e=0,g=0,a=d.event.fix(b);a.type="mousewheel";b.wheelDelta&&(f=b.wheelDelta/120);b.detail&&(f=-b.detail/3);g=f;void 0!==b.axis&&b.axis===b.HORIZONTAL_AXIS&&(g=0,e=-1*f);void 0!==b.wheelDeltaY&&(g=b.wheelDeltaY/120);void 0!==b.wheelDeltaX&&(e=-1*b.wheelDeltaX/120);c.unshift(a,f,e,g);return(d.event.dispatch||d.event.handle).apply(this,c)}var c=["DOMMouseScroll","mousewheel"];if(d.event.fixHooks)for(var h=c.length;h;)d.event.fixHooks[c[--h]]=d.event.mouseHooks;d.event.special.mousewheel={setup:function(){if(this.addEventListener)for(var a=c.length;a;)this.addEventListener(c[--a],e,!1);else this.onmousewheel=e},teardown:function(){if(this.removeEventListener)for(var a=c.length;a;)this.removeEventListener(c[--a],e,!1);else this.onmousewheel=null}};d.fn.extend({mousewheel:function(a){return a?this.bind("mousewheel",a):this.trigger("mousewheel")},unmousewheel:function(a){return this.unbind("mousewheel",a)}})})(jQuery);

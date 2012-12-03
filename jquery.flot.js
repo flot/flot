@@ -1,8 +1,9 @@
-/*! Javascript plotting library for jQuery, version 0.8 alpha.
- *
- * Released under the MIT license by IOLA, December 2007.
- *
- */
+/* Javascript plotting library for jQuery, version 0.8 alpha.
+
+Copyright (c) 2007-2012 IOLA and Ole Laursen.
+Licensed under the MIT license.
+
+*/
 
 // first an inline dependency, jquery.colorhelpers.js, we inline it here
 // for convenience
