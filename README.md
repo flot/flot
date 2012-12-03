@@ -3,9 +3,9 @@
 Flot is a Javascript plotting library for jQuery.  
 Read more at the website: <http://www.flotcharts.org/>
 
-Take a look at the [examples](http://people.iola.dk/olau/flot/examples/), they should give a good
-impression of what Flot can do and the source code of the examples is
-probably the fastest way to learn how to use Flot.
+Take a look at the the examples in examples/index.html; they should give a good
+impression of what Flot can do, and the source code of the examples is probably
+the fastest way to learn how to use Flot.
 
 
 ## Installation ##
@@ -92,5 +92,17 @@ the words that come up are "good-looking", "attractive", "stylish",
 "smart", "impressive", "extravagant". One of the main goals with Flot
 is pretty looks.
 
+
+## Notes about the examples ##
+
+In order to have a useful, functional example of time-series plots using time
+zones, date.js from [timezone-js][timezone-js] (released under the Apache 2.0
+license) and the [Olson][olson] time zone database (released to the public
+domain) have been included in the examples directory.  They are used in
+examples/timezones.html.
+
+
 [excanvas]: http://code.google.com/p/explorercanvas/
 [flashcanvas]: http://code.google.com/p/flashcanvas/
+[timezone-js]: https://github.com/mde/timezone-js
+[olson]: ftp://ftp.iana.org/tz/
