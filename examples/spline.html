@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Examples</title>
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.time.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.spline.js"></script>
+ </head>
+    <body>
+    <h1>Line Spline Examples</h1>
+
+    <h3> Line Spline </h3>
+    <div id="placeholder1" style="width:800px;height:275px;"></div>
+
+    <h3> Area Spline </h3>
+    <div id="placeholder2" style="width:800px;height:275px;"></div>
+
+    <h3> Multiple axes (Line Spline + Area Spline) </h3>
+    <div id="placeholder3" style="width:800px;height:275px;"></div>
+
+	<script type="text/javascript">
+		$(function () {
+			var oilprices = [[1167692400000,61.05], [1167778800000,58.32], [1167865200000,57.35], [1167951600000,56.31], [1168210800000,55.55], [1168297200000,55.64], [1168383600000,54.02], [1168470000000,51.88], [1168556400000,52.99], [1168815600000,52.99], [1168902000000,51.21], [1168988400000,52.24], [1169074800000,50.48], [1169161200000,51.99], [1169420400000,51.13], [1169506800000,55.04], [1169593200000,55.37], [1169679600000,54.23], [1169766000000,55.42], [1170025200000,54.01], [1170111600000,56.97], [1170198000000,58.14], [1170284400000,58.14], [1170370800000,59.02], [1170630000000,58.74], [1170716400000,58.88], [1170802800000,57.71], [1170889200000,59.71], [1170975600000,59.89], [1171234800000,57.81], [1171321200000,59.06], [1171407600000,58.00], [1171494000000,57.99]];
+
+		    var exchangerates = [[1167606000000,0.7580], [1167692400000,0.7580], [1167778800000,0.75470], [1167865200000,0.75490], [1167951600000,0.76130], [1168038000000,0.76550], [1168124400000,0.76930], [1168210800000,0.76940], [1168297200000,0.76880], [1168383600000,0.76780], [1168470000000,0.77080], [1168556400000,0.77270], [1168642800000,0.77490], [1168729200000,0.77410], [1168815600000,0.77410], [1168902000000,0.77320], [1168988400000,0.77270], [1169074800000,0.77370], [1169161200000,0.77240], [1169247600000,0.77120], [1169334000000,0.7720], [1169420400000,0.77210], [1169506800000,0.77170], [1169593200000,0.77040], [1169679600000,0.7690], [1169766000000,0.77110], [1169852400000,0.7740], [1169938800000,0.77450], [1170025200000,0.77450], [1170111600000,0.7740], [1170198000000,0.77160], [1170284400000,0.77130], [1170370800000,0.76780], [1170457200000,0.76880], [1170543600000,0.77180], [1170630000000,0.77180], [1170716400000,0.77280], [1170802800000,0.77290], [1170889200000,0.76980], [1170975600000,0.76850], [1171062000000,0.76810], [1171148400000,0.7690], [1171234800000,0.7690], [1171321200000,0.76980], [1171407600000,0.76990], [1171494000000,0.76510]];
+
+		    function euroFormatter(v, axis) {
+		        return v.toFixed(axis.tickDecimals) +"€";
+		    }
+
+		    (function () {
+		        $.plot($("#placeholder1"),
+		           [ { data: exchangerates, label: "USD/EUR exchange rate", lines: {show: false}, splines: {show: true, lineWidth: 2}, color: '#4484c9' }],
+		           {
+		               xaxes: [ { mode: 'time' } ],
+		               yaxes: [ {
+		                          tickFormatter: euroFormatter
+		                        } ]
+		           });
+		    })();
+
+		    (function () {
+		        $.plot($("#placeholder2"),
+		           [ { data: exchangerates, label: "USD/EUR exchange rate", lines: {show: true, lineWidth: 0, fill: 0.3}, splines: {show: true}, color: '#4484c9' }],
+		           {
+		               xaxes: [ { mode: 'time' } ],
+		               yaxis: {min: 0.75},
+		               yaxes: [ {
+		                          tickFormatter: euroFormatter
+		                        } ]
+		           });
+		    })();
+
+		    (function () {
+		        $.plot($("#placeholder3"),
+		           [ { data: oilprices, label: "Oil price ($)", lines: {show: false}, splines: {show: true}, color: '#669966' },
+		             { data: exchangerates, label: "USD/EUR exchange rate", yaxis: 2, lines: {show: true, lineWidth: 0, fill: 0.1}, splines: {show: true}, color: '#FF0000' }],
+		           {
+		               xaxes: [ { mode: 'time' } ],
+		               yaxes: [ { min: 0 },
+		                        {
+		                        	min: 0.75,
+									// align if we are to the right
+									alignTicksWithAxis: 1,
+									position: "right",
+									tickFormatter: euroFormatter
+		                        } ],
+		            legend: {
+		           		show: false
+		            }
+		       		});
+		    })();
+		});
+	</script>
+
+</body>
+</html>
