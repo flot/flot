@@ -32,7 +32,26 @@ To make merging as easy as possible, please keep these rules in mind:
 ### Flot Style Guidelines ###
 
 Flot follows the [jQuery Core Style Guidelines](http://docs.jquery.com/JQuery_Core_Style_Guidelines),
-with the following minor changes:
+with the following updates and exceptions:
+
+#### Spacing ####
+
+Do not add horizontal space around parameter lists, loop definitions, or
+array/object indices. For example:
+
+```js
+	for ( var i = 0; i < data.length; i++ ) {	// This block is wrong!
+		if ( data[ i ] > 1 ) {
+			data[ i ] = 2;
+		}
+	}
+
+	for (var i = 0; i < data.length; i++) {		// This block is correct!
+		if (data[i] > 1) {
+			data[i] = 2;
+		}
+	}
+```
 
 #### Comments ####
 
@@ -48,7 +67,7 @@ example:
 	// We're going to loop here
 	// TODO: Make this loop faster, better, stronger!
 
-	for ( var x = 0; x < 10; x++ ) {}
+	for (var x = 0; x < 10; x++) {}
 ```
 
 #### Wrapping ####
@@ -63,11 +82,9 @@ Statements containing complex logic should not be wrapped arbitrarily if they
 do not exceed 80 characters. For example:
 
 ```js
-	WRONG
-	if (a == 1 &&
+	if (a == 1 &&		// This block is wrong!
 		b == 2 &&
 		c == 3) {}
 
-	CORRECT
-	if ( a == 1 && b == 2 && c == 3 ) {}
+	if (a == 1 && b == 2 && c == 3) {}		// This block is correct!
 ```
