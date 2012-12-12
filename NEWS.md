@@ -13,9 +13,9 @@ the dates are displayed. If null, the dates are displayed as UTC. If
 "browser", the dates are displayed in the time zone of the user's browser.
 
 Date/time formatting has changed and now follows a proper subset of the
-standard strftime specifiers. Additionally, if a strftime function is found in
-the Date object's prototype, it will be used instead of the built-in
-formatter.
+standard strftime specifiers, plus one nonstandard specifier for quarters.
+Additionally, if a strftime function is found in the Date object's prototype,
+it will be used instead of the built-in formatter.
 
 Axis labels are now drawn with canvas text with some parsing to support
 newlines. This solves various issues but also means that they no longer
@@ -28,6 +28,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 "flot-overlay" to prevent accidental clashes (issue 540).
 
 ### Changes ###
+
+ - Addition of nonstandard %q specifier to date/time formatting. (patch
+   by risicle, issue 49)
 
  - Date/time formatting follows proper subset of strftime specifiers, and
    support added for Date.prototype.strftime, if found. (patch by Mark Cote,
