@@ -582,10 +582,10 @@ xaxis: {
     mode: "time"
     timeformat: "%Y/%m/%d"
 }
-``` 
+```
 
-This will result in tick labels like "2000/12/24". A subset of the 
-standard strftime specifiers are supported:
+This will result in tick labels like "2000/12/24". A subset of the
+standard strftime specifiers are supported (plus the nonstandard %q):
 
 ```js
 %a: weekday name (customizable)
@@ -596,6 +596,7 @@ standard strftime specifiers are supported:
 %I: hours, 12-hour time, zero-padded (01-12)
 %m: month, zero-padded (01-12)
 %M: minutes, zero-padded (00-59)
+%q: quarter (1-4)
 %S: seconds, zero-padded (00-59)
 %y: year (two digits)
 %Y: year (four digits)
