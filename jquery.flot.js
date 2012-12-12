@@ -2448,7 +2448,7 @@ Licensed under the MIT license.
         function onMouseMove(e) {
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", e,
-                                       function (s) { return !!s["hoverable"]; });
+                                       function (s) { return s["hoverable"] != false; });
         }
 
         function onMouseLeave(e) {
@@ -2459,7 +2459,7 @@ Licensed under the MIT license.
 
         function onClick(e) {
             triggerClickHoverEvent("plotclick", e,
-                                   function (s) { return !!s["clickable"]; });
+                                   function (s) { return s["clickable"] != false; });
         }
 
         // trigger click or hover event (they send the same parameters
