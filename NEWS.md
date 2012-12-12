@@ -155,6 +155,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 
  - Prevented several local variables from becoming global. (patch by aaa707)
 
+ - Ensure that the overlay and primary canvases remain aligned. (issue #670,
+   pull request #901)
+
 ## Flot 0.7 ##
 
 ### API changes ###

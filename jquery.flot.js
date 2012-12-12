@@ -738,15 +738,13 @@ Licensed under the MIT license.
             return devicePixelRatio / backingStoreRatio;
         }
 
-        function makeCanvas(skipPositioning, cls) {
+        function makeCanvas(cls) {
 
             var c = document.createElement('canvas');
             c.className = cls;
 
-            if (!skipPositioning)
-                $(c).css({ position: 'absolute', left: 0, top: 0 });
-
-            $(c).appendTo(placeholder);
+            $(c).css({ position: 'absolute', left: 0, top: 0 })
+            	.appendTo(placeholder);
 
 			// If HTML5 Canvas isn't available, fall back to Excanvas
 
@@ -842,8 +840,8 @@ Licensed under the MIT license.
 
                 getCanvasDimensions();
 
-                canvas = makeCanvas(true, "flot-base");
-                overlay = makeCanvas(false, "flot-overlay"); // overlay canvas for interactive features
+                canvas = makeCanvas("flot-base");
+                overlay = makeCanvas("flot-overlay"); // overlay canvas for interactive features
 
                 reused = false;
             }
