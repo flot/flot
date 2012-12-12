@@ -73,7 +73,7 @@ API.txt for details.
 					case 'M': c = leftPad(d.getMinutes()); break;
 					// quarters not in Open Group's strftime specification
 					case 'q':
-						 c = "Q" + (Math.floor(d.getMonth() / 3) + 1); break;
+						c = "" + (Math.floor(d.getMonth() / 3) + 1); break;
 					case 'S': c = leftPad(d.getSeconds()); break;
 					case 'y': c = leftPad(d.getFullYear() % 100); break;
 					case 'Y': c = "" + d.getFullYear(); break;
@@ -384,9 +384,9 @@ API.txt for details.
 							}
 						} else if (useQuarters && t < timeUnitSize.year) {
 							if (span < timeUnitSize.year) {
-								fmt = "%q";
+								fmt = "Q%q";
 							} else {
-								fmt = "%q %Y";
+								fmt = "Q%q %Y";
 							}
 						} else {
 							fmt = "%Y";
