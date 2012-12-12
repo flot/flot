@@ -2651,7 +2651,7 @@ Licensed under the MIT license.
         return plot;
     };
 
-    $.plot.version = "0.7";
+    $.plot.version = "0.8-alpha";
 
     $.plot.plugins = [];
 
