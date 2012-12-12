@@ -71,6 +71,9 @@ API.txt for details.
 					case 'l': c = leftPad(hours12, " "); break;
 					case 'm': c = leftPad(d.getMonth() + 1); break;
 					case 'M': c = leftPad(d.getMinutes()); break;
+					// quarters not in Open Group's strftime specification
+					case 'q':
+						 c = "Q" + (Math.floor(d.getMonth() / 3) + 1); break;
 					case 'S': c = leftPad(d.getSeconds()); break;
 					case 'y': c = leftPad(d.getFullYear() % 100); break;
 					case 'Y': c = "" + d.getFullYear(); break;
@@ -156,13 +159,14 @@ API.txt for details.
 		"hour": 60 * 60 * 1000,
 		"day": 24 * 60 * 60 * 1000,
 		"month": 30 * 24 * 60 * 60 * 1000,
+		"quarter": 3 * 30 * 24 * 60 * 60 * 1000,
 		"year": 365.2425 * 24 * 60 * 60 * 1000
 	};
 
 	// the allowed tick sizes, after 1 year we use
 	// an integer algorithm
 
-	var spec = [
+	var baseSpec = [
 		[1, "second"], [2, "second"], [5, "second"], [10, "second"],
 		[30, "second"], 
 		[1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
@@ -171,9 +175,16 @@ API.txt for details.
 		[8, "hour"], [12, "hour"],
 		[1, "day"], [2, "day"], [3, "day"],
 		[0.25, "month"], [0.5, "month"], [1, "month"],
-		[2, "month"], [3, "month"], [6, "month"],
-		[1, "year"]
+		[2, "month"]
 	];
+
+	// we don't know which variant(s) we'll need yet, but generating both is
+	// cheap
+
+	var specMonths = baseSpec.concat([[3, "month"], [6, "month"],
+		[1, "year"]]);
+	var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
+		[1, "year"]]);
 
 	function init(plot) {
 		plot.hooks.processDatapoints.push(function (plot, series, datapoints) {
@@ -187,6 +198,14 @@ API.txt for details.
 						var ticks = [];
 						var d = dateGenerator(axis.min, opts);
 						var minSize = 0;
+
+						// make quarter use a possibility if quarters are
+						// mentioned in either of these options
+
+						var spec = (opts.tickSize && opts.tickSize[1] ===
+							"quarter") ||
+							(opts.minTickSize && opts.minTickSize[1] ===
+							"quarter") ? specQuarters : specMonths;
 
 						if (opts.minTickSize != null) {
 							if (typeof opts.tickSize == "number") {
@@ -255,6 +274,9 @@ API.txt for details.
 							d.setHours(floorInBase(d.getHours(), tickSize));
 						} else if (unit == "month") {
 							d.setMonth(floorInBase(d.getMonth(), tickSize));
+						} else if (unit == "quarter") {
+							d.setMonth(3 * floorInBase(d.getMonth() / 3,
+								tickSize));
 						} else if (unit == "year") {
 							d.setFullYear(floorInBase(d.getFullYear(), tickSize));
 						}
@@ -271,6 +293,10 @@ API.txt for details.
 							d.setHours(0);
 						} else if (step >= timeUnitSize.day * 4) {
 							d.setDate(1);
+						} else if (step >= timeUnitSize.month * 2) {
+							d.setMonth(floorInBase(d.getMonth(), 3));
+						} else if (step >= timeUnitSize.quarter * 2) {
+							d.setMonth(floorInBase(d.getMonth(), 6));
 						} else if (step >= timeUnitSize.year) {
 							d.setMonth(0);
 						}
@@ -285,22 +311,25 @@ API.txt for details.
 							v = d.getTime();
 							ticks.push(v);
 
-							if (unit == "month") {
+							if (unit == "month" || unit == "quarter") {
 								if (tickSize < 1) {
 
-									// a bit complicated - we'll divide the month
-									// up but we need to take care of fractions
-									// so we don't end up in the middle of a day
+									// a bit complicated - we'll divide the
+									// month/quarter up but we need to take
+									// care of fractions so we don't end up in
+									// the middle of a day
 
 									d.setDate(1);
 									var start = d.getTime();
-									d.setMonth(d.getMonth() + 1);
+									d.setMonth(d.getMonth() +
+										(unit == "quarter" ? 3 : 1));
 									var end = d.getTime();
 									d.setTime(v + carry * timeUnitSize.hour + (end - start) * tickSize);
 									carry = d.getHours();
 									d.setHours(0);
 								} else {
-									d.setMonth(d.getMonth() + tickSize);
+									d.setMonth(d.getMonth() +
+										tickSize * (unit == "quarter" ? 3 : 1));
 								}
 							} else if (unit == "year") {
 								d.setFullYear(d.getFullYear() + tickSize);
@@ -322,6 +351,14 @@ API.txt for details.
 							return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames);
 						}
 
+						// possibly use quarters if quarters are mentioned in
+						// any of these places
+
+						var useQuarters = (axis.options.tickSize &&
+								axis.options.tickSize[1] == "quarter") ||
+							(axis.options.minTickSize &&
+								axis.options.minTickSize[1] == "quarter");
+
 						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
 						var span = axis.max - axis.min;
 						var suffix = (opts.twelveHourClock) ? " %p" : "";
@@ -338,11 +375,18 @@ API.txt for details.
 							}
 						} else if (t < timeUnitSize.month) {
 							fmt = "%b %d";
-						} else if (t < timeUnitSize.year) {
+						} else if ((useQuarters && t < timeUnitSize.quarter) ||
+							(!useQuarters && t < timeUnitSize.year)) {
 							if (span < timeUnitSize.year) {
 								fmt = "%b";
 							} else {
 								fmt = "%b %Y";
+							}
+						} else if (useQuarters && t < timeUnitSize.year) {
+							if (span < timeUnitSize.year) {
+								fmt = "%q";
+							} else {
+								fmt = "%q %Y";
 							}
 						} else {
 							fmt = "%Y";

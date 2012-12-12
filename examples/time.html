@@ -23,6 +23,7 @@
     <p>Zoom to: <button id="whole">Whole period</button>
       <button id="nineties">1990-2000</button>
       <button id="latenineties">1996-2000</button>
+      <button id="ninetyninequarters">1999 by quarter</button>
       <button id="ninetynine">1999</button>
       <button id="lastweekninetynine">end of 1999</button>
       <button id="lastdayninetynine">very end of 1999</button></p>
@@ -64,6 +65,17 @@ $(function () {
                 mode: "time",
                 minTickSize: [1, "year"],
                 min: (new Date(1996, 0, 1)).getTime(),
+                max: (new Date(2000, 0, 1)).getTime()
+            }
+        });
+    });
+
+    $("#ninetyninequarters").click(function () {
+        $.plot($("#placeholder"), [d], {
+            xaxis: {
+                mode: "time",
+                minTickSize: [1, "quarter"],
+                min: (new Date(1999, 0, 1)).getTime(),
                 max: (new Date(2000, 0, 1)).getTime()
             }
         });
