@@ -173,6 +173,9 @@ labelFormatter: function(label, series) {
 }
 ```
 
+To prevent a series from showing up in the legend, simply have the function
+return null.
+
 "noColumns" is the number of columns to divide the legend table into.
 "position" specifies the overall placement of the legend within the
 plot (top-right, top-left, etc.) and margin the distance to the plot
