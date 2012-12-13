@@ -888,7 +888,9 @@ Licensed under the MIT license.
 
             if (options.grid.clickable)
                 eventHolder.click(onClick);
-
+	    
+	    eventHolder.dblclick(onDblClick)
+	    
             executeHooks(hooks.bindEvents, [eventHolder]);
         }
 
@@ -899,6 +901,7 @@ Licensed under the MIT license.
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
+            eventHolder.unbind("dblclick", onDblClick);
 
             executeHooks(hooks.shutdown, [eventHolder]);
         }
@@ -2462,6 +2465,10 @@ Licensed under the MIT license.
                                    function (s) { return s["clickable"] != false; });
         }
 
+        function onDblClick(e) {
+            triggerClickHoverEvent("plotdblclick", e,
+                                   function (s) { return s["clickable"] != false; });
+        }
         // trigger click or hover event (they send the same parameters
         // so we share their code)
         function triggerClickHoverEvent(eventname, event, seriesFilter) {
