@@ -1749,8 +1749,10 @@ Licensed under the MIT license.
                         y += line.height/2 + offset;
                         offset += line.height;
 
-                        if ($.browser.opera) {
-                            // FIXME: UGLY BROWSER DETECTION
+                        if (!!(window.opera && window.opera.version().split('.')[0] < 12)) {
+                            // FIXME: LEGACY BROWSER FIX
+                            // AFFECTS: Opera < 12.00
+
                             // round the coordinates since Opera
                             // otherwise switches to more ugly
                             // rendering (probably non-hinted) and
