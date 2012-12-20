@@ -439,7 +439,7 @@ Licensed under the MIT license.
             // If any of the user colors are numeric indexes, then we
             // need to generate at least as many as the highest index.
 
-            if (maxIndex > neededColors) {
+            if (maxIndex >= neededColors) {
                 neededColors = maxIndex + 1;
             }
 
