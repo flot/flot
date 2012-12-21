@@ -190,8 +190,6 @@ More detail and specific examples can be found in the included HTML file.
 				canvas = plot.getCanvas();
 				target = $(canvas).parent();
 				options = plot.getOptions();
-				canvasWidth = plot.getPlaceholder().width();
-				canvasHeight = plot.getPlaceholder().height();
 				plot.setData(combine(plot.getData()));
 			}
 		}
@@ -293,6 +291,9 @@ More detail and specific examples can be found in the included HTML file.
 				return; // if no series were passed
 			}
 
+			canvasWidth = plot.getPlaceholder().width();
+			canvasHeight = plot.getPlaceholder().height();
+
 			ctx = newCtx;
 			setupPie();
 
@@ -316,6 +317,12 @@ More detail and specific examples can be found in the included HTML file.
 				clear();
 				target.prepend("<div class='error'>Could not draw pie with labels contained inside canvas</div>");
 			}
+
+			// Reset the redraw flag on success, so the loop above can run
+			// again in the event of a resize or other update.
+			// TODO: We should remove this redraw system entirely!
+
+			redraw = true;
 
 			if (plot.setSeries && plot.insertLegend) {
 				plot.setSeries(slices);
