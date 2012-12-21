@@ -161,6 +161,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Ensure that the overlay and primary canvases remain aligned. (issue #670,
    pull request #901)
 
+ - Added support for jQuery 1.9 by removing and replacing uses of $.browser.
+   (analysis and patch by Anthony Ryan, pull request #905)
+
 ## Flot 0.7 ##
 
 ### API changes ###
