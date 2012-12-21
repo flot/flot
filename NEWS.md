@@ -164,6 +164,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Added support for jQuery 1.9 by removing and replacing uses of $.browser.
    (analysis and patch by Anthony Ryan, pull request #905)
 
+ - Pie charts no longer disappear when redrawn during a resize or update.
+   (reported by Julien Bec, issue #656, pull request #910)
+
 ## Flot 0.7 ##
 
 ### API changes ###
