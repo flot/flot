@@ -190,8 +190,6 @@ More detail and specific examples can be found in the included HTML file.
 				canvas = plot.getCanvas();
 				target = $(canvas).parent();
 				options = plot.getOptions();
-				canvasWidth = plot.getPlaceholder().width();
-				canvasHeight = plot.getPlaceholder().height();
 				plot.setData(combine(plot.getData()));
 			}
 		}
@@ -292,6 +290,9 @@ More detail and specific examples can be found in the included HTML file.
 			if (!target) {
 				return; // if no series were passed
 			}
+
+			canvasWidth = plot.getPlaceholder().width();
+			canvasHeight = plot.getPlaceholder().height();
 
 			ctx = newCtx;
 			setupPie();
