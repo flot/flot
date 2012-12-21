@@ -318,6 +318,12 @@ More detail and specific examples can be found in the included HTML file.
 				target.prepend("<div class='error'>Could not draw pie with labels contained inside canvas</div>");
 			}
 
+			// Reset the redraw flag on success, so the loop above can run
+			// again in the event of a resize or other update.
+			// TODO: We should remove this redraw system entirely!
+
+			redraw = true;
+
 			if (plot.setSeries && plot.insertLegend) {
 				plot.setSeries(slices);
 				plot.insertLegend();
