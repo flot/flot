@@ -423,8 +423,8 @@ Licensed under the MIT license.
 
             var neededColors = series.length, maxIndex = 0, i;
 
-            // Subtract the number of series that already have fixed
-            // colors from the number we need to generate.
+            // Subtract the number of series that already have fixed colors or
+            // color indexes from the number that we still need to generate.
 
             for (i = 0; i < series.length; ++i) {
                 var sc = series[i].color;
@@ -436,14 +436,15 @@ Licensed under the MIT license.
                 }
             }
 
-            // If any of the user colors are numeric indexes, then we
-            // need to generate at least as many as the highest index.
+            // If any of the series have fixed color indexes, then we need to
+            // generate at least as many colors as the highest index.
 
             if (maxIndex >= neededColors) {
                 neededColors = maxIndex + 1;
             }
 
-            // Generate the needed colors, based on the option colors
+            // Generate all the colors, using first the option colors and then
+            // variations on those colors once they're exhausted.
 
             var c, colors = [], colorPool = options.colors,
                 colorPoolSize = colorPool.length, variation = 0;
