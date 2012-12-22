@@ -439,7 +439,7 @@ Licensed under the MIT license.
             // If any of the series have fixed color indexes, then we need to
             // generate at least as many colors as the highest index.
 
-            if (maxIndex >= neededColors) {
+            if (neededColors <= maxIndex) {
                 neededColors = maxIndex + 1;
             }
 
