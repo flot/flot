@@ -744,8 +744,8 @@ Licensed under the MIT license.
             var c = document.createElement('canvas');
             c.className = cls;
 
-            $(c).css({ position: 'absolute', left: 0, top: 0 })
-            	.appendTo(placeholder);
+			$(c).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
+				.appendTo(placeholder);
 
 			// If HTML5 Canvas isn't available, fall back to Excanvas
 
