@@ -421,7 +421,7 @@ Licensed under the MIT license.
 
         function fillInSeriesOptions() {
 
-            var neededColors = series.length, maxIndex = 0, i;
+            var neededColors = series.length, maxIndex = -1, i;
 
             // Subtract the number of series that already have fixed colors or
             // color indexes from the number that we still need to generate.
