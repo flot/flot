@@ -106,6 +106,8 @@ Licensed under the MIT license.
                         fill: false,
                         fillColor: null,
                         steps: false
+                        // Omit 'zero', so we can later default its value to
+                        // match that of the 'fill' option.
                     },
                     bars: {
                         show: false,
@@ -114,7 +116,8 @@ Licensed under the MIT license.
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
-                        horizontal: false
+                        horizontal: false,
+                        zero: true
                     },
                     shadowSize: 3,
                     highlightColor: null
@@ -497,6 +500,13 @@ Licensed under the MIT license.
                     if (show)
                         s.lines.show = true;
                 }
+
+				// If nothing was provided for lines.zero, default it to match
+				// lines.fill, since areas by default should extend to zero.
+
+				if (s.lines.show && s.lines.zero == null) {
+					s.lines.zero = !!s.lines.fill;
+				}
 
                 // setup axes
                 s.xaxis = getOrCreateAxis(xaxes, axisNumber(s, "x"));
