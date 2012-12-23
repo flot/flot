@@ -556,8 +556,9 @@ Licensed under the MIT license.
                     format.push({ x: true, number: true, required: true });
                     format.push({ y: true, number: true, required: true });
 
-                    if (s.bars.show || (s.lines.show && s.lines.fill)) {
-                        format.push({ y: true, number: true, required: false, defaultValue: 0 });
+                    if (s.bars.show || (s.lines.show && (s.lines.fill || s.lines.zero))) {
+                    	var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
+                        format.push({ y: true, number: true, required: false, defaultValue: 0, autoscale: autoscale });
                         if (s.bars.horizontal) {
                             delete format[format.length - 1].y;
                             format[format.length - 1].x = true;
@@ -671,7 +672,7 @@ Licensed under the MIT license.
                     for (m = 0; m < ps; ++m) {
                         val = points[j + m];
                         f = format[m];
-                        if (!f || val == fakeInfinity || val == -fakeInfinity)
+                        if (!f || f.autoscale === false || val == fakeInfinity || val == -fakeInfinity)
                             continue;
 
                         if (f.x) {
