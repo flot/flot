@@ -148,7 +148,7 @@ Licensed under the MIT license.
                 },
                 hooks: {}
             },
-        canvas = null,      // the canvas for the plot itself
+        surface = null,     // the canvas for the plot itself
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
@@ -175,7 +175,7 @@ Licensed under the MIT license.
         plot.setupGrid = setupGrid;
         plot.draw = draw;
         plot.getPlaceholder = function() { return placeholder; };
-        plot.getCanvas = function() { return canvas; };
+        plot.getCanvas = function() { return surface; };
         plot.getPlotOffset = function() { return plotOffset; };
         plot.width = function () { return plotWidth; };
         plot.height = function () { return plotHeight; };
@@ -211,7 +211,7 @@ Licensed under the MIT license.
         plot.shutdown = shutdown;
         plot.resize = function () {
             getCanvasDimensions();
-            resizeCanvas(canvas);
+            resizeCanvas(surface);
             resizeCanvas(overlay);
         };
 
@@ -837,10 +837,10 @@ Licensed under the MIT license.
 
         function setupCanvases() {
             var reused,
-                existingCanvas = placeholder.children("canvas.flot-base"),
+                existingSurface = placeholder.children("canvas.flot-base"),
                 existingOverlay = placeholder.children("canvas.flot-overlay");
 
-            if (existingCanvas.length == 0 || existingOverlay == 0) {
+            if (existingSurface.length == 0 || existingOverlay == 0) {
                 // init everything
 
                 placeholder.html(""); // make sure placeholder is clear
@@ -852,7 +852,7 @@ Licensed under the MIT license.
 
                 getCanvasDimensions();
 
-                canvas = makeCanvas("flot-base");
+                surface = makeCanvas("flot-base");
                 overlay = makeCanvas("flot-overlay"); // overlay canvas for interactive features
 
                 reused = false;
@@ -860,13 +860,13 @@ Licensed under the MIT license.
             else {
                 // reuse existing elements
 
-                canvas = existingCanvas.get(0);
+                surface = existingSurface.get(0);
                 overlay = existingOverlay.get(0);
 
                 reused = true;
             }
 
-            ctx = canvas.getContext("2d");
+            ctx = surface.getContext("2d");
             octx = overlay.getContext("2d");
 
             // define which element we're listening for events on
@@ -884,7 +884,7 @@ Licensed under the MIT license.
 
                 // then whack any remaining obvious garbage left
                 eventHolder.unbind();
-                placeholder.children().not([canvas, overlay]).remove();
+                placeholder.children().not([surface, overlay]).remove();
             }
 
             // save in case we get replotted
