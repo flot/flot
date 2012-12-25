@@ -33,6 +33,121 @@ Licensed under the MIT license.
 
 // the actual Flot code
 (function($) {
+
+	///////////////////////////////////////////////////////////////////////////
+	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
+	//
+	// @constructor
+	// @param {string} cls List of classes to apply to the canvas.
+	// @param {element} container Element onto which to append the canvas.
+	//
+	// Requiring a container is a little iffy, but unfortunately canvas
+	// operations don't work unless the canvas is attached to the DOM.
+
+	function Canvas(cls, container) {
+
+		var element = document.createElement("canvas");
+		element.className = cls;
+
+		$(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
+			.data("canvas", this)
+			.appendTo(container);
+
+		// If HTML5 Canvas isn't available, fall back to Excanvas
+
+		if (!element.getContext) {
+			if (window.G_vmlCanvasManager) {
+				element = window.G_vmlCanvasManager.initElement(element);
+			} else {
+				throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
+			}
+		}
+
+		var context = element.getContext("2d");
+
+		this.element = element;
+		this.context = context;
+
+		// Determine the screen's ratio of physical to device-independent
+		// pixels.  This is the ratio between the canvas width that the browser
+		// advertises and the number of pixels actually present in that space.
+
+		// The iPhone 4, for example, has a device-independent width of 320px,
+		// but its screen is actually 640px wide.  It therefore has a pixel
+		// ratio of 2, while most normal devices have a ratio of 1.
+
+		var devicePixelRatio = window.devicePixelRatio || 1,
+			backingStoreRatio =
+				context.webkitBackingStorePixelRatio ||
+				context.mozBackingStorePixelRatio ||
+				context.msBackingStorePixelRatio ||
+				context.oBackingStorePixelRatio ||
+				context.backingStorePixelRatio || 1;
+
+		this.pixelRatio = devicePixelRatio / backingStoreRatio;
+
+		// Size the canvas to match the internal dimensions of its container
+
+		this.resize(container.width(), container.height());
+	};
+
+	// Resizes the canvas to the given dimensions.
+	//
+	// @param {number} width New width of the canvas, in pixels.
+	// @param {number} width New height of the canvas, in pixels.
+
+	Canvas.prototype.resize = function(width, height) {
+
+		if (width <= 0 || height <= 0) {
+			throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
+		}
+
+		var element = this.element,
+			context = this.context,
+			pixelRatio = this.pixelRatio;
+
+		// Resize the canvas, increasing its density based on the display's
+		// pixel ratio; basically giving it more pixels without increasing the
+		// size of its element, to take advantage of the fact that retina
+		// displays have that many more pixels in the same advertised space.
+
+		// Resizing should reset the state (excanvas seems to be buggy though)
+
+		if (this.width != width) {
+			element.width = width * pixelRatio;
+			element.style.width = width + "px";
+			this.width = width;
+		}
+
+		if (this.height != height) {
+			element.height = height * pixelRatio;
+			element.style.height = height + "px";
+			this.height = height;
+		}
+
+		// Save the context, so we can reset in case we get replotted.  The
+		// restore ensure that we're really back at the initial state, and
+		// should be safe even if we haven't saved the initial state yet.
+
+		context.restore();
+		context.save();
+
+		// Scale the coordinate space to match the display density; so even though we
+		// may have twice as many pixels, we still want lines and other drawing to
+		// appear at the same size; the extra pixels will just make them crisper.
+
+		context.scale(pixelRatio, pixelRatio);
+	}
+
+	// Clears the entire canvas area.
+
+	Canvas.prototype.clear = function() {
+		this.context.clearRect(0, 0, this.width, this.height);
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	// The top-level container for the entire plot.
+
     function Plot(placeholder, data_, options_, plugins) {
         // data is on the form:
         //   [ series1, series2 ... ]
@@ -154,7 +269,6 @@ Licensed under the MIT license.
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = 0, canvasHeight = 0,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
@@ -175,7 +289,7 @@ Licensed under the MIT license.
         plot.setupGrid = setupGrid;
         plot.draw = draw;
         plot.getPlaceholder = function() { return placeholder; };
-        plot.getCanvas = function() { return surface; };
+        plot.getCanvas = function() { return surface.element; };
         plot.getPlotOffset = function() { return plotOffset; };
         plot.width = function () { return plotWidth; };
         plot.height = function () { return plotHeight; };
@@ -210,9 +324,10 @@ Licensed under the MIT license.
         };
         plot.shutdown = shutdown;
         plot.resize = function () {
-            getCanvasDimensions();
-            resizeCanvas(surface);
-            resizeCanvas(overlay);
+        	var width = placeholder.width(),
+        		height = placeholder.height();
+            surface.resize(width, height);
+            overlay.resize(width, height);
         };
 
         // public attributes
@@ -730,111 +845,6 @@ Licensed under the MIT license.
             });
         }
 
-        //////////////////////////////////////////////////////////////////////////////////
-        // Returns the display's ratio between physical and device-independent pixels.
-        //
-        // This is the ratio between the width that the browser advertises and the number
-        // of pixels actually available in that space.  The iPhone 4, for example, has a
-        // device-independent width of 320px, but its screen is actually 640px wide.  It
-        // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
-
-        function getPixelRatio(cctx) {
-            var devicePixelRatio = window.devicePixelRatio || 1;
-            var backingStoreRatio =
-                cctx.webkitBackingStorePixelRatio ||
-                cctx.mozBackingStorePixelRatio ||
-                cctx.msBackingStorePixelRatio ||
-                cctx.oBackingStorePixelRatio ||
-                cctx.backingStorePixelRatio || 1;
-
-            return devicePixelRatio / backingStoreRatio;
-        }
-
-        function makeCanvas(cls) {
-
-            var c = document.createElement('canvas');
-            c.className = cls;
-
-			$(c).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
-				.appendTo(placeholder);
-
-			// If HTML5 Canvas isn't available, fall back to Excanvas
-
-			if (!c.getContext) {
-				if (window.G_vmlCanvasManager) {
-					c = window.G_vmlCanvasManager.initElement(c);
-				} else {
-					throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
-				}
-			}
-
-            var cctx = c.getContext("2d");
-
-            // Increase the canvas density based on the display's pixel ratio; basically
-            // giving the canvas more pixels without increasing the size of its element,
-            // to take advantage of the fact that retina displays have that many more
-            // pixels than they actually use for page & element widths.
-
-            var pixelRatio = getPixelRatio(cctx);
-
-            c.width = canvasWidth * pixelRatio;
-            c.height = canvasHeight * pixelRatio;
-            c.style.width = canvasWidth + "px";
-            c.style.height = canvasHeight + "px";
-
-            // Save the context so we can reset in case we get replotted
-
-            cctx.save();
-
-            // Scale the coordinate space to match the display density; so even though we
-            // may have twice as many pixels, we still want lines and other drawing to
-            // appear at the same size; the extra pixels will just make them crisper.
-
-            cctx.scale(pixelRatio, pixelRatio);
-
-            return c;
-        }
-
-        function getCanvasDimensions() {
-            canvasWidth = placeholder.width();
-            canvasHeight = placeholder.height();
-
-            if (canvasWidth <= 0 || canvasHeight <= 0)
-                throw new Error("Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight);
-        }
-
-        function resizeCanvas(c) {
-
-            var cctx = c.getContext("2d");
-
-            // Handle pixel ratios > 1 for retina displays, as explained in makeCanvas
-
-            var pixelRatio = getPixelRatio(cctx);
-
-            // Resizing should reset the state (excanvas seems to be buggy though)
-
-            if (c.style.width != canvasWidth) {
-                c.width = canvasWidth * pixelRatio;
-                c.style.width = canvasWidth + "px";
-            }
-
-            if (c.style.height != canvasHeight) {
-                c.height = canvasHeight * pixelRatio;
-                c.style.height = canvasHeight + "px";
-            }
-
-            // so try to get back to the initial state (even if it's
-            // gone now, this should be safe according to the spec)
-            cctx.restore();
-
-            // and save again
-            cctx.save();
-
-            // Apply scaling for retina displays, as explained in makeCanvas
-
-            cctx.scale(pixelRatio, pixelRatio);
-        }
-
         function setupCanvases() {
             var reused,
                 existingSurface = placeholder.children("canvas.flot-base"),
@@ -850,27 +860,25 @@ Licensed under the MIT license.
                 if (placeholder.css("position") == 'static')
                     placeholder.css("position", "relative"); // for positioning labels and overlay
 
-                getCanvasDimensions();
-
-                surface = makeCanvas("flot-base");
-                overlay = makeCanvas("flot-overlay"); // overlay canvas for interactive features
+                surface = new Canvas("flot-base", placeholder);
+                overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
 
                 reused = false;
             }
             else {
                 // reuse existing elements
 
-                surface = existingSurface.get(0);
-                overlay = existingOverlay.get(0);
+                surface = existingSurface.data("canvas");
+                overlay = existingOverlay.data("canvas");
 
                 reused = true;
             }
 
-            ctx = surface.getContext("2d");
-            octx = overlay.getContext("2d");
+            ctx = surface.context;
+            octx = overlay.context;
 
             // define which element we're listening for events on
-            eventHolder = $(overlay);
+            eventHolder = $(overlay.element);
 
             if (reused) {
                 // run shutdown in the old plot object
@@ -880,11 +888,12 @@ Licensed under the MIT license.
                 plot.resize();
 
                 // make sure overlay pixels are cleared (canvas is cleared when we redraw)
-                octx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                overlay.clear();
 
                 // then whack any remaining obvious garbage left
                 eventHolder.unbind();
-                placeholder.children().not([surface, overlay]).remove();
+                placeholder.children().not([surface.element, overlay.element]).remove();
             }
 
             // save in case we get replotted
@@ -1053,7 +1062,7 @@ Licensed under the MIT license.
 
                 if (pos == "bottom") {
                     plotOffset.bottom += lh + axisMargin;
-                    axis.box = { top: canvasHeight - plotOffset.bottom, height: lh };
+                    axis.box = { top: surface.height - plotOffset.bottom, height: lh };
                 }
                 else {
                     axis.box = { top: plotOffset.top + axisMargin, height: lh };
@@ -1069,7 +1078,7 @@ Licensed under the MIT license.
                 }
                 else {
                     plotOffset.right += lw + axisMargin;
-                    axis.box = { left: canvasWidth - plotOffset.right, width: lw };
+                    axis.box = { left: surface.width - plotOffset.right, width: lw };
                 }
             }
 
@@ -1085,11 +1094,11 @@ Licensed under the MIT license.
             // dimension, we can set the remaining dimension coordinates
             if (axis.direction == "x") {
                 axis.box.left = plotOffset.left - axis.labelWidth / 2;
-                axis.box.width = canvasWidth - plotOffset.left - plotOffset.right + axis.labelWidth;
+                axis.box.width = surface.width - plotOffset.left - plotOffset.right + axis.labelWidth;
             }
             else {
                 axis.box.top = plotOffset.top - axis.labelHeight / 2;
-                axis.box.height = canvasHeight - plotOffset.bottom - plotOffset.top + axis.labelHeight;
+                axis.box.height = surface.height - plotOffset.bottom - plotOffset.top + axis.labelHeight;
             }
         }
 
@@ -1198,8 +1207,8 @@ Licensed under the MIT license.
                 });
             }
 
-            plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
-            plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
+            plotWidth = surface.width - plotOffset.left - plotOffset.right;
+            plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
 
             // now we got the proper plot dimensions, we can compute the scaling
             $.each(axes, function (_, axis) {
@@ -1258,7 +1267,7 @@ Licensed under the MIT license.
             else
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? surface.width : surface.height);
 
             axis.delta = (axis.max - axis.min) / noTicks;
 
@@ -1429,7 +1438,8 @@ Licensed under the MIT license.
         }
 
         function draw() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            surface.clear();
 
             executeHooks(hooks.drawBackground, [ctx]);
 
@@ -2543,7 +2553,7 @@ Licensed under the MIT license.
 
             // draw highlights
             octx.save();
-            octx.clearRect(0, 0, canvasWidth, canvasHeight);
+            overlay.clear();
             octx.translate(plotOffset.left, plotOffset.top);
 
             var i, hi;
