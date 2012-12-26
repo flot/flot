@@ -1701,26 +1701,16 @@ Licensed under the MIT license.
         }
 
         function drawAxisLabels() {
-            ctx.save();
-
             $.each(allAxes(), function (_, axis) {
+                placeholder.find(".axis_"+axis.direction).remove();
+
                 if (!axis.show || axis.ticks.length == 0)
                     return;
 
                 var box = axis.box, f = axis.font;
                 // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
-
-                ctx.fillStyle = axis.options.color;
-                // Important: Don't use quotes around axis.font.family! Just around single
-                // font names like 'Times New Roman' that have a space or special character in it.
-                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
-                ctx.textAlign = "start";
-                // middle align the labels - top would be more
-                // natural, but browsers can differ a pixel or two in
-                // where they consider the top to be, so instead we
-                // middle align to minimize variation between browsers
-                // and compensate when calculating the coordinates
-                ctx.textBaseline = "middle";
+                placeholder.append('<div class="axis_' + axis.direction + '" style="font-size:' + f.size + 'px;font-family:' + f.family + ';font-style:' + f.style + 'font-weight:' + f.weight + ';font-variant:' + f.variant + ';color:'+axis.options.color+';"></div>');
+                var axisplaceholder = $(".axis_"+axis.direction).first();
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
@@ -1746,10 +1736,6 @@ Licensed under the MIT license.
                                 x = box.left + box.padding;
                         }
 
-                        // account for middle aligning and line number
-                        y += line.height/2 + offset;
-                        offset += line.height;
-
                         if (!!(window.opera && window.opera.version().split('.')[0] < 12)) {
                             // FIXME: LEGACY BROWSER FIX
                             // AFFECTS: Opera < 12.00
@@ -1763,12 +1749,10 @@ Licensed under the MIT license.
                             x = Math.floor(x);
                             y = Math.ceil(y - 2);
                         }
-                        ctx.fillText(line.text, x, y);
+                        axisplaceholder.append('<div style="position:absolute;left:' + x + 'px;top:' + y + 'px;">'+line.text+'</div>');
                     }
                 }
             });
-
-            ctx.restore();
         }
 
         function drawSeries(series) {
