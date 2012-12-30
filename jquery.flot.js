@@ -1597,9 +1597,9 @@ Licensed under the MIT license.
                     ctx.stroke();
                 }
 
-                // draw ticks
-                ctx.beginPath();
+                // draw ticks                
                 for (i = 0; i < axis.ticks.length; ++i) {
+                    ctx.beginPath();
                     var v = axis.ticks[i].v;
 
                     xoff = yoff = 0;
@@ -1633,11 +1633,14 @@ Licensed under the MIT license.
                             y = Math.floor(y) + 0.5;
                     }
 
+                    if ($.isFunction(axis.options.tickColor)){
+                        ctx.strokeStyle = axis.options.tickColor(v, axis.direction);
+                    }
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
+                    ctx.stroke();
                 }
 
-                ctx.stroke();
             }
 
 
