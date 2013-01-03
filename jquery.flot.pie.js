@@ -267,7 +267,7 @@ More detail and specific examples can be found in the included HTML file.
 						color: data[i].color,
 						label: data[i].label,
 						angle: data[i].data[0][1] * Math.PI * 2 / total,
-						percent: data[i].data[0][1] / total * 100
+						percent: data[i].data[0][1] / (total / 100)
 					});
 				}
 			}
@@ -278,7 +278,7 @@ More detail and specific examples can be found in the included HTML file.
 					color: color,
 					label: options.series.pie.combine.label,
 					angle: combined * Math.PI * 2 / total,
-					percent: combined / total * 100
+					percent: combined / (total / 100)
 				});
 			}
 
