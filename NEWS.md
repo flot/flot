@@ -167,6 +167,10 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Pie charts no longer disappear when redrawn during a resize or update.
    (reported by Julien Bec, issue #656, pull request #910)
 
+ - Avoided floating-point precision errors when calculating pie percentages.
+   (patch by James Ward, pull request #918)
+
+
 ## Flot 0.7 ##
 
 ### API changes ###
