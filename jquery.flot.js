@@ -2267,7 +2267,7 @@ Licensed under the MIT license.
             if (!options.legend.show)
                 return;
 
-            var fragments = [], entries = [], rowStarted = false,
+            var entries = [], rowBuffer = null,
                 lf = options.legend.labelFormatter, s, label;
 
             // Build a list of legend entries, with each having a label and a color
