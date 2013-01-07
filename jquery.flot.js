@@ -884,7 +884,12 @@ Licensed under the MIT license.
             // bind events
             if (options.grid.hoverable) {
                 eventHolder.mousemove(onMouseMove);
-                eventHolder.mouseleave(onMouseLeave);
+                if (eventHolder.mouseleave) {
+                    eventHolder.mouseleave(onMouseLeave);
+                }
+                else {
+                    eventHolder.mouseout(onMouseLeave);
+                }
             }
 
             if (options.grid.clickable)
@@ -899,6 +904,7 @@ Licensed under the MIT license.
 
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
+            eventHolder.unbind("mouseout", onMouseLeave);
             eventHolder.unbind("click", onClick);
 
             executeHooks(hooks.shutdown, [eventHolder]);
