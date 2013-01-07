@@ -468,24 +468,27 @@ More detail and specific examples can be found in the included HTML file.
 
 						// format label text
 
-						var lf = options.legend.labelFormatter, text, plf = options.series.pie.label.formatter;
+						var lf = options.legend.labelFormatter, html, plf = options.series.pie.label.formatter;
 
 						if (lf) {
-							text = lf(slice.label, slice);
+							html = lf(slice.label, slice);
 						} else {
-							text = slice.label;
+							html = slice.label;
 						}
 
 						if (plf) {
-							text = plf(text, slice);
+							html = plf(html, slice);
 						}
 
 						var halfAngle = ((startAngle + slice.angle) + startAngle) / 2;
 						var x = centerLeft + Math.round(Math.cos(halfAngle) * radius);
 						var y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt;
 
-						var html = "<span class='pieLabel' id='pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
-						target.append(html);
+						target.append($('<span/>').addClass("pieLabel"+index).attr('id','pieLabel').css({
+							"position": "absolute",
+							"top": y + "px",
+							'left': x + "px"
+						}).html(html));
 
 						var label = target.children("#pieLabel" + index);
 						var labelTop = (y - label.height() / 2);
@@ -510,10 +513,17 @@ More detail and specific examples can be found in the included HTML file.
 								c = slice.color;
 							}
 
-							var pos = "top:" + labelTop + "px;left:" + labelLeft + "px;";
-							$("<div class='pieLabelBackground' style='position:absolute;width:" + label.width() + "px;height:" + label.height() + "px;" + pos + "background-color:" + c + ";'></div>")
-								.css("opacity", options.series.pie.label.background.opacity)
-								.insertBefore(label);
+							var pos = {
+								"top": labelTop + "px",
+								"left": labelLeft + "px"
+							};
+							$('<div/>').addClass('pieLabelBackground').css(pos).css({
+								"position": "absolute",
+								"width": label.width() + "px",
+								"height": label.height() + "px",
+								"background-color": c,
+								"opacity": options.series.pie.label.background.opacity
+							}).insertBefore(label);
 						}
 					} // end individual label function
 				} // end drawLabels function
@@ -778,7 +788,12 @@ More detail and specific examples can be found in the included HTML file.
 				label: {
 					show: "auto",
 					formatter: function(label, slice) {
-						return "<div style='font-size:x-small;text-align:center;padding:2px;color:" + slice.color + ";'>" + label + "<br/>" + Math.round(slice.percent) + "%</div>";
+						return $('<div/>').css({
+							"font-size": "x-small",
+							"text-align": "center",
+							"padding": "2px",
+							"color": slice.color
+						}).html(label + "<br/>" + Math.round(slice.percent) + "%");
 					},	// formatter function
 					radius: 1,	// radius at which to place the labels (based on full calculated radius if <=1, or hard pixel value)
 					background: {
