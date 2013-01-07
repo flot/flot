@@ -884,10 +884,12 @@ Licensed under the MIT license.
             // bind events
             if (options.grid.hoverable) {
                 eventHolder.mousemove(onMouseMove);
+
+                // Older versions of jQuery only support mouseout.
+
                 if (eventHolder.mouseleave) {
                     eventHolder.mouseleave(onMouseLeave);
-                }
-                else {
+                } else {
                     eventHolder.mouseout(onMouseLeave);
                 }
             }
@@ -904,6 +906,9 @@ Licensed under the MIT license.
 
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
+
+            // Older versions of jQuery only support mouseout.
+
             eventHolder.unbind("mouseout", onMouseLeave);
             eventHolder.unbind("click", onClick);
 
