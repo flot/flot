@@ -1709,15 +1709,15 @@ Licensed under the MIT license.
 
                 var box = axis.box, f = axis.font;
                 // debug
-                /* placeholder.append($('<div/>').css({
-                    "position":"absolute",
-                    "opacity": 0.10,
-                    "background-color":"red",
-                    "left": box.left + "px",
-                    "top":' box.top + "px",
-                    "width": box.width + "px",
-                    "height": box.height + "px"
-                })); */
+                // placeholder.append($('<div/>').css({
+                //     "position":"absolute",
+                //     "opacity": 0.10,
+                //     "background-color":"red",
+                //     "left": box.left + "px",
+                //     "top":' box.top + "px",
+                //     "width": box.width + "px",
+                //     "height": box.height + "px"
+                // }));
 
                 ctx.fillStyle = axis.options.color;
                 // Important: Don't use quotes around axis.font.family! Just around single
