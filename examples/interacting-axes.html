@@ -57,9 +57,9 @@ $(function () {
     $.each(plot.getAxes(), function (i, axis) {
         if (!axis.show)
             return;
-        
+
         var box = axis.box;
-        
+
         $('<div class="axisTarget" style="position:absolute;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
             .data('axis.direction', axis.direction)
             .data('axis.n', axis.n)

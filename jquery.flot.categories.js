@@ -52,7 +52,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
             categories: null
         }
     };
-    
+
     function processRawData(plot, series, data, datapoints) {
         // if categories are enabled, we need to disable
         // auto-transformation to numbers so the strings are intact
@@ -60,7 +60,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
 
         var xCategories = series.xaxis.options.mode == "categories",
             yCategories = series.yaxis.options.mode == "categories";
-        
+
         if (!(xCategories || yCategories))
             return;
 
@@ -80,14 +80,14 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
                     format[format.length - 1].x = true;
                 }
             }
-            
+
             datapoints.format = format;
         }
 
         for (var m = 0; m < format.length; ++m) {
             if (format[m].x && xCategories)
                 format[m].number = false;
-            
+
             if (format[m].y && yCategories)
                 format[m].number = false;
         }
@@ -95,7 +95,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
 
     function getNextIndex(categories) {
         var index = -1;
-        
+
         for (var v in categories)
             if (categories[v] > index)
                 index = categories[v];
@@ -115,11 +115,11 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
 
         return res;
     }
-    
+
     function setupCategoriesForAxis(series, axis, datapoints) {
         if (series[axis].options.mode != "categories")
             return;
-        
+
         if (!series[axis].categories) {
             // parse options
             var c = {}, o = series[axis].options.categories || {};
@@ -131,7 +131,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
                 for (var v in o)
                     c[v] = o[v];
             }
-            
+
             series[axis].categories = c;
         }
 
@@ -141,7 +141,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
 
         transformPointsOnAxis(datapoints, axis, series[axis].categories);
     }
-    
+
     function transformPointsOnAxis(datapoints, axis, categories) {
         // go through the points, transforming them
         var points = datapoints.points,
@@ -153,7 +153,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         for (var i = 0; i < points.length; i += ps) {
             if (points[i] == null)
                 continue;
-            
+
             for (var m = 0; m < ps; ++m) {
                 var val = points[i + m];
 
@@ -164,7 +164,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
                     categories[val] = index;
                     ++index;
                 }
-                
+
                 points[i + m] = categories[val];
             }
         }
@@ -179,7 +179,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         plot.hooks.processRawData.push(processRawData);
         plot.hooks.processDatapoints.push(processDatapoints);
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,

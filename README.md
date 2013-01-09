@@ -1,6 +1,6 @@
 ## About ##
 
-Flot is a Javascript plotting library for jQuery.  
+Flot is a Javascript plotting library for jQuery.
 Read more at the website: <http://www.flotcharts.org/>
 
 Take a look at the the examples in examples/index.html; they should give a good
