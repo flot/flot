@@ -39,23 +39,23 @@ charts or filled areas).
     var options = {
         series: { stack: null } // or number/string
     };
-    
+
     function init(plot) {
         function findMatchingSeries(s, allseries) {
             var res = null;
             for (var i = 0; i < allseries.length; ++i) {
                 if (s == allseries[i])
                     break;
-                
+
                 if (allseries[i].stack == s.stack)
                     res = allseries[i];
             }
-            
+
             return res;
         }
-        
+
         function stackData(plot, s, datapoints) {
-            if (s.stack == null)
+            if (s.stack === null)
                 return;
 
             var other = findMatchingSeries(s, plot.getData());
@@ -83,7 +83,7 @@ charts or filled areas).
 
                 l = newpoints.length;
 
-                if (points[i] == null) {
+                if (points[i] === null) {
                     // copy gaps
                     for (m = 0; m < ps; ++m)
                         newpoints.push(points[i + m]);
@@ -97,7 +97,7 @@ charts or filled areas).
                     }
                     i += ps;
                 }
-                else if (otherpoints[j] == null) {
+                else if (otherpoints[j] === null) {
                     // oops, got a gap
                     for (m = 0; m < ps; ++m)
                         newpoints.push(null);
@@ -118,20 +118,20 @@ charts or filled areas).
 
                         newpoints[l + accumulateOffset] += qy;
                         bottom = qy;
-                        
+
                         i += ps;
                         j += otherps;
                     }
                     else if (px > qx) {
                         // we got past point below, might need to
                         // insert interpolated extra point
-                        if (withlines && i > 0 && points[i - ps] != null) {
+                        if (withlines && i > 0 && points[i - ps] !== null) {
                             intery = py + (points[i - ps + accumulateOffset] - py) * (qx - px) / (points[i - ps + keyOffset] - px);
                             newpoints.push(qx);
                             newpoints.push(intery + qy);
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
-                            bottom = qy; 
+                            bottom = qy;
                         }
 
                         j += otherps;
@@ -142,31 +142,31 @@ charts or filled areas).
                             i += ps;
                             continue;
                         }
-                            
+
                         for (m = 0; m < ps; ++m)
                             newpoints.push(points[i + m]);
-                        
+
                         // we might be able to interpolate a point below,
                         // this can give us a better y
-                        if (withlines && j > 0 && otherpoints[j - otherps] != null)
+                        if (withlines && j > 0 && otherpoints[j - otherps] !== null)
                             bottom = qy + (otherpoints[j - otherps + accumulateOffset] - qy) * (px - qx) / (otherpoints[j - otherps + keyOffset] - qx);
 
                         newpoints[l + accumulateOffset] += bottom;
-                        
+
                         i += ps;
                     }
 
                     fromgap = false;
-                    
+
                     if (l != newpoints.length && withbottom)
                         newpoints[l + 2] += bottom;
                 }
 
                 // maintain the line steps invariant
-                if (withsteps && l != newpoints.length && l > 0
-                    && newpoints[l] != null
-                    && newpoints[l] != newpoints[l - ps]
-                    && newpoints[l + 1] != newpoints[l - ps + 1]) {
+                if (withsteps && l != newpoints.length && l > 0 &&
+                    newpoints[l] !== null &&
+                    newpoints[l] !== newpoints[l - ps] &&
+                    newpoints[l + 1] != newpoints[l - ps + 1]) {
                     for (m = 0; m < ps; ++m)
                         newpoints[l + ps + m] = newpoints[l + m];
                     newpoints[l + 1] = newpoints[l - ps + 1];
@@ -175,10 +175,10 @@ charts or filled areas).
 
             datapoints.points = newpoints;
         }
-        
+
         plot.hooks.processDatapoints.push(stackData);
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,

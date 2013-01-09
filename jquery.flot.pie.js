@@ -398,7 +398,7 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.save();
 					ctx.lineWidth = options.series.pie.stroke.width;
 					currentAngle = startAngle;
-					for (var i = 0; i < slices.length; ++i) {
+					for (i = 0; i < slices.length; ++i) {
 						drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
 					}
 					ctx.restore();
@@ -462,7 +462,7 @@ More detail and specific examples can be found in the included HTML file.
 					}
 
 					function drawLabel(slice, startAngle, index) {
-						if (slice.data[0][1] == 0) {
+						if (slice.data[0][1] === 0) {
 							return;
 						}
 
@@ -500,13 +500,13 @@ More detail and specific examples can be found in the included HTML file.
 							redraw = true;
 						}
 
-						if (options.series.pie.label.background.opacity != 0) {
+						if (options.series.pie.label.background.opacity !== 0) {
 
 							// put in the transparent background separately to avoid blended labels and label boxes
 
 							var c = options.series.pie.label.background.color;
 
-							if (c == null) {
+							if (c === null) {
 								c = slice.color;
 							}
 
@@ -555,9 +555,9 @@ More detail and specific examples can be found in the included HTML file.
 
 		function isPointInPoly(poly, pt) {
 			for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
-				((poly[i][1] <= pt[1] && pt[1] < poly[j][1]) || (poly[j][1] <= pt[1] && pt[1]< poly[i][1]))
-				&& (pt[0] < (poly[j][0] - poly[i][0]) * (pt[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
-				&& (c = !c);
+				((poly[i][1] <= pt[1] && pt[1] < poly[j][1]) || (poly[j][1] <= pt[1] && pt[1]< poly[i][1])) &&
+				(pt[0] < (poly[j][0] - poly[i][0]) * (pt[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0]) &&
+				(c = !c);
 			return c;
 		}
 

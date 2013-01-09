@@ -31,14 +31,14 @@ can just fix the size of their placeholders.
 
             // somebody might have hidden us and we can't plot
             // when we don't have the dimensions
-            if (placeholder.width() == 0 || placeholder.height() == 0)
+            if (placeholder.width() === 0 || placeholder.height() === 0)
                 return;
 
             plot.resize();
             plot.setupGrid();
             plot.draw();
         }
-        
+
         function bindEvents(plot, eventHolder) {
             plot.getPlaceholder().resize(onResize);
         }
@@ -46,11 +46,11 @@ can just fix the size of their placeholders.
         function shutdown(plot, eventHolder) {
             plot.getPlaceholder().unbind("resize", onResize);
         }
-        
+
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,

@@ -29,7 +29,7 @@ API.txt for details.
 
 		var leftPad = function(n, pad) {
 			n = "" + n;
-			pad = "" + (pad == null ? "0" : pad);
+			pad = "" + (pad === null ? "0" : pad);
 			return n.length == 1 ? pad + n : n;
 		};
 
@@ -38,11 +38,11 @@ API.txt for details.
 		var hours = d.getHours();
 		var isAM = hours < 12;
 
-		if (monthNames == null) {
+		if (monthNames === null) {
 			monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 		}
 
-		if (dayNames == null) {
+		if (dayNames === null) {
 			dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 		}
 
@@ -50,7 +50,7 @@ API.txt for details.
 
 		if (hours > 12) {
 			hours12 = hours - 12;
-		} else if (hours == 0) {
+		} else if (hours === 0) {
 			hours12 = 12;
 		} else {
 			hours12 = hours;
@@ -106,7 +106,7 @@ API.txt for details.
 			sourceObj[sourceMethod] = function() {
 				return targetObj[targetMethod].apply(targetObj, arguments);
 			};
-		};
+		}
 
 		var utc = {
 			date: d
@@ -129,7 +129,7 @@ API.txt for details.
 		}
 
 		return utc;
-	};
+	}
 
 	// select time zone strategy.  This returns a date-like object tied to the
 	// desired timezone
@@ -150,7 +150,7 @@ API.txt for details.
 			return makeUtcWrapper(new Date(ts));
 		}
 	}
-	
+
 	// map of app. size of time units in milliseconds
 
 	var timeUnitSize = {
@@ -168,9 +168,9 @@ API.txt for details.
 
 	var baseSpec = [
 		[1, "second"], [2, "second"], [5, "second"], [10, "second"],
-		[30, "second"], 
+		[30, "second"],
 		[1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
-		[30, "minute"], 
+		[30, "minute"],
 		[1, "hour"], [2, "hour"], [4, "hour"],
 		[8, "hour"], [12, "hour"],
 		[1, "day"], [2, "day"], [3, "day"],
@@ -207,7 +207,7 @@ API.txt for details.
 							(opts.minTickSize && opts.minTickSize[1] ===
 							"quarter") ? specQuarters : specMonths;
 
-						if (opts.minTickSize != null) {
+						if (opts.minTickSize !== null) {
 							if (typeof opts.tickSize == "number") {
 								minSize = opts.tickSize;
 							} else {
@@ -216,9 +216,9 @@ API.txt for details.
 						}
 
 						for (var i = 0; i < spec.length - 1; ++i) {
-							if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]]
-											  + spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2
-								&& spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
+							if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]] +
+								spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2 &&
+								spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
 								break;
 							}
 						}
@@ -233,7 +233,7 @@ API.txt for details.
 							// if given a minTickSize in years, just use it,
 							// ensuring that it's an integer
 
-							if (opts.minTickSize != null && opts.minTickSize[1] == "year") {
+							if (opts.minTickSize !== null && opts.minTickSize[1] == "year") {
 								size = Math.floor(opts.minTickSize[0]);
 							} else {
 
@@ -347,7 +347,7 @@ API.txt for details.
 
 						// first check global format
 
-						if (opts.timeformat != null) {
+						if (opts.timeformat !== null) {
 							return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames);
 						}
 

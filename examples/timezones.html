@@ -1,25 +1,25 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
-<html> 
- <head> 
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
-    <title>Flot Example</title> 
-    <link href="layout.css" rel="stylesheet" type="text/css"></link> 
-    <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]--> 
-    <script language="javascript" type="text/javascript" src="../jquery.js"></script> 
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Example</title>
+    <link href="layout.css" rel="stylesheet" type="text/css"></link>
+    <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../jquery.js"></script>
 
-    <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script> 
-    <script language="javascript" type="text/javascript" src="../jquery.flot.time.js"></script> 
+    <script language="javascript" type="text/javascript" src="../jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../jquery.flot.time.js"></script>
     <script language="javascript" type="text/javascript" src="../jquery.flot.selection.js"></script>
  </head>
-    <body> 
-    <h1>Timezone Examples</h1> 
+    <body>
+    <h1>Timezone Examples</h1>
     <table>
         <tr><td>UTC</td><td><div id="placeholderUTC" style="width:600px;height:100px;"></div></td></tr>
         <tr><td>Browser</td><td><div id="placeholderLocal" style="width:600px;height:100px;"></div></td></tr>
         <tr><td>Chicago</td><td><div id="placeholderChicago" style="width:600px;height:100px;"></div></td></tr>
     </table>
     <script language="javascript" type="text/javascript" src="date.js"></script>
-<script id="source"> 
+<script id="source">
 $(function () {
 
     timezoneJS.timezone.zoneFileBasePath = "tz";
@@ -66,9 +66,9 @@ $(function () {
     var plot = $.plot($("#placeholderUTC"), [d], { xaxis: { mode: "time" } });
     var plot = $.plot($("#placeholderLocal"), [d], { xaxis: { mode: "time", timezone: "browser" } });
     var plot = $.plot($("#placeholderChicago"), [d], { xaxis: { mode: "time", timezone: "America/Chicago" } });
-    
+
 });
-</script> 
- 
- </body> 
+</script>
+
+ </body>
 </html>

@@ -61,7 +61,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 
 		function computeFillBottoms( plot, s, datapoints ) {
 
-			if ( s.fillBetween == null ) {
+			if ( s.fillBetween === null ) {
 				return;
 			}
 
@@ -93,7 +93,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 
 				l = newpoints.length;
 
-				if ( points[ i ] == null ) {
+				if ( points[ i ] === null ) {
 
 					// copy gaps
 
@@ -115,7 +115,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 
 					i += ps;
 
-				} else if ( otherpoints[ j ] == null ) {
+				} else if ( otherpoints[ j ] === null ) {
 
 					// oops, got a gap
 
@@ -153,7 +153,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 						// we got past point below, might need to
 						// insert interpolated extra point
 
-						if ( withlines && i > 0 && points[ i - ps ] != null ) {
+						if ( withlines && i > 0 && points[ i - ps ] !== null ) {
 							intery = py + ( points[ i - ps + 1 ] - py ) * ( qx - px ) / ( points[ i - ps ] - px );
 							newpoints.push( qx );
 							newpoints.push( intery );
@@ -181,7 +181,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 						// we might be able to interpolate a point below,
 						// this can give us a better y
 
-						if ( withlines && j > 0 && otherpoints[ j - otherps ] != null ) {
+						if ( withlines && j > 0 && otherpoints[ j - otherps ] !== null ) {
 							bottom = qy + ( otherpoints[ j - otherps + 1 ] - qy ) * ( px - qx ) / ( otherpoints[ j - otherps ] - qx );
 						}
 
