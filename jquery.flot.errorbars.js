@@ -143,8 +143,8 @@ shadowSize and lineWidth are derived as well from the points series.
             } else eyl = points[i + 2];
 
         // symmetric errors?
-        if (exu == null) exu = exl;
-        if (eyu == null) eyu = eyl;
+        if (exu === null) exu = exl;
+        if (eyu === null) eyu = eyl;
 
         var errRanges = [exl, exu, eyl, eyu];
         // nullify if not showing
@@ -250,7 +250,7 @@ shadowSize and lineWidth are derived as well from the points series.
 
                     //same style as points by default
                     var lw = err[e].lineWidth ? err[e].lineWidth : s.points.lineWidth,
-                        sw = s.points.shadowSize != null ? s.points.shadowSize : s.shadowSize;
+                        sw = s.points.shadowSize !== null ? s.points.shadowSize : s.shadowSize;
 
                     //shadow as for points
                     if (lw > 0 && sw > 0) {
@@ -295,7 +295,7 @@ shadowSize and lineWidth are derived as well from the points series.
 
         //internal radius value in errorbar, allows to plot radius 0 points and still keep proper sized caps
         //this is a way to get errorbars on lines without visible connecting dots
-        radius = err.radius != null? err.radius: radius;
+        radius = err.radius !== null? err.radius: radius;
 
         // upper cap
         if (drawUpper) {

@@ -151,13 +151,13 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
             index = getNextIndex(categories);
 
         for (var i = 0; i < points.length; i += ps) {
-            if (points[i] == null)
+            if (points[i] === null)
                 continue;
 
             for (var m = 0; m < ps; ++m) {
                 var val = points[i + m];
 
-                if (val == null || !format[m][formatColumn])
+                if (val === null || !format[m][formatColumn])
                     continue;
 
                 if (!(val in categories)) {

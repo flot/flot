@@ -29,7 +29,7 @@
         o.r = r || 0;
         o.g = g || 0;
         o.b = b || 0;
-        o.a = a != null ? a : 1;
+        o.a = a !== null ? a : 1;
 
         o.add = function (c, d) {
             for (var i = 0; i < c.length; ++i)
@@ -68,7 +68,7 @@
         };
 
         return o.normalize();
-    }
+    };
 
     // extract CSS color property from element, going up in the DOM
     // if it's "transparent"
@@ -78,7 +78,7 @@
             c = elem.css(css).toLowerCase();
             // keep going until we find an element that has color, or
             // we hit the body
-            if (c != '' && c != 'transparent')
+            if (c !== '' && c != 'transparent')
                 break;
             elem = elem.parent();
         } while (!$.nodeName(elem.get(0), "body"));
@@ -88,7 +88,7 @@
             c = "transparent";
 
         return $.color.parse(c);
-    }
+    };
 
     // parse CSS color string (like "rgb(10, 32, 43)" or "#fff"),
     // returns color object, if parsing failed, you get black (0, 0,
@@ -129,7 +129,7 @@
             res = lookupColors[name] || [0, 0, 0];
             return m(res[0], res[1], res[2]);
         }
-    }
+    };
 
     var lookupColors = {
         aqua:[0,255,255],
