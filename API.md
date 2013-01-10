@@ -669,6 +669,10 @@ series: {
         fillColor: null or color/gradient
     }
 
+    lines, bars: {
+        zero: boolean
+    }
+
     points: {
         radius: number
         symbol: "circle" or function
@@ -736,6 +740,13 @@ When "horizontal" is on, the bars are drawn horizontally, i.e. from the
 y axis instead of the x axis; note that the bar end points are still
 defined in the same way so you'll probably want to swap the
 coordinates if you've been plotting vertical bars first.
+
+Area and bar charts normally start from zero, regardless of the data's range.
+This is because they convey information through size, and starting from a
+different value would distort their meaning. In cases where the fill is purely
+for decorative purposes, however, "zero" allows you to override this behavior.
+It defaults to true for filled lines and bars; setting it to false tells the
+series to use the same automatic scaling as an un-filled line.
 
 For lines, "steps" specifies whether two adjacent data points are
 connected with a straight (possibly diagonal) line or with first a
