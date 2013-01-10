@@ -501,12 +501,12 @@ Licensed under the MIT license.
                         s.lines.show = true;
                 }
 
-				// If nothing was provided for lines.zero, default it to match
-				// lines.fill, since areas by default should extend to zero.
+                // If nothing was provided for lines.zero, default it to match
+                // lines.fill, since areas by default should extend to zero.
 
-				if (s.lines.show && s.lines.zero == null) {
-					s.lines.zero = !!s.lines.fill;
-				}
+                if (s.lines.zero == null) {
+                    s.lines.zero = !!s.lines.fill;
+                }
 
                 // setup axes
                 s.xaxis = getOrCreateAxis(xaxes, axisNumber(s, "x"));
@@ -556,8 +556,8 @@ Licensed under the MIT license.
                     format.push({ x: true, number: true, required: true });
                     format.push({ y: true, number: true, required: true });
 
-                    if (s.bars.show || (s.lines.show && (s.lines.fill || s.lines.zero))) {
-                    	var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
+                    if (s.bars.show || (s.lines.show && s.lines.fill)) {
+                        var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
                         format.push({ y: true, number: true, required: false, defaultValue: 0, autoscale: autoscale });
                         if (s.bars.horizontal) {
                             delete format[format.length - 1].y;
