@@ -1247,9 +1247,21 @@ hooks in the plugins bundled with Flot.
    
     In any case, you might be interested in setting datapoints.format,
     an array of objects for specifying how a point is normalized and
-    how it interferes with axis scaling.
+    how it interferes with axis scaling. It accepts the following options:
 
-    The default format array for points is something along the lines of:
+    ```js
+    {
+        x, y: boolean,
+        number: boolean,
+        required: boolean,
+        defaultValue: value,
+        autoscale: boolean
+    }
+    ```
+
+    "x" and "y" specify whether the value is plotted against the x or y axis,
+    and is currently used only to calculate axis min-max ranges. The default
+    format array, for example, looks like this:
 
     ```js
     [
@@ -1258,14 +1270,22 @@ hooks in the plugins bundled with Flot.
     ]
     ```
 
-    The first object means that for the first coordinate it should be
-    taken into account when scaling the x axis, that it must be a
-    number, and that it is required - so if it is null or cannot be
-    converted to a number, the whole point will be zeroed out with
-    nulls. Beyond these you can also specify "defaultValue", a value to
-    use if the coordinate is null. This is for instance handy for bars
-    where one can omit the third coordinate (the bottom of the bar)
-    which then defaults to 0.
+    This indicates that a point, i.e. [0, 25], consists of two values, with the
+    first being plotted on the x axis and the second on the y axis.
+
+    If "number" is true, then the value must be numeric, and is set to null if
+    it cannot be converted to a number.
+
+    "defaultValue" provides a fallback in case the original value is null. This
+    is for instance handy for bars, where one can omit the third coordinate
+    (the bottom of the bar), which then defaults to zero.
+
+    If "required" is true, then the value must exist (be non-null) for the
+    point as a whole to be valid. If no value is provided, then the entire
+    point is cleared out with nulls, turning it into a gap in the series.
+
+    "autoscale" determines whether the value is considered when calculating an
+    automatic min-max range for the axes that the value is plotted against.
 
  - processDatapoints  [phase 3]
 
