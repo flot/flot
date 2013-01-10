@@ -2439,10 +2439,24 @@ Licensed under the MIT license.
                 j = item[1];
                 ps = series[i].datapoints.pointsize;
 
-                return { datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
-                         dataIndex: j,
-                         series: series[i],
-                         seriesIndex: i };
+                var result = { datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
+                    dataIndex: j,
+                    series: series[i],
+                    seriesIndex: i,
+                    meta: []
+                };
+
+                // find actual data points and add info to meta array
+                for(si = 0; si < series.length; si++) {
+                    for(sid = 0; sid < series[si].data.length; sid++) {
+                        var datapoint = series[si].data[sid];
+                        if(datapoint[0] == result.datapoint[0] && datapoint[1] == result.datapoint[1]) {
+                            result.meta.push(datapoint[2]);
+                        }
+                    }
+                }
+
+                return result;
             }
 
             return null;
