@@ -76,8 +76,9 @@ The plugin also adds four public methods:
                 crosshair.x = -1;
             else {
                 var o = plot.p2c(pos);
-                crosshair.x = Math.max(0, Math.min(o.left, plot.width()));
-                crosshair.y = Math.max(0, Math.min(o.top, plot.height()));
+                var adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
+                crosshair.x = Math.max(0, Math.min(Math.round(o.left) + adj, plot.width()));
+                crosshair.y = Math.max(0, Math.min(Math.round(o.top) + adj, plot.height()));
             }
             
             plot.triggerRedrawOverlay();
@@ -115,8 +116,9 @@ The plugin also adds four public methods:
             }
                 
             var offset = plot.offset();
-            crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
-            crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+            var adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
+            crosshair.x = Math.max(0, Math.min(Math.round(e.pageX - offset.left) + adj, plot.width()));
+            crosshair.y = Math.max(0, Math.min(Math.round(e.pageY - offset.top) + adj, plot.height()));
             plot.triggerRedrawOverlay();
         }
         
