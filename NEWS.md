@@ -170,6 +170,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Avoided floating-point precision errors when calculating pie percentages.
    (patch by James Ward, pull request #918)
 
+ - Fixed compatibility with jQuery 1.2.6, which has no 'mouseleave' shortcut.
+   (reported by Bevan, original pull request #920, replaced by direct patch)
+
 
 ## Flot 0.7 ##
 
