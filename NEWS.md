@@ -101,6 +101,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - The selection plugin's getSelection now returns null when the selection
    has been cleared. (patch by Nick Campbell, pull request #852)
 
+ - Added a new option called 'zero' to bars and filled lines series, to control
+   whether the y-axis minimum is scaled to fit the data or set to zero.
+
 ### Bug fixes ###
 
  - Fix problem with null values and pie plugin. (patch by gcruxifix,
