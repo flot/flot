@@ -319,7 +319,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.draw();
             
             if (!args.preventEvent)
-                plot.getPlaceholder().trigger("plotpan", [ plot ]);
+                plot.getPlaceholder().trigger("plotpan", [ plot, args ]);
         };
 
         function shutdown(plot, eventHolder) {
