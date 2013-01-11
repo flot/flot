@@ -139,18 +139,22 @@ The plugin also adds four public methods:
             ctx.translate(plotOffset.left, plotOffset.top);
 
             if (crosshair.x != -1) {
+                var adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
+
                 ctx.strokeStyle = c.color;
                 ctx.lineWidth = c.lineWidth;
                 ctx.lineJoin = "round";
 
                 ctx.beginPath();
                 if (c.mode.indexOf("x") != -1) {
-                    ctx.moveTo(crosshair.x, 0);
-                    ctx.lineTo(crosshair.x, plot.height());
+                    var drawX = Math.round(crosshair.x) + adj;
+                    ctx.moveTo(drawX, 0);
+                    ctx.lineTo(drawX, plot.height());
                 }
                 if (c.mode.indexOf("y") != -1) {
-                    ctx.moveTo(0, crosshair.y);
-                    ctx.lineTo(plot.width(), crosshair.y);
+                    var drawY = Math.round(crosshair.y) + adj;
+                    ctx.moveTo(0, drawY);
+                    ctx.lineTo(plot.width(), drawY);
                 }
                 ctx.stroke();
             }
