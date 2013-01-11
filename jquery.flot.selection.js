@@ -308,10 +308,10 @@ The plugin allso adds the following methods to the plot object:
                 ctx.lineJoin = "round";
                 ctx.fillStyle = c.scale('a', 0.4).toString();
 
-                var x = Math.min(selection.first.x, selection.second.x),
-                    y = Math.min(selection.first.y, selection.second.y),
-                    w = Math.abs(selection.second.x - selection.first.x),
-                    h = Math.abs(selection.second.y - selection.first.y);
+                var x = Math.min(selection.first.x, selection.second.x) + 0.5,
+                    y = Math.min(selection.first.y, selection.second.y) + 0.5,
+                    w = Math.abs(selection.second.x - selection.first.x) - 1,
+                    h = Math.abs(selection.second.y - selection.first.y) - 1;
 
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeRect(x, y, w, h);
