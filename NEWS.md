@@ -176,6 +176,10 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Fixed compatibility with jQuery 1.2.6, which has no 'mouseleave' shortcut.
    (reported by Bevan, original pull request #920, replaced by direct patch)
 
+ - Fixed sub-pixel rendering issues with crosshair and selection lines.
+   (patches by alanayoub and Daniel Shapiro, pull requests #17 and #925)
+
+
 
 ## Flot 0.7 ##
 
