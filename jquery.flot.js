@@ -1274,40 +1274,47 @@ Licensed under the MIT license.
 
             if (!axis.tickGenerator) {
 
-                var maxDec = opts.tickDecimals;
-                var dec = -Math.floor(Math.log(axis.delta) / Math.LN10);
-                if (maxDec != null && dec > maxDec)
-                    dec = maxDec;
-
-                var magn = Math.pow(10, -dec);
-                var norm = axis.delta / magn; // norm is between 1.0 and 10.0
-                var size;
-
-                if (norm < 1.5)
-                    size = 1;
-                else if (norm < 3) {
-                    size = 2;
-                    // special case for 2.5, requires an extra decimal
-                    if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
-                        size = 2.5;
-                        ++dec;
-                    }
-                }
-                else if (norm < 7.5)
-                    size = 5;
-                else size = 10;
-
-                size *= magn;
-
-                if (opts.minTickSize != null && size < opts.minTickSize)
-                    size = opts.minTickSize;
-
-                axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
-                axis.tickSize = opts.tickSize || size;
-
                 axis.tickGenerator = function (axis) {
-                    var ticks = [], start = floorInBase(axis.min, axis.tickSize),
-                        i = 0, v = Number.NaN, prev;
+                    var maxDec = opts.tickDecimals,
+                        dec = -Math.floor(Math.log(axis.delta) / Math.LN10);
+
+                    if (maxDec != null && dec > maxDec)
+                        dec = maxDec;
+
+                    var magn = Math.pow(10, -dec),
+                        norm = axis.delta / magn, // norm is between 1.0 and 10.0
+                        size,
+
+                        ticks = [],
+                        start,
+                        i = 0,
+                        v = Number.NaN,
+                        prev;
+
+                    if (norm < 1.5)
+                        size = 1;
+                    else if (norm < 3) {
+                        size = 2;
+                        // special case for 2.5, requires an extra decimal
+                        if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
+                            size = 2.5;
+                            ++dec;
+                        }
+                    }
+                    else if (norm < 7.5)
+                        size = 5;
+                    else size = 10;
+
+                    size *= magn;
+
+                    if (opts.minTickSize != null && size < opts.minTickSize)
+                        size = opts.minTickSize;
+
+                    axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
+                    axis.tickSize = opts.tickSize || size;
+
+                    start = floorInBase(axis.min, axis.tickSize)
+
                     do {
                         prev = v;
                         v = start + i * axis.tickSize;
