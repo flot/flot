@@ -1142,10 +1142,10 @@ Licensed under the MIT license.
 
             for (var a in plotOffset) {
                 if(typeof(options.grid.borderWidth) == "object") {
-                    plotOffset[a] = showGrid ? options.grid.borderWidth[a] : 0;
+                    plotOffset[a] += showGrid ? options.grid.borderWidth[a] : 0;
                 }
                 else {
-                    plotOffset[a] = showGrid ? options.grid.borderWidth : 0;
+                    plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
                 }
             }
 
