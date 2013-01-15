@@ -2328,7 +2328,7 @@ Licensed under the MIT license.
                             $('<div/>').css({"width":"4px", "height": 0, "border": "5px solid " + entry.color, "overflow": "hidden" })
                         )
                     ),
-                    $('<td/>').addClass('legendLabel').text(entry.label)
+                    $('<td/>').addClass('legendLabel').html(entry.label)
                 );
             }
 
