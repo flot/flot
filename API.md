@@ -229,6 +229,7 @@ xaxis, yaxis: {
     inverseTransform: null or fn: number -> number
     
     ticks: null or number or ticks array or (fn: axis -> ticks array)
+    tickFactor: number
     tickSize: number or array
     minTickSize: number or array
     tickFormatter: (fn: number, object -> string) or string
@@ -351,6 +352,10 @@ interval size with "tickSize". If you set it to 2, you'll get ticks at
 ticks at a size less than a specific tick size with "minTickSize".
 Note that for time series, the format is an array like [2, "month"],
 see the next section.
+
+The default algorithm uses the canvas size to estimate the number of
+ticks. To adjust this, use "tickFactor" which defaults to 1. Setting
+it to 0.5 will half the number of ticks.
 
 If you want to completely override the tick algorithm, you can specify
 an array for "ticks", either like this:
