@@ -46,8 +46,11 @@ Licensed under the MIT license.
 
 	function Canvas(cls, container) {
 
+		this.container = container;
+
 		var element = document.createElement("canvas");
 		element.className = cls;
+		this.element = element;
 
 		$(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
 			.data("canvas", this)
@@ -64,8 +67,6 @@ Licensed under the MIT license.
 		}
 
 		var context = element.getContext("2d");
-
-		this.element = element;
 		this.context = context;
 
 		// Determine the screen's ratio of physical to device-independent
@@ -89,6 +90,31 @@ Licensed under the MIT license.
 		// Size the canvas to match the internal dimensions of its container
 
 		this.resize(container.width(), container.height());
+
+		// Container for HTML text overlaid onto the canvas; created on demand
+
+		this.text = null;
+
+		// Buffer for HTML text fragments, so we can add them all at once
+
+		this._textBuffer = "";
+
+		// Cache of text fragments and metrics, so we can avoid expensively
+		// re-calculating them when the plot is re-rendered in a loop.
+
+		this._textCache = {};
+
+		// A 'hot' copy of the text cache; it holds only info that has been
+		// accessed in the past render cycle.  With each render it is saved as
+		// the new text cache, as an alternative to more complicated ways of
+		// expiring items that are no longer needed.
+
+		// NOTE: It's unclear how this compares performance-wise to keeping a
+		// single cache and looping over it to delete expired items.  This way
+		// is certainly less operations, but seems like it might result in more
+		// garbage collection and possibly increased cache-insert times.
+
+		this._activeTextCache = {};
 	};
 
 	// Resizes the canvas to the given dimensions.
@@ -139,10 +165,175 @@ Licensed under the MIT license.
 		context.scale(pixelRatio, pixelRatio);
 	}
 
-	// Clears the entire canvas area.
+	// Clears the entire canvas area, including overlaid text.
 
 	Canvas.prototype.clear = function() {
 		this.context.clearRect(0, 0, this.width, this.height);
+		if (this.text) {
+			this.text.empty();
+		}
+	}
+
+	// Finishes rendering the canvas, including populating the text overlay.
+
+	Canvas.prototype.render = function() {
+
+		if (this._textBuffer.length) {
+
+			// Add the HTML text layer, if it doesn't already exist
+
+			if (!this.text) {
+				this.text = $("<div></div>").css({
+					position: "absolute",
+					top: 0,
+					left: 0,
+					bottom: 0,
+					right: 0
+				}).insertAfter(this.element);
+			}
+
+			this.text.append(this._textBuffer);
+			this._textBuffer = "";
+		}
+
+		// Swap out the text cache for the 'hot cache' that we've been filling
+		// out since the last call to render.
+
+		this._textCache = this._activeTextCache;
+		this._activeTextCache = {};
+	}
+
+	// Creates (if necessary) and returns a text info object.
+	//
+	// The object looks like this:
+	//
+	// {
+	//     prefix: First half of the HTML for the text's div wrapper.
+	//     suffix: Second half of the HTML for the text's div wrapper.
+	//     dimensions: {
+	//         width: Width of the text's wrapper div.
+	//         height: Height of the text's wrapper div.
+	//     }
+	// }
+	//
+	// The prefix and suffix are divided at the 'top' inline style definition,
+	// so the top and left positions can be added when creating the real div.
+	//
+	// Canvas maintains a cache of recently-used text info objects; getTextInfo
+	// either returns the cached element or creates a new entry.
+	//
+	// @param {string} text Text string to retrieve info for.
+	// @param {(string|object)=} font Either a string of space-separated CSS
+	//     classes or a font-spec object, defining the text's font and style.
+	// @param {number=} angle Angle at which to rotate the text, in degrees.
+	//     Angle is currently unused, it will be implemented in the future.
+	// @return {object} a text info object.
+
+	Canvas.prototype.getTextInfo = function(text, font, angle) {
+
+		var textStyle, cacheKey, info;
+
+		// Cast the value to a string, in case we were given a number or such
+
+		text = "" + text;
+
+		// If the font is a font-spec object, generate a CSS font definition
+
+		if (typeof font === "object") {
+			textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px " + font.family;
+		} else {
+			textStyle = font;
+		}
+
+		// The text + style + angle uniquely identify the text's dimensions and
+		// content; we'll use them to build this entry's text cache key.
+
+		cacheKey = text + "-" + textStyle + "-" + angle;
+
+		info = this._textCache[cacheKey] || this._activeTextCache[cacheKey];
+
+		if (info == null) {
+
+			var prefix,
+				suffix = "px;'>" + text + "</div>",
+				element;
+
+			// If the font is a font-spec object, generate an inline-style string
+
+			if (typeof font === "object") {
+				prefix = "<div style='font:" + textStyle + ";color:" + font.color + ";position:absolute;top:";
+			} else if (typeof font === "string") {
+				prefix = "<div class='" + font + "' style='position:absolute;top:";
+			} else {
+				prefix = "<div style='position:absolute;top:";
+			}
+
+			// Create a dummy element off-screen and measure its dimensions
+
+			element = $(prefix + -9999 + suffix)
+				.appendTo(this.container);
+
+			info = {
+				prefix: prefix,
+				suffix: suffix,
+				dimensions: {
+					width: element.outerWidth(true),
+					height: element.outerHeight(true)
+				}
+			};
+
+			element.remove();
+		}
+
+		// Save the entry to the 'hot' text cache, marking it as active and
+		// preserving it for the next render pass.
+
+		this._activeTextCache[cacheKey] = info;
+
+		return info;
+	}
+
+	// Draws a text string onto the canvas.
+	//
+	// The text isn't necessarily drawn immediately; some implementations may
+	// buffer it to improve performance.  Text is only guaranteed to be drawn
+	// after the Canvas render method has been called.
+	//
+	// @param {number} x X coordinate at which to draw the text.
+	// @param {number} y Y coordinate at which to draw the text.
+	// @param {string} text Text string to draw.
+	// @param {(string|object)=} font Either a string of space-separated CSS
+	//     classes or a font-spec object, defining the text's font and style.
+	// @param {number=} angle Angle at which to rotate the text, in degrees.
+	//     Angle is currently unused, it will be implemented in the future.
+	// @param {string=} halign Horizontal alignment of the text; either "left",
+	//     "center" or "right".
+	// @param {string=} valign Vertical alignment of the text; either "top",
+	//     "middle" or "bottom".
+
+	Canvas.prototype.drawText = function(x, y, text, font, angle, halign, valign) {
+
+		var info = this.getTextInfo(text, font, angle),
+			dimensions = info.dimensions;
+
+		// Tweak the div's position to match the text's alignment
+
+		if (halign == "center") {
+			x -= dimensions.width / 2;
+		} else if (halign == "right") {
+			x -= dimensions.width;
+		}
+
+		if (valign == "middle") {
+			y -= dimensions.height / 2;
+		} else if (valign == "bottom") {
+			y -= dimensions.height;
+		}
+
+		// Use inline styles to move the element into position, then add its
+		// HTML to the canvas text buffer.
+
+		this._textBuffer += info.prefix + parseInt(y) + "px;left:" + parseInt(x) + info.suffix;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
