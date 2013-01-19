@@ -961,7 +961,7 @@ Licensed under the MIT license.
                 f = axis.font;
 
             ctx.save();
-            ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
+            ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
 
             for (var i = 0; i < ticks.length; ++i) {
                 var t = ticks[i];
