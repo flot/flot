@@ -34,6 +34,12 @@ Licensed under the MIT license.
 // the actual Flot code
 (function($) {
 
+	// Add default styles for tick labels and other text
+
+	$(function() {
+		$("head").prepend("<style id='flot-default-styles'>.flot-tick-label {font-size:smaller;color:#545454;}</style>");
+	});
+
 	///////////////////////////////////////////////////////////////////////////
 	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
 	//
@@ -1091,7 +1097,7 @@ Licensed under the MIT license.
 
                 // then whack any remaining obvious garbage left
                 eventHolder.unbind();
-                placeholder.children().not([surface.element, overlay.element]).remove();
+                placeholder.children().not([surface.element, surface.text, overlay.element, overlay.text]).remove();
             }
 
             // save in case we get replotted
@@ -1163,53 +1169,26 @@ Licensed under the MIT license.
         }
 
         function measureTickLabels(axis) {
+
             var opts = axis.options, ticks = axis.ticks || [],
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
-                f = axis.font;
-
-            ctx.save();
-            ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
+                font = axis.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis";
 
             for (var i = 0; i < ticks.length; ++i) {
-                var t = ticks[i];
 
-                t.lines = [];
-                t.width = t.height = 0;
+                var t = ticks[i],
+                    dimensions;
 
                 if (!t.label)
                     continue;
 
-                // accept various kinds of newlines, including HTML ones
-                // (you can actually split directly on regexps in Javascript,
-                // but IE < 9 is unfortunately broken)
-                var lines = (t.label + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
-                for (var j = 0; j < lines.length; ++j) {
-                    var line = { text: lines[j] },
-                        m = ctx.measureText(line.text);
-
-                    line.width = m.width;
-                    // m.height might not be defined, not in the
-                    // standard yet
-                    line.height = m.height != null ? m.height : f.size;
-
-                    // add a bit of margin since font rendering is
-                    // not pixel perfect and cut off letters look
-                    // bad, this also doubles as spacing between
-                    // lines
-                    line.height += Math.round(f.size * 0.15);
-
-                    t.width = Math.max(line.width, t.width);
-                    t.height += line.height;
-
-                    t.lines.push(line);
-                }
+                dimensions = surface.getTextInfo(t.label, font).dimensions;
 
                 if (opts.labelWidth == null)
-                    axisw = Math.max(axisw, t.width);
+                    axisw = Math.max(axisw, dimensions.width);
                 if (opts.labelHeight == null)
-                    axish = Math.max(axish, t.height);
+                    axish = Math.max(axish, dimensions.height);
             }
-            ctx.restore();
 
             axis.labelWidth = Math.ceil(axisw);
             axis.labelHeight = Math.ceil(axish);
@@ -1368,7 +1347,7 @@ Licensed under the MIT license.
             });
 
             if (showGrid) {
-                // determine from the placeholder the font size ~ height of font ~ 1 em
+
                 var fontDefaults = {
                     style: placeholder.css("font-style"),
                     size: Math.round(0.8 * (+placeholder.css("font-size").replace("px", "") || 13)),
@@ -1385,8 +1364,14 @@ Licensed under the MIT license.
                     setTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
 
+                    // If a font-spec object was provided, use font defaults
+                    // to fill out any unspecified settings.
+
+                    if (axis.font) {
+                        axis.font = $.extend({}, fontDefaults, axis.options.font);
+                    }
+
                     // find labelWidth/Height for axis
-                    axis.font = $.extend({}, fontDefaults, axis.options.font);
                     measureTickLabels(axis);
                 });
 
@@ -1663,6 +1648,8 @@ Licensed under the MIT license.
                 drawGrid();
                 drawAxisLabels();
             }
+
+            surface.render();
         }
 
         function extractRange(ranges, coord) {
@@ -1934,74 +1921,44 @@ Licensed under the MIT license.
         }
 
         function drawAxisLabels() {
-            ctx.save();
 
             $.each(allAxes(), function (_, axis) {
                 if (!axis.show || axis.ticks.length == 0)
                     return;
 
-                var box = axis.box, f = axis.font;
-                // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
-
-                ctx.fillStyle = axis.options.color;
-                // Important: Don't use quotes around axis.font.family! Just around single
-                // font names like 'Times New Roman' that have a space or special character in it.
-                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
-                ctx.textAlign = "start";
-                // middle align the labels - top would be more
-                // natural, but browsers can differ a pixel or two in
-                // where they consider the top to be, so instead we
-                // middle align to minimize variation between browsers
-                // and compensate when calculating the coordinates
-                ctx.textBaseline = "middle";
+                var box = axis.box,
+                    font = axis.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                    tick, x, y, halign, valign;
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
-                    var tick = axis.ticks[i];
+
+                    tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
 
-                    var x, y, offset = 0, line;
-                    for (var k = 0; k < tick.lines.length; ++k) {
-                        line = tick.lines[k];
-
-                        if (axis.direction == "x") {
-                            x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
-                            if (axis.position == "bottom")
-                                y = box.top + box.padding;
-                            else
-                                y = box.top + box.height - box.padding - tick.height;
+                    if (axis.direction == "x") {
+                        halign = "center";
+                        x = plotOffset.left + axis.p2c(tick.v);
+                        if (axis.position == "bottom") {
+                            y = box.top + box.padding;
+                        } else {
+                            y = box.top + box.height - box.padding;
+                            valign = "bottom";
                         }
-                        else {
-                            y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
-                            if (axis.position == "left")
-                                x = box.left + box.width - box.padding - line.width;
-                            else
-                                x = box.left + box.padding;
+                    } else {
+                        valign = "middle";
+                        y = plotOffset.top + axis.p2c(tick.v);
+                        if (axis.position == "left") {
+                            x = box.left + box.width - box.padding;
+                            halign = "right";
+                        } else {
+                            x = box.left + box.padding;
                         }
-
-                        // account for middle aligning and line number
-                        y += line.height/2 + offset;
-                        offset += line.height;
-
-                        if (!!(window.opera && window.opera.version().split('.')[0] < 12)) {
-                            // FIXME: LEGACY BROWSER FIX
-                            // AFFECTS: Opera < 12.00
-
-                            // round the coordinates since Opera
-                            // otherwise switches to more ugly
-                            // rendering (probably non-hinted) and
-                            // offset the y coordinates since it seems
-                            // to be off pretty consistently compared
-                            // to the other browsers
-                            x = Math.floor(x);
-                            y = Math.ceil(y - 2);
-                        }
-                        ctx.fillText(line.text, x, y);
                     }
+
+                    surface.drawText(x, y, tick.label, font, null, halign, valign);
                 }
             });
-
-            ctx.restore();
         }
 
         function drawSeries(series) {
