@@ -19,6 +19,95 @@
 				}
 			}
 		},
+		state = {
+			add: function ( plot, label ) {
+
+				var placeholder = $(plot.getPlaceholder()),
+					data = placeholder.data("togglestates");
+
+				if ( !$.isArray(data) ) {
+
+					data =  [ ];
+
+				}
+
+				if ( data.indexOf(label) === -1 ) {
+
+					data.push(label);
+
+				}
+
+				placeholder.data("togglestates", data);
+
+			},
+			remove: function ( plot, label ) {
+
+				console.log("REMOVE: %s", label);
+
+				var placeholder = $(plot.getPlaceholder()),
+					data = placeholder.data("togglestates");
+
+				if ( $.isArray(data) ) {
+
+					if ( data.indexOf(label) > -1 ) {
+
+						data.splice(data.indexOf(label), 1);
+						placeholder.data("togglestates", data);
+
+					}
+
+				}
+
+			}
+		},
+		toggle = function ( el, plot, datasets ) {
+
+			var cell,
+				label,
+				swatch,
+				isCell = el.is("td");
+
+			if ( isCell || (el.parents("td").length) ) {
+
+				cell = ( isCell ? el : el.parents("td") );
+
+				// Acquire the label and colour swatch of whatever
+				// legend item the user just clicked.
+				if ( cell.hasClass("legendLabel") ) {
+
+					label = cell;
+					swatch = cell.prev(".legendColorBox");
+
+				} else {
+
+					label = cell.next(".legendLabel");
+					swatch = cell;
+
+				}
+
+				var series = getSeries(label.text(), datasets);
+
+				if ( series.toggle.enabled ) {
+
+					if ( label.hasClass("flotSeriesHidden") ) {
+
+						label.removeClass("flotSeriesHidden");
+						toggleSwatch(swatch, true);
+						showSeries(label.text(), plot, datasets);
+
+					} else {
+
+						label.addClass("flotSeriesHidden");
+						toggleSwatch(swatch);
+						hideSeries(label.text(), plot, datasets);
+
+					}
+
+				}
+
+			}
+
+		},
 		setupSwatch = function ( swatch ) {
 
 			swatch.data("flotcolor", swatch.find("div div").css("border-color"));
@@ -64,6 +153,7 @@
 	
 					// Hide this series
 					datasets.visible.splice(i, 1);
+					state.add(plot, label);
 					break;
 
 				}
@@ -101,6 +191,7 @@
 					if ( datasets.all[i].label === datasets.visible[j].label ) {
 
 						outDataset.push(datasets.all[i]);
+						state.remove(plot, label);
 						break;
 
 					}
@@ -116,28 +207,78 @@
 		},
 		init = function ( _plot ) {
 
-			_plot.hooks.legendInserted.push(function ( _plot, legend ) {
+			var datasets = { },
+				initDraw = false,
+				legend;
 
-				// Get all the legend cells
-				var cells = legend.find("td"),
-					entries = [],
-					datasets;
+			_plot.hooks.draw.push(function ( _plot ) {
 
-				var plot = _plot;
+				var placeholder, toggleStates, lenToggleStates, i;
 
-				var datasets = {
+				if ( !initDraw ) {
+
+					placeholder = $(_plot.getPlaceholder());
+					toggleStates = [ ];
+
+					// This stops the calls to draw from creating an infinite loop
+					initDraw = true;
+
+
+					// Look for an existing toggleLegend config
+					if ( $.isArray(placeholder.data("togglestates")) ) {
+
+						toggleStates = placeholder.data("togglestates");
+
+						lenToggleStates = toggleStates.length;
+
+						// Initialise the line states
+						for ( i = 0; i < lenToggleStates; i++ ) {
+
+							//hideSeries(toggleStates[i], _plot, datasets);
+							// Find the corresponding legend entry and click it!
+							// (Yucky!)
+							toggle(legend.find("td").filter(function ( ) {
+
+								return $(this).text() === toggleStates[i];
+
+							}), _plot, datasets);
+
+						}
+
+					} else {
+
+						placeholder.data("togglestates", toggleStates);
+
+					}
+
+				}
+
+			});
+
+			_plot.hooks.legendInserted.push(function ( _plot, _legend ) {
+
+				var plot = _plot,
+					toggleStates = [ ],
+					cells = _legend.find("td"),
+					entries = [ ];
+
+				datasets = {
 					visible: plot.getData(),
-					toggle: [],
+					toggle: [ ],
 					all: plot.getData().slice()
 				};
+
+				legend = _legend;
 
 				// Split into objects containing each legend item's
 				// colour box and label.
 				for ( var i = 0; i < cells.length; i += 2 ) {
+
 					entries.push({
 						swatch: $(cells[i]),
-						label: $(cells[i+1])
+						label: $(cells[i + 1])
 					});
+
 				}
 
 				for ( var e in entries ) {
@@ -161,51 +302,7 @@
 					})
 					.bind("click.flot", function ( e ) {
 
-						var el = $(e.target),
-							cell,
-							label,
-							swatch,
-							isCell = el.is("td");
-
-						if ( isCell || (el.parents("td").length) ) {
-
-							cell = ( isCell ? el : el.parents("td") );
-
-							// Acquire the label and colour swatch of whatever
-							// legend item the user just clicked.
-							if ( cell.hasClass("legendLabel") ) {
-
-								label = cell;
-								swatch = cell.prev(".legendColorBox");
-
-							} else {
-
-								label = cell.next(".legendLabel");
-								swatch = cell;
-
-							}
-
-							var series = getSeries(label.text(), datasets);
-
-							if ( series.toggle.enabled ) {
-
-								if ( label.hasClass("flotSeriesHidden") ) {
-
-									label.removeClass("flotSeriesHidden");
-									toggleSwatch(swatch, true);
-									showSeries(label.text(), plot, datasets);
-
-								} else {
-
-									label.addClass("flotSeriesHidden");
-									toggleSwatch(swatch);
-									hideSeries(label.text(), plot, datasets);
-
-								}
-
-							}
-
-						}
+						toggle($(e.target), plot, datasets);
 
 					})
 					.find("td").css("cursor", "pointer");
@@ -218,7 +315,7 @@
 		init: init,
 		options: options,
 		name: 'toggleLegend',
-		version: '0.1'
+		version: '0.2'
 	});
 
 }(jQuery));
