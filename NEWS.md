@@ -179,6 +179,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Fixed sub-pixel rendering issues with crosshair and selection lines.
    (patches by alanayoub and Daniel Shapiro, pull requests #17 and #925)
 
+ - Fixed rendering issues when using the threshold plugin with several series.
+   (patch by Ivan Novikov, pull request #934)
+
 
 
 ## Flot 0.7 ##
