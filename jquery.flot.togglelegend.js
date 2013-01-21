@@ -42,8 +42,6 @@
 			},
 			remove: function ( plot, label ) {
 
-				console.log("REMOVE: %s", label);
-
 				var placeholder = $(plot.getPlaceholder()),
 					data = placeholder.data("togglestates");
 
