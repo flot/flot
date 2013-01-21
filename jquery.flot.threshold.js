@@ -1,39 +1,45 @@
-/*
-Flot plugin for thresholding data. Controlled through the option
-"threshold" in either the global series options
+/* Flot plugin for thresholding data.
 
-  series: {
-    threshold: {
-      below: number
-      color: colorspec
-    }
-  }
+Copyright (c) 2007-2012 IOLA and Ole Laursen.
+Licensed under the MIT license.
 
-or in a specific series
+The plugin supports these options:
 
-  $.plot($("#placeholder"), [{ data: [ ... ], threshold: { ... }}])
-  
-An array can be passed for multiple thresholding
+	series: {
+		threshold: {
+			below: number
+			color: colorspec
+		}
+	}
 
-  threshold: [{
-    below: number1
-    color: color1
-  },{
-    below: number2
-    color: color2
-  }]
+It can also be applied to a single series, like this:
 
-These multiple threshold objects can be passed in any order since they
-are sorted by the processing function.
+	$.plot( $("#placeholder"), [{
+		data: [ ... ],
+		threshold: { ... }
+	}])
 
-The data points below "below" are drawn with the specified color. This
-makes it easy to mark points below 0, e.g. for budget data.
+An array can be passed for multiple thresholding, like this:
 
-Internally, the plugin works by splitting the data into two series,
-above and below the threshold. The extra series below the threshold
-will have its label cleared and the special "originSeries" attribute
-set to the original series. You may need to check for this in hover
-events.
+	threshold: [{
+		below: number1
+		color: color1
+	},{
+		below: number2
+		color: color2
+	}]
+
+These multiple threshold objects can be passed in any order since they are
+sorted by the processing function.
+
+The data points below "below" are drawn with the specified color. This makes
+it easy to mark points below 0, e.g. for budget data.
+
+Internally, the plugin works by splitting the data into two series, above and
+below the threshold. The extra series below the threshold will have its label
+cleared and the special "originSeries" attribute set to the original series.
+You may need to check for this in hover events.
+
 */
 
 (function ($) {
@@ -56,11 +62,12 @@ events.
             var origpoints = datapoints.points,
                 addCrossingPoints = s.lines.show;
 
-            threspoints = [];
-            newpoints = [];
+            var threspoints = [];
+            var newpoints = [];
+            var m;
 
             for (i = 0; i < origpoints.length; i += ps) {
-                x = origpoints[i]
+                x = origpoints[i];
                 y = origpoints[i + 1];
 
                 prevp = p;
@@ -96,8 +103,11 @@ events.
             datapoints.points = newpoints;
             thresholded.datapoints.points = threspoints;
             
-            if (thresholded.datapoints.points.length > 0)
-                plot.getData().push(thresholded);
+            if (thresholded.datapoints.points.length > 0) {
+                var origIndex = $.inArray(s, plot.getData());
+                // Insert newly-generated series right after original one (to prevent it from becoming top-most)
+                plot.getData().splice(origIndex + 1, 0, thresholded);
+            }
                 
             // FIXME: there are probably some edge cases left in bars
         }

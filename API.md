@@ -173,6 +173,9 @@ labelFormatter: function(label, series) {
 }
 ```
 
+To prevent a series from showing up in the legend, simply have the function
+return null.
+
 "noColumns" is the number of columns to divide the legend table into.
 "position" specifies the overall placement of the legend within the
 plot (top-right, top-left, etc.) and margin the distance to the plot
@@ -582,10 +585,10 @@ xaxis: {
     mode: "time"
     timeformat: "%Y/%m/%d"
 }
-``` 
+```
 
-This will result in tick labels like "2000/12/24". A subset of the 
-standard strftime specifiers are supported:
+This will result in tick labels like "2000/12/24". A subset of the
+standard strftime specifiers are supported (plus the nonstandard %q):
 
 ```js
 %a: weekday name (customizable)
@@ -596,6 +599,7 @@ standard strftime specifiers are supported:
 %I: hours, 12-hour time, zero-padded (01-12)
 %m: month, zero-padded (01-12)
 %M: minutes, zero-padded (00-59)
+%q: quarter (1-4)
 %S: seconds, zero-padded (00-59)
 %y: year (two digits)
 %Y: year (four digits)
@@ -663,6 +667,10 @@ series: {
         lineWidth: number
         fill: boolean or number
         fillColor: null or color/gradient
+    }
+
+    lines, bars: {
+        zero: boolean
     }
 
     points: {
@@ -733,6 +741,13 @@ y axis instead of the x axis; note that the bar end points are still
 defined in the same way so you'll probably want to swap the
 coordinates if you've been plotting vertical bars first.
 
+Area and bar charts normally start from zero, regardless of the data's range.
+This is because they convey information through size, and starting from a
+different value would distort their meaning. In cases where the fill is purely
+for decorative purposes, however, "zero" allows you to override this behavior.
+It defaults to true for filled lines and bars; setting it to false tells the
+series to use the same automatic scaling as an un-filled line.
+
 For lines, "steps" specifies whether two adjacent data points are
 connected with a straight (possibly diagonal) line or with first a
 horizontal and then a vertical line. Note that this transforms the
@@ -790,8 +805,8 @@ grid: {
     labelMargin: number
     axisMargin: number
     markings: array of markings or (fn: axes -> array of markings)
-    borderWidth: number
-    borderColor: color or null
+    borderWidth: number or object with "top", "right", "bottom" and "left" properties with different widths
+    borderColor: color or null or object with "top", "right", "bottom" and "left" properties with different colors
     minBorderMargin: number or null
     clickable: boolean
     hoverable: boolean
@@ -833,12 +848,14 @@ line, and "axisMargin" is the space in pixels between axes when there
 are two next to each other.
 
 "borderWidth" is the width of the border around the plot. Set it to 0
-to disable the border. You can also set "borderColor" if you want the
-border to have a different color than the grid lines.
-"minBorderMargin" controls the default minimum margin around the
-border - it's used to make sure that points aren't accidentally
-clipped by the canvas edge so by default the value is computed from
-the point radius.
+to disable the border. Set it to an object with "top", "right",
+"bottom" and "left" properties to use different widths. You can
+also set "borderColor" if you want the border to have a different color
+than the grid lines. Set it to an object with "top", "right", "bottom"
+and "left" properties to use different colors. "minBorderMargin" controls
+the default minimum margin around the border - it's used to make sure
+that points aren't accidentally clipped by the canvas edge so by default
+the value is computed from the point radius.
 
 "markings" is used to draw simple lines and rectangular areas in the
 background of the plot. You can either specify an array of ranges on
@@ -1230,9 +1247,21 @@ hooks in the plugins bundled with Flot.
    
     In any case, you might be interested in setting datapoints.format,
     an array of objects for specifying how a point is normalized and
-    how it interferes with axis scaling.
+    how it interferes with axis scaling. It accepts the following options:
 
-    The default format array for points is something along the lines of:
+    ```js
+    {
+        x, y: boolean,
+        number: boolean,
+        required: boolean,
+        defaultValue: value,
+        autoscale: boolean
+    }
+    ```
+
+    "x" and "y" specify whether the value is plotted against the x or y axis,
+    and is currently used only to calculate axis min-max ranges. The default
+    format array, for example, looks like this:
 
     ```js
     [
@@ -1241,14 +1270,22 @@ hooks in the plugins bundled with Flot.
     ]
     ```
 
-    The first object means that for the first coordinate it should be
-    taken into account when scaling the x axis, that it must be a
-    number, and that it is required - so if it is null or cannot be
-    converted to a number, the whole point will be zeroed out with
-    nulls. Beyond these you can also specify "defaultValue", a value to
-    use if the coordinate is null. This is for instance handy for bars
-    where one can omit the third coordinate (the bottom of the bar)
-    which then defaults to 0.
+    This indicates that a point, i.e. [0, 25], consists of two values, with the
+    first being plotted on the x axis and the second on the y axis.
+
+    If "number" is true, then the value must be numeric, and is set to null if
+    it cannot be converted to a number.
+
+    "defaultValue" provides a fallback in case the original value is null. This
+    is for instance handy for bars, where one can omit the third coordinate
+    (the bottom of the bar), which then defaults to zero.
+
+    If "required" is true, then the value must exist (be non-null) for the
+    point as a whole to be valid. If no value is provided, then the entire
+    point is cleared out with nulls, turning it into a gap in the series.
+
+    "autoscale" determines whether the value is considered when calculating an
+    automatic min-max range for the axes that the value is plotted against.
 
  - processDatapoints  [phase 3]
 

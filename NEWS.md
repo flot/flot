@@ -1,4 +1,4 @@
-## Flot x.x ##
+## Flot 0.8 alpha ##
 
 ### API changes ###
 
@@ -13,9 +13,9 @@ the dates are displayed. If null, the dates are displayed as UTC. If
 "browser", the dates are displayed in the time zone of the user's browser.
 
 Date/time formatting has changed and now follows a proper subset of the
-standard strftime specifiers. Additionally, if a strftime function is found in
-the Date object's prototype, it will be used instead of the built-in
-formatter.
+standard strftime specifiers, plus one nonstandard specifier for quarters.
+Additionally, if a strftime function is found in the Date object's prototype,
+it will be used instead of the built-in formatter.
 
 Axis labels are now drawn with canvas text with some parsing to support
 newlines. This solves various issues but also means that they no longer
@@ -28,6 +28,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 "flot-overlay" to prevent accidental clashes (issue 540).
 
 ### Changes ###
+
+ - Addition of nonstandard %q specifier to date/time formatting. (patch
+   by risicle, issue 49)
 
  - Date/time formatting follows proper subset of strftime specifiers, and
    support added for Date.prototype.strftime, if found. (patch by Mark Cote,
@@ -85,7 +88,21 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    Tom Cleaveland, Christopher Lambert, and Simon Strandgaard)
 
  - Added support for high pixel density (retina) displays, resulting in much
-   crisper charts on such devices. (patch by Olivier Guerriat)
+   crisper charts on such devices. (patch by Olivier Guerriat, additional
+   fixes by Julien Thomas, maimairel, and Lau Bech Lauritzen)
+
+ - Added the ability to control pie shadow position and alpha via a new pie
+   'shadow' option. (patch by Julien Thomas, pull request #78)
+
+ - Added the ability to set width and color for individual sides of the grid.
+   (patch by Ara Anjargolian, additional fixes by Karl Swedberg, pull requests #855
+   and #880)
+
+ - The selection plugin's getSelection now returns null when the selection
+   has been cleared. (patch by Nick Campbell, pull request #852)
+
+ - Added a new option called 'zero' to bars and filled lines series, to control
+   whether the y-axis minimum is scaled to fit the data or set to zero.
 
 ### Bug fixes ###
 
@@ -127,6 +144,43 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 
  - Fixed an error when custom tick labels weren't provided as strings. (patch
    by Shad Downey)
+
+ - Prevented the local insertSteps and fmt variables from becoming global.
+   (first reported by Marc Bennewitz and Szymon Barglowski, patch by Nick
+   Campbell, issues #825 and #831, pull request #851)
+
+ - Prevented several threshold plugin variables from becoming global. (patch
+   by Lasse Dahl Ebert)
+
+ - Fixed various jQuery 1.8 compatibility issues. (issues #814 and #819,
+   pull request #877)
+
+ - Pie charts with a slice equal to or approaching 100% of the pie no longer
+   appear invisible. (patch by David Schnur, issues #444, #658, #726, #824
+   and #850, pull request #879)
+
+ - Prevented several local variables from becoming global. (patch by aaa707)
+
+ - Ensure that the overlay and primary canvases remain aligned. (issue #670,
+   pull request #901)
+
+ - Added support for jQuery 1.9 by removing and replacing uses of $.browser.
+   (analysis and patch by Anthony Ryan, pull request #905)
+
+ - Pie charts no longer disappear when redrawn during a resize or update.
+   (reported by Julien Bec, issue #656, pull request #910)
+
+ - Avoided floating-point precision errors when calculating pie percentages.
+   (patch by James Ward, pull request #918)
+
+ - Fixed compatibility with jQuery 1.2.6, which has no 'mouseleave' shortcut.
+   (reported by Bevan, original pull request #920, replaced by direct patch)
+
+ - Fixed sub-pixel rendering issues with crosshair and selection lines.
+   (patches by alanayoub and Daniel Shapiro, pull requests #17 and #925)
+
+ - Fixed rendering issues when using the threshold plugin with several series.
+   (patch by Ivan Novikov, pull request #934)
 
 
 
