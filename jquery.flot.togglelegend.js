@@ -142,7 +142,11 @@
 
 				for ( var e in entries ) {
 
-					setupSwatch(entries[e].swatch);
+					if ( entries.hasOwnProperty(e) ) {
+
+						setupSwatch(entries[e].swatch);
+
+					}
 
 				}
 
