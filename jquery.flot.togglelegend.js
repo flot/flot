@@ -27,11 +27,11 @@
 
 				if ( !$.isArray(data) ) {
 
-					data =  [ ];
+					data = [ ];
 
 				}
 
-				if ( data.indexOf(label) === -1 ) {
+				if ( $.inArray(label, data) === -1 ) {
 
 					data.push(label);
 
@@ -47,9 +47,9 @@
 
 				if ( $.isArray(data) ) {
 
-					if ( data.indexOf(label) > -1 ) {
+					if ( $.inArray(label, data) > -1 ) {
 
-						data.splice(data.indexOf(label), 1);
+						data.splice($.inArray(label, data), 1);
 						placeholder.data("togglestates", data);
 
 					}
@@ -313,7 +313,7 @@
 		init: init,
 		options: options,
 		name: 'toggleLegend',
-		version: '0.2'
+		version: '0.3'
 	});
 
 }(jQuery));
