@@ -17,6 +17,11 @@ p {
 	margin-top: 10px;
 }
 
+button {
+	font-size: 18px;
+	padding: 1px 7px;
+}
+
 #header {
 	position: relative;
 	width: 900px;
