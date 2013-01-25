@@ -13,6 +13,12 @@ h2 {
 	font: normal 32px "omnes-pro", Helvetica, Arial, sans-serif;
 }
 
+h3 {
+	margin-left: 10px;
+	font: normal 26px "omnes-pro", Helvetica, Arial, sans-serif;
+	color: #666;
+}
+
 p {
 	margin-top: 10px;
 }
