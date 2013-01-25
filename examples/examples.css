@@ -22,6 +22,10 @@ button {
 	padding: 1px 7px;
 }
 
+input {
+	font-size: 18px;
+}
+
 #header {
 	position: relative;
 	width: 900px;
