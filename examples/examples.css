@@ -26,6 +26,10 @@ input {
 	font-size: 18px;
 }
 
+input[type=checkbox] {
+	margin: 7px;
+}
+
 #header {
 	position: relative;
 	width: 900px;
