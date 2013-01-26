@@ -659,6 +659,10 @@
 		// Show the initial default chart
 
 		$("#example-1").click();
+
+		// Add the Flot version string to the footer
+
+		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
 	});
 
 	// A custom label formatter used by several of the plots

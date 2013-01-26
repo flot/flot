@@ -117,6 +117,10 @@
 		addArrow("right", 25, 60, { left: 100 });
 		addArrow("up", 40, 45, { top: -100 });
 		addArrow("down", 40, 75, { top: 100 });
+
+		// Add the Flot version string to the footer
+
+		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
 	});
 
 	</script>
