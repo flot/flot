@@ -49,11 +49,11 @@
 
 		var startData = getData(0, 3 * Math.PI);
 
-		var plot = $.plot($("#placeholder"), startData, options);
+		var plot = $.plot("#placeholder", startData, options);
 
-		// setup overview
+		// Create the overview plot
 
-		var overview = $.plot($("#overview"), startData, {
+		var overview = $.plot("#overview", startData, {
 			legend: {
 				show: false
 			},
@@ -96,7 +96,7 @@
 
 			// do the zooming
 
-			plot = $.plot($("#placeholder"), getData(ranges.xaxis.from, ranges.xaxis.to),
+			plot = $.plot("#placeholder", getData(ranges.xaxis.from, ranges.xaxis.to),
 				$.extend(true, {}, options, {
 					xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
 					yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }

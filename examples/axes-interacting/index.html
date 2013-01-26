@@ -27,7 +27,7 @@
 			{ data: generate(2, 10, function (x) { return Math.tan(x);}), xaxis: 2, yaxis: 4 }
 		];
 
-		var plot = $.plot($("#placeholder"), data, {
+		var plot = $.plot("#placeholder", data, {
 			xaxes: [
 				{ position: 'bottom' },
 				{ position: 'top'}
@@ -40,16 +40,17 @@
 			]
 		});
 
-		// now for each axis, create a div
+		// Create a div for each axis
+
 		$.each(plot.getAxes(), function (i, axis) {
 			if (!axis.show)
 				return;
 
 			var box = axis.box;
 
-			$('<div class="axisTarget" style="position:absolute;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>')
-				.data('axis.direction', axis.direction)
-				.data('axis.n', axis.n)
+			$("<div class='axisTarget' style='position:absolute; left:" + box.left + "px; top:" + box.top + "px; width:" + box.width +  "px; height:" + box.height + "px'></div>")
+				.data("axis.direction", axis.direction)
+				.data("axis.n", axis.n)
 				.css({ backgroundColor: "#f00", opacity: 0, cursor: "pointer" })
 				.appendTo(plot.getPlaceholder())
 				.hover(

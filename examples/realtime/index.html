@@ -64,9 +64,9 @@
 			}
 		});
 
-		var plot = $.plot($("#placeholder"), [ getRandomData() ], {
+		var plot = $.plot("#placeholder", [ getRandomData() ], {
 			series: {
-				shadowSize: 0	// drawing is faster without shadows
+				shadowSize: 0	// Drawing is faster without shadows
 			},
 			yaxis: {
 				min: 0,
@@ -78,8 +78,11 @@
 		});
 
 		function update() {
-			plot.setData([ getRandomData() ]);
+
+			plot.setData([getRandomData()]);
+
 			// Since the axes don't change, we don't need to call plot.setupGrid()
+
 			plot.draw();
 			setTimeout(update, updateInterval);
 		}

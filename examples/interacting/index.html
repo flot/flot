@@ -19,7 +19,7 @@
 			cos.push([i, Math.cos(i)]);
 		}
 
-		var plot = $.plot($("#placeholder"), [
+		var plot = $.plot("#placeholder", [
 			{ data: sin, label: "sin(x)"},
 			{ data: cos, label: "cos(x)"}
 		], {
