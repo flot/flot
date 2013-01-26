@@ -4,16 +4,10 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Flot Examples: Resizing</title>
 	<link href="../examples.css" rel="stylesheet" type="text/css">
-	<style type="text/css">
-
-	.message {
-		padding-left: 50px;
-		font-size: smaller;
-	}
-
-	</style>
+	<link href="../shared/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css">
 	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../shared/jquery-ui/jquery-ui.min.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.resize.js"></script>
 	<script type="text/javascript">
@@ -39,6 +33,13 @@
 				+ $(this).width() + "x" + $(this).height()
 				+ " pixels");
 		});
+
+		$(".demo-container").resizable({
+			maxWidth: 900,
+			maxHeight: 500,
+			minWidth: 450,
+			minHeight: 250,
+		});
 	});
 
 	</script>
@@ -49,9 +50,9 @@
 		<h2>Resizing</h2>
 	</div>
 
-	<div id="content" style="width:100%;">
+	<div id="content">
 
-		<div class="demo-container" style="width:100%;">
+		<div class="demo-container">
 			<div id="placeholder"></div>
 		</div>
 
@@ -59,8 +60,7 @@
 
 		<p>Sometimes it makes more sense to just let the plot take up the available space. In that case, we need to redraw the plot each time the placeholder changes its size. If you include the resize plugin, this is handled automatically.</p>
 
-		<!--<p>Drag the handles at the bottom and right of the plot to resize it.</p>-->
-		<p>Try resizing the window.</p>
+		<p>Drag the bottom and right sides of the plot to resize it.</p>
 
 	</div>
 
