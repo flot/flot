@@ -27,7 +27,8 @@
 	#menu button {
 		display: inline-block;
 		width: 200px;
-		margin-bottom: 2px;
+		margin-bottom: 5px;
+		font-size: 16px;
 	}
 
 	#description {
@@ -109,12 +110,16 @@
 			}
 		}
 
+		var placeholder = $("#placeholder");
+
 		$("#example-1").click(function() {
+
+			placeholder.unbind();
 
 			$("#title").text("Default pie chart");
 			$("#description").text("The default pie chart with no options set.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true
@@ -135,10 +140,12 @@
 
 		$("#example-2").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Default without legend");
 			$("#description").text("The default pie chart when the legend is disabled. Since the labels would normally be outside the container, the chart is resized to fit.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true
@@ -165,10 +172,12 @@
 
 		$("#example-3").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Custom Label Formatter");
 			$("#description").text("Added a semi-transparent background to the labels and a custom labelFormatter function.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -213,10 +222,12 @@
 
 		$("#example-4").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Label Radius");
 			$("#description").text("Slightly more transparent label backgrounds and adjusted the radius values to place them within the pie.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -261,10 +272,12 @@
 
 		$("#example-5").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Label Styles #1");
 			$("#description").text("Semi-transparent, black-colored label background.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -311,10 +324,12 @@
 
 		$("#example-6").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Label Styles #2");
 			$("#description").text("Semi-transparent, black-colored label background placed at pie edge.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -361,10 +376,12 @@
 
 		$("#example-7").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Hidden Labels");
 			$("#description").text("Labels can be hidden if the slice is less than a given percentage of the pie (10% in this case).");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -405,10 +422,12 @@
 
 		$("#example-8").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Combined Slice");
 			$("#description").text("All slices less than a given percentage of the pie can be combined into a single, larger slice (10% in this case).");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -443,10 +462,12 @@
 
 		$("#example-9").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Rectangular Pie");
 			$("#description").text("The radius can also be set to a specific size (even larger than the container itself).");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -485,10 +506,12 @@
 
 		$("#example-10").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Tilted Pie");
 			$("#description").text("The pie can be tilted at an angle.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true,
@@ -543,10 +566,12 @@
 
 		$("#example-11").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Donut Hole");
 			$("#description").text("A donut hole can be added.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						innerRadius: 0.5,
@@ -569,10 +594,12 @@
 
 		$("#example-12").click(function() {
 
+			placeholder.unbind();
+
 			$("#title").text("Interactivity");
 			$("#description").text("The pie can be made interactive with hover and click events.");
 
-			$.plot("#placeholder", data, {
+			$.plot(placeholder, data, {
 				series: {
 					pie: { 
 						show: true
@@ -598,7 +625,7 @@
 				"});"
 			]);
 
-			$("#placeholder").bind("plothover", function(event, pos, obj) {
+			placeholder.bind("plothover", function(event, pos, obj) {
 
 				if (!obj) {
 					return;
@@ -608,7 +635,7 @@
 				$("#hover").html("<span style='font-weight:bold; color:" + obj.series.color + "'>" + obj.series.label + " (" + percent + "%)</span>");
 			});
 
-			$("#placeholder").bind("plotclick", function(event, pos, obj) {
+			placeholder.bind("plotclick", function(event, pos, obj) {
 
 				if (!obj) {
 					return;
@@ -661,7 +688,7 @@
 				<button id="example-9">Rectangular Pie</button>
 				<button id="example-10">Tilted Pie</button>
 				<button id="example-11">Donut Hole</button>
-				<button id="example-11">Interactivity</button>
+				<button id="example-12">Interactivity</button>
 			</div>
 		</div>
 
