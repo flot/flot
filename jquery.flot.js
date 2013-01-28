@@ -1326,7 +1326,7 @@ Licensed under the MIT license.
 
 				axis.tickFormatter = function (value, axis) {
 
-					var factor = Math.pow(10, axis.tickDecimals);
+					var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
 					var formatted = "" + Math.round(value * factor) / factor;
 
 					// If tickDecimals was specified, ensure that we have exactly that
