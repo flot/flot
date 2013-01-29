@@ -144,7 +144,9 @@ Licensed under the MIT license.
                     mouseActiveRadius: 10 // how far the mouse can be away to activate an item
                 },
                 interaction: {
-                    redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
+                    redrawOverlayInterval: 1000/60, // time between updates, -1 means in same flow
+                    useDevicePixelRatio: true // if false, devicePixelRatio will be 1, canvas will
+                                            // not be scaled for "retina" displays
                 },
                 hooks: {}
             },
@@ -739,6 +741,13 @@ Licensed under the MIT license.
         // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
 
         function getPixelRatio(cctx) {
+            // using device pixel ratio and then scaling canvas may result in low performance
+            // on devices with "retina"-like displays, e.g. in case of real-time redraws with
+            // high frame rates
+            if(!options.interaction.useDevicePixelRatio) {
+                return 1;
+            }
+
             var devicePixelRatio = window.devicePixelRatio || 1;
             var backingStoreRatio =
                 cctx.webkitBackingStorePixelRatio ||
