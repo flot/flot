@@ -798,8 +798,9 @@ Licensed under the MIT license.
             // Scale the coordinate space to match the display density; so even though we
             // may have twice as many pixels, we still want lines and other drawing to
             // appear at the same size; the extra pixels will just make them crisper.
-
-            cctx.scale(pixelRatio, pixelRatio);
+            
+            if (pixelRatio != 1)
+                cctx.scale(pixelRatio, pixelRatio);
 
             return c;
         }
@@ -840,8 +841,8 @@ Licensed under the MIT license.
             cctx.save();
 
             // Apply scaling for retina displays, as explained in makeCanvas
-
-            cctx.scale(pixelRatio, pixelRatio);
+            if (pixelRatio != 1)
+                cctx.scale(pixelRatio, pixelRatio);
         }
 
         function setupCanvases() {
