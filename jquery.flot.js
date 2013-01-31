@@ -189,13 +189,15 @@ Licensed under the MIT license.
 			// Add the HTML text layer, if it doesn't already exist
 
 			if (!this.text) {
-				this.text = $("<div></div>").css({
-					position: "absolute",
-					top: 0,
-					left: 0,
-					bottom: 0,
-					right: 0
-				}).insertAfter(this.element);
+				this.text = $("<div></div>")
+					.addClass("flot-text")
+					.css({
+						position: "absolute",
+						top: 0,
+						left: 0,
+						bottom: 0,
+						right: 0
+					}).insertAfter(this.element);
 			}
 
 			this.text.append(this._textBuffer);
@@ -1122,7 +1124,7 @@ Licensed under the MIT license.
 
                 // then whack any remaining obvious garbage left
                 eventHolder.unbind();
-                placeholder.children().not([surface.element, surface.text, overlay.element, overlay.text]).remove();
+                placeholder.children(":not(.flot-base,.flot-overlay,.flot-text)").remove();
             }
 
             // save in case we get replotted
