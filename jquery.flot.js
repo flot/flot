@@ -73,6 +73,7 @@ Licensed under the MIT license.
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
                     labelAngle: null,
+                    labelAlign: null,
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
                     tickLength: null, // size in pixels of ticks, or "full" for whole line
                     alignTicksWithAxis: null, // axis number or null for no sync
@@ -1772,7 +1773,8 @@ Licensed under the MIT license.
                 ctx.textBaseline = "middle";
 
                 var x, y, angle = axis.options.labelAngle || 0,
-                    sin_angle = Math.sin(angle);
+                    sin_angle = Math.sin(angle),
+                    align = axis.options.labelAlign;
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
@@ -1820,6 +1822,19 @@ Licensed under the MIT license.
                         x1 = 0;
                         y1 = 0;
                         if (axis.direction == "x") {
+                            if (!sin_angle) {
+                                switch (align) {
+                                   case "right":
+                                       x1 = 0;
+                                       break;
+                                   case "left":
+                                       x1 = line.width;
+                                       break;
+                                   default:
+                                       x1 = line.width/2;
+                                       break;
+                                }
+                            }
                             if (axis.position == "top") {
                                y1 = tick.raw_height;
                                if (sin_angle > 0) {
@@ -1833,6 +1848,19 @@ Licensed under the MIT license.
                             }
                         }
                         else {
+                            if (!sin_angle) {
+                                switch (align) {
+                                   case "bottom":
+                                       y1 = 0;
+                                       break;
+                                   case "top":
+                                       y1 = tick.height;
+                                       break;
+                                   default:
+                                       y1 = tick.height/2;
+                                       break;
+                                }
+                            }
                             if (axis.position == "left") {
                                 x1 = line.width;
                                 if (sin_angle < 0) {
