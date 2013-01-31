@@ -121,7 +121,7 @@ Licensed under the MIT license.
 		// garbage collection and possibly increased cache-insert times.
 
 		this._activeTextCache = {};
-	};
+	}
 
 	// Resizes the canvas to the given dimensions.
 	//
@@ -169,7 +169,7 @@ Licensed under the MIT license.
 		// appear at the same size; the extra pixels will just make them crisper.
 
 		context.scale(pixelRatio, pixelRatio);
-	}
+	};
 
 	// Clears the entire canvas area, including overlaid text.
 
@@ -178,7 +178,7 @@ Licensed under the MIT license.
 		if (this.text) {
 			this.text.empty();
 		}
-	}
+	};
 
 	// Finishes rendering the canvas, including populating the text overlay.
 
@@ -207,7 +207,7 @@ Licensed under the MIT license.
 
 		this._textCache = this._activeTextCache;
 		this._activeTextCache = {};
-	}
+	};
 
 	// Creates (if necessary) and returns a text info object.
 	//
@@ -297,7 +297,7 @@ Licensed under the MIT license.
 		this._activeTextCache[cacheKey] = info;
 
 		return info;
-	}
+	};
 
 	// Draws a text string onto the canvas.
 	//
@@ -340,7 +340,7 @@ Licensed under the MIT license.
 		// HTML to the canvas text buffer.
 
 		this._textBuffer += info.prefix + parseInt(y) + "px;left:" + parseInt(x) + info.suffix;
-	}
+	};
 
 	///////////////////////////////////////////////////////////////////////////
 	// The top-level container for the entire plot.
@@ -1514,7 +1514,7 @@ Licensed under the MIT license.
                     axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
                     axis.tickSize = opts.tickSize || size;
 
-                    start = floorInBase(axis.min, axis.tickSize)
+                    start = floorInBase(axis.min, axis.tickSize);
 
                     do {
                         prev = v;
