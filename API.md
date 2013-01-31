@@ -236,6 +236,7 @@ xaxis, yaxis: {
 
     labelWidth: null or number
     labelHeight: null or number
+    labelAngle: null or number
     reserveSpace: null or true
     
     tickLength: null or number
@@ -421,6 +422,10 @@ labels in pixels. They're useful in case you need to align several
 plots. "reserveSpace" means that even if an axis isn't shown, Flot
 should reserve space for it - it is useful in combination with
 labelWidth and labelHeight for aligning multi-axis charts.
+
+If you want to have a slanted labels use a "labelAngle" option.
+Angle specified in degrees. Valid values are from -90 to 90.
+Direction of rotation clockwise.
 
 "tickLength" is the length of the tick lines in pixels. By default, the
 innermost axes will have ticks that extend all across the plot, while
