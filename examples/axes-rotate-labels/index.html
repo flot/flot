@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Flot Examples: Rotating labels on axes</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script type="text/javascript">
+
+	$(function() {
+		var data = [];
+		for (var i = 0; i < 14; i += 0.5) {
+			data.push([i, Math.sin(i)]);
+		}
+
+		var options = {
+			xaxis: {
+				labelAngle: 0,
+				position: "bottom",
+			},
+			yaxis: {
+				labelAngle: 0,
+				position: "left",
+			}
+		}
+
+		// Forms
+		$("form").submit(function() {
+			$.plot("#placeholder", [ data ], options);
+			return false;
+		})
+
+		// Horizontal axis
+
+		$("#xaxis select[name=position]").change(function() {
+			options.xaxis.position = $(this).val();
+			$.plot("#placeholder", [ data ], options);
+		});
+		$("#xaxis input[name=angle]").change(function() {
+			options.xaxis.labelAngle = parseInt($(this).val());
+			$.plot("#placeholder", [ data ], options);
+		});
+
+		// Vertical axis
+		$("#yaxis select[name=position]").change(function() {
+			options.yaxis.position = $(this).val();
+			$.plot("#placeholder", [ data ], options);
+		});
+		$("#yaxis input[name=angle]").change(function() {
+			options.yaxis.labelAngle = parseInt($(this).val());
+			$.plot("#placeholder", [ data ], options);
+		});
+
+		$.plot("#placeholder", [ data ], options);
+
+		// Add the Flot version string to the footer
+
+		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+	});
+
+	</script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Rotating labels on axes</h2>
+	</div>
+
+	<div id="content">
+
+		<div class="demo-container">
+			<div id="placeholder"></div>
+		</div>
+
+		<p>You can rotate labels on axes in any direction. Use <em>labelAngle</em> option to specify an angle.</p>
+		<p>Horizontal axis:
+			<form id="xaxis">
+				<label for='position'>Position:</label>
+				<select name='position' style='vertical-align: middle'>
+					<option value='top'>Top</option>
+					<option value='bottom' selected='selected'>Bottom</option>
+				</select>
+				&nbsp;
+				<label for='angle'>Angle:</label>
+				<input type='number' min='-90' max='90' name='angle' value='0'>
+			</form>
+		</p>
+		<p>Vertical axis:
+			<form id="yaxis">
+				<label for='position'>Position:</label>
+				<select name='position' style='vertical-align: middle'>
+					<option value='left' selected='selected'>Left</option>
+					<option value='right'>Right</option>
+				</select>
+				&nbsp;
+				<label for='angle'>Angle:</label>
+				<input type='number' min='-90' max='90' name='angle' value='0'>
+			</form>
+		</p>
+
+	</div>
+
+	<div id="footer">
+		Copyright &copy; 2007 - 2013 IOLA and Ole Laursen
+	</div>
+
+</body>
+</html>
