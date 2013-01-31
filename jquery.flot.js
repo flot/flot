@@ -72,6 +72,8 @@ Licensed under the MIT license.
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
+                    labelAngle: null,
+                    labelAlign: null,
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
                     tickLength: null, // size in pixels of ticks, or "full" for whole line
                     alignTicksWithAxis: null, // axis number or null for no sync
@@ -243,6 +245,14 @@ Licensed under the MIT license.
             }
         }
 
+        function convertToRad(degree) {
+            var rad = (degree * Math.PI)/180;
+            if (Math.cos(rad) < 0) {
+                throw new Error("Invalid value of angle: " + degree);
+            }
+            return rad;
+        }
+
         function parseOptions(opts) {
             var i;
 
@@ -257,6 +267,12 @@ Licensed under the MIT license.
                 options.xaxis.tickColor = options.grid.tickColor;
             if (options.yaxis.tickColor == null) // backwards-compatibility
                 options.yaxis.tickColor = options.grid.tickColor;
+
+            if (options.xaxis.labelAngle != null)
+                options.xaxis.labelAngle = convertToRad(options.xaxis.labelAngle);
+
+            if (options.yaxis.labelAngle != null)
+                options.yaxis.labelAngle = convertToRad(options.yaxis.labelAngle);
 
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
@@ -985,6 +1001,7 @@ Licensed under the MIT license.
                     // standard yet
                     line.height = m.height != null ? m.height : f.size;
 
+
                     // add a bit of margin since font rendering is
                     // not pixel perfect and cut off letters look
                     // bad, this also doubles as spacing between
@@ -995,6 +1012,14 @@ Licensed under the MIT license.
                     t.height += line.height;
 
                     t.lines.push(line);
+                }
+                var angle = opts.labelAngle;
+                t.raw_height = t.height;
+                if(angle) {
+                    var abs = Math.abs, sin = Math.sin, cos = Math.cos,
+                        w = t.width, h = t.height;
+                    t.height = abs(w * sin(angle)) + abs(h * cos(angle));
+                    t.width = abs(w * cos(angle)) + abs(h * sin(angle));
                 }
 
                 if (opts.labelWidth == null)
@@ -1258,7 +1283,8 @@ Licensed under the MIT license.
             else
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                // Increase factor if labels have an angle
+                noTicks = (0.3 + (opts.labelAngle ? Math.abs(Math.sin(opts.labelAngle)) * .5 : 0)) * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
 
             axis.delta = (axis.max - axis.min) / noTicks;
 
@@ -1726,7 +1752,6 @@ Licensed under the MIT license.
         }
 
         function drawAxisLabels() {
-            ctx.save();
 
             $.each(allAxes(), function (_, axis) {
                 if (!axis.show || axis.ticks.length == 0)
@@ -1747,53 +1772,114 @@ Licensed under the MIT license.
                 // and compensate when calculating the coordinates
                 ctx.textBaseline = "middle";
 
+                var x, y, angle = axis.options.labelAngle || 0,
+                    sin_angle = Math.sin(angle),
+                    align = axis.options.labelAlign;
+
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
 
-                    var x, y, offset = 0, line;
+                    ctx.save();
+
+                    if (axis.direction == "x") {
+                          x = plotOffset.left + axis.p2c(tick.v);
+                          if (axis.position == "bottom")
+                              y = box.top + box.padding;
+                          else
+                              y = box.top + box.height - box.padding;
+                    }
+                    else {
+                        y = plotOffset.top + axis.p2c(tick.v);
+                        if (axis.position == "left")
+                            x = box.left + box.width - box.padding;
+                        else
+                            x = box.left + box.padding;
+                    }
+
+                    if (!!(window.opera && window.opera.version().split('.')[0] < 12)) {
+                        // FIXME: LEGACY BROWSER FIX
+                        // AFFECTS: Opera < 12.00
+
+                        // round the coordinates since Opera
+                        // otherwise switches to more ugly
+                        // rendering (probably non-hinted) and
+                        // offset the y coordinates since it seems
+                        // to be off pretty consistently compared
+                        // to the other browsers
+                        x = Math.floor(x);
+                        y = Math.ceil(y - 2);
+                    }
+
+                    ctx.translate(x, y);
+                    ctx.rotate(angle);
+
+                    var x1, y1, offset = 0, line;
                     for (var k = 0; k < tick.lines.length; ++k) {
                         line = tick.lines[k];
 
+                        x1 = 0;
+                        y1 = 0;
                         if (axis.direction == "x") {
-                            x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
-                            if (axis.position == "bottom")
-                                y = box.top + box.padding;
-                            else
-                                y = box.top + box.height - box.padding - tick.height;
+                            if (!sin_angle) {
+                                switch (align) {
+                                   case "right":
+                                       x1 = 0;
+                                       break;
+                                   case "left":
+                                       x1 = line.width;
+                                       break;
+                                   default:
+                                       x1 = line.width/2;
+                                       break;
+                                }
+                            }
+                            if (axis.position == "top") {
+                               y1 = tick.raw_height;
+                               if (sin_angle > 0) {
+                                   x1 = line.width;
+                               }
+                            }
+                            else {
+                               if (sin_angle < 0) {
+                                   x1 = line.width;
+                               }
+                            }
                         }
                         else {
-                            y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
-                            if (axis.position == "left")
-                                x = box.left + box.width - box.padding - line.width;
-                            else
-                                x = box.left + box.padding;
+                            if (!sin_angle) {
+                                switch (align) {
+                                   case "bottom":
+                                       y1 = 0;
+                                       break;
+                                   case "top":
+                                       y1 = tick.height;
+                                       break;
+                                   default:
+                                       y1 = tick.height/2;
+                                       break;
+                                }
+                            }
+                            if (axis.position == "left") {
+                                x1 = line.width;
+                                if (sin_angle < 0) {
+                                    y1 = tick.raw_height;
+                                }
+                            }
+                            else {
+                                if (sin_angle > 0) {
+                                    y1 = tick.raw_height;
+                                }
+                            }
                         }
 
-                        // account for middle aligning and line number
-                        y += line.height/2 + offset;
+                        ctx.fillText(line.text, -x1, line.height/2 + offset - y1);
                         offset += line.height;
-
-                        if (!!(window.opera && window.opera.version().split('.')[0] < 12)) {
-                            // FIXME: LEGACY BROWSER FIX
-                            // AFFECTS: Opera < 12.00
-
-                            // round the coordinates since Opera
-                            // otherwise switches to more ugly
-                            // rendering (probably non-hinted) and
-                            // offset the y coordinates since it seems
-                            // to be off pretty consistently compared
-                            // to the other browsers
-                            x = Math.floor(x);
-                            y = Math.ceil(y - 2);
-                        }
-                        ctx.fillText(line.text, x, y);
                     }
+                    ctx.restore();
                 }
             });
-
-            ctx.restore();
         }
 
         function drawSeries(series) {
