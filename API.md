@@ -237,6 +237,7 @@ xaxis, yaxis: {
     labelWidth: null or number
     labelHeight: null or number
     labelAngle: null or number
+    labelAlign: null or alignment spec
     reserveSpace: null or true
     
     tickLength: null or number
@@ -426,6 +427,10 @@ labelWidth and labelHeight for aligning multi-axis charts.
 If you want to have a slanted labels use a "labelAngle" option.
 Angle specified in degrees. Valid values are from -90 to 90.
 Direction of rotation clockwise.
+
+"labelAlign" option controls label alignment relative to tick.
+Possible values for horizontal axis are "left", "right", and "center".
+Possible values for vertical axis are "top", "bottom", and "middle".
 
 "tickLength" is the length of the tick lines in pixels. By default, the
 innermost axes will have ticks that extend all across the plot, while
