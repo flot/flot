@@ -563,7 +563,6 @@ Licensed under the MIT license.
         }
 
         function parseOptions(opts) {
-            var i;
 
             $.extend(true, options, opts);
 
@@ -582,12 +581,38 @@ Licensed under the MIT license.
             if (options.grid.tickColor == null)
                 options.grid.tickColor = $.color.parse(options.grid.color).scale('a', 0.22).toString();
 
-            // fill in defaults in axes, copy at least always the
-            // first as the rest of the code assumes it'll be there
-            for (i = 0; i < Math.max(1, options.xaxes.length); ++i)
-                options.xaxes[i] = $.extend(true, {}, options.xaxis, options.xaxes[i]);
-            for (i = 0; i < Math.max(1, options.yaxes.length); ++i)
-                options.yaxes[i] = $.extend(true, {}, options.yaxis, options.yaxes[i]);
+            // Fill in defaults for axis options, including any unspecified
+            // font-spec fields, if a font-spec was provided.
+
+            // If no x/y axis options were provided, create one of each anyway,
+            // since the rest of the code assumes that they exist.
+
+            var i, axisOptions, axisCount,
+                fontDefaults = {
+                    style: placeholder.css("font-style"),
+                    size: Math.round(0.8 * (+placeholder.css("font-size").replace("px", "") || 13)),
+                    variant: placeholder.css("font-variant"),
+                    weight: placeholder.css("font-weight"),
+                    family: placeholder.css("font-family")
+                };
+
+            axisCount = options.xaxes.length || 1;
+            for (i = 0; i < axisCount; ++i) {
+                axisOptions = $.extend(true, {}, options.xaxis, options.xaxes[i]);
+                options.xaxes[i] = axisOptions;
+                if (axisOptions.font) {
+                    axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
+                }
+            }
+
+            axisCount = options.yaxes.length || 1;
+            for (i = 0; i < axisCount; ++i) {
+                axisOptions = $.extend(true, {}, options.yaxis, options.yaxes[i]);
+                options.yaxes[i] = axisOptions;
+                if (axisOptions.font) {
+                    axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
+                }
+            }
 
             // backwards compatibility, to be removed in future
             if (options.xaxis.noTicks && options.xaxis.ticks == null)
@@ -1172,7 +1197,7 @@ Licensed under the MIT license.
 
             var opts = axis.options, ticks = axis.ticks || [],
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
-                font = axis.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis";
+                font = opts.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis";
 
             for (var i = 0; i < ticks.length; ++i) {
 
@@ -1348,14 +1373,6 @@ Licensed under the MIT license.
 
             if (showGrid) {
 
-                var fontDefaults = {
-                    style: placeholder.css("font-style"),
-                    size: Math.round(0.8 * (+placeholder.css("font-size").replace("px", "") || 13)),
-                    variant: placeholder.css("font-variant"),
-                    weight: placeholder.css("font-weight"),
-                    family: placeholder.css("font-family")
-                };
-
                 var allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
 
                 $.each(allocatedAxes, function (_, axis) {
@@ -1363,14 +1380,6 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-
-                    // If a font-spec object was provided, use font defaults
-                    // to fill out any unspecified settings.
-
-                    if (axis.font) {
-                        axis.font = $.extend({}, fontDefaults, axis.options.font);
-                    }
-
                     // find labelWidth/Height for axis
                     measureTickLabels(axis);
                 });
@@ -1927,7 +1936,7 @@ Licensed under the MIT license.
                     return;
 
                 var box = axis.box,
-                    font = axis.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                    font = axis.options.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
                     tick, x, y, halign, valign;
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
