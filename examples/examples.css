@@ -45,7 +45,7 @@ input[type=checkbox] {
 #header h2 {
 	margin-left: 10px;
 	vertical-align: middle;
-	font-size: 48px;
+	font-size: 42px;
 	font-weight: bold;
 	text-decoration: none;
 	color: #000;
@@ -67,8 +67,8 @@ input[type=checkbox] {
 
 .demo-container {
 	box-sizing: border-box;
-	width: 900px;
-	height: 500px;
+	width: 850px;
+	height: 450px;
 	padding: 20px 15px 15px 15px;
 	margin: 15px auto 30px auto;
 	border: 1px solid #ddd;
