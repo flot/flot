@@ -28,7 +28,7 @@ support for VML which Excanvas is relying on. It appears that some
 stripped down versions used for test environments on virtual machines
 lack the VML support.
 
-You can also try using [Flashcanvas] [flashcanvas], which uses Flash to
+You can also try using [Flashcanvas][flashcanvas], which uses Flash to
 do the emulation. Although Flash can be a bit slower to load than VML,
 if you've got a lot of points, the Flash version can be much faster
 overall. Flot contains some wrapper code for activating Excanvas which
@@ -99,7 +99,7 @@ In order to have a useful, functional example of time-series plots using time
 zones, date.js from [timezone-js][timezone-js] (released under the Apache 2.0
 license) and the [Olson][olson] time zone database (released to the public
 domain) have been included in the examples directory.  They are used in
-examples/timezones.html.
+examples/axes-time-zones/index.html.
 
 
 [excanvas]: http://code.google.com/p/explorercanvas/
