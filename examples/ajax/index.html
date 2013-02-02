@@ -112,6 +112,10 @@
 			setTimeout(fetchData, 1000);
 		});
 
+		// Load the first series by default, so we don't have an empty plot
+
+		$("button.fetchSeries:first").click();
+
 		// Add the Flot version string to the footer
 
 		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
