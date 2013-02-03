@@ -74,7 +74,6 @@ More detail and specific examples can be found in the included HTML file.
 			maxRadius = null,
 			centerLeft = null,
 			centerTop = null,
-			redraw = true,
 			legendWidth = 0,
 			processed = false,
 			raw = false,
@@ -302,11 +301,13 @@ More detail and specific examples can be found in the included HTML file.
 			ctx = newCtx;
 			setupPie();
 
-			var slices = plot.getData();
-			var attempts = 0;
+			var slices = plot.getData(),
+				attempts = 0;
 
-			while (redraw && attempts < REDRAW_ATTEMPTS) {
-				redraw = false;
+			// Keep shrinking the pie's radius until drawPie returns true,
+			// indicating that all the labels fit, or we try too many times.
+
+			do {
 				if (attempts > 0) {
 					maxRadius *= REDRAW_SHRINK;
 				}
@@ -315,19 +316,12 @@ More detail and specific examples can be found in the included HTML file.
 				if (options.series.pie.tilt <= 0.8) {
 					drawShadow();
 				}
-				drawPie();
-			}
+			} while (!drawPie() && attempts < REDRAW_ATTEMPTS)
 
 			if (attempts >= REDRAW_ATTEMPTS) {
 				clear();
 				target.prepend("<div class='error'>Could not draw pie with labels contained inside canvas</div>");
 			}
-
-			// Reset the redraw flag on success, so the loop above can run
-			// again in the event of a resize or other update.
-			// TODO: We should remove this redraw system entirely!
-
-			redraw = true;
 
 			if (plot.setSeries && plot.insertLegend) {
 				plot.setSeries(slices);
@@ -413,14 +407,13 @@ More detail and specific examples can be found in the included HTML file.
 
 				drawDonutHole(ctx);
 
-				// draw labels
+				ctx.restore();
+
+				// Draw the labels, returning true if they fit within the plot
 
 				if (options.series.pie.label.show) {
-					drawLabels();
-				}
-
-				// restore to original state
-				ctx.restore();
+					return drawLabels();
+				} else return true;
 
 				function drawSlice(angle, color, fill) {
 
@@ -461,14 +454,19 @@ More detail and specific examples can be found in the included HTML file.
 
 					for (var i = 0; i < slices.length; ++i) {
 						if (slices[i].percent >= options.series.pie.label.threshold * 100) {
-							drawLabel(slices[i], currentAngle, i);
+							if (!drawLabel(slices[i], currentAngle, i)) {
+								return false;
+							}
 						}
 						currentAngle += slices[i].angle;
 					}
 
+					return true;
+
 					function drawLabel(slice, startAngle, index) {
+
 						if (slice.data[0][1] == 0) {
-							return;
+							return true;
 						}
 
 						// format label text
@@ -502,7 +500,7 @@ More detail and specific examples can be found in the included HTML file.
 						// check to make sure that the label is not outside the canvas
 
 						if (0 - labelTop > 0 || 0 - labelLeft > 0 || canvasHeight - (labelTop + label.height()) < 0 || canvasWidth - (labelLeft + label.width()) < 0) {
-							redraw = true;
+							return false;
 						}
 
 						if (options.series.pie.label.background.opacity != 0) {
@@ -520,6 +518,8 @@ More detail and specific examples can be found in the included HTML file.
 								.css("opacity", options.series.pie.label.background.opacity)
 								.insertBefore(label);
 						}
+
+						return true;
 					} // end individual label function
 				} // end drawLabels function
 			} // end drawPie function
