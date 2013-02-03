@@ -192,33 +192,6 @@ More detail and specific examples can be found in the included HTML file.
 			}
 		}
 
-		function setupPie() {
-
-			legendWidth = target.children().filter(".legend").children().width() || 0;
-
-			// calculate maximum radius and center point
-
-			maxRadius =  Math.min(canvasWidth, canvasHeight / options.series.pie.tilt) / 2;
-			centerTop = canvasHeight / 2 + options.series.pie.offset.top;
-			centerLeft = canvasWidth / 2;
-
-			if (options.series.pie.offset.left == "auto") {
-				if (options.legend.position.match("w")) {
-					centerLeft += legendWidth / 2;
-				} else {
-					centerLeft -= legendWidth / 2;
-				}
-			} else {
-				centerLeft += options.series.pie.offset.left;
-			}
-
-			if (centerLeft < maxRadius) {
-				centerLeft = maxRadius;
-			} else if (centerLeft > canvasWidth - maxRadius) {
-				centerLeft = canvasWidth - maxRadius;
-			}
-		}
-
 		function combine(data) {
 
 			var total = 0,
@@ -299,7 +272,30 @@ More detail and specific examples can be found in the included HTML file.
 			canvasHeight = plot.getPlaceholder().height();
 
 			ctx = newCtx;
-			setupPie();
+
+			legendWidth = target.children().filter(".legend").children().width() || 0;
+
+			// calculate maximum radius and center point
+
+			maxRadius =  Math.min(canvasWidth, canvasHeight / options.series.pie.tilt) / 2;
+			centerTop = canvasHeight / 2 + options.series.pie.offset.top;
+			centerLeft = canvasWidth / 2;
+
+			if (options.series.pie.offset.left == "auto") {
+				if (options.legend.position.match("w")) {
+					centerLeft += legendWidth / 2;
+				} else {
+					centerLeft -= legendWidth / 2;
+				}
+			} else {
+				centerLeft += options.series.pie.offset.left;
+			}
+
+			if (centerLeft < maxRadius) {
+				centerLeft = maxRadius;
+			} else if (centerLeft > canvasWidth - maxRadius) {
+				centerLeft = canvasWidth - maxRadius;
+			}
 
 			var slices = plot.getData(),
 				attempts = 0;
