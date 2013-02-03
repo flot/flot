@@ -178,7 +178,7 @@ More detail and specific examples can be found in the included HTML file.
 			alert(msg);
 		}
 
-		function processDatapoints(plot, series, data, datapoints) {
+		function processDatapoints(plot, series, datapoints) {
 			if (!processed)	{
 				processed = true;
 				canvas = plot.getCanvas();
