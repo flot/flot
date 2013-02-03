@@ -81,15 +81,8 @@ More detail and specific examples can be found in the included HTML file.
 
 		// add hook to determine if pie plugin in enabled, and then perform necessary operations
 
-		plot.hooks.processOptions.push(checkPieEnabled);
-		plot.hooks.bindEvents.push(bindEvents);
-
-		// check to see if the pie plugin is enabled
-
-		function checkPieEnabled(plot, options) {
+		plot.hooks.processOptions.push(function(plot, options) {
 			if (options.series.pie.show) {
-
-				//disable grid
 
 				options.grid.show = false;
 
@@ -130,11 +123,11 @@ More detail and specific examples can be found in the included HTML file.
 
 				plot.hooks.draw.push(draw);
 			}
-		}
+		});
 
 		// bind hoverable events
 
-		function bindEvents(plot, eventHolder) {
+		plot.hooks.bindEvents.push(function(plot, eventHolder) {
 			var options = plot.getOptions();
 			if (options.series.pie.show) {
 				if (options.grid.hoverable) {
@@ -144,7 +137,7 @@ More detail and specific examples can be found in the included HTML file.
 					eventHolder.unbind("click").click(onClick);
 				}
 			}
-		}
+		});
 
 		// debugging function that prints out an object
 
