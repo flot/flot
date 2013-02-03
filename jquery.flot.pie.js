@@ -66,7 +66,6 @@ More detail and specific examples can be found in the included HTML file.
 			maxRadius = null,
 			centerLeft = null,
 			centerTop = null,
-			total = 0,
 			redraw = true,
 			redrawAttempts = 10,
 			shrink = 0.95,
@@ -217,7 +216,8 @@ More detail and specific examples can be found in the included HTML file.
 
 		function combine(data) {
 
-			var combined = 0,
+			var total = 0,
+				combined = 0,
 				numCombined = 0,
 				color = options.series.pie.combine.color,
 				newdata = [];
