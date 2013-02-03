@@ -113,19 +113,8 @@ More detail and specific examples can be found in the included HTML file.
 				} else if (options.series.pie.tilt < 0) {
 					options.series.pie.tilt = 0;
 				}
-
-				// add processData hook to do transformations on the data
-
-				plot.hooks.processDatapoints.push(processDatapoints);
-				plot.hooks.drawOverlay.push(drawOverlay);
-
-				//  draw hook
-
-				plot.hooks.draw.push(draw);
 			}
 		});
-
-		// bind hoverable events
 
 		plot.hooks.bindEvents.push(function(plot, eventHolder) {
 			var options = plot.getOptions();
@@ -136,6 +125,27 @@ More detail and specific examples can be found in the included HTML file.
 				if (options.grid.clickable) {
 					eventHolder.unbind("click").click(onClick);
 				}
+			}
+		});
+
+		plot.hooks.processDatapoints.push(function(plot, series, data, datapoints) {
+			var options = plot.getOptions();
+			if (options.series.pie.show) {
+				processDatapoints(plot, series, data, datapoints);
+			}
+		});
+
+		plot.hooks.drawOverlay.push(function(plot, octx) {
+			var options = plot.getOptions();
+			if (options.series.pie.show) {
+				drawOverlay(plot, octx);
+			}
+		});
+
+		plot.hooks.draw.push(function(plot, newCtx) {
+			var options = plot.getOptions();
+			if (options.series.pie.show) {
+				draw(plot, newCtx);
 			}
 		});
 
