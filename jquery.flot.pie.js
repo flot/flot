@@ -68,13 +68,10 @@ More detail and specific examples can be found in the included HTML file.
 	function init(plot) {
 
 		var canvas = null,
-			canvasWidth = 0,
-			canvasHeight = 0,
 			target = null,
 			maxRadius = null,
 			centerLeft = null,
 			centerTop = null,
-			legendWidth = 0,
 			processed = false,
 			raw = false,
 			ctx = null;
@@ -268,12 +265,11 @@ More detail and specific examples can be found in the included HTML file.
 				return; // if no series were passed
 			}
 
-			canvasWidth = plot.getPlaceholder().width();
-			canvasHeight = plot.getPlaceholder().height();
+			var canvasWidth = plot.getPlaceholder().width(),
+				canvasHeight = plot.getPlaceholder().height(),
+				legendWidth = target.children().filter(".legend").children().width() || 0;
 
 			ctx = newCtx;
-
-			legendWidth = target.children().filter(".legend").children().width() || 0;
 
 			// calculate maximum radius and center point
 
