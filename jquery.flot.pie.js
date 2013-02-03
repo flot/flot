@@ -178,15 +178,6 @@ More detail and specific examples can be found in the included HTML file.
 			alert(msg);
 		}
 
-		function calcTotal(data) {
-			for (var i = 0; i < data.length; ++i) {
-				var item = parseFloat(data[i].data[0][1]);
-				if (item) {
-					total += item;
-				}
-			}
-		}
-
 		function processDatapoints(plot, series, data, datapoints) {
 			if (!processed)	{
 				processed = true;
@@ -224,7 +215,15 @@ More detail and specific examples can be found in the included HTML file.
 			}
 		}
 
-		function fixData(data) {
+		function combine(data) {
+
+			var combined = 0,
+				numCombined = 0,
+				color = options.series.pie.combine.color,
+				newdata = [];
+
+			// Fix up the raw data from Flot, eliminating undefined values
+
 			for (var i = 0; i < data.length; ++i) {
 				if (typeof(data[i].data) == "number") {
 					data[i].data = [[1, data[i].data]];
@@ -235,18 +234,15 @@ More detail and specific examples can be found in the included HTML file.
 					data[i].data = [[1, 0]];
 				}
 			}
-			return data;
-		}
 
-		function combine(data) {
+			// Calculate the total of all slices, so we can show percentages
 
-			data = fixData(data);
-			calcTotal(data);
-
-			var combined = 0;
-			var numCombined = 0;
-			var color = options.series.pie.combine.color;
-			var newdata = [];
+			for (var i = 0; i < data.length; ++i) {
+				var item = parseFloat(data[i].data[0][1]);
+				if (item) {
+					total += item;
+				}
+			}
 
 			for (var i = 0; i < data.length; ++i) {
 
