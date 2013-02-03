@@ -57,6 +57,14 @@ More detail and specific examples can be found in the included HTML file.
 
 (function($) {
 
+	// Maximum redraw attempts when fitting labels within the plot
+
+	var REDRAW_ATTEMPTS = 10;
+
+	// Factor by which to shrink the pie when fitting labels within the plot
+
+	var REDRAW_SHRINK = 0.95;
+
 	function init(plot) {
 
 		var canvas = null,
@@ -67,8 +75,6 @@ More detail and specific examples can be found in the included HTML file.
 			centerLeft = null,
 			centerTop = null,
 			redraw = true,
-			redrawAttempts = 10,
-			shrink = 0.95,
 			legendWidth = 0,
 			processed = false,
 			raw = false,
@@ -299,10 +305,10 @@ More detail and specific examples can be found in the included HTML file.
 			var slices = plot.getData();
 			var attempts = 0;
 
-			while (redraw && attempts<redrawAttempts) {
+			while (redraw && attempts < REDRAW_ATTEMPTS) {
 				redraw = false;
 				if (attempts > 0) {
-					maxRadius *= shrink;
+					maxRadius *= REDRAW_SHRINK;
 				}
 				attempts += 1;
 				clear();
@@ -312,7 +318,7 @@ More detail and specific examples can be found in the included HTML file.
 				drawPie();
 			}
 
-			if (attempts >= redrawAttempts) {
+			if (attempts >= REDRAW_ATTEMPTS) {
 				clear();
 				target.prepend("<div class='error'>Could not draw pie with labels contained inside canvas</div>");
 			}
