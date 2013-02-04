@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Flot Waterfall Chart</title>
+	<title>Flot Examples: Basic Usage</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.waterfall.js"></script>
+    <script type="text/javascript">
+
+        // NOTE: Bar Chart data has a 3rd point = bottom of area (defaults to 0)
+        var series = [
+            5, // Capital %
+            3, // Income %
+            -4, // Costs %
+            4   // Total
+        ];
+
+        var d1 = [],
+            end = series.length - 1; // NOTE: d1[3] = Total added by waterfall code
+        for (var i = 0; i < end; ++i) {
+            d1.push([i, series[i], 0]);
+        }
+
+        $(function () {
+            $.plot("#placeholder", [{
+                data: d1,
+                label: 'Capital %, Income %, Costs %, Total %',
+                color: 'black',
+                waterfall: {
+                    on: true,
+                    totalx: series.length - 1
+                }
+            }], {
+                bars: {
+                    show: true,
+                    fill: true,
+                    lineWidth: 0,
+                    barWidth: 0.5
+                },
+                xaxis: {
+                    show: false
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Waterfall Chart</h2>
+	</div>
+
+	<div id="content">
+
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+
+	</div>
+
+</body>
+</html>
