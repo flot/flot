@@ -78,7 +78,7 @@ You may need to check for this in hover events.
 
                 if (addCrossingPoints && prevp != p && x != null
                     && i > 0 && origpoints[i - ps] != null) {
-                    var interx = (x - origpoints[i - ps]) / (y - origpoints[i - ps + 1]) * (below - y) + x;
+                    var interx = x + (below - y) * (x - origpoints[i - ps]) / (y - origpoints[i - ps + 1]);
                     prevp.push(interx);
                     prevp.push(below);
                     for (m = 2; m < ps; ++m)
