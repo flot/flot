@@ -182,6 +182,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Fixed rendering issues when using the threshold plugin with several series.
    (patch by Ivan Novikov, pull request #934)
 
+ - Pie charts no longer disappear when redrawn after calling setData().
+   (reported by zengge1984 and pareeohnos, issues #810 and #945)
 
 
 ## Flot 0.7 ##
