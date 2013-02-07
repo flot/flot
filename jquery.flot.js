@@ -2533,7 +2533,7 @@ Licensed under the MIT license.
                     highlight(item.series, item.datapoint, eventname);
             }
 
-            placeholder.trigger(eventname, [ pos, item ]);
+            placeholder.trigger(eventname, [ pos, item, plot ]);
         }
 
         function triggerRedrawOverlay() {
