@@ -185,6 +185,10 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Pie charts no longer disappear when redrawn after calling setData().
    (reported by zengge1984 and pareeohnos, issues #810 and #945)
 
+ - Added a work-around for the problem where points with a lineWidth of zero
+   still showed up with a visible line. (reported by SalvoSav, issue #842,
+   patch by Jamie Hamel-Smith, pull request #937)
+
 
 ## Flot 0.7 ##
 
