@@ -2681,6 +2681,8 @@ Licensed under the MIT license.
         }
     }
 
+    // Add the plot function to the top level of the jQuery object
+
     $.plot = function(placeholder, data, options) {
         //var t0 = new Date();
         var plot = new Plot($(placeholder), data, options, $.plot.plugins);
@@ -2691,6 +2693,14 @@ Licensed under the MIT license.
     $.plot.version = "0.8-alpha";
 
     $.plot.plugins = [];
+
+    // Also add the plot function as a chainable property
+
+    $.fn.plot = function(data, options) {
+        return this.each(function() {
+            $.plot(this, data, options);
+        });
+    }
 
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
