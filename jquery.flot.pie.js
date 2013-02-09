@@ -196,17 +196,32 @@ More detail and specific examples can be found in the included HTML file.
 				color = options.series.pie.combine.color,
 				newdata = [];
 
-			// Fix up the raw data from Flot, eliminating undefined values
+			// Fix up the raw data from Flot, ensuring the data is numeric
 
 			for (var i = 0; i < data.length; ++i) {
-				if (typeof(data[i].data) == "number") {
-					data[i].data = [[1, data[i].data]];
-				} else if (typeof(data[i].data) == "undefined" || typeof(data[i].data[0]) == "undefined") {
-					if (typeof(data[i].data) != "undefined" && typeof(data[i].data.label) != "undefined") {
-						data[i].label = data[i].data.label; // fix weirdness coming from flot
+
+				var value = data[i].data;
+
+				// If the data is an array, we'll assume that it's a standard
+				// Flot x-y pair, and are concerned only with the second value.
+
+				// Note how we use the original array, rather than creating a
+				// new one; this is more efficient and preserves any extra data
+				// that the user may have stored in higher indexes.
+
+				if ($.isArray(value)) {
+					if ($.isNumeric(value[1])) {
+						value[1] = +value[1];
+					} else {
+						value[1] = 0;
 					}
-					data[i].data = [[1, 0]];
+				} else if ($.isNumeric(value)) {
+					value = [1, +value];
+				} else {
+					value = [1, 0];
 				}
+
+				data[i].data = [value];
 			}
 
 			// Calculate the total of all slices, so we can show percentages
