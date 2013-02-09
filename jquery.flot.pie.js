@@ -227,21 +227,10 @@ More detail and specific examples can be found in the included HTML file.
 			// Calculate the total of all slices, so we can show percentages
 
 			for (var i = 0; i < data.length; ++i) {
-				var item = parseFloat(data[i].data[0][1]);
-				if (item) {
-					total += item;
-				}
+				total += data[i].data[0][1];
 			}
 
 			for (var i = 0; i < data.length; ++i) {
-
-				// make sure its a number
-
-				data[i].data[0][1] = parseFloat(data[i].data[0][1]);
-
-				if (!data[i].data[0][1]) {
-					data[i].data[0][1] = 0;
-				}
 
 				if (data[i].data[0][1] / total <= options.series.pie.combine.threshold) {
 					combined += data[i].data[0][1];
