@@ -104,6 +104,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Added a new option called 'zero' to bars and filled lines series, to control
    whether the y-axis minimum is scaled to fit the data or set to zero.
 
+ - The plot function is now also a jQuery chainable property.
+   (patch by David Schnur, issues #734 and #816, pull request #953)
+
 ### Bug fixes ###
 
  - Fix problem with null values and pie plugin. (patch by gcruxifix,

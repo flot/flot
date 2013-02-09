@@ -15,6 +15,14 @@ don't use for anything else. Make sure you check any fancy styling
 you apply to the div, e.g. background images have been reported to be a
 problem on IE 7.
 
+The plot function can also be used as a jQuery chainable property.  This form
+naturally can't return the plot object directly, but you can still access it
+via the 'plot' data key, like this:
+
+```js
+var plot = $("#placeholder").plot(data, options).data("plot");
+```
+
 The format of the data is documented below, as is the available
 options. The plot object returned from the call has some methods you
 can call. These are documented separately below.
