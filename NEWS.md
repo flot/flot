@@ -189,6 +189,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
    still showed up with a visible line. (reported by SalvoSav, issue #842,
    patch by Jamie Hamel-Smith, pull request #937)
 
+ - Pie charts now accept values in string form, like other plot types.
+   (reported by laerdal.no, issue #534)
+
 
 ## Flot 0.7 ##
 
