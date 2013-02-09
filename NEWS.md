@@ -192,6 +192,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Pie charts now accept values in string form, like other plot types.
    (reported by laerdal.no, issue #534)
 
+ - Avoid rounding errors in the threshold plugin.
+   (reported by jerikojerk, issue #895)
+
 
 ## Flot 0.7 ##
 
