@@ -232,19 +232,21 @@ More detail and specific examples can be found in the included HTML file.
 
 			for (var i = 0; i < data.length; ++i) {
 
-				if (data[i].data[0][1] / total <= options.series.pie.combine.threshold) {
-					combined += data[i].data[0][1];
+				var value = data[i].data[0][1];
+
+				if (value / total <= options.series.pie.combine.threshold) {
+					combined += value;
 					numCombined++;
 					if (!color) {
 						color = data[i].color;
 					}
 				} else {
 					newdata.push({
-						data: [[1, data[i].data[0][1]]],
+						data: [[1, value]],
 						color: data[i].color,
 						label: data[i].label,
-						angle: data[i].data[0][1] * Math.PI * 2 / total,
-						percent: data[i].data[0][1] / (total / 100)
+						angle: value * Math.PI * 2 / total,
+						percent: value / (total / 100)
 					});
 				}
 			}
