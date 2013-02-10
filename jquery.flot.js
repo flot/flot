@@ -2202,7 +2202,7 @@ Licensed under the MIT license.
                 c.lineTo(left, top);
                 c.lineTo(right, top);
                 c.lineTo(right, bottom);
-                c.fillStyle = fillStyleCallback(bottom, top);
+                c.fillStyle = fillStyleCallback(bottom, top, x, y, b);
                 c.fill();
             }
 
@@ -2266,19 +2266,23 @@ Licensed under the MIT license.
                     throw new Error("Invalid bar alignment: " + series.bars.align);
             }
 
-            var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
+            var fillStyleCallback = series.bars.fill ? function (bottom, top, x, y, b) { return getFillStyle(series.bars, series.color, bottom, top, {series: series, x:x, y:y, b:b}); } : null;
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
-        function getFillStyle(filloptions, seriesColor, bottom, top) {
+        function getFillStyle(filloptions, seriesColor, bottom, top, context) {
             var fill = filloptions.fill;
             if (!fill)
                 return null;
 
-            if (filloptions.fillColor)
-                return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
-
+            if (filloptions.fillColor) {
+                var colorSpec = filloptions.fillColor;
+                if (typeof colorSpec == "function")
+                    colorSpec = colorSpec(context);
+                return getColorOrGradient(colorSpec, bottom, top, seriesColor);
+            }
+            
             var c = $.color.parse(seriesColor);
             c.a = typeof fill == "number" ? fill : 0.4;
             c.normalize();
