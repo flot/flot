@@ -2315,6 +2315,8 @@ Licensed under the MIT license.
             if (options.legend.sorted) {
                 if ($.isFunction(options.legend.sorted)) {
                     entries.sort(options.legend.sorted);
+                } else if (options.legend.sorted == "reverse") {
+                	entries.reverse();
                 } else {
                     var ascending = options.legend.sorted != "descending";
                     entries.sort(function(a, b) {
