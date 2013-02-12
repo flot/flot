@@ -2234,7 +2234,7 @@ Licensed under the MIT license.
                 c.stroke();
             }
 
-            executeHooks(hooks.barDrawn, [series, c, top, right, bottom, left]);
+            executeHooks(hooks.barDrawn, [c, top, right, bottom, left]);
 
         }
 
