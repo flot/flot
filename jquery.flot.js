@@ -163,6 +163,7 @@ Licensed under the MIT license.
             processOffset: [],
             drawBackground: [],
             drawSeries: [],
+            seriesDrawn: [],
             draw: [],
             bindEvents: [],
             drawOverlay: [],
@@ -1447,6 +1448,7 @@ Licensed under the MIT license.
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i]);
+                executeHooks(hooks.seriesDrawn, [ctx, series[i]]);
             }
 
             executeHooks(hooks.draw, [ctx]);
