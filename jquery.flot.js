@@ -164,6 +164,7 @@ Licensed under the MIT license.
             drawBackground: [],
             drawSeries: [],
             seriesDrawn: [],
+            barDrawn: [],
             draw: [],
             bindEvents: [],
             drawOverlay: [],
@@ -2232,6 +2233,9 @@ Licensed under the MIT license.
                     c.moveTo(left, bottom + offset);
                 c.stroke();
             }
+
+            executeHooks(hooks.barDrawn, [series, c, top, right, bottom, left]);
+
         }
 
         function drawSeriesBars(series) {
