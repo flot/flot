@@ -55,7 +55,7 @@ charts or filled areas).
         }
         
         function stackData(plot, s, datapoints) {
-            if (s.stack == null)
+            if (!s.stack)
                 return;
 
             var other = findMatchingSeries(s, plot.getData());
