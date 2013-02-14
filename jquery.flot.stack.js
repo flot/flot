@@ -15,7 +15,7 @@ key (which can be any number or string or just "true"). To specify the default
 stack, you can set the stack option like this:
 
 	series: {
-		stack: null or true or key (number/string)
+		stack: null/false, true, or a key (number/string)
 	}
 
 You can also specify it for a single series, like this:
@@ -55,7 +55,7 @@ charts or filled areas).
         }
         
         function stackData(plot, s, datapoints) {
-            if (s.stack == null)
+            if (s.stack == null || s.stack === false)
                 return;
 
             var other = findMatchingSeries(s, plot.getData());
