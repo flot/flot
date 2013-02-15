@@ -1,3 +1,5 @@
+# Flot # [![Build Status](//travis-ci.org/flot/flot.png)](https://travis-ci.org/flot/flot)
+
 ## About ##
 
 Flot is a Javascript plotting library for jQuery.  
