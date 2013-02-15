@@ -1,4 +1,4 @@
-# Flot # [![Build Status](//travis-ci.org/flot/flot.png)](https://travis-ci.org/flot/flot)
+# Flot # [![Build status](https://travis-ci.org/flot/flot.png)](https://travis-ci.org/flot/flot)
 
 ## About ##
 
