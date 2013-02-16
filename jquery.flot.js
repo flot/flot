@@ -101,10 +101,6 @@ Licensed under the MIT license.
 
 		this.text = null;
 
-		// Buffer for HTML text fragments, so we can add them all at once
-
-		this._textBuffer = "";
-
 		// Cache of text fragments and metrics, so we can avoid expensively
 		// re-calculating them when the plot is re-rendered in a loop.
 
@@ -176,7 +172,7 @@ Licensed under the MIT license.
 	Canvas.prototype.clear = function() {
 		this.context.clearRect(0, 0, this.width, this.height);
 		if (this.text) {
-			this.text.empty();
+			this.text.html("");
 		}
 	};
 
@@ -184,9 +180,32 @@ Licensed under the MIT license.
 
 	Canvas.prototype.render = function() {
 
-		if (this._textBuffer.length) {
+		var cache = this._activeTextCache;
 
-			// Add the HTML text layer, if it doesn't already exist
+		// Swap out the text cache for the 'hot cache' that we've been filling
+		// out since the last call to render.
+
+		this._activeTextCache = {};
+		this._textCache = cache;
+
+		// Check whether the cache actually has any entries.
+
+		var hasOwnProperty = Object.prototype.hasOwnProperty,
+			cacheHasText = false;
+
+		for (var key in cache) {
+			if (hasOwnProperty.call(cache, key)) {
+				cacheHasText = true;
+				break;
+			}
+		}
+
+		// Render the contents of the cache
+
+		if (cacheHasText) {
+
+			// Create the HTML text layer, if it doesn't already exist; if it
+			// does, detach it so we don't get repaints while adding elements.
 
 			if (!this.text) {
 				this.text = $("<div></div>")
@@ -197,18 +216,22 @@ Licensed under the MIT license.
 						left: 0,
 						bottom: 0,
 						right: 0
-					}).insertAfter(this.element);
+					});
+			} else {
+				this.text.detach();
 			}
 
-			this.text.append(this._textBuffer);
-			this._textBuffer = "";
+			// Add all the elements to the text layer, then add it to the DOM
+			// at the end, so we only trigger a single redraw.
+
+			for (var key in cache) {
+				if (hasOwnProperty.call(cache, key)) {
+					this.text.append(cache[key].element);
+				}
+			}
+
+			this.text.insertAfter(this.element);
 		}
-
-		// Swap out the text cache for the 'hot cache' that we've been filling
-		// out since the last call to render.
-
-		this._textCache = this._activeTextCache;
-		this._activeTextCache = {};
 	};
 
 	// Creates (if necessary) and returns a text info object.
@@ -216,16 +239,12 @@ Licensed under the MIT license.
 	// The object looks like this:
 	//
 	// {
-	//     prefix: First half of the HTML for the text's div wrapper.
-	//     suffix: Second half of the HTML for the text's div wrapper.
+	//     element: The jQuery-wrapped HTML div containing the text.
 	//     dimensions: {
 	//         width: Width of the text's wrapper div.
 	//         height: Height of the text's wrapper div.
 	//     }
 	// }
-	//
-	// The prefix and suffix are divided at the 'top' inline style definition,
-	// so the top and left positions can be added when creating the real div.
 	//
 	// Canvas maintains a cache of recently-used text info objects; getTextInfo
 	// either returns the cached element or creates a new entry.
@@ -260,37 +279,42 @@ Licensed under the MIT license.
 
 		info = this._textCache[cacheKey] || this._activeTextCache[cacheKey];
 
+		// If we can't find a matching element in our cache, create a new one
+
 		if (info == null) {
 
-			var prefix,
-				suffix = "px;'>" + text + "</div>",
-				element;
-
-			// If the font is a font-spec object, generate an inline-style string
+			var element = $("<div>" + text + "</div>");
 
 			if (typeof font === "object") {
-				prefix = "<div style='font:" + textStyle + ";color:" + font.color + ";position:absolute;top:";
+				element.css({
+					font: textStyle,
+					color: font.color,
+					position: "absolute",
+					top: -9999
+				});
 			} else if (typeof font === "string") {
-				prefix = "<div class='" + font + "' style='position:absolute;top:";
+				element.addClass(font).css({
+					position: "absolute",
+					top: -9999
+				});
 			} else {
-				prefix = "<div style='position:absolute;top:";
+				element.css({
+					position: "absolute",
+					top: -9999
+				});
 			}
 
-			// Create a dummy element off-screen and measure its dimensions
-
-			element = $(prefix + -9999 + suffix)
-				.appendTo(this.container);
+			element.appendTo(this.container);
 
 			info = {
-				prefix: prefix,
-				suffix: suffix,
+				element: element,
 				dimensions: {
 					width: element.outerWidth(true),
 					height: element.outerHeight(true)
 				}
 			};
 
-			element.remove();
+			element.detach();
 		}
 
 		// Save the entry to the 'hot' text cache, marking it as active and
@@ -338,10 +362,12 @@ Licensed under the MIT license.
 			y -= dimensions.height;
 		}
 
-		// Use inline styles to move the element into position, then add its
-		// HTML to the canvas text buffer.
+		// Move the element to its final position within the container
 
-		this._textBuffer += info.prefix + parseInt(y) + "px;left:" + parseInt(x) + info.suffix;
+		info.element.css({
+			top: parseInt(y),
+			left: parseInt(x)
+		});
 	};
 
 	///////////////////////////////////////////////////////////////////////////
