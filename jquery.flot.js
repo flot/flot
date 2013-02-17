@@ -40,6 +40,10 @@ Licensed under the MIT license.
 		$("head").prepend("<style id='flot-default-styles'>.flot-tick-label {font-size:smaller;color:#545454;}</style>");
 	});
 
+	// Cache the prototype hasOwnProperty for faster access
+
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 	///////////////////////////////////////////////////////////////////////////
 	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
 	//
@@ -190,8 +194,7 @@ Licensed under the MIT license.
 
 		// Check whether the cache actually has any entries.
 
-		var hasOwnProperty = Object.prototype.hasOwnProperty,
-			cacheHasText = false;
+		var cacheHasText = false;
 
 		for (var key in cache) {
 			if (hasOwnProperty.call(cache, key)) {
