@@ -8,7 +8,8 @@ The plugin supports these options:
 selection: {
 	mode: null or "x" or "y" or "xy",
 	color: color,
-	shape: "round" or "miter" or "bevel"
+	shape: "round" or "miter" or "bevel",
+	alwaysShow: boolean
 }
 
 Selection support is enabled by setting the mode to one of "x", "y" or "xy".
@@ -16,7 +17,9 @@ In "x" mode, the user will only be able to specify the x range, similarly for
 "y" mode. For "xy", the selection becomes a rectangle where both ranges can be
 specified. "color" is color of the selection (if you need to change the color
 later on, you can get to it with plot.getOptions().selection.color). "shape"
-is the shape of the corners of the selection.
+is the shape of the corners of the selection. When "alwaysShow" is true,
+the selection rectangle will always be displayed (as a line), even when the
+selection is very small.
 
 When selection support is enabled, a "plotselected" event will be emitted on
 the DOM element you passed into the plot function. The event handler gets a
@@ -296,9 +299,9 @@ The plugin allso adds the following methods to the plot object:
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
             // draw selection
-            if (selection.show && selectionIsSane()) {
+            var o = plot.getOptions();
+            if (selection.show && (selectionIsSane() || o.selection.alwaysShow)) {
                 var plotOffset = plot.getPlotOffset();
-                var o = plot.getOptions();
 
                 ctx.save();
                 ctx.translate(plotOffset.left, plotOffset.top);
@@ -338,7 +341,8 @@ The plugin allso adds the following methods to the plot object:
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
                 color: "#e8cfac",
-                shape: "round" // one of "round", "miter", or "bevel"
+                shape: "round", // one of "round", "miter", or "bevel"
+                alwaysShow: false // boolean
             }
         },
         name: 'selection',
