@@ -45,17 +45,18 @@ how much info to output:
         var debugLevel = 1;
 
         function checkDebugEnabled(plot, options) {
-        if (options.debug) {
-            debugLevel = options.debug;
-            plot.hooks.processDatapoints.push(alertSeries);
+            if (options.debug) {
+                debugLevel = options.debug;
+                plot.hooks.processDatapoints.push(alertSeries);
+            }
         }
-    }
 
-    function alertSeries(plot, series, datapoints) {
-        var msg = "series " + series.label;
-        if (debugLevel > 1) {
-            msg += " with " + series.data.length + " points";
-            alert(msg);
+        function alertSeries(plot, series, datapoints) {
+            var msg = "series " + series.label;
+            if (debugLevel > 1) {
+                msg += " with " + series.data.length + " points";
+                alert(msg);
+            }
         }
 
         plot.hooks.processOptions.push(checkDebugEnabled);
