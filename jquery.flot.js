@@ -286,25 +286,18 @@ Licensed under the MIT license.
 
 		if (info == null) {
 
-			var element = $("<div>" + text + "</div>");
+			var element = $("<div></div>").html(text).css({
+				position: "absolute",
+				top: -9999
+			});
 
 			if (typeof font === "object") {
 				element.css({
 					font: textStyle,
 					color: font.color,
-					position: "absolute",
-					top: -9999
 				});
 			} else if (typeof font === "string") {
-				element.addClass(font).css({
-					position: "absolute",
-					top: -9999
-				});
-			} else {
-				element.css({
-					position: "absolute",
-					top: -9999
-				});
+				element.addClass(font);
 			}
 
 			element.appendTo(this.container);
