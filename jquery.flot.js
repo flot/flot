@@ -69,6 +69,7 @@ Licensed under the MIT license.
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
+                    tickFactor: 1, // Density of ticks when the options 'ticks' is null. This takes the canvas size into consideration
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
@@ -1258,7 +1259,7 @@ Licensed under the MIT license.
             else
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                noTicks = (opts.tickFactor || 1) * 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
 
             axis.delta = (axis.max - axis.min) / noTicks;
 
