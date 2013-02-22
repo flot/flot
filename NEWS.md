@@ -199,6 +199,9 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Avoid rounding errors in the threshold plugin.
    (reported by jerikojerk, issue #895)
 
+ - Fixed an error when using the navigate plugin with jQuery 1.9.x or later.
+   (reported by Paolo Valleri, issue #964)
+
 
 ## Flot 0.7 ##
 
