@@ -109,18 +109,6 @@ Licensed under the MIT license.
 		// re-calculating them when the plot is re-rendered in a loop.
 
 		this._textCache = {};
-
-		// A 'hot' copy of the text cache; it holds only info that has been
-		// accessed in the past render cycle.  With each render it is saved as
-		// the new text cache, as an alternative to more complicated ways of
-		// expiring items that are no longer needed.
-
-		// NOTE: It's unclear how this compares performance-wise to keeping a
-		// single cache and looping over it to delete expired items.  This way
-		// is certainly less operations, but seems like it might result in more
-		// garbage collection and possibly increased cache-insert times.
-
-		this._activeTextCache = {};
 	}
 
 	// Resizes the canvas to the given dimensions.
@@ -171,70 +159,73 @@ Licensed under the MIT license.
 		context.scale(pixelRatio, pixelRatio);
 	};
 
-	// Clears the entire canvas area, including overlaid text.
+	// Clears the entire canvas area, not including any overlaid HTML text
 
 	Canvas.prototype.clear = function() {
 		this.context.clearRect(0, 0, this.width, this.height);
-		if (this.text) {
-			this.text.html("");
-		}
 	};
 
-	// Finishes rendering the canvas, including populating the text overlay.
+	// Finishes rendering the canvas, including managing the text overlay.
 
 	Canvas.prototype.render = function() {
 
-		var cache = this._activeTextCache;
-
-		// Swap out the text cache for the 'hot cache' that we've been filling
-		// out since the last call to render.
-
-		this._activeTextCache = {};
-		this._textCache = cache;
+		var cache = this._textCache,
+			cacheHasText = false,
+			info, key;
 
 		// Check whether the cache actually has any entries.
 
-		var cacheHasText = false;
-
-		for (var key in cache) {
+		for (key in cache) {
 			if (hasOwnProperty.call(cache, key)) {
 				cacheHasText = true;
 				break;
 			}
 		}
 
-		// Render the contents of the cache
+		if (!cacheHasText) {
+			return;
+		}
 
-		if (cacheHasText) {
+		// Create the HTML text layer, if it doesn't already exist.
 
-			// Create the HTML text layer, if it doesn't already exist; if it
-			// does, detach it so we don't get repaints while adding elements.
+		if (!this.text) {
+			this.text = $("<div></div>")
+				.addClass("flot-text")
+				.css({
+					position: "absolute",
+					top: 0,
+					left: 0,
+					bottom: 0,
+					right: 0
+				})
+				.insertAfter(this.element);
+		}
 
-			if (!this.text) {
-				this.text = $("<div></div>")
-					.addClass("flot-text")
-					.css({
-						position: "absolute",
-						top: 0,
-						left: 0,
-						bottom: 0,
-						right: 0
-					});
-			} else {
-				this.text.detach();
-			}
+		// Add all the elements to the text layer, then add it to the DOM at
+		// the end, so we only trigger a single redraw.
 
-			// Add all the elements to the text layer, then add it to the DOM
-			// at the end, so we only trigger a single redraw.
+		this.text.hide();
 
-			for (var key in cache) {
-				if (hasOwnProperty.call(cache, key)) {
-					this.text.append(cache[key].element);
+		for (key in cache) {
+			if (hasOwnProperty.call(cache, key)) {
+
+				info = cache[key];
+
+				if (info.active) {
+					if (!info.rendered) {
+						this.text.append(info.element);
+						info.rendered = true;
+					}
+				} else {
+					delete cache[key];
+					if (info.rendered) {
+						info.element.detach();
+					}
 				}
 			}
-
-			this.text.insertAfter(this.element);
 		}
+
+		this.text.show();
 	};
 
 	// Creates (if necessary) and returns a text info object.
@@ -242,11 +233,11 @@ Licensed under the MIT license.
 	// The object looks like this:
 	//
 	// {
+	//     width: Width of the text's wrapper div.
+	//     height: Height of the text's wrapper div.
+	//     active: Flag indicating whether the text should be visible.
+	//     rendered: Flag indicating whether the text is currently visible.
 	//     element: The jQuery-wrapped HTML div containing the text.
-	//     dimensions: {
-	//         width: Width of the text's wrapper div.
-	//         height: Height of the text's wrapper div.
-	//     }
 	// }
 	//
 	// Canvas maintains a cache of recently-used text info objects; getTextInfo
@@ -280,7 +271,7 @@ Licensed under the MIT license.
 
 		cacheKey = text + "-" + textStyle + "-" + angle;
 
-		info = this._textCache[cacheKey] || this._activeTextCache[cacheKey];
+		info = this._textCache[cacheKey];
 
 		// If we can't find a matching element in our cache, create a new one
 
@@ -294,7 +285,7 @@ Licensed under the MIT license.
 			if (typeof font === "object") {
 				element.css({
 					font: textStyle,
-					color: font.color,
+					color: font.color
 				});
 			} else if (typeof font === "string") {
 				element.addClass(font);
@@ -303,29 +294,25 @@ Licensed under the MIT license.
 			element.appendTo(this.container);
 
 			info = {
+				active: false,
+				rendered: false,
 				element: element,
-				dimensions: {
-					width: element.outerWidth(true),
-					height: element.outerHeight(true)
-				}
+				width: element.outerWidth(true),
+				height: element.outerHeight(true)
 			};
 
 			element.detach();
+
+			this._textCache[cacheKey] = info;
 		}
-
-		// Save the entry to the 'hot' text cache, marking it as active and
-		// preserving it for the next render pass.
-
-		this._activeTextCache[cacheKey] = info;
 
 		return info;
 	};
 
-	// Draws a text string onto the canvas.
+	// Adds a text string to the canvas text overlay.
 	//
-	// The text isn't necessarily drawn immediately; some implementations may
-	// buffer it to improve performance.  Text is only guaranteed to be drawn
-	// after the Canvas render method has been called.
+	// The text isn't drawn immediately; it is marked as rendering, which will
+	// result in its addition to the canvas on the next render pass.
 	//
 	// @param {number} x X coordinate at which to draw the text.
 	// @param {number} y Y coordinate at which to draw the text.
@@ -339,31 +326,62 @@ Licensed under the MIT license.
 	// @param {string=} valign Vertical alignment of the text; either "top",
 	//     "middle" or "bottom".
 
-	Canvas.prototype.drawText = function(x, y, text, font, angle, halign, valign) {
+	Canvas.prototype.addText = function(x, y, text, font, angle, halign, valign) {
 
-		var info = this.getTextInfo(text, font, angle),
-			dimensions = info.dimensions;
+		var info = this.getTextInfo(text, font, angle);
+
+		// Mark the div for inclusion in the next render pass
+
+		info.active = true;
 
 		// Tweak the div's position to match the text's alignment
 
 		if (halign == "center") {
-			x -= dimensions.width / 2;
+			x -= info.width / 2;
 		} else if (halign == "right") {
-			x -= dimensions.width;
+			x -= info.width;
 		}
 
 		if (valign == "middle") {
-			y -= dimensions.height / 2;
+			y -= info.height / 2;
 		} else if (valign == "bottom") {
-			y -= dimensions.height;
+			y -= info.height;
 		}
 
 		// Move the element to its final position within the container
 
 		info.element.css({
-			top: parseInt(y),
-			left: parseInt(x)
+			top: parseInt(y, 10),
+			left: parseInt(x, 10)
 		});
+	};
+
+	// Removes one or more text strings from the canvas text overlay.
+	//
+	// If no parameters are given, all text within the container is removed.
+	// The text is not actually removed; it is simply marked as inactive, which
+	// will result in its removal on the next render pass.
+	//
+	// @param {string} text Text string to remove.
+	// @param {(string|object)=} font Either a string of space-separated CSS
+	//     classes or a font-spec object, defining the text's font and style.
+	// @param {number=} angle Angle at which the text is rotated, in degrees.
+	//     Angle is currently unused, it will be implemented in the future.
+
+	Canvas.prototype.removeText = function(text, font, angle) {
+		if (text == null) {
+			var cache = this._textCache;
+			for (var key in cache) {
+				if (hasOwnProperty.call(cache, key)) {
+					cache[key].active = false;
+				}
+			}
+		} else {
+			var info = this.getTextInfo(text, font, angle);
+			if (info != null) {
+				info.active = false;
+			}
+		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -1225,18 +1243,17 @@ Licensed under the MIT license.
 
             for (var i = 0; i < ticks.length; ++i) {
 
-                var t = ticks[i],
-                    dimensions;
+                var t = ticks[i];
 
                 if (!t.label)
                     continue;
 
-                dimensions = surface.getTextInfo(t.label, font).dimensions;
+                var info = surface.getTextInfo(t.label, font);
 
                 if (opts.labelWidth == null)
-                    axisw = Math.max(axisw, dimensions.width);
+                    axisw = Math.max(axisw, info.width);
                 if (opts.labelHeight == null)
-                    axish = Math.max(axish, dimensions.height);
+                    axish = Math.max(axish, info.height);
             }
 
             axis.labelWidth = Math.ceil(axisw);
@@ -1430,6 +1447,10 @@ Licensed under the MIT license.
             $.each(axes, function (_, axis) {
                 setTransformationHelpers(axis);
             });
+
+            if (showGrid) {
+                drawAxisLabels();
+            }
 
             insertLegend();
         }
@@ -1667,7 +1688,6 @@ Licensed under the MIT license.
 
             if (grid.show && !grid.aboveData) {
                 drawGrid();
-                drawAxisLabels();
             }
 
             for (var i = 0; i < series.length; ++i) {
@@ -1679,7 +1699,6 @@ Licensed under the MIT license.
 
             if (grid.show && grid.aboveData) {
                 drawGrid();
-                drawAxisLabels();
             }
 
             surface.render();
@@ -1955,6 +1974,8 @@ Licensed under the MIT license.
 
         function drawAxisLabels() {
 
+            surface.removeText();
+
             $.each(allAxes(), function (_, axis) {
                 if (!axis.show || axis.ticks.length == 0)
                     return;
@@ -1989,7 +2010,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    surface.drawText(x, y, tick.label, font, null, halign, valign);
+                    surface.addText(x, y, tick.label, font, null, halign, valign);
                 }
             });
         }
