@@ -268,8 +268,9 @@ Licensed under the MIT license.
 
 		// The text + style + angle uniquely identify the text's dimensions and
 		// content; we'll use them to build this entry's text cache key.
+		// NOTE: We don't support rotated text yet, so the angle is unused.
 
-		cacheKey = text + "-" + textStyle + "-" + angle;
+		cacheKey = textStyle + "|" + text;
 
 		info = this._textCache[cacheKey];
 
