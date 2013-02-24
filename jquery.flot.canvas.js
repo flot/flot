@@ -61,69 +61,80 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 			for (var layerKey in cache) {
 				if (hasOwnProperty.call(cache, layerKey)) {
-
 					var layerCache = cache[layerKey];
+					for (var styleKey in layerCache) {
+						if (hasOwnProperty.call(layerCache, styleKey)) {
+							var styleCache = layerCache[styleKey],
+								updateStyles = true;
+							for (var key in styleCache) {
+								if (hasOwnProperty.call(styleCache, key)) {
 
-					for (var key in layerCache) {
-						if (hasOwnProperty.call(layerCache, key)) {
+									var info = styleCache[key];
 
-							var info = layerCache[key];
+									if (!info.active) {
+										delete styleCache[key];
+										continue;
+									}
 
-							if (!info.active) {
-								delete cache[key];
-								continue;
-							}
+									var x = info.x,
+										y = info.y,
+										lines = info.lines,
+										halign = info.halign;
 
-							var x = info.x,
-								y = info.y,
-								lines = info.lines,
-								halign = info.halign;
+									// Since every element at this level of the cache have the
+									// same font and fill styles, we can just change them once
+									// using the values from the first element.
 
-							context.fillStyle = info.font.color;
-							context.font = info.font.definition;
+									if (updateStyles) {
+										context.fillStyle = info.font.color;
+										context.font = info.font.definition;
+										updateStyles = false;
+									}
 
-							// TODO: Comments in Ole's implementation indicate that
-							// some browsers differ in their interpretation of 'top';
-							// so far I don't see this, but it requires more testing.
-							// We'll stick with top until this can be verified.
+									// TODO: Comments in Ole's implementation indicate that
+									// some browsers differ in their interpretation of 'top';
+									// so far I don't see this, but it requires more testing.
+									// We'll stick with top until this can be verified.
 
-							// Original comment was:
-							// Top alignment would be more natural, but browsers can
-							// differ a pixel or two in where they consider the top to
-							// be, so instead we middle align to minimize variation
-							// between browsers and compensate when calculating the
-							// coordinates.
+									// Original comment was:
+									// Top alignment would be more natural, but browsers can
+									// differ a pixel or two in where they consider the top to
+									// be, so instead we middle align to minimize variation
+									// between browsers and compensate when calculating the
+									// coordinates.
 
-							context.textBaseline = "top";
+									context.textBaseline = "top";
 
-							for (var i = 0; i < lines.length; ++i) {
+									for (var i = 0; i < lines.length; ++i) {
 
-								var line = lines[i],
-									linex = x;
+										var line = lines[i],
+											linex = x;
 
-								// Apply horizontal alignment per-line
+										// Apply horizontal alignment per-line
 
-								if (halign == "center") {
-									linex -= line.width / 2;
-								} else if (halign == "right") {
-									linex -= line.width;
+										if (halign == "center") {
+											linex -= line.width / 2;
+										} else if (halign == "right") {
+											linex -= line.width;
+										}
+
+										// FIXME: LEGACY BROWSER FIX
+										// AFFECTS: Opera < 12.00
+
+										// Round the coordinates, since Opera otherwise
+										// switches to uglier (probably non-hinted) rendering.
+										// Also offset the y coordinate, since Opera is off
+										// pretty consistently compared to the other browsers.
+
+										if (!!(window.opera && window.opera.version().split(".")[0] < 12)) {
+											linex = Math.floor(linex);
+											y = Math.ceil(y - 2);
+										}
+
+										context.fillText(line.text, linex, y);
+										y += line.height;
+									}
 								}
-
-								// FIXME: LEGACY BROWSER FIX
-								// AFFECTS: Opera < 12.00
-
-								// Round the coordinates, since Opera otherwise
-								// switches to uglier (probably non-hinted) rendering.
-								// Also offset the y coordinate, since Opera is off
-								// pretty consistently compared to the other browsers.
-
-								if (!!(window.opera && window.opera.version().split(".")[0] < 12)) {
-									linex = Math.floor(linex);
-									y = Math.ceil(y - 2);
-								}
-
-								context.fillText(line.text, linex, y);
-								y += line.height;
 							}
 						}
 					}
@@ -160,7 +171,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				return getTextInfo.call(this, layer, text, font, angle);
 			}
 
-			var textStyle, cache, cacheKey, info;
+			var textStyle, layerCache, styleCache, info;
 
 			// Cast the value to a string, in case we were given a number
 
@@ -174,21 +185,21 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				textStyle = font;
 			}
 
-			// Retrieve (or create) the cache for the text's layer
+			// Retrieve (or create) the cache for the text's layer and styles
 
-			cache = this._textCache[layer];
+			layerCache = this._textCache[layer];
 
-			if (cache == null) {
-				cache = this._textCache[layer] = {};
+			if (layerCache == null) {
+				layerCache = this._textCache[layer] = {};
 			}
 
-			// The text + style + angle uniquely identify the text's dimensions
-			// and content; we'll use them to build the entry's text cache key.
-			// NOTE: We don't support rotated text yet, so the angle is unused.
+			styleCache = layerCache[textStyle];
 
-			cacheKey = textStyle + "|" + text;
+			if (styleCache == null) {
+				styleCache = layerCache[textStyle] = {};
+			}
 
-			info = cache[cacheKey];
+			info = styleCache[text];
 
 			if (info == null) {
 
@@ -224,7 +235,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				// Create a new info object, initializing the dimensions to
 				// zero so we can count them up line-by-line.
 
-				info = cache[cacheKey] = {
+				info = styleCache[text] = {
 					x: null,
 					y: null,
 					width: 0,

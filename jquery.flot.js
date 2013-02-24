@@ -180,20 +180,23 @@ Licensed under the MIT license.
 
 				layer.hide();
 
-				for (var key in layerCache) {
-					if (hasOwnProperty.call(layerCache, key)) {
-
-						var info = layerCache[key];
-
-						if (info.active) {
-							if (!info.rendered) {
-								layer.append(info.element);
-								info.rendered = true;
-							}
-						} else {
-							delete layerCache[key];
-							if (info.rendered) {
-								info.element.detach();
+				for (var styleKey in layerCache) {
+					if (hasOwnProperty.call(layerCache, styleKey)) {
+						var styleCache = layerCache[styleKey];
+						for (var key in styleCache) {
+							if (hasOwnProperty.call(styleCache, key)) {
+								var info = styleCache[key];
+								if (info.active) {
+									if (!info.rendered) {
+										layer.append(info.element);
+										info.rendered = true;
+									}
+								} else {
+									delete styleCache[key];
+									if (info.rendered) {
+										info.element.detach();
+									}
+								}
 							}
 						}
 					}
@@ -258,7 +261,7 @@ Licensed under the MIT license.
 
 	Canvas.prototype.getTextInfo = function(layer, text, font, angle) {
 
-		var textStyle, cache, cacheKey, info;
+		var textStyle, layerCache, styleCache, info;
 
 		// Cast the value to a string, in case we were given a number or such
 
@@ -272,21 +275,21 @@ Licensed under the MIT license.
 			textStyle = font;
 		}
 
-		// Retrieve (or create) the cache for the text's layer
+		// Retrieve (or create) the cache for the text's layer and styles
 
-		cache = this._textCache[layer];
+		layerCache = this._textCache[layer];
 
-		if (cache == null) {
-			cache = this._textCache[layer] = {};
+		if (layerCache == null) {
+			layerCache = this._textCache[layer] = {};
 		}
 
-		// The text + style + angle uniquely identify the text's dimensions and
-		// content; we'll use them to build this entry's text cache key.
-		// NOTE: We don't support rotated text yet, so the angle is unused.
+		styleCache = layerCache[textStyle];
 
-		cacheKey = textStyle + "|" + text;
+		if (styleCache == null) {
+			styleCache = layerCache[textStyle] = {};
+		}
 
-		info = cache[cacheKey];
+		info = styleCache[text];
 
 		// If we can't find a matching element in our cache, create a new one
 
@@ -308,7 +311,7 @@ Licensed under the MIT license.
 				element.addClass(font);
 			}
 
-			info = cache[cacheKey] = {
+			info = styleCache[text] = {
 				active: false,
 				rendered: false,
 				element: element,
@@ -387,11 +390,16 @@ Licensed under the MIT license.
 
 	Canvas.prototype.removeText = function(layer, text, font, angle) {
 		if (text == null) {
-			var cache = this._textCache[layer];
-			if (cache != null) {
-				for (var key in cache) {
-					if (hasOwnProperty.call(cache, key)) {
-						cache[key].active = false;
+			var layerCache = this._textCache[layer];
+			if (layerCache != null) {
+				for (var styleKey in layerCache) {
+					if (hasOwnProperty.call(layerCache, styleKey)) {
+						var styleCache = layerCache[styleKey]
+						for (var key in styleCache) {
+							if (hasOwnProperty.call(styleCache, key)) {
+								styleCache[key].active = false;
+							}
+						}
 					}
 				}
 			}
