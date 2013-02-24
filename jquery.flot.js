@@ -99,9 +99,9 @@ Licensed under the MIT license.
 
 		this.resize(container.width(), container.height());
 
-		// Container for HTML text overlaid onto the canvas; created on demand
+		// Collection of HTML div layers for text overlaid onto the canvas
 
-		this.text = null;
+		this.text = {};
 
 		// Cache of text fragments and metrics, so we can avoid expensively
 		// re-calculating them when the plot is re-rendered in a loop.
@@ -167,66 +167,58 @@ Licensed under the MIT license.
 
 	Canvas.prototype.render = function() {
 
-		var cache = this._textCache,
-			cacheHasText = false,
-			key;
+		var cache = this._textCache;
 
-		// Check whether the cache actually has any entries.
+		// For each text layer, add elements marked as active that haven't
+		// already been rendered, and remove those that are no longer active.
 
-		for (key in cache) {
-			if (hasOwnProperty.call(cache, key)) {
-				cacheHasText = true;
-				break;
-			}
-		}
+		for (var layerKey in cache) {
+			if (hasOwnProperty.call(cache, layerKey)) {
 
-		if (!cacheHasText) {
-			return;
-		}
+				var layer = this.getTextLayer(layerKey),
+					layerCache = cache[layerKey];
 
-		// Create the HTML text layer, if it doesn't already exist.
+				layer.hide();
 
-		var layer = this.getTextLayer(),
-			info;
+				for (var key in layerCache) {
+					if (hasOwnProperty.call(layerCache, key)) {
 
-		// Add all the elements to the text layer, then add it to the DOM at
-		// the end, so we only trigger a single redraw.
+						var info = layerCache[key];
 
-		layer.hide();
-
-		for (key in cache) {
-			if (hasOwnProperty.call(cache, key)) {
-
-				info = cache[key];
-
-				if (info.active) {
-					if (!info.rendered) {
-						layer.append(info.element);
-						info.rendered = true;
-					}
-				} else {
-					delete cache[key];
-					if (info.rendered) {
-						info.element.detach();
+						if (info.active) {
+							if (!info.rendered) {
+								layer.append(info.element);
+								info.rendered = true;
+							}
+						} else {
+							delete layerCache[key];
+							if (info.rendered) {
+								info.element.detach();
+							}
+						}
 					}
 				}
+
+				layer.show();
 			}
 		}
-
-		layer.show();
 	};
 
 	// Creates (if necessary) and returns the text overlay container.
 	//
+	// @param {string} classes String of space-separated CSS classes used to
+	//     uniquely identify the text layer.
 	// @return {object} The jQuery-wrapped text-layer div.
 
-	Canvas.prototype.getTextLayer = function() {
+	Canvas.prototype.getTextLayer = function(classes) {
+
+		var layer = this.text[classes];
 
 		// Create the text layer if it doesn't exist
 
-		if (!this.text) {
-			this.text = $("<div></div>")
-				.addClass("flot-text")
+		if (layer == null) {
+			layer = this.text[classes] = $("<div></div>")
+				.addClass("flot-text " + classes)
 				.css({
 					position: "absolute",
 					top: 0,
@@ -237,7 +229,7 @@ Licensed under the MIT license.
 				.insertAfter(this.element);
 		}
 
-		return this.text;
+		return layer;
 	};
 
 	// Creates (if necessary) and returns a text info object.
@@ -255,6 +247,8 @@ Licensed under the MIT license.
 	// Canvas maintains a cache of recently-used text info objects; getTextInfo
 	// either returns the cached element or creates a new entry.
 	//
+	// @param {string} layer A string of space-separated CSS classes uniquely
+	//     identifying the layer containing this text.
 	// @param {string} text Text string to retrieve info for.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
@@ -262,9 +256,9 @@ Licensed under the MIT license.
 	//     Angle is currently unused, it will be implemented in the future.
 	// @return {object} a text info object.
 
-	Canvas.prototype.getTextInfo = function(text, font, angle) {
+	Canvas.prototype.getTextInfo = function(layer, text, font, angle) {
 
-		var textStyle, cacheKey, info;
+		var textStyle, cache, cacheKey, info;
 
 		// Cast the value to a string, in case we were given a number or such
 
@@ -278,13 +272,21 @@ Licensed under the MIT license.
 			textStyle = font;
 		}
 
+		// Retrieve (or create) the cache for the text's layer
+
+		cache = this._textCache[layer];
+
+		if (cache == null) {
+			cache = this._textCache[layer] = {};
+		}
+
 		// The text + style + angle uniquely identify the text's dimensions and
 		// content; we'll use them to build this entry's text cache key.
 		// NOTE: We don't support rotated text yet, so the angle is unused.
 
 		cacheKey = textStyle + "|" + text;
 
-		info = this._textCache[cacheKey];
+		info = cache[cacheKey];
 
 		// If we can't find a matching element in our cache, create a new one
 
@@ -295,7 +297,7 @@ Licensed under the MIT license.
 					position: "absolute",
 					top: -9999
 				})
-				.appendTo(this.getTextLayer());
+				.appendTo(this.getTextLayer(layer));
 
 			if (typeof font === "object") {
 				element.css({
@@ -306,7 +308,7 @@ Licensed under the MIT license.
 				element.addClass(font);
 			}
 
-			info = {
+			info = cache[cacheKey] = {
 				active: false,
 				rendered: false,
 				element: element,
@@ -315,8 +317,6 @@ Licensed under the MIT license.
 			};
 
 			element.detach();
-
-			this._textCache[cacheKey] = info;
 		}
 
 		return info;
@@ -327,6 +327,8 @@ Licensed under the MIT license.
 	// The text isn't drawn immediately; it is marked as rendering, which will
 	// result in its addition to the canvas on the next render pass.
 	//
+	// @param {string} layer A string of space-separated CSS classes uniquely
+	//     identifying the layer containing this text.
 	// @param {number} x X coordinate at which to draw the text.
 	// @param {number} y Y coordinate at which to draw the text.
 	// @param {string} text Text string to draw.
@@ -339,9 +341,9 @@ Licensed under the MIT license.
 	// @param {string=} valign Vertical alignment of the text; either "top",
 	//     "middle" or "bottom".
 
-	Canvas.prototype.addText = function(x, y, text, font, angle, halign, valign) {
+	Canvas.prototype.addText = function(layer, x, y, text, font, angle, halign, valign) {
 
-		var info = this.getTextInfo(text, font, angle);
+		var info = this.getTextInfo(layer, text, font, angle);
 
 		// Mark the div for inclusion in the next render pass
 
@@ -371,29 +373,30 @@ Licensed under the MIT license.
 
 	// Removes one or more text strings from the canvas text overlay.
 	//
-	// If no parameters are given, all text within the container is removed.
+	// If no parameters are given, all text within the layer is removed.
 	// The text is not actually removed; it is simply marked as inactive, which
 	// will result in its removal on the next render pass.
 	//
+	// @param {string} layer A string of space-separated CSS classes uniquely
+	//     identifying the layer containing this text.
 	// @param {string} text Text string to remove.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which the text is rotated, in degrees.
 	//     Angle is currently unused, it will be implemented in the future.
 
-	Canvas.prototype.removeText = function(text, font, angle) {
+	Canvas.prototype.removeText = function(layer, text, font, angle) {
 		if (text == null) {
-			var cache = this._textCache;
-			for (var key in cache) {
-				if (hasOwnProperty.call(cache, key)) {
-					cache[key].active = false;
+			var cache = this._textCache[layer];
+			if (cache != null) {
+				for (var key in cache) {
+					if (hasOwnProperty.call(cache, key)) {
+						cache[key].active = false;
+					}
 				}
 			}
 		} else {
-			var info = this.getTextInfo(text, font, angle);
-			if (info != null) {
-				info.active = false;
-			}
+			this.getTextInfo(layer, text, font, angle).active = false;
 		}
 	};
 
@@ -1252,7 +1255,8 @@ Licensed under the MIT license.
 
             var opts = axis.options, ticks = axis.ticks || [],
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
-                font = opts.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis";
+                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                font = opts.font || "flot-tick-label";
 
             for (var i = 0; i < ticks.length; ++i) {
 
@@ -1261,7 +1265,7 @@ Licensed under the MIT license.
                 if (!t.label)
                     continue;
 
-                var info = surface.getTextInfo(t.label, font);
+                var info = surface.getTextInfo(layer, t.label, font);
 
                 if (opts.labelWidth == null)
                     axisw = Math.max(axisw, info.width);
@@ -1987,15 +1991,16 @@ Licensed under the MIT license.
 
         function drawAxisLabels() {
 
-            surface.removeText();
-
             $.each(allAxes(), function (_, axis) {
                 if (!axis.show || axis.ticks.length == 0)
                     return;
 
                 var box = axis.box,
-                    font = axis.options.font || "flot-tick-label flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                    font = axis.options.font || "flot-tick-label",
                     tick, x, y, halign, valign;
+
+	            surface.removeText(layer);
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
 
@@ -2023,7 +2028,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    surface.addText(x, y, tick.label, font, null, halign, valign);
+                    surface.addText(layer, x, y, tick.label, font, null, halign, valign);
                 }
             });
         }

@@ -53,87 +53,79 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			}
 
 			var context = this.context,
-				cache = this._textCache,
-				cacheHasText = false,
-				key;
+				cache = this._textCache;
 
-			// Check whether the cache actually has any entries.
-
-			for (key in cache) {
-				if (hasOwnProperty.call(cache, key)) {
-					cacheHasText = true;
-					break;
-				}
-			}
-
-			if (!cacheHasText) {
-				return;
-			}
-
-			// Render the contents of the cache
+			// For each text layer, render elements marked as active
 
 			context.save();
 
-			for (key in cache) {
-				if (hasOwnProperty.call(cache, key)) {
+			for (var layerKey in cache) {
+				if (hasOwnProperty.call(cache, layerKey)) {
 
-					var info = cache[key];
+					var layerCache = cache[layerKey];
 
-					if (!info.active) {
-						delete cache[key];
-						continue;
-					}
+					for (var key in layerCache) {
+						if (hasOwnProperty.call(layerCache, key)) {
 
-					var x = info.x,
-						y = info.y,
-						lines = info.lines,
-						halign = info.halign;
+							var info = layerCache[key];
 
-					context.fillStyle = info.font.color;
-					context.font = info.font.definition;
+							if (!info.active) {
+								delete cache[key];
+								continue;
+							}
 
-					// TODO: Comments in Ole's implementation indicate that
-					// some browsers differ in their interpretation of 'top';
-					// so far I don't see this, but it requires more testing.
-					// We'll stick with top until this can be verified.
+							var x = info.x,
+								y = info.y,
+								lines = info.lines,
+								halign = info.halign;
 
-					// Original comment was:
-					// Top alignment would be more natural, but browsers can
-					// differ a pixel or two in where they consider the top to
-					// be, so instead we middle align to minimize variation
-					// between browsers and compensate when calculating the
-					// coordinates.
+							context.fillStyle = info.font.color;
+							context.font = info.font.definition;
 
-					context.textBaseline = "top";
+							// TODO: Comments in Ole's implementation indicate that
+							// some browsers differ in their interpretation of 'top';
+							// so far I don't see this, but it requires more testing.
+							// We'll stick with top until this can be verified.
 
-					for (var i = 0; i < lines.length; ++i) {
+							// Original comment was:
+							// Top alignment would be more natural, but browsers can
+							// differ a pixel or two in where they consider the top to
+							// be, so instead we middle align to minimize variation
+							// between browsers and compensate when calculating the
+							// coordinates.
 
-						var line = lines[i],
-							linex = x;
+							context.textBaseline = "top";
 
-						// Apply horizontal alignment per-line
+							for (var i = 0; i < lines.length; ++i) {
 
-						if (halign == "center") {
-							linex -= line.width / 2;
-						} else if (halign == "right") {
-							linex -= line.width;
+								var line = lines[i],
+									linex = x;
+
+								// Apply horizontal alignment per-line
+
+								if (halign == "center") {
+									linex -= line.width / 2;
+								} else if (halign == "right") {
+									linex -= line.width;
+								}
+
+								// FIXME: LEGACY BROWSER FIX
+								// AFFECTS: Opera < 12.00
+
+								// Round the coordinates, since Opera otherwise
+								// switches to uglier (probably non-hinted) rendering.
+								// Also offset the y coordinate, since Opera is off
+								// pretty consistently compared to the other browsers.
+
+								if (!!(window.opera && window.opera.version().split(".")[0] < 12)) {
+									linex = Math.floor(linex);
+									y = Math.ceil(y - 2);
+								}
+
+								context.fillText(line.text, linex, y);
+								y += line.height;
+							}
 						}
-
-						// FIXME: LEGACY BROWSER FIX
-						// AFFECTS: Opera < 12.00
-
-						// Round the coordinates, since Opera otherwise
-						// switches to uglier (probably non-hinted) rendering.
-						// Also offset the y coordinate, since Opera is off
-						// pretty consistently compared to the other browsers.
-
-						if (!!(window.opera && window.opera.version().split(".")[0] < 12)) {
-							linex = Math.floor(linex);
-							y = Math.ceil(y - 2);
-						}
-
-						context.fillText(line.text, linex, y);
-						y += line.height;
 					}
 				}
 			}
@@ -162,13 +154,13 @@ browser, but needs to redraw with canvas text when exporting as an image.
 		//     },
 		// }
 
-		Canvas.prototype.getTextInfo = function(text, font, angle) {
+		Canvas.prototype.getTextInfo = function(layer, text, font, angle) {
 
 			if (!plot.getOptions().canvas) {
-				return getTextInfo.call(this, text, font, angle);
+				return getTextInfo.call(this, layer, text, font, angle);
 			}
 
-			var textStyle, cacheKey, info;
+			var textStyle, cache, cacheKey, info;
 
 			// Cast the value to a string, in case we were given a number
 
@@ -182,13 +174,21 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				textStyle = font;
 			}
 
+			// Retrieve (or create) the cache for the text's layer
+
+			cache = this._textCache[layer];
+
+			if (cache == null) {
+				cache = this._textCache[layer] = {};
+			}
+
 			// The text + style + angle uniquely identify the text's dimensions
 			// and content; we'll use them to build the entry's text cache key.
 			// NOTE: We don't support rotated text yet, so the angle is unused.
 
 			cacheKey = textStyle + "|" + text;
 
-			info = this._textCache[cacheKey];
+			info = cache[cacheKey];
 
 			if (info == null) {
 
@@ -205,7 +205,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 							position: "absolute",
 							top: -9999
 						})
-						.appendTo(this.getTextLayer());
+						.appendTo(this.getTextLayer(layer));
 
 					font = {
 						style: element.css("font-style"),
@@ -224,7 +224,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				// Create a new info object, initializing the dimensions to
 				// zero so we can count them up line-by-line.
 
-				info = {
+				info = cache[cacheKey] = {
 					x: null,
 					y: null,
 					width: 0,
@@ -275,8 +275,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 					});
 				}
 
-				this._textCache[cacheKey] = info;
-
 				context.restore();
 			}
 
@@ -285,13 +283,13 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 		// Adds a text string to the canvas text overlay.
 
-		Canvas.prototype.addText = function(x, y, text, font, angle, halign, valign) {
+		Canvas.prototype.addText = function(layer, x, y, text, font, angle, halign, valign) {
 
 			if (!plot.getOptions().canvas) {
-				return addText.call(this, x, y, text, font, angle, halign, valign);
+				return addText.call(this, layer, x, y, text, font, angle, halign, valign);
 			}
 
-			var info = this.getTextInfo(text, font, angle);
+			var info = this.getTextInfo(layer, text, font, angle);
 
 			info.x = x;
 			info.y = y;
