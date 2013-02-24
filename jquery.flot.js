@@ -56,8 +56,6 @@ Licensed under the MIT license.
 
 	function Canvas(cls, container) {
 
-		this.container = container;
-
 		var element = document.createElement("canvas");
 		element.className = cls;
 		this.element = element;
@@ -292,10 +290,12 @@ Licensed under the MIT license.
 
 		if (info == null) {
 
-			var element = $("<div></div>").html(text).css({
-				position: "absolute",
-				top: -9999
-			});
+			var element = $("<div></div>").html(text)
+				.css({
+					position: "absolute",
+					top: -9999
+				})
+				.appendTo(this.getTextLayer());
 
 			if (typeof font === "object") {
 				element.css({
@@ -305,8 +305,6 @@ Licensed under the MIT license.
 			} else if (typeof font === "string") {
 				element.addClass(font);
 			}
-
-			element.appendTo(this.container);
 
 			info = {
 				active: false,
