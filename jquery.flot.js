@@ -171,7 +171,7 @@ Licensed under the MIT license.
 
 		var cache = this._textCache,
 			cacheHasText = false,
-			info, key;
+			key;
 
 		// Check whether the cache actually has any entries.
 
@@ -188,6 +188,44 @@ Licensed under the MIT license.
 
 		// Create the HTML text layer, if it doesn't already exist.
 
+		var layer = this.getTextLayer(),
+			info;
+
+		// Add all the elements to the text layer, then add it to the DOM at
+		// the end, so we only trigger a single redraw.
+
+		layer.hide();
+
+		for (key in cache) {
+			if (hasOwnProperty.call(cache, key)) {
+
+				info = cache[key];
+
+				if (info.active) {
+					if (!info.rendered) {
+						layer.append(info.element);
+						info.rendered = true;
+					}
+				} else {
+					delete cache[key];
+					if (info.rendered) {
+						info.element.detach();
+					}
+				}
+			}
+		}
+
+		layer.show();
+	};
+
+	// Creates (if necessary) and returns the text overlay container.
+	//
+	// @return {object} The jQuery-wrapped text-layer div.
+
+	Canvas.prototype.getTextLayer = function() {
+
+		// Create the text layer if it doesn't exist
+
 		if (!this.text) {
 			this.text = $("<div></div>")
 				.addClass("flot-text")
@@ -201,31 +239,7 @@ Licensed under the MIT license.
 				.insertAfter(this.element);
 		}
 
-		// Add all the elements to the text layer, then add it to the DOM at
-		// the end, so we only trigger a single redraw.
-
-		this.text.hide();
-
-		for (key in cache) {
-			if (hasOwnProperty.call(cache, key)) {
-
-				info = cache[key];
-
-				if (info.active) {
-					if (!info.rendered) {
-						this.text.append(info.element);
-						info.rendered = true;
-					}
-				} else {
-					delete cache[key];
-					if (info.rendered) {
-						info.element.detach();
-					}
-				}
-			}
-		}
-
-		this.text.show();
+		return this.text;
 	};
 
 	// Creates (if necessary) and returns a text info object.
