@@ -195,23 +195,29 @@ More detail and specific examples can be found in the included HTML file.
 				data[i].data = [value];
 			}
 
-			// Calculate the total of all slices, so we can show percentages
+			// Sum up all the slices, so we can calculate percentages for each
 
 			for (var i = 0; i < data.length; ++i) {
 				total += data[i].data[0][1];
 			}
 
+			// Count the number of slices with percentages below the combine
+			// threshold; if it turns out to be just one, we won't combine.
+
 			for (var i = 0; i < data.length; ++i) {
-
 				var value = data[i].data[0][1];
-
 				if (value / total <= options.series.pie.combine.threshold) {
 					combined += value;
 					numCombined++;
 					if (!color) {
 						color = data[i].color;
 					}
-				} else {
+				}
+			}
+
+			for (var i = 0; i < data.length; ++i) {
+				var value = data[i].data[0][1];
+				if (numCombined < 2 || value / total > options.series.pie.combine.threshold) {
 					newdata.push({
 						data: [[1, value]],
 						color: data[i].color,
@@ -222,7 +228,7 @@ More detail and specific examples can be found in the included HTML file.
 				}
 			}
 
-			if (numCombined > 0) {
+			if (numCombined > 1) {
 				newdata.push({
 					data: [[1, combined]],
 					color: color,
