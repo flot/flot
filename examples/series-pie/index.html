@@ -435,7 +435,7 @@
 			placeholder.unbind();
 
 			$("#title").text("Combined Slice");
-			$("#description").text("All slices less than a given percentage of the pie can be combined into a single, larger slice (10% in this case).");
+			$("#description").text("Multiple slices less than a given percentage (5% in this case) of the pie can be combined into a single, larger slice.");
 
 			$.plot(placeholder, data, {
 				series: {
@@ -443,7 +443,7 @@
 						show: true,
 						combine: {
 							color: "#999",
-							threshold: 0.1
+							threshold: 0.05
 						}
 					}
 				},
