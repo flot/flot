@@ -1629,7 +1629,7 @@ Licensed under the MIT license.
 
                     xoff = yoff = 0;
 
-                    if (v < axis.min || v > axis.max
+                    if (isNaN(v) || v < axis.min || v > axis.max
                         // skip those lying on the axes if we got a border
                         || (t == "full"
                             && ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0)
