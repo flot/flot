@@ -108,6 +108,13 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - The plot function is now also a jQuery chainable property.
    (patch by David Schnur, issues #734 and #816, pull request #953)
 
+ - When only a single pie slice is beneath the combine threshold it is no longer
+   replaced by an 'other' slice. (suggested by Devin Bayer, issue #638)
+
+ - Added lineJoin and minSize options to the selection plugin to control the
+   corner style and minimum size of the selection, respectively.
+   (patch by Ruth Linehan, pull request #963)
+
 ### Bug fixes ###
 
  - Fix problem with null values and pie plugin. (patch by gcruxifix,
