@@ -1274,7 +1274,7 @@ Licensed under the MIT license.
             var opts = axis.options, ticks = axis.ticks || [],
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
-                font = opts.font || "flot-tick-label";
+                font = opts.font || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
 
@@ -2015,7 +2015,7 @@ Licensed under the MIT license.
 
                 var box = axis.box,
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
-                    font = axis.options.font || "flot-tick-label",
+                    font = axis.options.font || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
 	            surface.removeText(layer);
