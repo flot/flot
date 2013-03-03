@@ -1273,7 +1273,8 @@ Licensed under the MIT license.
 
             var opts = axis.options, ticks = axis.ticks || [],
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
-                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
@@ -2014,11 +2015,12 @@ Licensed under the MIT license.
                     return;
 
                 var box = axis.box,
-                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis",
+                    legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
-	            surface.removeText(layer);
+                surface.removeText(layer);
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
 
