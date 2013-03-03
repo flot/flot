@@ -57,7 +57,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Display time series in different time zones. (patch by Knut Forkalsrud,
    issue 141)
 
- - Canvas text support for labels. (sponsored by YCharts.com)
+ - Added a canvas plugin to enable rendering axis tick labels to the canvas.
+   (sponsored by YCharts.com, implementation by Ole Laursen and David Schnur)
 
  - Support for setting the interval between redraws of the overlay canvas with
    redrawOverlayInterval. (suggested in issue 185)
