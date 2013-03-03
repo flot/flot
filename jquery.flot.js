@@ -34,15 +34,19 @@ Licensed under the MIT license.
 // the actual Flot code
 (function($) {
 
-	// Add default styles for tick labels and other text
-
-	$(function() {
-		$("head").prepend("<style id='flot-default-styles'>.flot-tick-label {font-size:smaller;color:#545454;}</style>");
-	});
-
 	// Cache the prototype hasOwnProperty for faster access
 
 	var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+	// Add default styles for tick labels and other text
+
+	var STYLES = [
+		".flot-tick-label {font-size:smaller;color:#545454;}"
+	];
+
+	$(function() {
+		$("head").prepend("<style id='flot-default-styles'>" + STYLES.join("") + "</style>");
+	});
 
 	///////////////////////////////////////////////////////////////////////////
 	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
@@ -668,6 +672,9 @@ Licensed under the MIT license.
                 options.xaxes[i] = axisOptions;
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
+                    if (!axisOptions.font.color) {
+                        axisOptions.font.color = axisOptions.color;
+                    }
                 }
             }
 
@@ -677,6 +684,9 @@ Licensed under the MIT license.
                 options.yaxes[i] = axisOptions;
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
+                    if (!axisOptions.font.color) {
+                        axisOptions.font.color = axisOptions.color;
+                    }
                 }
             }
 
