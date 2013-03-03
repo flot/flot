@@ -33,6 +33,388 @@ Licensed under the MIT license.
 
 // the actual Flot code
 (function($) {
+
+	// Cache the prototype hasOwnProperty for faster access
+
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+	// Add default styles for tick labels and other text
+
+	var STYLES = [
+		".flot-tick-label {font-size:smaller;color:#545454;}"
+	];
+
+	$(function() {
+		$("head").prepend("<style id='flot-default-styles'>" + STYLES.join("") + "</style>");
+	});
+
+	///////////////////////////////////////////////////////////////////////////
+	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
+	//
+	// @constructor
+	// @param {string} cls List of classes to apply to the canvas.
+	// @param {element} container Element onto which to append the canvas.
+	//
+	// Requiring a container is a little iffy, but unfortunately canvas
+	// operations don't work unless the canvas is attached to the DOM.
+
+	function Canvas(cls, container) {
+
+		var element = document.createElement("canvas");
+		element.className = cls;
+		this.element = element;
+
+		$(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
+			.data("canvas", this)
+			.appendTo(container);
+
+		// If HTML5 Canvas isn't available, fall back to Excanvas
+
+		if (!element.getContext) {
+			if (window.G_vmlCanvasManager) {
+				element = window.G_vmlCanvasManager.initElement(element);
+			} else {
+				throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
+			}
+		}
+
+		var context = element.getContext("2d");
+		this.context = context;
+
+		// Determine the screen's ratio of physical to device-independent
+		// pixels.  This is the ratio between the canvas width that the browser
+		// advertises and the number of pixels actually present in that space.
+
+		// The iPhone 4, for example, has a device-independent width of 320px,
+		// but its screen is actually 640px wide.  It therefore has a pixel
+		// ratio of 2, while most normal devices have a ratio of 1.
+
+		var devicePixelRatio = window.devicePixelRatio || 1,
+			backingStoreRatio =
+				context.webkitBackingStorePixelRatio ||
+				context.mozBackingStorePixelRatio ||
+				context.msBackingStorePixelRatio ||
+				context.oBackingStorePixelRatio ||
+				context.backingStorePixelRatio || 1;
+
+		this.pixelRatio = devicePixelRatio / backingStoreRatio;
+
+		// Size the canvas to match the internal dimensions of its container
+
+		this.resize(container.width(), container.height());
+
+		// Collection of HTML div layers for text overlaid onto the canvas
+
+		this.text = {};
+
+		// Cache of text fragments and metrics, so we can avoid expensively
+		// re-calculating them when the plot is re-rendered in a loop.
+
+		this._textCache = {};
+	}
+
+	// Resizes the canvas to the given dimensions.
+	//
+	// @param {number} width New width of the canvas, in pixels.
+	// @param {number} width New height of the canvas, in pixels.
+
+	Canvas.prototype.resize = function(width, height) {
+
+		if (width <= 0 || height <= 0) {
+			throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
+		}
+
+		var element = this.element,
+			context = this.context,
+			pixelRatio = this.pixelRatio;
+
+		// Resize the canvas, increasing its density based on the display's
+		// pixel ratio; basically giving it more pixels without increasing the
+		// size of its element, to take advantage of the fact that retina
+		// displays have that many more pixels in the same advertised space.
+
+		// Resizing should reset the state (excanvas seems to be buggy though)
+
+		if (this.width != width) {
+			element.width = width * pixelRatio;
+			element.style.width = width + "px";
+			this.width = width;
+		}
+
+		if (this.height != height) {
+			element.height = height * pixelRatio;
+			element.style.height = height + "px";
+			this.height = height;
+		}
+
+		// Save the context, so we can reset in case we get replotted.  The
+		// restore ensure that we're really back at the initial state, and
+		// should be safe even if we haven't saved the initial state yet.
+
+		context.restore();
+		context.save();
+
+		// Scale the coordinate space to match the display density; so even though we
+		// may have twice as many pixels, we still want lines and other drawing to
+		// appear at the same size; the extra pixels will just make them crisper.
+
+		context.scale(pixelRatio, pixelRatio);
+	};
+
+	// Clears the entire canvas area, not including any overlaid HTML text
+
+	Canvas.prototype.clear = function() {
+		this.context.clearRect(0, 0, this.width, this.height);
+	};
+
+	// Finishes rendering the canvas, including managing the text overlay.
+
+	Canvas.prototype.render = function() {
+
+		var cache = this._textCache;
+
+		// For each text layer, add elements marked as active that haven't
+		// already been rendered, and remove those that are no longer active.
+
+		for (var layerKey in cache) {
+			if (hasOwnProperty.call(cache, layerKey)) {
+
+				var layer = this.getTextLayer(layerKey),
+					layerCache = cache[layerKey];
+
+				layer.hide();
+
+				for (var styleKey in layerCache) {
+					if (hasOwnProperty.call(layerCache, styleKey)) {
+						var styleCache = layerCache[styleKey];
+						for (var key in styleCache) {
+							if (hasOwnProperty.call(styleCache, key)) {
+								var info = styleCache[key];
+								if (info.active) {
+									if (!info.rendered) {
+										layer.append(info.element);
+										info.rendered = true;
+									}
+								} else {
+									delete styleCache[key];
+									if (info.rendered) {
+										info.element.detach();
+									}
+								}
+							}
+						}
+					}
+				}
+
+				layer.show();
+			}
+		}
+	};
+
+	// Creates (if necessary) and returns the text overlay container.
+	//
+	// @param {string} classes String of space-separated CSS classes used to
+	//     uniquely identify the text layer.
+	// @return {object} The jQuery-wrapped text-layer div.
+
+	Canvas.prototype.getTextLayer = function(classes) {
+
+		var layer = this.text[classes];
+
+		// Create the text layer if it doesn't exist
+
+		if (layer == null) {
+			layer = this.text[classes] = $("<div></div>")
+				.addClass("flot-text " + classes)
+				.css({
+					position: "absolute",
+					top: 0,
+					left: 0,
+					bottom: 0,
+					right: 0
+				})
+				.insertAfter(this.element);
+		}
+
+		return layer;
+	};
+
+	// Creates (if necessary) and returns a text info object.
+	//
+	// The object looks like this:
+	//
+	// {
+	//     width: Width of the text's wrapper div.
+	//     height: Height of the text's wrapper div.
+	//     active: Flag indicating whether the text should be visible.
+	//     rendered: Flag indicating whether the text is currently visible.
+	//     element: The jQuery-wrapped HTML div containing the text.
+	// }
+	//
+	// Canvas maintains a cache of recently-used text info objects; getTextInfo
+	// either returns the cached element or creates a new entry.
+	//
+	// @param {string} layer A string of space-separated CSS classes uniquely
+	//     identifying the layer containing this text.
+	// @param {string} text Text string to retrieve info for.
+	// @param {(string|object)=} font Either a string of space-separated CSS
+	//     classes or a font-spec object, defining the text's font and style.
+	// @param {number=} angle Angle at which to rotate the text, in degrees.
+	//     Angle is currently unused, it will be implemented in the future.
+	// @return {object} a text info object.
+
+	Canvas.prototype.getTextInfo = function(layer, text, font, angle) {
+
+		var textStyle, layerCache, styleCache, info;
+
+		// Cast the value to a string, in case we were given a number or such
+
+		text = "" + text;
+
+		// If the font is a font-spec object, generate a CSS font definition
+
+		if (typeof font === "object") {
+			textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px " + font.family;
+		} else {
+			textStyle = font;
+		}
+
+		// Retrieve (or create) the cache for the text's layer and styles
+
+		layerCache = this._textCache[layer];
+
+		if (layerCache == null) {
+			layerCache = this._textCache[layer] = {};
+		}
+
+		styleCache = layerCache[textStyle];
+
+		if (styleCache == null) {
+			styleCache = layerCache[textStyle] = {};
+		}
+
+		info = styleCache[text];
+
+		// If we can't find a matching element in our cache, create a new one
+
+		if (info == null) {
+
+			var element = $("<div></div>").html(text)
+				.css({
+					position: "absolute",
+					top: -9999
+				})
+				.appendTo(this.getTextLayer(layer));
+
+			if (typeof font === "object") {
+				element.css({
+					font: textStyle,
+					color: font.color
+				});
+			} else if (typeof font === "string") {
+				element.addClass(font);
+			}
+
+			info = styleCache[text] = {
+				active: false,
+				rendered: false,
+				element: element,
+				width: element.outerWidth(true),
+				height: element.outerHeight(true)
+			};
+
+			element.detach();
+		}
+
+		return info;
+	};
+
+	// Adds a text string to the canvas text overlay.
+	//
+	// The text isn't drawn immediately; it is marked as rendering, which will
+	// result in its addition to the canvas on the next render pass.
+	//
+	// @param {string} layer A string of space-separated CSS classes uniquely
+	//     identifying the layer containing this text.
+	// @param {number} x X coordinate at which to draw the text.
+	// @param {number} y Y coordinate at which to draw the text.
+	// @param {string} text Text string to draw.
+	// @param {(string|object)=} font Either a string of space-separated CSS
+	//     classes or a font-spec object, defining the text's font and style.
+	// @param {number=} angle Angle at which to rotate the text, in degrees.
+	//     Angle is currently unused, it will be implemented in the future.
+	// @param {string=} halign Horizontal alignment of the text; either "left",
+	//     "center" or "right".
+	// @param {string=} valign Vertical alignment of the text; either "top",
+	//     "middle" or "bottom".
+
+	Canvas.prototype.addText = function(layer, x, y, text, font, angle, halign, valign) {
+
+		var info = this.getTextInfo(layer, text, font, angle);
+
+		// Mark the div for inclusion in the next render pass
+
+		info.active = true;
+
+		// Tweak the div's position to match the text's alignment
+
+		if (halign == "center") {
+			x -= info.width / 2;
+		} else if (halign == "right") {
+			x -= info.width;
+		}
+
+		if (valign == "middle") {
+			y -= info.height / 2;
+		} else if (valign == "bottom") {
+			y -= info.height;
+		}
+
+		// Move the element to its final position within the container
+
+		info.element.css({
+			top: parseInt(y, 10),
+			left: parseInt(x, 10)
+		});
+	};
+
+	// Removes one or more text strings from the canvas text overlay.
+	//
+	// If no parameters are given, all text within the layer is removed.
+	// The text is not actually removed; it is simply marked as inactive, which
+	// will result in its removal on the next render pass.
+	//
+	// @param {string} layer A string of space-separated CSS classes uniquely
+	//     identifying the layer containing this text.
+	// @param {string} text Text string to remove.
+	// @param {(string|object)=} font Either a string of space-separated CSS
+	//     classes or a font-spec object, defining the text's font and style.
+	// @param {number=} angle Angle at which the text is rotated, in degrees.
+	//     Angle is currently unused, it will be implemented in the future.
+
+	Canvas.prototype.removeText = function(layer, text, font, angle) {
+		if (text == null) {
+			var layerCache = this._textCache[layer];
+			if (layerCache != null) {
+				for (var styleKey in layerCache) {
+					if (hasOwnProperty.call(layerCache, styleKey)) {
+						var styleCache = layerCache[styleKey]
+						for (var key in styleCache) {
+							if (hasOwnProperty.call(styleCache, key)) {
+								styleCache[key].active = false;
+							}
+						}
+					}
+				}
+			}
+		} else {
+			this.getTextInfo(layer, text, font, angle).active = false;
+		}
+	};
+
+	///////////////////////////////////////////////////////////////////////////
+	// The top-level container for the entire plot.
+
     function Plot(placeholder, data_, options_, plugins) {
         // data is on the form:
         //   [ series1, series2 ... ]
@@ -148,13 +530,12 @@ Licensed under the MIT license.
                 },
                 hooks: {}
             },
-        canvas = null,      // the canvas for the plot itself
+        surface = null,     // the canvas for the plot itself
         overlay = null,     // canvas for interactive stuff on top of plot
         eventHolder = null, // jQuery object that events should be bound to
         ctx = null, octx = null,
         xaxes = [], yaxes = [],
         plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        canvasWidth = 0, canvasHeight = 0,
         plotWidth = 0, plotHeight = 0,
         hooks = {
             processOptions: [],
@@ -175,7 +556,7 @@ Licensed under the MIT license.
         plot.setupGrid = setupGrid;
         plot.draw = draw;
         plot.getPlaceholder = function() { return placeholder; };
-        plot.getCanvas = function() { return canvas; };
+        plot.getCanvas = function() { return surface.element; };
         plot.getPlotOffset = function() { return plotOffset; };
         plot.width = function () { return plotWidth; };
         plot.height = function () { return plotHeight; };
@@ -210,9 +591,10 @@ Licensed under the MIT license.
         };
         plot.shutdown = shutdown;
         plot.resize = function () {
-            getCanvasDimensions();
-            resizeCanvas(canvas);
-            resizeCanvas(overlay);
+        	var width = placeholder.width(),
+        		height = placeholder.height();
+            surface.resize(width, height);
+            overlay.resize(width, height);
         };
 
         // public attributes
@@ -235,16 +617,22 @@ Licensed under the MIT license.
         }
 
         function initPlugins() {
+
+            // References to key classes, allowing plugins to modify them
+
+            var classes = {
+                Canvas: Canvas
+            };
+
             for (var i = 0; i < plugins.length; ++i) {
                 var p = plugins[i];
-                p.init(plot);
+                p.init(plot, classes);
                 if (p.options)
                     $.extend(true, options, p.options);
             }
         }
 
         function parseOptions(opts) {
-            var i;
 
             $.extend(true, options, opts);
 
@@ -263,12 +651,44 @@ Licensed under the MIT license.
             if (options.grid.tickColor == null)
                 options.grid.tickColor = $.color.parse(options.grid.color).scale('a', 0.22).toString();
 
-            // fill in defaults in axes, copy at least always the
-            // first as the rest of the code assumes it'll be there
-            for (i = 0; i < Math.max(1, options.xaxes.length); ++i)
-                options.xaxes[i] = $.extend(true, {}, options.xaxis, options.xaxes[i]);
-            for (i = 0; i < Math.max(1, options.yaxes.length); ++i)
-                options.yaxes[i] = $.extend(true, {}, options.yaxis, options.yaxes[i]);
+            // Fill in defaults for axis options, including any unspecified
+            // font-spec fields, if a font-spec was provided.
+
+            // If no x/y axis options were provided, create one of each anyway,
+            // since the rest of the code assumes that they exist.
+
+            var i, axisOptions, axisCount,
+                fontDefaults = {
+                    style: placeholder.css("font-style"),
+                    size: Math.round(0.8 * (+placeholder.css("font-size").replace("px", "") || 13)),
+                    variant: placeholder.css("font-variant"),
+                    weight: placeholder.css("font-weight"),
+                    family: placeholder.css("font-family")
+                };
+
+            axisCount = options.xaxes.length || 1;
+            for (i = 0; i < axisCount; ++i) {
+                axisOptions = $.extend(true, {}, options.xaxis, options.xaxes[i]);
+                options.xaxes[i] = axisOptions;
+                if (axisOptions.font) {
+                    axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
+                    if (!axisOptions.font.color) {
+                        axisOptions.font.color = axisOptions.color;
+                    }
+                }
+            }
+
+            axisCount = options.yaxes.length || 1;
+            for (i = 0; i < axisCount; ++i) {
+                axisOptions = $.extend(true, {}, options.yaxis, options.yaxes[i]);
+                options.yaxes[i] = axisOptions;
+                if (axisOptions.font) {
+                    axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
+                    if (!axisOptions.font.color) {
+                        axisOptions.font.color = axisOptions.color;
+                    }
+                }
+            }
 
             // backwards compatibility, to be removed in future
             if (options.xaxis.noTicks && options.xaxis.ticks == null)
@@ -730,117 +1150,12 @@ Licensed under the MIT license.
             });
         }
 
-        //////////////////////////////////////////////////////////////////////////////////
-        // Returns the display's ratio between physical and device-independent pixels.
-        //
-        // This is the ratio between the width that the browser advertises and the number
-        // of pixels actually available in that space.  The iPhone 4, for example, has a
-        // device-independent width of 320px, but its screen is actually 640px wide.  It
-        // therefore has a pixel ratio of 2, while most normal devices have a ratio of 1.
-
-        function getPixelRatio(cctx) {
-            var devicePixelRatio = window.devicePixelRatio || 1;
-            var backingStoreRatio =
-                cctx.webkitBackingStorePixelRatio ||
-                cctx.mozBackingStorePixelRatio ||
-                cctx.msBackingStorePixelRatio ||
-                cctx.oBackingStorePixelRatio ||
-                cctx.backingStorePixelRatio || 1;
-
-            return devicePixelRatio / backingStoreRatio;
-        }
-
-        function makeCanvas(cls) {
-
-            var c = document.createElement('canvas');
-            c.className = cls;
-
-			$(c).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
-				.appendTo(placeholder);
-
-			// If HTML5 Canvas isn't available, fall back to Excanvas
-
-			if (!c.getContext) {
-				if (window.G_vmlCanvasManager) {
-					c = window.G_vmlCanvasManager.initElement(c);
-				} else {
-					throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
-				}
-			}
-
-            var cctx = c.getContext("2d");
-
-            // Increase the canvas density based on the display's pixel ratio; basically
-            // giving the canvas more pixels without increasing the size of its element,
-            // to take advantage of the fact that retina displays have that many more
-            // pixels than they actually use for page & element widths.
-
-            var pixelRatio = getPixelRatio(cctx);
-
-            c.width = canvasWidth * pixelRatio;
-            c.height = canvasHeight * pixelRatio;
-            c.style.width = canvasWidth + "px";
-            c.style.height = canvasHeight + "px";
-
-            // Save the context so we can reset in case we get replotted
-
-            cctx.save();
-
-            // Scale the coordinate space to match the display density; so even though we
-            // may have twice as many pixels, we still want lines and other drawing to
-            // appear at the same size; the extra pixels will just make them crisper.
-
-            cctx.scale(pixelRatio, pixelRatio);
-
-            return c;
-        }
-
-        function getCanvasDimensions() {
-            canvasWidth = placeholder.width();
-            canvasHeight = placeholder.height();
-
-            if (canvasWidth <= 0 || canvasHeight <= 0)
-                throw new Error("Invalid dimensions for plot, width = " + canvasWidth + ", height = " + canvasHeight);
-        }
-
-        function resizeCanvas(c) {
-
-            var cctx = c.getContext("2d");
-
-            // Handle pixel ratios > 1 for retina displays, as explained in makeCanvas
-
-            var pixelRatio = getPixelRatio(cctx);
-
-            // Resizing should reset the state (excanvas seems to be buggy though)
-
-            if (c.style.width != canvasWidth) {
-                c.width = canvasWidth * pixelRatio;
-                c.style.width = canvasWidth + "px";
-            }
-
-            if (c.style.height != canvasHeight) {
-                c.height = canvasHeight * pixelRatio;
-                c.style.height = canvasHeight + "px";
-            }
-
-            // so try to get back to the initial state (even if it's
-            // gone now, this should be safe according to the spec)
-            cctx.restore();
-
-            // and save again
-            cctx.save();
-
-            // Apply scaling for retina displays, as explained in makeCanvas
-
-            cctx.scale(pixelRatio, pixelRatio);
-        }
-
         function setupCanvases() {
             var reused,
-                existingCanvas = placeholder.children("canvas.flot-base"),
+                existingSurface = placeholder.children("canvas.flot-base"),
                 existingOverlay = placeholder.children("canvas.flot-overlay");
 
-            if (existingCanvas.length == 0 || existingOverlay == 0) {
+            if (existingSurface.length == 0 || existingOverlay == 0) {
                 // init everything
 
                 placeholder.html(""); // make sure placeholder is clear
@@ -850,27 +1165,25 @@ Licensed under the MIT license.
                 if (placeholder.css("position") == 'static')
                     placeholder.css("position", "relative"); // for positioning labels and overlay
 
-                getCanvasDimensions();
-
-                canvas = makeCanvas("flot-base");
-                overlay = makeCanvas("flot-overlay"); // overlay canvas for interactive features
+                surface = new Canvas("flot-base", placeholder);
+                overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
 
                 reused = false;
             }
             else {
                 // reuse existing elements
 
-                canvas = existingCanvas.get(0);
-                overlay = existingOverlay.get(0);
+                surface = existingSurface.data("canvas");
+                overlay = existingOverlay.data("canvas");
 
                 reused = true;
             }
 
-            ctx = canvas.getContext("2d");
-            octx = overlay.getContext("2d");
+            ctx = surface.context;
+            octx = overlay.context;
 
             // define which element we're listening for events on
-            eventHolder = $(overlay);
+            eventHolder = $(overlay.element);
 
             if (reused) {
                 // run shutdown in the old plot object
@@ -880,11 +1193,12 @@ Licensed under the MIT license.
                 plot.resize();
 
                 // make sure overlay pixels are cleared (canvas is cleared when we redraw)
-                octx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                overlay.clear();
 
                 // then whack any remaining obvious garbage left
                 eventHolder.unbind();
-                placeholder.children().not([canvas, overlay]).remove();
+                placeholder.children(":not(.flot-base,.flot-overlay,.flot-text)").remove();
             }
 
             // save in case we get replotted
@@ -956,53 +1270,27 @@ Licensed under the MIT license.
         }
 
         function measureTickLabels(axis) {
+
             var opts = axis.options, ticks = axis.ticks || [],
                 axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
-                f = axis.font;
-
-            ctx.save();
-            ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
+                legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
+                font = opts.font || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
-                var t = ticks[i];
 
-                t.lines = [];
-                t.width = t.height = 0;
+                var t = ticks[i];
 
                 if (!t.label)
                     continue;
 
-                // accept various kinds of newlines, including HTML ones
-                // (you can actually split directly on regexps in Javascript,
-                // but IE < 9 is unfortunately broken)
-                var lines = (t.label + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
-                for (var j = 0; j < lines.length; ++j) {
-                    var line = { text: lines[j] },
-                        m = ctx.measureText(line.text);
-
-                    line.width = m.width;
-                    // m.height might not be defined, not in the
-                    // standard yet
-                    line.height = m.height != null ? m.height : f.size;
-
-                    // add a bit of margin since font rendering is
-                    // not pixel perfect and cut off letters look
-                    // bad, this also doubles as spacing between
-                    // lines
-                    line.height += Math.round(f.size * 0.15);
-
-                    t.width = Math.max(line.width, t.width);
-                    t.height += line.height;
-
-                    t.lines.push(line);
-                }
+                var info = surface.getTextInfo(layer, t.label, font);
 
                 if (opts.labelWidth == null)
-                    axisw = Math.max(axisw, t.width);
+                    axisw = Math.max(axisw, info.width);
                 if (opts.labelHeight == null)
-                    axish = Math.max(axish, t.height);
+                    axish = Math.max(axish, info.height);
             }
-            ctx.restore();
 
             axis.labelWidth = Math.ceil(axisw);
             axis.labelHeight = Math.ceil(axish);
@@ -1053,7 +1341,7 @@ Licensed under the MIT license.
 
                 if (pos == "bottom") {
                     plotOffset.bottom += lh + axisMargin;
-                    axis.box = { top: canvasHeight - plotOffset.bottom, height: lh };
+                    axis.box = { top: surface.height - plotOffset.bottom, height: lh };
                 }
                 else {
                     axis.box = { top: plotOffset.top + axisMargin, height: lh };
@@ -1069,7 +1357,7 @@ Licensed under the MIT license.
                 }
                 else {
                     plotOffset.right += lw + axisMargin;
-                    axis.box = { left: canvasWidth - plotOffset.right, width: lw };
+                    axis.box = { left: surface.width - plotOffset.right, width: lw };
                 }
             }
 
@@ -1085,11 +1373,11 @@ Licensed under the MIT license.
             // dimension, we can set the remaining dimension coordinates
             if (axis.direction == "x") {
                 axis.box.left = plotOffset.left - axis.labelWidth / 2;
-                axis.box.width = canvasWidth - plotOffset.left - plotOffset.right + axis.labelWidth;
+                axis.box.width = surface.width - plotOffset.left - plotOffset.right + axis.labelWidth;
             }
             else {
                 axis.box.top = plotOffset.top - axis.labelHeight / 2;
-                axis.box.height = canvasHeight - plotOffset.bottom - plotOffset.top + axis.labelHeight;
+                axis.box.height = surface.height - plotOffset.bottom - plotOffset.top + axis.labelHeight;
             }
         }
 
@@ -1161,14 +1449,6 @@ Licensed under the MIT license.
             });
 
             if (showGrid) {
-                // determine from the placeholder the font size ~ height of font ~ 1 em
-                var fontDefaults = {
-                    style: placeholder.css("font-style"),
-                    size: Math.round(0.8 * (+placeholder.css("font-size").replace("px", "") || 13)),
-                    variant: placeholder.css("font-variant"),
-                    weight: placeholder.css("font-weight"),
-                    family: placeholder.css("font-family")
-                };
 
                 var allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
 
@@ -1177,9 +1457,7 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-
                     // find labelWidth/Height for axis
-                    axis.font = $.extend({}, fontDefaults, axis.options.font);
                     measureTickLabels(axis);
                 });
 
@@ -1198,13 +1476,17 @@ Licensed under the MIT license.
                 });
             }
 
-            plotWidth = canvasWidth - plotOffset.left - plotOffset.right;
-            plotHeight = canvasHeight - plotOffset.bottom - plotOffset.top;
+            plotWidth = surface.width - plotOffset.left - plotOffset.right;
+            plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
 
             // now we got the proper plot dimensions, we can compute the scaling
             $.each(axes, function (_, axis) {
                 setTransformationHelpers(axis);
             });
+
+            if (showGrid) {
+                drawAxisLabels();
+            }
 
             insertLegend();
         }
@@ -1258,7 +1540,7 @@ Licensed under the MIT license.
             else
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? canvasWidth : canvasHeight);
+                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? surface.width : surface.height);
 
             axis.delta = (axis.max - axis.min) / noTicks;
 
@@ -1313,7 +1595,7 @@ Licensed under the MIT license.
                     axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
                     axis.tickSize = opts.tickSize || size;
 
-                    start = floorInBase(axis.min, axis.tickSize)
+                    start = floorInBase(axis.min, axis.tickSize);
 
                     do {
                         prev = v;
@@ -1429,7 +1711,8 @@ Licensed under the MIT license.
         }
 
         function draw() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            surface.clear();
 
             executeHooks(hooks.drawBackground, [ctx]);
 
@@ -1441,7 +1724,6 @@ Licensed under the MIT license.
 
             if (grid.show && !grid.aboveData) {
                 drawGrid();
-                drawAxisLabels();
             }
 
             for (var i = 0; i < series.length; ++i) {
@@ -1453,8 +1735,9 @@ Licensed under the MIT license.
 
             if (grid.show && grid.aboveData) {
                 drawGrid();
-                drawAxisLabels();
             }
+
+            surface.render();
         }
 
         function extractRange(ranges, coord) {
@@ -1726,74 +2009,48 @@ Licensed under the MIT license.
         }
 
         function drawAxisLabels() {
-            ctx.save();
 
             $.each(allAxes(), function (_, axis) {
                 if (!axis.show || axis.ticks.length == 0)
                     return;
 
-                var box = axis.box, f = axis.font;
-                // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
+                var box = axis.box,
+                    legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
+                    font = axis.options.font || "flot-tick-label tickLabel",
+                    tick, x, y, halign, valign;
 
-                ctx.fillStyle = axis.options.color;
-                // Important: Don't use quotes around axis.font.family! Just around single
-                // font names like 'Times New Roman' that have a space or special character in it.
-                ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px " + f.family;
-                ctx.textAlign = "start";
-                // middle align the labels - top would be more
-                // natural, but browsers can differ a pixel or two in
-                // where they consider the top to be, so instead we
-                // middle align to minimize variation between browsers
-                // and compensate when calculating the coordinates
-                ctx.textBaseline = "middle";
+                surface.removeText(layer);
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
-                    var tick = axis.ticks[i];
+
+                    tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
 
-                    var x, y, offset = 0, line;
-                    for (var k = 0; k < tick.lines.length; ++k) {
-                        line = tick.lines[k];
-
-                        if (axis.direction == "x") {
-                            x = plotOffset.left + axis.p2c(tick.v) - line.width/2;
-                            if (axis.position == "bottom")
-                                y = box.top + box.padding;
-                            else
-                                y = box.top + box.height - box.padding - tick.height;
+                    if (axis.direction == "x") {
+                        halign = "center";
+                        x = plotOffset.left + axis.p2c(tick.v);
+                        if (axis.position == "bottom") {
+                            y = box.top + box.padding;
+                        } else {
+                            y = box.top + box.height - box.padding;
+                            valign = "bottom";
                         }
-                        else {
-                            y = plotOffset.top + axis.p2c(tick.v) - tick.height/2;
-                            if (axis.position == "left")
-                                x = box.left + box.width - box.padding - line.width;
-                            else
-                                x = box.left + box.padding;
+                    } else {
+                        valign = "middle";
+                        y = plotOffset.top + axis.p2c(tick.v);
+                        if (axis.position == "left") {
+                            x = box.left + box.width - box.padding;
+                            halign = "right";
+                        } else {
+                            x = box.left + box.padding;
                         }
-
-                        // account for middle aligning and line number
-                        y += line.height/2 + offset;
-                        offset += line.height;
-
-                        if (!!(window.opera && window.opera.version().split('.')[0] < 12)) {
-                            // FIXME: LEGACY BROWSER FIX
-                            // AFFECTS: Opera < 12.00
-
-                            // round the coordinates since Opera
-                            // otherwise switches to more ugly
-                            // rendering (probably non-hinted) and
-                            // offset the y coordinates since it seems
-                            // to be off pretty consistently compared
-                            // to the other browsers
-                            x = Math.floor(x);
-                            y = Math.ceil(y - 2);
-                        }
-                        ctx.fillText(line.text, x, y);
                     }
+
+                    surface.addText(layer, x, y, tick.label, font, null, halign, valign);
                 }
             });
-
-            ctx.restore();
         }
 
         function drawSeries(series) {
@@ -2554,7 +2811,7 @@ Licensed under the MIT license.
 
             // draw highlights
             octx.save();
-            octx.clearRect(0, 0, canvasWidth, canvasHeight);
+            overlay.clear();
             octx.translate(plotOffset.left, plotOffset.top);
 
             var i, hi;
