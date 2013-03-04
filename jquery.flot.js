@@ -583,6 +583,7 @@ Licensed under the MIT license.
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
         plot.triggerRedrawOverlay = triggerRedrawOverlay;
+        plot.executeHooks = executeHooks;
         plot.pointOffset = function(point) {
             return {
                 left: parseInt(xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plotOffset.left, 10),
