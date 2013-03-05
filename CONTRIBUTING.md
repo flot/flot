@@ -18,6 +18,11 @@ running under.
 If you have suggestions for new features, or changes to existing ones, we'd
 love to hear them! Please submit each suggestion as a separate new issue.
 
+If you would like to work on an existing issue, please make sure it is not
+already assigned to someone else. If an issue is assigned to someone, that
+person has already started working on it. So, pick unassigned issues to prevent
+duplicated efforts.
+
 ### Pull Requests ###
 
 To make merging as easy as possible, please keep these rules in mind:
