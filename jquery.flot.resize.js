@@ -1,6 +1,6 @@
 /* Flot plugin for automatically redrawing plots as the placeholder resizes.
 
-Copyright (c) 2007-2012 IOLA and Ole Laursen.
+Copyright (c) 2007-2013 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
 It works by listening for changes on the placeholder div (through the jQuery
