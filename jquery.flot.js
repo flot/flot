@@ -427,7 +427,6 @@ Licensed under the MIT license.
 
         var series = [],
             options = {
-                chipToggle: false,
                 // the color theme used for graphs
                 colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
                 legend: {
@@ -601,9 +600,7 @@ Licensed under the MIT license.
             surface.resize(width, height);
             overlay.resize(width, height);
         };
-        plot.setChipToggle  = function() {
-          chipToggle();
-        }
+
         // public attributes
         plot.hooks = hooks;
 
@@ -722,6 +719,9 @@ Licensed under the MIT license.
                 $.extend(true, options.series.bars, options.bars);
             if (options.shadowSize != null)
                 options.series.shadowSize = options.shadowSize;
+            if (options.highlightColor != null)
+                options.series.highlightColor = options.highlightColor;
+
             // save options on axes for future reference
             for (i = 0; i < options.xaxes.length; ++i)
                 getOrCreateAxis(xaxes, i + 1).options = options.xaxes[i];
@@ -2036,14 +2036,14 @@ Licensed under the MIT license.
         }
 
         function drawSeries(series) {
-          if(series.display) {
-            if (series.lines.show)
-                drawSeriesLines(series);
-            if (series.bars.show)
-                drawSeriesBars(series);
-            if (series.points.show)
-                drawSeriesPoints(series);
-          }
+	    if (series.show) {
+                if (series.lines.show)
+                    drawSeriesLines(series);
+                if (series.bars.show)
+                    drawSeriesBars(series);
+                if (series.points.show)
+                    drawSeriesPoints(series);
+	    }
         }
 
         function drawSeriesLines(series) {
@@ -2583,9 +2583,8 @@ Licensed under the MIT license.
                 }
 
                 fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + entry.label + '</td>'
-                );
+                    '<td id="' + legendIDBase + i + '" class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
+                    '<td class="legendLabel">' + entry.label + '</td>');
             }
 
             if (rowStarted)
@@ -2629,10 +2628,6 @@ Licensed under the MIT license.
                     var div = legend.children();
                     $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
                 }
-            }
-
-            if (options.chipToggle) {
-              chipToggle();
             }
         }
 
@@ -2956,3 +2951,5 @@ Licensed under the MIT license.
     }
 
 })(jQuery);
+
+
