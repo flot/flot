@@ -60,26 +60,30 @@ Licensed under the MIT license.
 
 	function Canvas(cls, container) {
 
-		var element = document.createElement("canvas");
-		element.className = cls;
-		this.element = element;
+		var element = container.children("." + cls)[0];
 
-		$(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
-			.data("canvas", this)
-			.appendTo(container);
+		if (element == null) {
 
-		// If HTML5 Canvas isn't available, fall back to Excanvas
+			element = document.createElement("canvas");
+			element.className = cls;
 
-		if (!element.getContext) {
-			if (window.G_vmlCanvasManager) {
-				element = window.G_vmlCanvasManager.initElement(element);
-			} else {
-				throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
+			$(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
+				.appendTo(container);
+
+			// If HTML5 Canvas isn't available, fall back to [Ex|Flash]canvas
+
+			if (!element.getContext) {
+				if (window.G_vmlCanvasManager) {
+					element = window.G_vmlCanvasManager.initElement(element);
+				} else {
+					throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
+				}
 			}
 		}
 
-		var context = element.getContext("2d");
-		this.context = context;
+		this.element = element;
+
+		var context = this.context = element.getContext("2d");
 
 		// Determine the screen's ratio of physical to device-independent
 		// pixels.  This is the ratio between the canvas width that the browser
@@ -1151,54 +1155,32 @@ Licensed under the MIT license.
         }
 
         function setupCanvases() {
-            var reused,
-                existingSurface = placeholder.children("canvas.flot-base"),
-                existingOverlay = placeholder.children("canvas.flot-overlay");
 
-            if (existingSurface.length == 0 || existingOverlay == 0) {
-                // init everything
+            // Make sure the placeholder is clear of everything except canvases
+            // from a previous plot in this container that we'll try to re-use.
 
-                placeholder.html(""); // make sure placeholder is clear
+            placeholder.css("padding", 0) // padding messes up the positioning
+                .children(":not(.flot-base,.flot-overlay)").remove();
 
-                placeholder.css({ padding: 0 }); // padding messes up the positioning
+            if (placeholder.css("position") == 'static')
+                placeholder.css("position", "relative"); // for positioning labels and overlay
 
-                if (placeholder.css("position") == 'static')
-                    placeholder.css("position", "relative"); // for positioning labels and overlay
-
-                surface = new Canvas("flot-base", placeholder);
-                overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
-
-                reused = false;
-            }
-            else {
-                // reuse existing elements
-
-                surface = existingSurface.data("canvas");
-                overlay = existingOverlay.data("canvas");
-
-                reused = true;
-            }
+            surface = new Canvas("flot-base", placeholder);
+            overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
 
             ctx = surface.context;
             octx = overlay.context;
 
             // define which element we're listening for events on
-            eventHolder = $(overlay.element);
+            eventHolder = $(overlay.element).unbind();
 
-            if (reused) {
-                // run shutdown in the old plot object
-                placeholder.data("plot").shutdown();
+            // If we're re-using a plot object, shut down the old one
 
-                // reset reused canvases
-                plot.resize();
+            var existing = placeholder.data("plot");
 
-                // make sure overlay pixels are cleared (canvas is cleared when we redraw)
-
+            if (existing) {
+                existing.shutdown();
                 overlay.clear();
-
-                // then whack any remaining obvious garbage left
-                eventHolder.unbind();
-                placeholder.children(":not(.flot-base,.flot-overlay,.flot-text)").remove();
             }
 
             // save in case we get replotted
