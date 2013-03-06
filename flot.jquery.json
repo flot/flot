@@ -17,7 +17,7 @@
 	"keywords": ["plot", "chart", "graph", "visualization", "canvas", "graphics"],
 	"homepage": "http://flotcharts.org",
 	"docs": "https://github.com/flot/flot/blob/master/API.md",
-	"demo": "http://people.iola.dk/olau/flot/examples",
+	"demo": "http://www.flotcharts.org/flot/examples/",
 	"maintainers": [{
 		"name": "David Schnur",
 		"email": "dnschnur@gmail.com",
