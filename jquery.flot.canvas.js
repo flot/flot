@@ -33,16 +33,25 @@ browser, but needs to redraw with canvas text when exporting as an image.
 		canvas: true
 	};
 
+	var render, getTextInfo, addText;
+
 	// Cache the prototype hasOwnProperty for faster access
 
 	var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 	function init(plot, classes) {
 
-		var Canvas = classes.Canvas,
+		var Canvas = classes.Canvas;
+
+		// We only want to replace the functions once; the second time around
+		// we would just get our new function back.  This whole replacing of
+		// prototype functions is a disaster, and needs to be changed ASAP.
+
+		if (render == null) {
 			getTextInfo = Canvas.prototype.getTextInfo,
 			addText = Canvas.prototype.addText,
 			render = Canvas.prototype.render;
+		}
 
 		// Finishes rendering the canvas, including overlaid text
 
