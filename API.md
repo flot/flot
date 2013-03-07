@@ -85,7 +85,7 @@ The format of a single series object is as follows:
     clickable: boolean
     hoverable: boolean
     shadowSize: number
-    highlightColor: color or number
+    highlightColor: color string or a function
 }
 ```
 
@@ -713,7 +713,7 @@ series: {
     }
 
     shadowSize: number
-    highlightColor: color or number
+    highlightColor: color string or a function
 }
 
 colors: [ color1, color2, ... ]
@@ -803,7 +803,22 @@ ensures that all symbols have approximately the same visual weight.
 remove shadows.
 
 "highlightColor" is the default color of the translucent overlay used
-to highlight the series when the mouse hovers over it.
+to highlight the series when the mouse hovers over it. You can specify
+either a string or a function, that evaluates to a string for a given
+"series" and "datapoint":
+
+```js
+highlightColor: "#d18b2c"
+```
+
+or
+
+```js
+highlightColor: function (series, datapoint) {
+  return datapoint[0] < 5 ? "#f1493e" : "#ffce14";
+}
+```
+
 
 The "colors" array specifies a default color theme to get colors for
 the data series from. You can specify as many colors as you like, like
