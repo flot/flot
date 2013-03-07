@@ -23,6 +23,12 @@ The text containers  for each axis now use the classes 'flot-[x|y]-axis' and
 with Flot 0.7 and earlier text will continue to use the old classes as well,
 but they are considered deprecated and will be removed in a future version.
 
+In previous versions the axis 'color' option was used to set the color of tick
+marks and their label text. It now controls the color of the axis line, which
+previously could not be changed separately, and continues to act as a default
+for the tick-mark color.  The color of tick label text is now set either by
+overriding the 'flot-tick-label' CSS rule or via the axis 'font' option.
+
 A new plugin, jquery.flot.canvas.js, allows axis tick labels to be rendered
 directly to the canvas, rather than using HTML elements. This feature can be
 toggled with a simple option, making it easy to create interactive plots in the

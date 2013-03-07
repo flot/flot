@@ -641,14 +641,14 @@ Licensed under the MIT license.
             $.extend(true, options, opts);
 
             if (options.xaxis.color == null)
-                options.xaxis.color = options.grid.color;
+                options.xaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
             if (options.yaxis.color == null)
-                options.yaxis.color = options.grid.color;
+                options.yaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
 
-            if (options.xaxis.tickColor == null) // backwards-compatibility
-                options.xaxis.tickColor = options.grid.tickColor;
-            if (options.yaxis.tickColor == null) // backwards-compatibility
-                options.yaxis.tickColor = options.grid.tickColor;
+            if (options.xaxis.tickColor == null) // grid.tickColor for back-compatibility
+                options.xaxis.tickColor = options.grid.tickColor || options.xaxis.color;
+            if (options.yaxis.tickColor == null) // grid.tickColor for back-compatibility
+                options.yaxis.tickColor = options.grid.tickColor || options.yaxis.color;
 
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
@@ -1849,7 +1849,6 @@ Licensed under the MIT license.
                 if (!axis.show || axis.ticks.length == 0)
                     continue;
 
-                ctx.strokeStyle = axis.options.tickColor || $.color.parse(axis.options.color).scale('a', 0.22).toString();
                 ctx.lineWidth = 1;
 
                 // find the edges
@@ -1870,6 +1869,7 @@ Licensed under the MIT license.
 
                 // draw tick bar
                 if (!axis.innermost) {
+                    ctx.strokeStyle = axis.options.color;
                     ctx.beginPath();
                     xoff = yoff = 0;
                     if (axis.direction == "x")
@@ -1888,6 +1888,9 @@ Licensed under the MIT license.
                 }
 
                 // draw ticks
+
+                ctx.strokeStyle = axis.options.tickColor;
+
                 ctx.beginPath();
                 for (i = 0; i < axis.ticks.length; ++i) {
                     var v = axis.ticks[i].v;
