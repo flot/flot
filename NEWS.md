@@ -1,4 +1,4 @@
-## Flot 0.8.0-alpha ##
+## Flot 0.8.0-beta ##
 
 ### API changes ###
 
