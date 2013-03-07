@@ -2862,10 +2862,19 @@ Licensed under the MIT license.
             return -1;
         }
 
+        function getHighlightColor(series, point) {
+            if (typeof series.highlightColor === "string")
+                return series.highlightColor;
+            else if(typeof series.highlightColor === "function")
+                return series.highlightColor (series, point);
+            else
+                return $.color.parse(series.color).scale('a', 0.5).toString();
+        }
+
         function drawPointHighlight(series, point) {
             var x = point[0], y = point[1],
                 axisx = series.xaxis, axisy = series.yaxis,
-                highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
+                highlightColor = getHighlightColor(series, point);
 
             if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
                 return;
@@ -2887,7 +2896,7 @@ Licensed under the MIT license.
         }
 
         function drawBarHighlight(series, point) {
-            var highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString(),
+            var highlightColor = getHighlightColor(series, point),
                 fillStyle = highlightColor,
                 barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
 
