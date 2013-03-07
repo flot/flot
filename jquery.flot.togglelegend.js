@@ -108,7 +108,7 @@
 		},
 		setupSwatch = function ( swatch ) {
 
-			swatch.data("flotcolor", swatch.find("div div").css("border-color"));
+			swatch.data("flotcolor", swatch.find("div div").css("border-top-color"));
 
 		},
 		toggleSwatch = function ( swatch, show ) {
