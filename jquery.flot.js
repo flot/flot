@@ -1873,13 +1873,16 @@ Licensed under the MIT license.
                     ctx.beginPath();
                     xoff = yoff = 0;
                     if (axis.direction == "x")
-                        xoff = plotWidth;
+                        xoff = plotWidth + 1;
                     else
-                        yoff = plotHeight;
+                        yoff = plotHeight + 1;
 
                     if (ctx.lineWidth == 1) {
-                        x = Math.floor(x) + 0.5;
-                        y = Math.floor(y) + 0.5;
+                        if (axis.direction == "x") {
+                            y = Math.floor(y) + 0.5;
+                        } else {
+                            x = Math.floor(x) + 0.5;
+                        }
                     }
 
                     ctx.moveTo(x, y);
