@@ -505,6 +505,7 @@ Licensed under the MIT license.
                         horizontal: false,
                         zero: true
                     },
+		    show: true,
                     shadowSize: 3,
                     highlightColor: null
                 },

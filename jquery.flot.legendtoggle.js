@@ -18,43 +18,40 @@
 
 (function ($) {
 
-    function init(plot) {
+	function init(plot) {
 
-			function chipToggle(plot, eventHolder) {
-					var display_all = '<tr><td id="display_all" class="legendColorBox"><div style="border:1px solid ' + plot.getOptions().legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid #CCCCCC;overflow:hidden"></div></div></td>' + '<td class="legendLabel">Toggle All</td></tr>';
+		function chipToggle(plot, eventHolder) {
+				var display_all = '<tr><td id="display_all" class="legendColorBox"><div style="border:1px solid ' + plot.getOptions().legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid #CCCCCC;overflow:hidden"></div></div></td>' + '<td class="legendLabel">Toggle All</td></tr>';
 
-					$('.legend table').append(display_all);
+				$('.legend table').append(display_all);
 
-					$('.legendColorBox').click(function(){
-						var my_id = $(this).attr('id');
-						var pattern = new RegExp('[0-9]+');
-						var selected  = pattern.exec(my_id);
-						if (my_id === 'display_all') {
-							for (var i = 0; i < plot.getData().length; ++i) {
-								plot.getData()[i].show = !plot.getData()[i].show;
-							}
-						} else {
-							plot.getData()[selected].show = !plot.getData()[selected].show;
+				$('.legendColorBox').click(function(){
+					var my_id = $(this).attr('id');
+					var pattern = new RegExp('[0-9]+');
+					var selected  = pattern.exec(my_id);
+					if (my_id === 'display_all') {
+						for (var i = 0; i < plot.getData().length; ++i) {
+							plot.getData()[i].show = !plot.getData()[i].show;
 						}
-						plot.draw();
-					});
-			}
-
-			//Not the greatest place but I want to much as little as possible with the base jquery.
-			plot.hooks.bindEvents.push(chipToggle);
+					} else {
+						plot.getData()[selected].show = !plot.getData()[selected].show;
+					}
+					plot.draw();
+				});
 		}
 
-		var options = {
-			chipToggle: false,
-			series: {
-				show: true
-			}
-		};
+		//Not the greatest place but I want to muck as little as possible with the base jquery.
+		plot.hooks.bindEvents.push(chipToggle);
+	}
 
-    $.plot.plugins.push({
-        init: init,
-        options: options,
-        name: 'legendtoggle',
-        version: '1.0'
-    });
+	var options = {
+		chipToggle: false,
+	};
+
+	$.plot.plugins.push({
+		init: init,
+		options: options,
+		name: 'legendtoggle',
+		version: '1.0'
+	});
 })(jQuery);
