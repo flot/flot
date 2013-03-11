@@ -23,7 +23,11 @@
 		function chipToggle(plot, eventHolder) {
 				var display_all = '<tr><td id="display_all" class="legendColorBox"><div style="border:1px solid ' + plot.getOptions().legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid #CCCCCC;overflow:hidden"></div></div></td>' + '<td class="legendLabel">Toggle All</td></tr>';
 
-				$('.legend table').append(display_all);
+				if (plot.getOptions().legend.container == null) {
+					$('.legend table').append(display_all);
+				} else {
+					$(plot.getOptions().legend.container).children('table').append(display_all);
+				}
 
 				$('.legendColorBox').click(function(){
 					var my_id = $(this).attr('id');
