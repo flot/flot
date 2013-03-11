@@ -40,12 +40,12 @@ Licensed under the MIT license.
 
 	// Add default styles for tick labels and other text
 
-	var STYLES = [
-		".flot-tick-label {font-size:smaller;color:#545454;}"
-	];
-
 	$(function() {
-		$("head").prepend("<style id='flot-default-styles'>" + STYLES.join("") + "</style>");
+		$("head").prepend([
+			"<style id='flot-default-styles'>",
+			".flot-tick-label {font-size:smaller;color:#545454;}",
+			"</style>"
+		].join(""));
 	});
 
 	///////////////////////////////////////////////////////////////////////////
