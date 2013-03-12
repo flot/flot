@@ -2839,6 +2839,7 @@ Licensed under the MIT license.
             if (s == null && point == null) {
                 highlights = [];
                 triggerRedrawOverlay();
+                return;
             }
 
             if (typeof s == "number")
