@@ -2844,8 +2844,10 @@ Licensed under the MIT license.
             if (typeof s == "number")
                 s = series[s];
 
-            if (typeof point == "number")
-                point = s.data[point];
+            if (typeof point == "number") {
+                var ps = s.datapoints.pointsize;
+                point = s.datapoints.points.slice(ps * point, ps * (point + 1));
+            }
 
             var i = indexOfHighlight(s, point);
             if (i != -1) {
