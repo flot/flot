@@ -231,7 +231,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 						style: element.css("font-style"),
 						variant: element.css("font-variant"),
 						weight: element.css("font-weight"),
-						size: parseInt(element.css("font-size"), 10),
+						size: parseInt(element.css("font-size"), 10) || 13,
 						family: element.css("font-family"),
 						color: element.css("color")
 					};
