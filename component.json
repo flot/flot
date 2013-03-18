@@ -3,6 +3,6 @@
 	"version": "0.8.0-beta",
 	"main": "jquery.flot.js",
 	"dependencies": {
-		"jquery": ">= 1.2.6"
+		"component/jquery": ">= 1.2.6"
 	}
 }
