@@ -7,15 +7,19 @@ The plugin supports these options:
 
 	crosshair: {
 		mode: null or "x" or "y" or "xy"
+		coverAxes: null or "x" or "y" or "xy"
 		color: color
 		lineWidth: number
 	}
 
 Set the mode to one of "x", "y" or "xy". The "x" mode enables a vertical
 crosshair that lets you trace the values on the x axis, "y" enables a
-horizontal crosshair and "xy" enables them both. "color" is the color of the
-crosshair (default is "rgba(170, 0, 0, 0.80)"), "lineWidth" is the width of
-the drawn lines (default is 1).
+horizontal crosshair and "xy" enables them both. By default the crosshair 
+covers the plot area. If you want it to cover the whole canvas, including 
+the axes, set "coverAxes" to "x", "y" or "xy", depending on which directions 
+you want this to happen in. "color" is the color of the crosshair 
+(default is "rgba(170, 0, 0, 0.80)"), "lineWidth" is the width of the drawn 
+lines (default is 1).
 
 The plugin also adds four public methods:
 
@@ -62,6 +66,7 @@ The plugin also adds four public methods:
     var options = {
         crosshair: {
             mode: null, // one of null, "x", "y" or "xy",
+	    coverAxes: null, // one of null, "x", "y" or "xy"
             color: "rgba(170, 0, 0, 0.80)",
             lineWidth: 1
         }
@@ -133,10 +138,12 @@ The plugin also adds four public methods:
             if (!c.mode)
                 return;
 
+	    var coverAxesX = c.coverAxes.indexOf("x") != -1;
+	    var coverAxesY = c.coverAxes.indexOf("y") != -1;
             var plotOffset = plot.getPlotOffset();
             
             ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
+            ctx.translate(coverAxesY ? 0 : plotOffset.left, coverAxesX ? 0 : plotOffset.top);
 
             if (crosshair.x != -1) {
                 var adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
@@ -149,12 +156,12 @@ The plugin also adds four public methods:
                 if (c.mode.indexOf("x") != -1) {
                     var drawX = Math.round(crosshair.x) + adj;
                     ctx.moveTo(drawX, 0);
-                    ctx.lineTo(drawX, plot.height());
+                    ctx.lineTo(drawX, coverAxesX ? plot.getCanvas().height : plot.height());
                 }
                 if (c.mode.indexOf("y") != -1) {
                     var drawY = Math.round(crosshair.y) + adj;
                     ctx.moveTo(0, drawY);
-                    ctx.lineTo(plot.width(), drawY);
+                    ctx.lineTo(coverAxesY ? plot.getCanvas().width : plot.width(), drawY);
                 }
                 ctx.stroke();
             }
