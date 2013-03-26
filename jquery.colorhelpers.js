@@ -29,7 +29,7 @@
         o.r = r || 0;
         o.g = g || 0;
         o.b = b || 0;
-        o.a = a !== null ? a : 1;
+        o.a = a != null ? a : 1;
 
         o.add = function (c, d) {
             for (var i = 0; i < c.length; ++i)
