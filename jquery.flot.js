@@ -38,16 +38,6 @@ Licensed under the MIT license.
 
 	var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-	// Add default styles for tick labels and other text
-
-	$(function() {
-		$("head").prepend([
-			"<style id='flot-default-styles'>",
-			".flot-tick-label {font-size:smaller;color:#545454;}",
-			"</style>"
-		].join(""));
-	});
-
 	///////////////////////////////////////////////////////////////////////////
 	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
 	//
@@ -109,6 +99,7 @@ Licensed under the MIT license.
 
 		// Collection of HTML div layers for text overlaid onto the canvas
 
+		this.textContainer = null;
 		this.text = {};
 
 		// Cache of text fragments and metrics, so we can avoid expensively
@@ -228,8 +219,25 @@ Licensed under the MIT license.
 		// Create the text layer if it doesn't exist
 
 		if (layer == null) {
+
+			// Create the text layer container, if it doesn't exist
+
+			if (this.textContainer == null) {
+				this.textContainer = $("<div class='flot-text'></div>")
+					.css({
+						position: "absolute",
+						top: 0,
+						left: 0,
+						bottom: 0,
+						right: 0,
+						'font-size': "smaller",
+						color: "#545454"
+					})
+					.insertAfter(this.element);
+			}
+
 			layer = this.text[classes] = $("<div></div>")
-				.addClass("flot-text " + classes)
+				.addClass(classes)
 				.css({
 					position: "absolute",
 					top: 0,
@@ -237,7 +245,7 @@ Licensed under the MIT license.
 					bottom: 0,
 					right: 0
 				})
-				.insertAfter(this.element);
+				.appendTo(this.textContainer);
 		}
 
 		return layer;

@@ -281,12 +281,12 @@ deprecated and scheduled to be removed with the release of version 1.0.0.
 
 To enable more granular control over styles, labels are divided between a set
 of text containers, with each holding the labels for one axis. These containers
-are given the classes 'flot-text', 'flot-[x|y]-axis', and 'flot-[x|y]#-axis',
-where '#' is the number of the axis when there are multiple axes.  For example,
-the x-axis labels for a simple plot with only one x-axis might look like this:
+are given the classes 'flot-[x|y]-axis', and 'flot-[x|y]#-axis', where '#' is
+the number of the axis when there are multiple axes.  For example, the x-axis
+labels for a simple plot with only a single x-axis might look like this:
 
 ```html
-<div class='flot-text flot-x-axis flot-x1-axis'>
+<div class='flot-x-axis flot-x1-axis'>
     <div class='flot-tick-label'>January 2013</div>
     ...
 </div>
