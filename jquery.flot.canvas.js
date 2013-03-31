@@ -217,21 +217,24 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				// If the font was provided as CSS, create a div with those
 				// classes and examine it to generate a canvas font spec.
 
+				// Note the trick of using a line-height of 1, without units;
+				// this sets it equal to the font-size, even if the font-size
+				// is something abstract, like 'smaller'.  This enables us to
+				// read the real font-size via the element's height, working
+				// around browsers that return the literal 'smaller' value.
+
 				if (typeof font !== "object") {
 
-					var element = $("<div></div>").html(text)
+					var element = $("<div>&nbsp;</div>")
 						.addClass(typeof font === "string" ? font : null)
-						.css({
-							position: "absolute",
-							top: -9999
-						})
+						.css({ position: "absolute", padding: 0, 'line-height': 1 })
 						.appendTo(this.getTextLayer(layer));
 
 					font = {
 						style: element.css("font-style"),
 						variant: element.css("font-variant"),
 						weight: element.css("font-weight"),
-						size: parseInt(element.css("font-size"), 10) || 13,
+						size: element.height(),
 						family: element.css("font-family"),
 						color: element.css("color")
 					};
