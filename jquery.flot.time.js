@@ -10,7 +10,14 @@ API.txt for details.
 
 (function($) {
 
-	var options = {};
+	var options = {
+		xaxis: {
+			timezone: null,		// "browser" for local to the client or timezone for timezone-js
+			timeformat: null,	// format string to use
+			twelveHourClock: false,	// 12 or 24 time in time mode
+			monthNames: null	// list of names of months
+		}
+	};
 
 	// round to nearby lower multiple of base
 
