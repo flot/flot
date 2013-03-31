@@ -674,8 +674,15 @@ Licensed under the MIT license.
 
             axisCount = options.xaxes.length || 1;
             for (i = 0; i < axisCount; ++i) {
-                axisOptions = $.extend(true, {}, options.xaxis, options.xaxes[i]);
+
+                axisOptions = options.xaxes[i];
+                if (axisOptions && !axisOptions.tickColor) {
+                    axisOptions.tickColor = axisOptions.color;
+                }
+
+                axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
                 options.xaxes[i] = axisOptions;
+
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
                     if (!axisOptions.font.color) {
@@ -686,8 +693,15 @@ Licensed under the MIT license.
 
             axisCount = options.yaxes.length || 1;
             for (i = 0; i < axisCount; ++i) {
-                axisOptions = $.extend(true, {}, options.yaxis, options.yaxes[i]);
+
+                axisOptions = options.yaxes[i];
+                if (axisOptions && !axisOptions.tickColor) {
+                    axisOptions.tickColor = axisOptions.color;
+                }
+
+                axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
                 options.yaxes[i] = axisOptions;
+
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
                     if (!axisOptions.font.color) {
