@@ -68,6 +68,19 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 			context.save();
 
+			// TODO: Comments in Ole's implementation indicate that some
+			// browsers differ in their interpretation of 'top'; so far I
+			// don't see this, but it requires more testing.  We'll stick
+			// with top until this can be verified.
+
+			// Original comment was:
+			// Top alignment would be more natural, but browsers can differ a
+			// pixel or two in where they consider the top to be, so instead
+			// we middle align to minimize variation between browsers and
+			// compensate when calculating the coordinates.
+
+			context.textBaseline = "top";
+
 			for (var layerKey in cache) {
 				if (hasOwnProperty.call(cache, layerKey)) {
 					var layerCache = cache[layerKey];
@@ -99,20 +112,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 										context.font = info.font.definition;
 										updateStyles = false;
 									}
-
-									// TODO: Comments in Ole's implementation indicate that
-									// some browsers differ in their interpretation of 'top';
-									// so far I don't see this, but it requires more testing.
-									// We'll stick with top until this can be verified.
-
-									// Original comment was:
-									// Top alignment would be more natural, but browsers can
-									// differ a pixel or two in where they consider the top to
-									// be, so instead we middle align to minimize variation
-									// between browsers and compensate when calculating the
-									// coordinates.
-
-									context.textBaseline = "top";
 
 									for (var i = 0; i < lines.length; ++i) {
 
