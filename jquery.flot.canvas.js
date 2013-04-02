@@ -98,11 +98,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 										continue;
 									}
 
-									var x = info.x,
-										y = info.y,
-										lines = info.lines,
-										halign = info.halign;
-
 									// Since every element at this level of the cache have the
 									// same font and fill styles, we can just change them once
 									// using the values from the first element.
@@ -113,34 +108,10 @@ browser, but needs to redraw with canvas text when exporting as an image.
 										updateStyles = false;
 									}
 
+									var lines = info.lines;
 									for (var i = 0; i < lines.length; ++i) {
-
-										var line = lines[i],
-											linex = x;
-
-										// Apply horizontal alignment per-line
-
-										if (halign == "center") {
-											linex -= line.width / 2;
-										} else if (halign == "right") {
-											linex -= line.width;
-										}
-
-										// FIXME: LEGACY BROWSER FIX
-										// AFFECTS: Opera < 12.00
-
-										// Round the coordinates, since Opera otherwise
-										// switches to uglier (probably non-hinted) rendering.
-										// Also offset the y coordinate, since Opera is off
-										// pretty consistently compared to the other browsers.
-
-										if (!!(window.opera && window.opera.version().split(".")[0] < 12)) {
-											linex = Math.floor(linex);
-											y = Math.ceil(y - 2);
-										}
-
-										context.fillText(line.text, Math.round(linex), Math.round(y));
-										y += line.height;
+										var line = lines[i];
+										context.fillText(line.text, line.x, line.y);
 									}
 								}
 							}
@@ -247,8 +218,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				// zero so we can count them up line-by-line.
 
 				info = styleCache[text] = {
-					x: null,
-					y: null,
 					width: 0,
 					height: 0,
 					active: false,
@@ -317,19 +286,41 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 			info.active = true;
 
-			// Save horizontal alignment for later; we'll apply it per-line
-
-			info.x = x;
-			info.halign = halign;
-
 			// Tweak the initial y-position to match vertical alignment
 
 			if (valign == "middle") {
-				info.y = y - info.height / 2;
+				y = Math.round(y - info.height / 2);
 			} else if (valign == "bottom") {
-				info.y = y - info.height;
+				y = Math.round(y - info.height);
 			} else {
-				info.y = y;
+				y = Math.round(y);
+			}
+
+			// FIXME: LEGACY BROWSER FIX
+			// AFFECTS: Opera < 12.00
+
+			// Offset the y coordinate, since Opera is off pretty
+			// consistently compared to the other browsers.
+
+			if (!!(window.opera && window.opera.version().split(".")[0] < 12)) {
+				y -= 2;
+			}
+
+			// Fill in the x & y positions of each line, adjusting them
+			// individually for horizontal alignment.
+
+			var lines = info.lines;
+			for (var i = 0; i < lines.length; ++i) {
+				var line = lines[i];
+				line.y = y;
+				y += line.height;
+				if (halign == "center") {
+					line.x = Math.round(x - line.width / 2);
+				} else if (halign == "right") {
+					line.x = Math.round(x - line.width);
+				} else {
+					line.x = Math.round(x);
+				}
 			}
 		};
 	}
