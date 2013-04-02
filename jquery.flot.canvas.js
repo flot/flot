@@ -140,7 +140,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 											y = Math.ceil(y - 2);
 										}
 
-										context.fillText(line.text, linex, y);
+										context.fillText(line.text, Math.round(linex), Math.round(y));
 										y += line.height;
 									}
 								}

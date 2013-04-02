@@ -385,8 +385,8 @@ Licensed under the MIT license.
 		// Move the element to its final position within the container
 
 		info.element.css({
-			top: parseInt(y, 10),
-			left: parseInt(x, 10)
+			top: Math.round(y),
+			left: Math.round(x)
 		});
 	};
 
