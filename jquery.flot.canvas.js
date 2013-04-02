@@ -314,15 +314,13 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 			var info = this.getTextInfo(layer, text, font, angle);
 
-			info.x = x;
-			info.y = y;
-
 			// Mark the text for inclusion in the next render pass
 
 			info.active = true;
 
 			// Save horizontal alignment for later; we'll apply it per-line
 
+			info.x = x;
 			info.halign = halign;
 
 			// Tweak the initial y-position to match vertical alignment
@@ -331,6 +329,8 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				info.y = y - info.height / 2;
 			} else if (valign == "bottom") {
 				info.y = y - info.height;
+			} else {
+				info.y = y;
 			}
 		};
 	}
