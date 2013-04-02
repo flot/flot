@@ -187,27 +187,29 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				// If the font was provided as CSS, create a div with those
 				// classes and examine it to generate a canvas font spec.
 
-				// Note the trick of using a line-height of 1, without units;
-				// this sets it equal to the font-size, even if the font-size
-				// is something abstract, like 'smaller'.  This enables us to
-				// read the real font-size via the element's height, working
-				// around browsers that return the literal 'smaller' value.
-
 				if (typeof font !== "object") {
 
 					var element = $("<div>&nbsp;</div>")
+						.css("position", "absolute")
 						.addClass(typeof font === "string" ? font : null)
-						.css({ position: "absolute", padding: 0, 'line-height': 1 })
 						.appendTo(this.getTextLayer(layer));
 
 					font = {
+						lineHeight: element.height(),
 						style: element.css("font-style"),
 						variant: element.css("font-variant"),
 						weight: element.css("font-weight"),
-						size: element.height(),
 						family: element.css("font-family"),
 						color: element.css("color")
 					};
+
+					// Setting line-height to 1, without units, sets it equal
+					// to the font-size, even if the font-size is abstract,
+					// like 'smaller'.  This enables us to read the real size
+					// via the element's height, working around browsers that
+					// return the literal 'smaller' value.
+
+					font.size = element.css("line-height", 1).height();
 
 					element.remove();
 				}
@@ -241,28 +243,15 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				for (var i = 0; i < lines.length; ++i) {
 
 					var lineText = lines[i],
-						measured = context.measureText(lineText),
-						lineWidth, lineHeight;
+						measured = context.measureText(lineText);
 
-					lineWidth = measured.width;
-
-					// Height might not be defined; not in the standard yet
-
-					lineHeight = measured.height || font.size;
-
-					// Add a bit of margin since font rendering is not pixel
-					// perfect and cut off letters look bad.  This also doubles
-					// as spacing between lines.
-
-					lineHeight += Math.round(font.size * 0.15);
-
-					info.width = Math.max(lineWidth, info.width);
-					info.height += lineHeight;
+					info.width = Math.max(measured.width, info.width);
+					info.height += font.lineHeight;
 
 					info.lines.push({
 						text: lineText,
-						width: lineWidth,
-						height: lineHeight
+						width: measured.width,
+						height: font.lineHeight
 					});
 				}
 
