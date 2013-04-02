@@ -298,6 +298,7 @@ with this format:
 ```js
 {
     size: 11,
+    lineHeight: 13,
     style: "italic",
     weight: "bold",
     family: "sans-serif",
@@ -305,6 +306,9 @@ with this format:
     color: "#545454"
 }
 ```
+
+The size and lineHeight must be expressed in pixels; CSS units such as 'em'
+or 'smaller' are not allowed.
 
 The options "min"/"max" are the precise minimum/maximum value on the
 scale. If you don't specify either of them, a value will automatically

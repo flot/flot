@@ -286,7 +286,7 @@ Licensed under the MIT license.
 		// If the font is a font-spec object, generate a CSS font definition
 
 		if (typeof font === "object") {
-			textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px " + font.family;
+			textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px/" + font.lineHeight + "px " + font.family;
 		} else {
 			textStyle = font;
 		}
@@ -453,7 +453,7 @@ Licensed under the MIT license.
                     show: null, // null = auto-detect, true = always, false = never
                     position: "bottom", // or "top"
                     mode: null, // null or "time"
-                    font: null, // null (derived from CSS in placeholder) or object like { size: 11, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
+                    font: null, // null (derived from CSS in placeholder) or object like { size: 11, lineHeight: 13, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
                     color: null, // base color, labels, ticks
                     tickColor: null, // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
                     transform: null, // null or f: number -> number to transform axis
@@ -671,6 +671,8 @@ Licensed under the MIT license.
                     weight: placeholder.css("font-weight"),
                     family: placeholder.css("font-family")
                 };
+
+            fontDefaults.lineHeight = fontDefaults.size * 1.15;
 
             axisCount = options.xaxes.length || 1;
             for (i = 0; i < axisCount; ++i) {
