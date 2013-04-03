@@ -67,19 +67,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// For each text layer, render elements marked as active
 
 			context.save();
-
-			// TODO: Comments in Ole's implementation indicate that some
-			// browsers differ in their interpretation of 'top'; so far I
-			// don't see this, but it requires more testing.  We'll stick
-			// with top until this can be verified.
-
-			// Original comment was:
-			// Top alignment would be more natural, but browsers can differ a
-			// pixel or two in where they consider the top to be, so instead
-			// we middle align to minimize variation between browsers and
-			// compensate when calculating the coordinates.
-
-			context.textBaseline = "top";
+			context.textBaseline = "middle";
 
 			for (var layerKey in cache) {
 				if (hasOwnProperty.call(cache, layerKey)) {
@@ -269,11 +257,17 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				return addText.call(this, layer, x, y, text, font, angle, halign, valign);
 			}
 
-			var info = this.getTextInfo(layer, text, font, angle);
+			var info = this.getTextInfo(layer, text, font, angle),
+				lines = info.lines;
 
 			// Mark the text for inclusion in the next render pass
 
 			info.active = true;
+
+			// Text is drawn with baseline 'middle', which we need to account
+			// for by adding half a line's height to the y position.
+
+			y += info.height / lines.length / 2;
 
 			// Tweak the initial y-position to match vertical alignment
 
@@ -298,7 +292,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// Fill in the x & y positions of each line, adjusting them
 			// individually for horizontal alignment.
 
-			var lines = info.lines;
 			for (var i = 0; i < lines.length; ++i) {
 				var line = lines[i];
 				line.y = y;
