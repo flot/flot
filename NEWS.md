@@ -230,6 +230,12 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Fixed an error when using the navigate plugin with jQuery 1.9.x or later.
    (reported by Paolo Valleri, issue #964)
 
+ - Fixed inconsistencies between the highlight and unhighlight functions.
+   (reported by djamshed, issue #987)
+
+ - Fixed recalculation of tickSize and tickDecimals on calls to setupGrid.
+   (patch by thecountofzero, pull request #861, issues #860, #1000)
+
 
 ## Flot 0.7 ##
 
