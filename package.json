@@ -1,6 +1,6 @@
 {
 	"name": "Flot",
-	"version": "0.8.0-beta",
+	"version": "0.8.0",
 	"main": "jquery.flot.js",
 	"scripts": {
 		"test": "make test"
