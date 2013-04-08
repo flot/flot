@@ -610,7 +610,7 @@ this:
 
 ```js
 xaxis: {
-    mode: "time"
+    mode: "time",
     timeformat: "%Y/%m/%d"
 }
 ```
