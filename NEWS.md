@@ -1,3 +1,6 @@
+## Flot 0.9.0 ##
+
+
 ## Flot 0.8.0 ##
 
 ### API changes ###
