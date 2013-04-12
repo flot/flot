@@ -646,8 +646,8 @@ More detail and specific examples can be found in the included HTML file.
 		function triggerClickHoverEvent(eventname, e) {
 
 			var offset = plot.offset();
-			var canvasX = parseInt(e.pageX - offset.left);
-			var canvasY =  parseInt(e.pageY - offset.top);
+			var canvasX = parseInt(e.pageX - offset.left, 10);
+			var canvasY =  parseInt(e.pageY - offset.top, 10);
 			var item = findNearbySlice(canvasX, canvasY);
 
 			if (options.grid.autoHighlight) {
