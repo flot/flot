@@ -1,5 +1,10 @@
 ## Flot 0.8.1 ##
 
+### Bug fixes ###
+
+ - Fixed missing semicolons in the core library.
+   (reported by Michal Zglinski)
+
 
 ## Flot 0.8.0 ##
 
