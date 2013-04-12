@@ -164,7 +164,7 @@ The plugin allso adds the following methods to the plot object:
             var r = {}, c1 = selection.first, c2 = selection.second;
             $.each(plot.getAxes(), function (name, axis) {
                 if (axis.used) {
-                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]); 
+                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]);
                     r[name] = { from: Math.min(p1, p2), to: Math.max(p1, p2) };
                 }
             });

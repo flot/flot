@@ -1,7 +1,7 @@
 /* Plugin for jQuery for working with colors.
- * 
+ *
  * Version 1.1.
- * 
+ *
  * Inspiration from jQuery color animation plugin by John Resig.
  *
  * Released under the MIT license by Ole Laursen, October 2009.
@@ -18,7 +18,7 @@
  *
  * V. 1.1: Fix error handling so e.g. parsing an empty string does
  * produce a color rather than just crashing.
- */ 
+ */
 
 (function($) {
     $.color = {};

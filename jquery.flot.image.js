@@ -148,7 +148,7 @@ Google Maps).
                 y1 = tmp;
             }
             
-            // if the anchor is at the center of the pixel, expand the 
+            // if the anchor is at the center of the pixel, expand the
             // image by 1/2 pixel in each direction
             if (series.images.anchor == "center") {
                 tmp = 0.5 * (x2-x1) / (img.width - 1);

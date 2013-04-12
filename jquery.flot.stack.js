@@ -131,7 +131,7 @@ charts or filled areas).
                             newpoints.push(intery + qy);
                             for (m = 2; m < ps; ++m)
                                 newpoints.push(points[i + m]);
-                            bottom = qy; 
+                            bottom = qy;
                         }
 
                         j += otherps;
