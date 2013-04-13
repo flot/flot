@@ -5,6 +5,9 @@
  - Fixed missing semicolons in the core library.
    (reported by Michal Zglinski)
 
+ - Avoid triggering the time-mode plugin exception when there are zero series.
+   (reported by Daniel Rothig, patch by Mark Raymond, issues #1016)
+
 
 ## Flot 0.8.0 ##
 
