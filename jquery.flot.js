@@ -2381,7 +2381,7 @@ Licensed under the MIT license.
             }
 
             ctx.lineWidth = lw;
-            ctx.strokeStyle = series.points.strokeColor ? series.points.strokeColor : series.color;
+            ctx.strokeStyle = series.points.strokeColor || series.color;
             plotPoints(series.datapoints, radius,
                        getFillStyle(series.points, series.color), 0, false,
                        series.xaxis, series.yaxis, symbol);
