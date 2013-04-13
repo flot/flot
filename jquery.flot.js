@@ -485,6 +485,7 @@ Licensed under the MIT license.
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
+                        strokeColor: null,
                         symbol: "circle" // or callback
                     },
                     lines: {
@@ -2380,7 +2381,7 @@ Licensed under the MIT license.
             }
 
             ctx.lineWidth = lw;
-            ctx.strokeStyle = series.color;
+            ctx.strokeStyle = series.points.strokeColor ? series.points.strokeColor : series.color;
             plotPoints(series.datapoints, radius,
                        getFillStyle(series.points, series.color), 0, false,
                        series.xaxis, series.yaxis, symbol);
