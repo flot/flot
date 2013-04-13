@@ -704,6 +704,7 @@ series: {
     points: {
         radius: number
         symbol: "circle" or function
+        strokeColor: color
     }
 
     bars: {
@@ -781,8 +782,8 @@ connected with a straight (possibly diagonal) line or with first a
 horizontal and then a vertical line. Note that this transforms the
 data by adding extra points.
 
-For points, you can specify the radius and the symbol. The only
-built-in symbol type is circles, for other types you can use a plugin
+For points, you can specify the radius, symbol, and symbol stroke color. The
+only built-in symbol type is circles, for other types you can use a plugin
 or define them yourself by specifying a callback:
 
 ```js
