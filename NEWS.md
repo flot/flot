@@ -1,5 +1,10 @@
 ## Flot 0.9.0 ##
 
+### Changes ###
+
+ - Added a strokeColor option to control the outline around point symbols.
+   (patch by djamshed, pull request #1003)
+
 
 ## Flot 0.8.0 ##
 
