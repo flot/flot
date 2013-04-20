@@ -294,17 +294,23 @@ API.txt for details.
 
 						if (step >= timeUnitSize.minute) {
 							d.setSeconds(0);
-						} else if (step >= timeUnitSize.hour) {
+						}
+						if (step >= timeUnitSize.hour) {
 							d.setMinutes(0);
-						} else if (step >= timeUnitSize.day) {
+						}
+						if (step >= timeUnitSize.day) {
 							d.setHours(0);
-						} else if (step >= timeUnitSize.day * 4) {
+						}
+						if (step >= timeUnitSize.day * 4) {
 							d.setDate(1);
-						} else if (step >= timeUnitSize.month * 2) {
+						}
+						if (step >= timeUnitSize.month * 2) {
 							d.setMonth(floorInBase(d.getMonth(), 3));
-						} else if (step >= timeUnitSize.quarter * 2) {
+						}
+						if (step >= timeUnitSize.quarter * 2) {
 							d.setMonth(floorInBase(d.getMonth(), 6));
-						} else if (step >= timeUnitSize.year) {
+						}
+						if (step >= timeUnitSize.year) {
 							d.setMonth(0);
 						}
 
