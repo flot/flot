@@ -73,6 +73,7 @@ API.txt for details.
 					case 'b': c = "" + monthNames[d.getMonth()]; break;
 					case 'd': c = leftPad(d.getDate()); break;
 					case 'e': c = leftPad(d.getDate(), " "); break;
+					case 'h':	// For back-compat with 0.7; remove in 1.0
 					case 'H': c = leftPad(hours); break;
 					case 'I': c = leftPad(hours12); break;
 					case 'l': c = leftPad(hours12, " "); break;
