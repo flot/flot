@@ -641,6 +641,8 @@ Licensed under the MIT license.
         function parseOptions(opts) {
 
             $.extend(true, options, opts);
+            
+            if (opts.colors) options.colors = opts.colors;
 
             if (options.xaxis.color == null)
                 options.xaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
