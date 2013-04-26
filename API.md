@@ -8,7 +8,7 @@ var plot = $.plot(placeholder, data, options)
 
 The placeholder is a jQuery object or DOM element or jQuery expression
 that the plot will be put into. This placeholder needs to have its
-width and height set as explained in the README (go read that now if
+width and height set as explained in the [README](README.md) (go read that now if
 you haven't, it's short). The plot will modify some properties of the
 placeholder so it's recommended you simply pass in a div that you
 don't use for anything else. Make sure you check any fancy styling
