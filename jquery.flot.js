@@ -641,10 +641,13 @@ Licensed under the MIT license.
         function parseOptions(opts) {
 
             $.extend(true, options, opts);
-            
-            //Override options.colors after $.extend if user has set colors, because extend does not clear out excess
-            //default colors if user defines color palette smaller than default palette size (currently 5).
-            if (opts.colors) {
+
+            // $.extend merges arrays, rather than replacing them.  When less
+            // colors are provided than the size of the default palette, we
+            // end up with those colors plus the remaining defaults, which is
+            // not expected behavior; avoid it by replacing them here.
+
+            if (opts && opts.colors) {
             	options.colors = opts.colors;
             }
 
