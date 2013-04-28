@@ -180,6 +180,10 @@ More detail and specific examples can be found in the included HTML file.
 				// new one; this is more efficient and preserves any extra data
 				// that the user may have stored in higher indexes.
 
+				if ($.isArray(value) && value.length == 1) {
+    				value = value[0];
+				}
+
 				if ($.isArray(value)) {
 					// Equivalent to $.isNumeric() but compatible with jQuery < 1.7
 					if (!isNaN(parseFloat(value[1])) && isFinite(value[1])) {
