@@ -1284,8 +1284,11 @@ Licensed under the MIT license.
 
         function measureTickLabels(axis) {
 
-            var opts = axis.options, ticks = axis.ticks || [],
-                axisw = opts.labelWidth || 0, axish = opts.labelHeight || 0,
+            var opts = axis.options,
+                ticks = axis.ticks || [],
+                labelWidth = opts.labelWidth || 0,
+                labelHeight = opts.labelHeight || 0,
+                maxWidth = labelWidth || axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null;
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
@@ -1297,16 +1300,14 @@ Licensed under the MIT license.
                 if (!t.label)
                     continue;
 
-                var info = surface.getTextInfo(layer, t.label, font);
+                var info = surface.getTextInfo(layer, t.label, font, null, maxWidth);
 
-                if (opts.labelWidth == null)
-                    axisw = Math.max(axisw, info.width);
-                if (opts.labelHeight == null)
-                    axish = Math.max(axish, info.height);
+                labelWidth = Math.max(labelWidth, info.width);
+                labelHeight = Math.max(labelHeight, info.height);
             }
 
-            axis.labelWidth = Math.ceil(axisw);
-            axis.labelHeight = Math.ceil(axish);
+            axis.labelWidth = opts.labelWidth || labelWidth;
+            axis.labelHeight = opts.labelHeight || labelHeight;
         }
 
         function allocateAxisBoxFirstPhase(axis) {
