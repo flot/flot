@@ -273,9 +273,10 @@ Licensed under the MIT license.
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which to rotate the text, in degrees.
 	//     Angle is currently unused, it will be implemented in the future.
+	// @param {number=} width Maximum width of the text before it wraps.
 	// @return {object} a text info object.
 
-	Canvas.prototype.getTextInfo = function(layer, text, font, angle) {
+	Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
 
 		var textStyle, layerCache, styleCache, info;
 
@@ -314,6 +315,7 @@ Licensed under the MIT license.
 			var element = $("<div></div>").html(text)
 				.css({
 					position: "absolute",
+					'max-width': width,
 					top: -9999
 				})
 				.appendTo(this.getTextLayer(layer));
@@ -355,14 +357,15 @@ Licensed under the MIT license.
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which to rotate the text, in degrees.
 	//     Angle is currently unused, it will be implemented in the future.
+	// @param {number=} width Maximum width of the text before it wraps.
 	// @param {string=} halign Horizontal alignment of the text; either "left",
 	//     "center" or "right".
 	// @param {string=} valign Vertical alignment of the text; either "top",
 	//     "middle" or "bottom".
 
-	Canvas.prototype.addText = function(layer, x, y, text, font, angle, halign, valign) {
+	Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
 
-		var info = this.getTextInfo(layer, text, font, angle);
+		var info = this.getTextInfo(layer, text, font, angle, width);
 
 		// Mark the div for inclusion in the next render pass
 
@@ -386,7 +389,8 @@ Licensed under the MIT license.
 
 		info.element.css({
 			top: Math.round(y),
-			left: Math.round(x)
+			left: Math.round(x),
+			'text-align': halign	// In case the text wraps
 		});
 	};
 
@@ -2065,7 +2069,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    surface.addText(layer, x, y, tick.label, font, null, halign, valign);
+                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
                 }
             });
         }

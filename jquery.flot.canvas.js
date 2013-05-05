@@ -132,10 +132,10 @@ browser, but needs to redraw with canvas text when exporting as an image.
 		//     },
 		// }
 
-		Canvas.prototype.getTextInfo = function(layer, text, font, angle) {
+		Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
 
 			if (!plot.getOptions().canvas) {
-				return getTextInfo.call(this, layer, text, font, angle);
+				return getTextInfo.call(this, layer, text, font, angle, width);
 			}
 
 			var textStyle, layerCache, styleCache, info;
@@ -251,13 +251,13 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 		// Adds a text string to the canvas text overlay.
 
-		Canvas.prototype.addText = function(layer, x, y, text, font, angle, halign, valign) {
+		Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
 
 			if (!plot.getOptions().canvas) {
-				return addText.call(this, layer, x, y, text, font, angle, halign, valign);
+				return addText.call(this, layer, x, y, text, font, angle, width, halign, valign);
 			}
 
-			var info = this.getTextInfo(layer, text, font, angle),
+			var info = this.getTextInfo(layer, text, font, angle, width),
 				lines = info.lines;
 
 			// Mark the text for inclusion in the next render pass
