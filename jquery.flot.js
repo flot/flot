@@ -1073,10 +1073,14 @@ Licensed under the MIT license.
                             if (val != null) {
                                 f = format[m];
                                 // extract min/max info
-                                if (f.x)
-                                    updateAxis(s.xaxis, val, val);
-                                if (f.y)
-                                    updateAxis(s.yaxis, val, val);
+                                if (f.autoscale) {
+                                    if (f.x) {
+                                        updateAxis(s.xaxis, val, val);
+                                    }
+                                    if (f.y) {
+                                        updateAxis(s.yaxis, val, val);
+                                    }
+                                }
                             }
                             points[k + m] = null;
                         }
