@@ -35,6 +35,19 @@ charts or filled areas).
 
 */
 
+
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 (function ($) {
     var options = {
         series: { stack: null } // or number/string
@@ -186,3 +199,7 @@ charts or filled areas).
         version: '1.2'
     });
 })(jQuery);
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

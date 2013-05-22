@@ -8,6 +8,18 @@ API.txt for details.
 
 */
 
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 (function($) {
 
 	var options = {
@@ -429,3 +441,8 @@ API.txt for details.
 	$.plot.formatDate = formatDate;
 
 })(jQuery);
+
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

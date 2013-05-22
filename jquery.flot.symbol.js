@@ -13,6 +13,19 @@ The symbols are accessed as strings through the standard symbol options:
 
 */
 
+
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 (function ($) {
     function processRawData(plot, series, datapoints) {
         // we normalize the area of each symbol so it is approximately the
@@ -69,3 +82,8 @@ The symbols are accessed as strings through the standard symbol options:
         version: '1.0'
     });
 })(jQuery);
+
+//End export wrapper
+return $.plot;//Export plot function
+}));
+

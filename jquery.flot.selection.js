@@ -78,6 +78,19 @@ The plugin allso adds the following methods to the plot object:
 
 */
 
+
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 (function ($) {
     function init(plot) {
         var selection = {
@@ -358,3 +371,8 @@ The plugin allso adds the following methods to the plot object:
         version: '1.1'
     });
 })(jQuery);
+
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

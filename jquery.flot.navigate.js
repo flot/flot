@@ -79,6 +79,20 @@ can set the default in the options.
 
 */
 
+
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
+
 // First two dependencies, jquery.event.drag.js and
 // jquery.mousewheel.js, we put them inline here to save people the
 // effort of downloading them.
@@ -344,3 +358,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         version: '1.3'
     });
 })(jQuery);
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

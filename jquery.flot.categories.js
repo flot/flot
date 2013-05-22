@@ -43,6 +43,18 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
 
 */
 
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 (function ($) {
     var options = {
         xaxis: {
@@ -188,3 +200,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         version: '1.0'
     });
 })(jQuery);
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

@@ -11,6 +11,19 @@ can just fix the size of their placeholders.
 
 */
 
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
+
 /* Inline dependency:
  * jQuery resize event - v1.1 - 3/14/2010
  * http://benalman.com/projects/jquery-resize-plugin/
@@ -58,3 +71,8 @@ can just fix the size of their placeholders.
         version: '1.0'
     });
 })(jQuery);
+
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

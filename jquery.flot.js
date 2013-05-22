@@ -5,6 +5,18 @@ Licensed under the MIT license.
 
 */
 
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 // first an inline dependency, jquery.colorhelpers.js, we inline it here
 // for convenience
 
@@ -3059,3 +3071,8 @@ Licensed under the MIT license.
     }
 
 })(jQuery);
+
+
+//End export wrapper
+return $.plot;//Export plot function
+}));

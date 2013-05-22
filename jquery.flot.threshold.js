@@ -42,6 +42,19 @@ You may need to check for this in hover events.
 
 */
 
+
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery", "jquery.flot"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
+
+
 (function ($) {
     var options = {
         series: { threshold: null } // or { below: number, color: color spec}
@@ -140,3 +153,7 @@ You may need to check for this in hover events.
         version: '1.2'
     });
 })(jQuery);
+
+//End export wrapper
+return $.plot;//Export plot function
+}));
