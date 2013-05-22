@@ -19,7 +19,21 @@
  * V. 1.1: Fix error handling so e.g. parsing an empty string does
  * produce a color rather than just crashing.
  */ 
+ 
+ 
+//Start export wrapper
+(function(root, factory){
+    if (typeof define === 'function' && define.amd)
+        // AMD
+        define(["jquery"], factory);
+    else
+        // Browser globals
+        factory($);
+}(this, function ($){
+var jQuery = $;//Assign local jQuery variable with imported $
 
+
+ 
 (function($) {
     $.color = {};
 
@@ -177,3 +191,7 @@
         yellow:[255,255,0]
     };
 })(jQuery);
+
+//End export wrapper
+return $.color;//Export color function
+}));
