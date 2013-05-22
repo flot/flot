@@ -184,17 +184,25 @@ Licensed under the MIT license.
 						var styleCache = layerCache[styleKey];
 						for (var key in styleCache) {
 							if (hasOwnProperty.call(styleCache, key)) {
-								var info = styleCache[key];
-								if (info.active) {
-									if (!info.rendered) {
-										layer.append(info.element);
-										info.rendered = true;
+
+								var positions = styleCache[key].positions;
+
+								for (var i = 0, position; position = positions[i]; i++) {
+									if (position.active) {
+										if (!position.rendered) {
+											layer.append(position.element);
+											position.rendered = true;
+										}
+									} else {
+										positions.splice(i--, 1);
+										if (position.rendered) {
+											position.element.detach();
+										}
 									}
-								} else {
+								}
+
+								if (positions.length == 0) {
 									delete styleCache[key];
-									if (info.rendered) {
-										info.element.detach();
-									}
 								}
 							}
 						}
@@ -258,10 +266,25 @@ Licensed under the MIT license.
 	// {
 	//     width: Width of the text's wrapper div.
 	//     height: Height of the text's wrapper div.
+	//     element: The jQuery-wrapped HTML div containing the text.
+	//     positions: Array of positions at which this text is drawn.
+	// }
+	//
+	// The positions array contains objects that look like this:
+	//
+	// {
 	//     active: Flag indicating whether the text should be visible.
 	//     rendered: Flag indicating whether the text is currently visible.
 	//     element: The jQuery-wrapped HTML div containing the text.
+	//     x: X coordinate at which to draw the text.
+	//     y: Y coordinate at which to draw the text.
 	// }
+	//
+	// Each position after the first receives a clone of the original element.
+	//
+	// The idea is that that the width, height, and general 'identity' of the
+	// text is constant no matter where it is placed; the placements are a
+	// secondary property.
 	//
 	// Canvas maintains a cache of recently-used text info objects; getTextInfo
 	// either returns the cached element or creates a new entry.
@@ -330,11 +353,10 @@ Licensed under the MIT license.
 			}
 
 			info = styleCache[text] = {
-				active: false,
-				rendered: false,
-				element: element,
 				width: element.outerWidth(true),
-				height: element.outerHeight(true)
+				height: element.outerHeight(true),
+				element: element,
+				positions: []
 			};
 
 			element.detach();
@@ -365,11 +387,8 @@ Licensed under the MIT license.
 
 	Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
 
-		var info = this.getTextInfo(layer, text, font, angle, width);
-
-		// Mark the div for inclusion in the next render pass
-
-		info.active = true;
+		var info = this.getTextInfo(layer, text, font, angle, width),
+			positions = info.positions;
 
 		// Tweak the div's position to match the text's alignment
 
@@ -385,9 +404,34 @@ Licensed under the MIT license.
 			y -= info.height;
 		}
 
+		// Determine whether this text already exists at this position.
+		// If so, mark it for inclusion in the next render pass.
+
+		for (var i = 0, position; position = positions[i]; i++) {
+			if (position.x == x && position.y == y) {
+				position.active = true;
+				return;
+			}
+		}
+
+		// If the text doesn't exist at this position, create a new entry
+
+		// For the very first position we'll re-use the original element,
+		// while for subsequent ones we'll clone it.
+
+		position = {
+			active: true,
+			rendered: false,
+			element: positions.length ? info.element.clone() : info.element,
+			x: x,
+			y: y
+		}
+
+		positions.push(position);
+
 		// Move the element to its final position within the container
 
-		info.element.css({
+		position.element.css({
 			top: Math.round(y),
 			left: Math.round(x),
 			'text-align': halign	// In case the text wraps
@@ -397,18 +441,24 @@ Licensed under the MIT license.
 	// Removes one or more text strings from the canvas text overlay.
 	//
 	// If no parameters are given, all text within the layer is removed.
-	// The text is not actually removed; it is simply marked as inactive, which
-	// will result in its removal on the next render pass.
+	//
+	// Note that the text is not immediately removed; it is simply marked as
+	// inactive, which will result in its removal on the next render pass.
+	// This avoids the performance penalty for 'clear and redraw' behavior,
+	// where we potentially get rid of all text on a layer, but will likely
+	// add back most or all of it later, as when redrawing axes, for example.
 	//
 	// @param {string} layer A string of space-separated CSS classes uniquely
 	//     identifying the layer containing this text.
-	// @param {string} text Text string to remove.
+	// @param {number=} x X coordinate of the text.
+	// @param {number=} y Y coordinate of the text.
+	// @param {string=} text Text string to remove.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which the text is rotated, in degrees.
 	//     Angle is currently unused, it will be implemented in the future.
 
-	Canvas.prototype.removeText = function(layer, text, font, angle) {
+	Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
 		if (text == null) {
 			var layerCache = this._textCache[layer];
 			if (layerCache != null) {
@@ -417,14 +467,22 @@ Licensed under the MIT license.
 						var styleCache = layerCache[styleKey];
 						for (var key in styleCache) {
 							if (hasOwnProperty.call(styleCache, key)) {
-								styleCache[key].active = false;
+								var positions = styleCache[key].positions;
+								for (var i = 0, position; position = positions[i]; i++) {
+									position.active = false;
+								}
 							}
 						}
 					}
 				}
 			}
 		} else {
-			this.getTextInfo(layer, text, font, angle).active = false;
+			var positions = this.getTextInfo(layer, text, font, angle).positions;
+			for (var i = 0, position; position = positions[i]; i++) {
+				if (position.x == x && position.y == y) {
+					position.active = false;
+				}
+			}
 		}
 	};
 
