@@ -1,4 +1,4 @@
-/* Javascript plotting library for jQuery, version 0.8.1.
+/* Javascript plotting library for jQuery, version 0.8.2-alpha.
 
 Copyright (c) 2007-2013 IOLA and Ole Laursen.
 Licensed under the MIT license.
@@ -3041,7 +3041,7 @@ Licensed under the MIT license.
         return plot;
     };
 
-    $.plot.version = "0.8.1";
+    $.plot.version = "0.8.2-alpha";
 
     $.plot.plugins = [];
 
