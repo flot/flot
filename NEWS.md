@@ -1,3 +1,15 @@
+## Flot 0.8.2 ##
+
+### Bug fixes ###
+
+ - Fixed a bug where the second axis in an xaxes/yaxes array incorrectly had
+   its 'innermost' property set to false or undefined, even if it was on the
+   other side of the plot from the first axis. This resulted in the axis bar
+   being visible when it shouldn't have been, which was especially obvious
+   when the grid had a left/right border width of zero.
+   (reported by Teq1, fix researched by ryleyb, issue #1056)
+
+
 ## Flot 0.8.1 ##
 
 ### Bug fixes ###
