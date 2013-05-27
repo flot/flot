@@ -1397,9 +1397,7 @@ Licensed under the MIT license.
 
             // Determine whether the axis is the first (innermost) on its side
 
-            innermost = $.inArray(axis, $.grep(all, function (a) {
-                return a && a.reserveSpace;
-            })) == 0;
+            innermost = $.inArray(axis, samePosition) == 0;
 
             // determine tick length - if we're innermost, we can use "full"
 
