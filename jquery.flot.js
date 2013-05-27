@@ -1395,13 +1395,15 @@ Licensed under the MIT license.
             if ($.inArray(axis, samePosition) == samePosition.length - 1)
                 axisMargin = 0; // outermost
 
-            // determine tick length - if we're innermost, we can use "full"
-            if (tickLength == null) {
-                var sameDirection = $.grep(all, function (a) {
-                    return a && a.reserveSpace;
-                });
+            // Determine whether the axis is the first (innermost) on its side
 
-                innermost = $.inArray(axis, sameDirection) == 0;
+            innermost = $.inArray(axis, $.grep(all, function (a) {
+                return a && a.reserveSpace;
+            })) == 0;
+
+            // determine tick length - if we're innermost, we can use "full"
+
+            if (tickLength == null) {
                 if (innermost)
                     tickLength = "full";
                 else
