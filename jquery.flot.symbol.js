@@ -65,7 +65,7 @@ The symbols are accessed as strings through the standard symbol options:
 
     $.plot.plugins.push({
         init: init,
-        name: 'symbols',
-        version: '1.0'
+        name: "symbols",
+        version: "1.0"
     });
 })(jQuery);

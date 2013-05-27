@@ -170,7 +170,7 @@ The plugin also adds four public methods:
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'crosshair',
-        version: '1.0'
+        name: "crosshair",
+        version: "1.0"
     });
 })(jQuery);

@@ -111,7 +111,7 @@ Google Maps).
                     callback(loaded);
             };
 
-            $('<img />').load(handler).error(handler).attr('src', url);
+            $("<img />").load(handler).error(handler).attr("src", url);
         });
     };
 
@@ -235,7 +235,7 @@ Google Maps).
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'image',
-        version: '1.1'
+        name: "image",
+        version: "1.1"
     });
 })(jQuery);

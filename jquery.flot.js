@@ -238,7 +238,7 @@ Licensed under the MIT license.
 						left: 0,
 						bottom: 0,
 						right: 0,
-						'font-size': "smaller",
+						"font-size": "smaller",
 						color: "#545454"
 					})
 					.insertAfter(this.element);
@@ -338,7 +338,7 @@ Licensed under the MIT license.
 			var element = $("<div></div>").html(text)
 				.css({
 					position: "absolute",
-					'max-width': width,
+					"max-width": width,
 					top: -9999
 				})
 				.appendTo(this.getTextLayer(layer));
@@ -434,7 +434,7 @@ Licensed under the MIT license.
 		position.element.css({
 			top: Math.round(y),
 			left: Math.round(x),
-			'text-align': halign	// In case the text wraps
+			"text-align": halign	// In case the text wraps
 		});
 	};
 
@@ -714,9 +714,9 @@ Licensed under the MIT license.
             }
 
             if (options.xaxis.color == null)
-                options.xaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
+                options.xaxis.color = $.color.parse(options.grid.color).scale("a", 0.22).toString();
             if (options.yaxis.color == null)
-                options.yaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
+                options.yaxis.color = $.color.parse(options.grid.color).scale("a", 0.22).toString();
 
             if (options.xaxis.tickColor == null) // grid.tickColor for back-compatibility
                 options.xaxis.tickColor = options.grid.tickColor || options.xaxis.color;
@@ -726,7 +726,7 @@ Licensed under the MIT license.
             if (options.grid.borderColor == null)
                 options.grid.borderColor = options.grid.color;
             if (options.grid.tickColor == null)
-                options.grid.tickColor = $.color.parse(options.grid.color).scale('a', 0.22).toString();
+                options.grid.tickColor = $.color.parse(options.grid.color).scale("a", 0.22).toString();
 
             // Fill in defaults for axis options, including any unspecified
             // font-spec fields, if a font-spec was provided.
@@ -985,7 +985,7 @@ Licensed under the MIT license.
                     } else variation = -variation;
                 }
 
-                colors[i] = c.scale('rgb', 1 + variation);
+                colors[i] = c.scale("rgb", 1 + variation);
             }
 
             // Finalize the series options, filling in their colors
@@ -1255,7 +1255,7 @@ Licensed under the MIT license.
             placeholder.css("padding", 0) // padding messes up the positioning
                 .children(":not(.flot-base,.flot-overlay)").remove();
 
-            if (placeholder.css("position") == 'static')
+            if (placeholder.css("position") == "static")
                 placeholder.css("position", "relative"); // for positioning labels and overlay
 
             surface = new Canvas("flot-base", placeholder);
@@ -2681,24 +2681,24 @@ Licensed under the MIT license.
 
                 if (i % options.legend.noColumns == 0) {
                     if (rowStarted)
-                        fragments.push('</tr>');
-                    fragments.push('<tr>');
+                        fragments.push("</tr>");
+                    fragments.push("<tr>");
                     rowStarted = true;
                 }
 
                 fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + entry.label + '</td>'
+                    "<td class='legendColorBox'><div style='border:1px solid " + options.legend.labelBoxBorderColor + ";padding:1px'><div style='width:4px;height:0;border:5px solid " + entry.color + ";overflow:hidden'></div></div></td>" +
+                    "<td class='legendLabel'>" + entry.label + "</td>"
                 );
             }
 
             if (rowStarted)
-                fragments.push('</tr>');
+                fragments.push("</tr>");
 
             if (fragments.length == 0)
                 return;
 
-            var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
+            var table = "<table style='font-size:smaller;color:" + options.grid.color + "'>" + fragments.join("") + "</table>";
             if (options.legend.container != null)
                 $(options.legend.container).html(table);
             else {
@@ -2708,14 +2708,14 @@ Licensed under the MIT license.
                 if (m[0] == null)
                     m = [m, m];
                 if (p.charAt(0) == "n")
-                    pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
+                    pos += "top:" + (m[1] + plotOffset.top) + "px;";
                 else if (p.charAt(0) == "s")
-                    pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
+                    pos += "bottom:" + (m[1] + plotOffset.bottom) + "px;";
                 if (p.charAt(1) == "e")
-                    pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
+                    pos += "right:" + (m[0] + plotOffset.right) + "px;";
                 else if (p.charAt(1) == "w")
-                    pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
-                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
+                    pos += "left:" + (m[0] + plotOffset.left) + "px;";
+                var legend = $("<div class='legend'>" + table.replace("style='", "style='position:absolute;" + pos +";") + "</div>").appendTo(placeholder);
                 if (options.legend.backgroundOpacity != 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
@@ -2726,12 +2726,12 @@ Licensed under the MIT license.
                         if (c && typeof c == "string")
                             c = $.color.parse(c);
                         else
-                            c = $.color.extract(legend, 'background-color');
+                            c = $.color.extract(legend, "background-color");
                         c.a = 1;
                         c = c.toString();
                     }
                     var div = legend.children();
-                    $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
+                    $("<div style='position:absolute;width:" + div.width() + "px;height:" + div.height() + "px;" + pos +"background-color:" + c + ";'> </div>").prependTo(legend).css("opacity", options.legend.backgroundOpacity);
                 }
             }
         }
@@ -2972,7 +2972,7 @@ Licensed under the MIT license.
         function drawPointHighlight(series, point) {
             var x = point[0], y = point[1],
                 axisx = series.xaxis, axisy = series.yaxis,
-                highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
+                highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale("a", 0.5).toString();
 
             if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
                 return;
@@ -2994,7 +2994,7 @@ Licensed under the MIT license.
         }
 
         function drawBarHighlight(series, point) {
-            var highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString(),
+            var highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale("a", 0.5).toString(),
                 fillStyle = highlightColor,
                 barLeft = series.bars.align == "left" ? 0 : -series.bars.barWidth/2;
 
@@ -3019,7 +3019,7 @@ Licensed under the MIT license.
                     if (typeof c != "string") {
                         var co = $.color.parse(defaultColor);
                         if (c.brightness != null)
-                            co = co.scale('rgb', c.brightness);
+                            co = co.scale("rgb", c.brightness);
                         if (c.opacity != null)
                             co.a *= c.opacity;
                         c = co.toString();

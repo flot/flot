@@ -69,25 +69,25 @@ API.txt for details.
 
 			if (escape) {
 				switch (c) {
-					case 'a': c = "" + dayNames[d.getDay()]; break;
-					case 'b': c = "" + monthNames[d.getMonth()]; break;
-					case 'd': c = leftPad(d.getDate()); break;
-					case 'e': c = leftPad(d.getDate(), " "); break;
-					case 'h':	// For back-compat with 0.7; remove in 1.0
-					case 'H': c = leftPad(hours); break;
-					case 'I': c = leftPad(hours12); break;
-					case 'l': c = leftPad(hours12, " "); break;
-					case 'm': c = leftPad(d.getMonth() + 1); break;
-					case 'M': c = leftPad(d.getMinutes()); break;
+					case "a": c = "" + dayNames[d.getDay()]; break;
+					case "b": c = "" + monthNames[d.getMonth()]; break;
+					case "d": c = leftPad(d.getDate()); break;
+					case "e": c = leftPad(d.getDate(), " "); break;
+					case "h":	// For back-compat with 0.7; remove in 1.0
+					case "H": c = leftPad(hours); break;
+					case "I": c = leftPad(hours12); break;
+					case "l": c = leftPad(hours12, " "); break;
+					case "m": c = leftPad(d.getMonth() + 1); break;
+					case "M": c = leftPad(d.getMinutes()); break;
 					// quarters not in Open Group's strftime specification
-					case 'q':
+					case "q":
 						c = "" + (Math.floor(d.getMonth() / 3) + 1); break;
-					case 'S': c = leftPad(d.getSeconds()); break;
-					case 'y': c = leftPad(d.getFullYear() % 100); break;
-					case 'Y': c = "" + d.getFullYear(); break;
-					case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
-					case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
-					case 'w': c = "" + d.getDay(); break;
+					case "S": c = leftPad(d.getSeconds()); break;
+					case "y": c = leftPad(d.getFullYear() % 100); break;
+					case "Y": c = "" + d.getFullYear(); break;
+					case "p": c = (isAM) ? ("" + "am") : ("" + "pm"); break;
+					case "P": c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
+					case "w": c = "" + d.getDay(); break;
 				}
 				r.push(c);
 				escape = false;
@@ -418,8 +418,8 @@ API.txt for details.
 	$.plot.plugins.push({
 		init: init,
 		options: options,
-		name: 'time',
-		version: '1.0'
+		name: "time",
+		version: "1.0"
 	});
 
 	// Time-axis support used to be in Flot core, which exposed the

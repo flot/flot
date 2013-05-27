@@ -140,16 +140,16 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             return false;
         }
 
-        var prevCursor = 'default', prevPageX = 0, prevPageY = 0,
+        var prevCursor = "default", prevPageX = 0, prevPageY = 0,
             panTimeout = null;
 
         function onDragStart(e) {
             if (e.which != 1)  // only accept left-click
                 return false;
-            var c = plot.getPlaceholder().css('cursor');
+            var c = plot.getPlaceholder().css("cursor");
             if (c)
                 prevCursor = c;
-            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
+            plot.getPlaceholder().css("cursor", plot.getOptions().pan.cursor);
             prevPageX = e.pageX;
             prevPageY = e.pageY;
         }
@@ -175,7 +175,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 panTimeout = null;
             }
 
-            plot.getPlaceholder().css('cursor', prevCursor);
+            plot.getPlaceholder().css("cursor", prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
         }
@@ -340,7 +340,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'navigate',
-        version: '1.3'
+        name: "navigate",
+        version: "1.3"
     });
 })(jQuery);

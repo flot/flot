@@ -78,7 +78,7 @@
             c = elem.css(css).toLowerCase();
             // keep going until we find an element that has color, or
             // we hit the body
-            if (c !== '' && c != 'transparent')
+            if (c !== "" && c != "transparent")
                 break;
             elem = elem.parent();
         } while (!$.nodeName(elem.get(0), "body"));

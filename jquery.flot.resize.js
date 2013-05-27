@@ -54,7 +54,7 @@ can just fix the size of their placeholders.
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'resize',
-        version: '1.0'
+        name: "resize",
+        version: "1.0"
     });
 })(jQuery);

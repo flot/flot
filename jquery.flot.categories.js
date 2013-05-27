@@ -184,7 +184,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'categories',
-        version: '1.0'
+        name: "categories",
+        version: "1.0"
     });
 })(jQuery);

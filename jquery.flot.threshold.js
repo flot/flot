@@ -136,7 +136,7 @@ You may need to check for this in hover events.
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'threshold',
-        version: '1.2'
+        name: "threshold",
+        version: "1.2"
     });
 })(jQuery);
