@@ -36,13 +36,13 @@
                 o[c.charAt(i)] += d;
             return o.normalize();
         };
-        
+
         o.scale = function (c, f) {
             for (var i = 0; i < c.length; ++i)
                 o[c.charAt(i)] *= f;
             return o.normalize();
         };
-        
+
         o.toString = function () {
             if (o.a >= 1.0) {
                 return "rgb("+[o.r, o.g, o.b].join(",")+")";
@@ -55,7 +55,7 @@
             function clamp(min, value, max) {
                 return value < min ? min: (value > max ? max: value);
             }
-            
+
             o.r = clamp(0, parseInt(o.r, 10), 255);
             o.g = clamp(0, parseInt(o.g, 10), 255);
             o.b = clamp(0, parseInt(o.b, 10), 255);
@@ -86,10 +86,10 @@
         // catch Safari's way of signalling transparent
         if (c == "rgba(0, 0, 0, 0)")
             c = "transparent";
-        
+
         return $.color.parse(c);
     };
-    
+
     // parse CSS color string (like "rgb(10, 32, 43)" or "#fff"),
     // returns color object, if parsing failed, you get black (0, 0,
     // 0) out
@@ -100,12 +100,12 @@
 	res = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str);
         if (res)
             return m(parseInt(res[1], 10), parseInt(res[2], 10), parseInt(res[3], 10));
-        
+
         // Look for rgba(num,num,num,num)
         res = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str);
         if (res)
             return m(parseInt(res[1], 10), parseInt(res[2], 10), parseInt(res[3], 10), parseFloat(res[4]));
-            
+
         // Look for rgb(num%,num%,num%)
         res = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str);
         if (res)
@@ -115,7 +115,7 @@
         res = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str);
         if (res)
             return m(parseFloat(res[1])*2.55, parseFloat(res[2])*2.55, parseFloat(res[3])*2.55, parseFloat(res[4]));
-        
+
         // Look for #a0b1c2
         res = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str);
         if (res)
@@ -136,7 +136,7 @@
             return m(res[0], res[1], res[2]);
         }
     };
-    
+
     var lookupColors = {
         aqua:[0,255,255],
         azure:[240,255,255],

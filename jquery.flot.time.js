@@ -158,7 +158,7 @@ API.txt for details.
 			return makeUtcWrapper(new Date(ts));
 		}
 	}
-	
+
 	// map of app. size of time units in milliseconds
 
 	var timeUnitSize = {
