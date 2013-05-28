@@ -55,8 +55,9 @@ The symbols are accessed as strings through the standard symbol options:
         };
 
         var s = series.points.symbol;
-        if (handlers[s])
+        if (handlers[s]) {
             series.points.symbol = handlers[s];
+        }
     }
 
     function init(plot) {

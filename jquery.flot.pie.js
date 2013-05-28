@@ -181,7 +181,7 @@ More detail and specific examples can be found in the included HTML file.
 				// that the user may have stored in higher indexes.
 
 				if ($.isArray(value) && value.length == 1) {
-    				value = value[0];
+					value = value[0];
 				}
 
 				if ($.isArray(value)) {
@@ -415,7 +415,9 @@ More detail and specific examples can be found in the included HTML file.
 
 				if (options.series.pie.label.show) {
 					return drawLabels();
-				} else return true;
+				} else {
+					return true;
+				}
 
 				function drawSlice(angle, color, fill) {
 
@@ -561,10 +563,11 @@ More detail and specific examples can be found in the included HTML file.
 		//-- Additional Interactive related functions --
 
 		function isPointInPoly(poly, pt) {
-			for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
+			for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) {
 				((poly[i][1] <= pt[1] && pt[1] < poly[j][1]) || (poly[j][1] <= pt[1] && pt[1]< poly[i][1]))
 				&& (pt[0] < (poly[j][0] - poly[i][0]) * (pt[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])
 				&& (c = !c);
+			}
 			return c;
 		}
 
@@ -715,8 +718,9 @@ More detail and specific examples can be found in the included HTML file.
 		function indexOfHighlight(s) {
 			for (var i = 0; i < highlights.length; ++i) {
 				var h = highlights[i];
-				if (h.series == s)
+				if (h.series == s) {
 					return i;
+				}
 			}
 			return -1;
 		}

@@ -61,8 +61,9 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         var xCategories = series.xaxis.options.mode == "categories",
             yCategories = series.yaxis.options.mode == "categories";
 
-        if (!(xCategories || yCategories))
+        if (!(xCategories || yCategories)) {
             return;
+        }
 
         var format = datapoints.format;
 
@@ -86,20 +87,24 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         }
 
         for (var m = 0; m < format.length; ++m) {
-            if (format[m].x && xCategories)
+            if (format[m].x && xCategories) {
                 format[m].number = false;
+            }
 
-            if (format[m].y && yCategories)
+            if (format[m].y && yCategories) {
                 format[m].number = false;
+            }
         }
     }
 
     function getNextIndex(categories) {
         var index = -1;
 
-        for (var v in categories)
-            if (categories[v] > index)
+        for (var v in categories) {
+            if (categories[v] > index) {
                 index = categories[v];
+            }
+        }
 
         return index + 1;
     }
@@ -108,8 +113,9 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         var res = [];
         for (var label in axis.categories) {
             var v = axis.categories[label];
-            if (v >= axis.min && v <= axis.max)
+            if (v >= axis.min && v <= axis.max) {
                 res.push([v, label]);
+            }
         }
 
         res.sort(function (a, b) { return a[0] - b[0]; });
@@ -118,27 +124,31 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
     }
 
     function setupCategoriesForAxis(series, axis, datapoints) {
-        if (series[axis].options.mode != "categories")
+        if (series[axis].options.mode != "categories") {
             return;
+        }
 
         if (!series[axis].categories) {
             // parse options
             var c = {}, o = series[axis].options.categories || {};
             if ($.isArray(o)) {
-                for (var i = 0; i < o.length; ++i)
+                for (var i = 0; i < o.length; ++i) {
                     c[o[i]] = i;
+                }
             }
             else {
-                for (var v in o)
+                for (var v in o) {
                     c[v] = o[v];
+                }
             }
 
             series[axis].categories = c;
         }
 
         // fix ticks
-        if (!series[axis].options.ticks)
+        if (!series[axis].options.ticks) {
             series[axis].options.ticks = categoriesTickGenerator;
+        }
 
         transformPointsOnAxis(datapoints, axis, series[axis].categories);
     }
@@ -152,14 +162,16 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
             index = getNextIndex(categories);
 
         for (var i = 0; i < points.length; i += ps) {
-            if (points[i] == null)
+            if (points[i] == null) {
                 continue;
+            }
 
             for (var m = 0; m < ps; ++m) {
                 var val = points[i + m];
 
-                if (val == null || !format[m][formatColumn])
+                if (val == null || !format[m][formatColumn]) {
                     continue;
+                }
 
                 if (!(val in categories)) {
                     categories[val] = index;

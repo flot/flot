@@ -32,14 +32,16 @@
         o.a = a != null ? a : 1;
 
         o.add = function (c, d) {
-            for (var i = 0; i < c.length; ++i)
+            for (var i = 0; i < c.length; ++i) {
                 o[c.charAt(i)] += d;
+            }
             return o.normalize();
         };
 
         o.scale = function (c, f) {
-            for (var i = 0; i < c.length; ++i)
+            for (var i = 0; i < c.length; ++i) {
                 o[c.charAt(i)] *= f;
+            }
             return o.normalize();
         };
 
@@ -78,14 +80,16 @@
             c = elem.css(css).toLowerCase();
             // keep going until we find an element that has color, or
             // we hit the body
-            if (c !== "" && c != "transparent")
+            if (c !== "" && c != "transparent") {
                 break;
+            }
             elem = elem.parent();
         } while (!$.nodeName(elem.get(0), "body"));
 
         // catch Safari's way of signalling transparent
-        if (c == "rgba(0, 0, 0, 0)")
+        if (c == "rgba(0, 0, 0, 0)") {
             c = "transparent";
+        }
 
         return $.color.parse(c);
     };
@@ -98,39 +102,45 @@
 
         // Look for rgb(num,num,num)
 	res = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str);
-        if (res)
+        if (res) {
             return m(parseInt(res[1], 10), parseInt(res[2], 10), parseInt(res[3], 10));
+        }
 
         // Look for rgba(num,num,num,num)
         res = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str);
-        if (res)
+        if (res) {
             return m(parseInt(res[1], 10), parseInt(res[2], 10), parseInt(res[3], 10), parseFloat(res[4]));
+        }
 
         // Look for rgb(num%,num%,num%)
         res = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str);
-        if (res)
+        if (res) {
             return m(parseFloat(res[1])*2.55, parseFloat(res[2])*2.55, parseFloat(res[3])*2.55);
+        }
 
         // Look for rgba(num%,num%,num%,num)
         res = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str);
-        if (res)
+        if (res) {
             return m(parseFloat(res[1])*2.55, parseFloat(res[2])*2.55, parseFloat(res[3])*2.55, parseFloat(res[4]));
+        }
 
         // Look for #a0b1c2
         res = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str);
-        if (res)
+        if (res) {
             return m(parseInt(res[1], 16), parseInt(res[2], 16), parseInt(res[3], 16));
+        }
 
         // Look for #fff
         res = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(str);
-        if (res)
+        if (res) {
             return m(parseInt(res[1]+res[1], 16), parseInt(res[2]+res[2], 16), parseInt(res[3]+res[3], 16));
+        }
 
         // Otherwise, we're most likely dealing with a named color
         var name = $.trim(str).toLowerCase();
-        if (name == "transparent")
+        if (name == "transparent") {
             return m(255, 255, 255, 0);
-        else {
+        } else {
             // default to black
             res = lookupColors[name] || [0, 0, 0];
             return m(res[0], res[1], res[2]);
