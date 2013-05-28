@@ -104,7 +104,7 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
-            if (e.which != 1) { // only accept left-click
+            if (e.which !== 1) { // only accept left-click
                 return;
             }
 
@@ -199,12 +199,12 @@ The plugin allso adds the following methods to the plot object:
             pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plot.width());
             pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plot.height());
 
-            if (o.selection.mode == "y") {
-                pos.x = pos == selection.first ? 0 : plot.width();
+            if (o.selection.mode === "y") {
+                pos.x = pos === selection.first ? 0 : plot.width();
             }
 
-            if (o.selection.mode == "x") {
-                pos.y = pos == selection.first ? 0 : plot.height();
+            if (o.selection.mode === "x") {
+                pos.y = pos === selection.first ? 0 : plot.height();
             }
         }
 
@@ -238,9 +238,9 @@ The plugin allso adds the following methods to the plot object:
 
             for (var k in axes) {
                 axis = axes[k];
-                if (axis.direction == coord) {
+                if (axis.direction === coord) {
                     key = coord + axis.n + "axis";
-                    if (!ranges[key] && axis.n == 1) {
+                    if (!ranges[key] && axis.n === 1) {
                         key = coord + "axis"; // support x1axis as xaxis
                     }
                     if (ranges[key]) {
@@ -253,7 +253,7 @@ The plugin allso adds the following methods to the plot object:
 
             // backwards-compat stuff - to be removed in future
             if (!ranges[key]) {
-                axis = coord == "x" ? plot.getXAxes()[0] : plot.getYAxes()[0];
+                axis = coord === "x" ? plot.getXAxes()[0] : plot.getYAxes()[0];
                 from = ranges[coord + "1"];
                 to = ranges[coord + "2"];
             }
@@ -271,7 +271,7 @@ The plugin allso adds the following methods to the plot object:
         function setSelection(ranges, preventEvent) {
             var axis, range, o = plot.getOptions();
 
-            if (o.selection.mode == "y") {
+            if (o.selection.mode === "y") {
                 selection.first.x = 0;
                 selection.second.x = plot.width();
             }
@@ -282,7 +282,7 @@ The plugin allso adds the following methods to the plot object:
                 selection.second.x = range.axis.p2c(range.to);
             }
 
-            if (o.selection.mode == "x") {
+            if (o.selection.mode === "x") {
                 selection.first.y = 0;
                 selection.second.y = plot.height();
             }

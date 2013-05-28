@@ -88,7 +88,7 @@ More detail and specific examples can be found in the included HTML file.
 
 				// set labels.show
 
-				if (options.series.pie.label.show == "auto") {
+				if (options.series.pie.label.show === "auto") {
 					if (options.legend.show) {
 						options.series.pie.label.show = false;
 					} else {
@@ -98,7 +98,7 @@ More detail and specific examples can be found in the included HTML file.
 
 				// set radius
 
-				if (options.series.pie.radius == "auto") {
+				if (options.series.pie.radius === "auto") {
 					if (options.series.pie.label.show) {
 						options.series.pie.radius = 3/4;
 					} else {
@@ -180,7 +180,7 @@ More detail and specific examples can be found in the included HTML file.
 				// new one; this is more efficient and preserves any extra data
 				// that the user may have stored in higher indexes.
 
-				if ($.isArray(value) && value.length == 1) {
+				if ($.isArray(value) && value.length === 1) {
 					value = value[0];
 				}
 
@@ -287,7 +287,7 @@ More detail and specific examples can be found in the included HTML file.
 			centerTop = canvasHeight / 2 + options.series.pie.offset.top;
 			centerLeft = canvasWidth / 2;
 
-			if (options.series.pie.offset.left == "auto") {
+			if (options.series.pie.offset.left === "auto") {
 				if (options.legend.position.match("w")) {
 					centerLeft += legendWidth / 2;
 				} else {
@@ -469,7 +469,7 @@ More detail and specific examples can be found in the included HTML file.
 
 					function drawLabel(slice, startAngle, index) {
 
-						if (slice.data[0][1] == 0) {
+						if (slice.data[0][1] === 0) {
 							return true;
 						}
 
@@ -507,7 +507,7 @@ More detail and specific examples can be found in the included HTML file.
 							return false;
 						}
 
-						if (options.series.pie.label.background.opacity != 0) {
+						if (options.series.pie.label.background.opacity !== 0) {
 
 							// put in the transparent background separately to avoid blended labels and label boxes
 
@@ -665,7 +665,7 @@ More detail and specific examples can be found in the included HTML file.
 
 				for (var i = 0; i < highlights.length; ++i) {
 					var h = highlights[i];
-					if (h.auto == eventname && !(item && h.series == item.series)) {
+					if (h.auto === eventname && !(item && h.series === item.series)) {
 						unhighlight(h.series);
 					}
 				}
@@ -690,7 +690,7 @@ More detail and specific examples can be found in the included HTML file.
 
 			var i = indexOfHighlight(s);
 
-			if (i == -1) {
+			if (i === -1) {
 				highlights.push({ series: s, auto: auto });
 				plot.triggerRedrawOverlay();
 			} else if (!auto) {
@@ -710,7 +710,7 @@ More detail and specific examples can be found in the included HTML file.
 
 			var i = indexOfHighlight(s);
 
-			if (i != -1) {
+			if (i !== -1) {
 				highlights.splice(i, 1);
 				plot.triggerRedrawOverlay();
 			}
@@ -719,7 +719,7 @@ More detail and specific examples can be found in the included HTML file.
 		function indexOfHighlight(s) {
 			for (var i = 0; i < highlights.length; ++i) {
 				var h = highlights[i];
-				if (h.series == s) {
+				if (h.series === s) {
 					return i;
 				}
 			}

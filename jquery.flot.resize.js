@@ -31,7 +31,7 @@ can just fix the size of their placeholders.
 
             // somebody might have hidden us and we can't plot
             // when we don't have the dimensions
-            if (placeholder.width() == 0 || placeholder.height() == 0) {
+            if (placeholder.width() === 0 || placeholder.height() === 0) {
                 return;
             }
 

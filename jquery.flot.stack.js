@@ -44,11 +44,11 @@ charts or filled areas).
         function findMatchingSeries(s, allseries) {
             var res = null;
             for (var i = 0; i < allseries.length; ++i) {
-                if (s == allseries[i]) {
+                if (s === allseries[i]) {
                     break;
                 }
 
-                if (allseries[i].stack == s.stack) {
+                if (allseries[i].stack === s.stack) {
                     res = allseries[i];
                 }
             }
@@ -120,7 +120,7 @@ charts or filled areas).
                     qy = otherpoints[j + accumulateOffset];
                     bottom = 0;
 
-                    if (px == qx) {
+                    if (px === qx) {
                         for (m = 0; m < ps; ++m) {
                             newpoints.push(points[i + m]);
                         }
@@ -170,16 +170,16 @@ charts or filled areas).
 
                     fromgap = false;
 
-                    if (l != newpoints.length && withbottom) {
+                    if (l !== newpoints.length && withbottom) {
                         newpoints[l + 2] += bottom;
                     }
                 }
 
                 // maintain the line steps invariant
-                if (withsteps && l != newpoints.length && l > 0 &&
+                if (withsteps && l !== newpoints.length && l > 0 &&
                     newpoints[l] != null &&
-                    newpoints[l] != newpoints[l - ps] &&
-                    newpoints[l + 1] != newpoints[l - ps + 1]) {
+                    newpoints[l] !== newpoints[l - ps] &&
+                    newpoints[l + 1] !== newpoints[l - ps + 1]) {
                     for (m = 0; m < ps; ++m) {
                         newpoints[l + ps + m] = newpoints[l + m];
                     }

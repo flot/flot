@@ -103,7 +103,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 										}
 									}
 
-									if (positions.length == 0) {
+									if (positions.length === 0) {
 										delete styleCache[key];
 									}
 								}
@@ -280,9 +280,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 			// Tweak the initial y-position to match vertical alignment
 
-			if (valign == "middle") {
+			if (valign === "middle") {
 				y = Math.round(y - info.height / 2);
-			} else if (valign == "bottom") {
+			} else if (valign === "bottom") {
 				y = Math.round(y - info.height);
 			} else {
 				y = Math.round(y);
@@ -302,7 +302,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// If so, mark it for inclusion in the next render pass.
 
 			for (var i = 0, position; position = positions[i]; i++) {
-				if (position.x == x && position.y == y) {
+				if (position.x === x && position.y === y) {
 					position.active = true;
 					return;
 				}
@@ -323,9 +323,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// individually for horizontal alignment.
 
 			for (var i = 0, line; line = lines[i]; i++) {
-				if (halign == "center") {
+				if (halign === "center") {
 					position.lines.push([Math.round(x - line.width / 2), y]);
-				} else if (halign == "right") {
+				} else if (halign === "right") {
 					position.lines.push([Math.round(x - line.width), y]);
 				} else {
 					position.lines.push([Math.round(x), y]);

@@ -86,7 +86,7 @@ shadowSize and lineWidth are derived as well from the points series.
 
         var errors = series.points.errorbars;
         // error bars - first X then Y
-        if (errors == "x" || errors == "xy") {
+        if (errors === "x" || errors === "xy") {
             // lower / upper error
             if (series.points.xerr.asymmetric) {
                 format.push({ x: true, number: true, required: true });
@@ -95,7 +95,7 @@ shadowSize and lineWidth are derived as well from the points series.
                 format.push({ x: true, number: true, required: true });
             }
         }
-        if (errors == "y" || errors == "xy") {
+        if (errors === "y" || errors === "xy") {
             // lower / upper error
             if (series.points.yerr.asymmetric) {
                 format.push({ y: true, number: true, required: true });
@@ -121,11 +121,11 @@ shadowSize and lineWidth are derived as well from the points series.
 
         var eb = series.points.errorbars;
         // error bars - first X
-        if (eb == "x" || eb == "xy") {
+        if (eb === "x" || eb === "xy") {
             if (xerr.asymmetric) {
                 exl = points[i + 2];
                 exu = points[i + 3];
-                if (eb == "xy") {
+                if (eb === "xy") {
                     if (yerr.asymmetric){
                         eyl = points[i + 4];
                         eyu = points[i + 5];
@@ -135,7 +135,7 @@ shadowSize and lineWidth are derived as well from the points series.
                 }
             } else {
                 exl = points[i + 2];
-                if (eb == "xy") {
+                if (eb === "xy") {
                     if (yerr.asymmetric) {
                         eyl = points[i + 3];
                         eyu = points[i + 4];
@@ -145,7 +145,7 @@ shadowSize and lineWidth are derived as well from the points series.
                 }
             }
         // only Y
-        } else if (eb == "y") {
+        } else if (eb === "y") {
             if (yerr.asymmetric) {
                 eyl = points[i + 2];
                 eyu = points[i + 3];
@@ -222,12 +222,12 @@ shadowSize and lineWidth are derived as well from the points series.
                         lower = [x, y][e] - errRanges[e * err.length];
 
                     //points outside of the canvas
-                    if (err[e].err == "x") {
+                    if (err[e].err === "x") {
                         if (y > ax[1].max || y < ax[1].min || upper < ax[0].min || lower > ax[0].max) {
                             continue;
                         }
                     }
-                    if (err[e].err == "y") {
+                    if (err[e].err === "y") {
                         if (x > ax[0].max || x < ax[0].min || upper < ax[1].min || lower > ax[1].max) {
                             continue;
                         }
@@ -247,7 +247,7 @@ shadowSize and lineWidth are derived as well from the points series.
                     }
 
                     //sanity check, in case some inverted axis hack is applied to flot
-                    if ((err[e].err == "x" && invertX) || (err[e].err == "y" && invertY)) {
+                    if ((err[e].err === "x" && invertX) || (err[e].err === "y" && invertY)) {
                         //swap coordinates
                         var tmp = lower;
                         lower = upper;
@@ -300,7 +300,7 @@ shadowSize and lineWidth are derived as well from the points series.
         lower += offset;
 
         // error bar - avoid plotting over circles
-        if (err.err == "x"){
+        if (err.err === "x"){
             if (upper > x + radius) {
                 drawPath(ctx, [[upper,y],[Math.max(x + radius,minmax[0]),y]]);
             } else {
@@ -330,14 +330,14 @@ shadowSize and lineWidth are derived as well from the points series.
 
         // upper cap
         if (drawUpper) {
-            if (err.upperCap == "-"){
-                if (err.err=="x") {
+            if (err.upperCap === "-"){
+                if (err.err === "x") {
                     drawPath(ctx, [[upper,y - radius],[upper,y + radius]] );
                 } else {
                     drawPath(ctx, [[x - radius,upper],[x + radius,upper]] );
                 }
             } else if ($.isFunction(err.upperCap)){
-                if (err.err=="x") {
+                if (err.err === "x") {
                     err.upperCap(ctx, upper, y, radius);
                 } else {
                     err.upperCap(ctx, x, upper, radius);
@@ -346,14 +346,14 @@ shadowSize and lineWidth are derived as well from the points series.
         }
         // lower cap
         if (drawLower) {
-            if (err.lowerCap == "-"){
-                if (err.err=="x") {
+            if (err.lowerCap === "-"){
+                if (err.err === "x") {
                     drawPath(ctx, [[lower,y - radius],[lower,y + radius]] );
                 } else {
                     drawPath(ctx, [[x - radius,lower],[x + radius,lower]] );
                 }
             } else if ($.isFunction(err.lowerCap)){
-                if (err.err=="x") {
+                if (err.err === "x") {
                     err.lowerCap(ctx, lower, y, radius);
                 } else {
                     err.lowerCap(ctx, x, lower, radius);

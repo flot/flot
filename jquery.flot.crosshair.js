@@ -101,7 +101,7 @@ The plugin also adds four public methods:
                 return;
             }
 
-            if (crosshair.x != -1) {
+            if (crosshair.x !== -1) {
                 crosshair.x = -1;
                 plot.triggerRedrawOverlay();
             }
@@ -143,7 +143,7 @@ The plugin also adds four public methods:
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            if (crosshair.x != -1) {
+            if (crosshair.x !== -1) {
                 var adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
 
                 ctx.strokeStyle = c.color;
@@ -151,12 +151,12 @@ The plugin also adds four public methods:
                 ctx.lineJoin = "round";
 
                 ctx.beginPath();
-                if (c.mode.indexOf("x") != -1) {
+                if (c.mode.indexOf("x") !== -1) {
                     var drawX = Math.round(crosshair.x) + adj;
                     ctx.moveTo(drawX, 0);
                     ctx.lineTo(drawX, plot.height());
                 }
-                if (c.mode.indexOf("y") != -1) {
+                if (c.mode.indexOf("y") !== -1) {
                     var drawY = Math.round(crosshair.y) + adj;
                     ctx.moveTo(0, drawY);
                     ctx.lineTo(plot.width(), drawY);
