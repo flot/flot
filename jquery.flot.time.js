@@ -224,9 +224,9 @@ API.txt for details.
 						}
 
 						for (var i = 0; i < spec.length - 1; ++i) {
-							if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]]
-											  + spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2
-								&& spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
+							if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]] +
+								spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2 &&
+								spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
 								break;
 							}
 						}
@@ -335,8 +335,7 @@ API.txt for details.
 
 									d.setDate(1);
 									var start = d.getTime();
-									d.setMonth(d.getMonth() +
-										(unit == "quarter" ? 3 : 1));
+									d.setMonth(d.getMonth() + (unit == "quarter" ? 3 : 1));
 									var end = d.getTime();
 									d.setTime(v + carry * timeUnitSize.hour + (end - start) * tickSize);
 									carry = d.getHours();
@@ -370,7 +369,7 @@ API.txt for details.
 
 						var useQuarters = (axis.options.tickSize &&
 								axis.options.tickSize[1] == "quarter") ||
-							(axis.options.minTickSize &&
+								(axis.options.minTickSize &&
 								axis.options.minTickSize[1] == "quarter");
 
 						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];

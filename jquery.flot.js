@@ -1191,10 +1191,10 @@ Licensed under the MIT license.
                         // a little bit of line specific stuff that
                         // perhaps shouldn't be here, but lacking
                         // better means...
-                        if (insertSteps && k > 0
-                            && points[k - ps] != null
-                            && points[k - ps] != points[k]
-                            && points[k - ps + 1] != points[k + 1]) {
+                        if (insertSteps && k > 0 &&
+                        	points[k - ps] != null &&
+                        	points[k - ps] != points[k] &&
+                        	points[k - ps + 1] != points[k + 1]) {
                             // copy the point to make room for a middle point
                             for (m = 0; m < ps; ++m) {
                                 points[k + ps + m] = points[k + m];
@@ -2084,11 +2084,11 @@ Licensed under the MIT license.
 
                     xoff = yoff = 0;
 
-                    if (isNaN(v) || v < axis.min || v > axis.max
+                    if (isNaN(v) || v < axis.min || v > axis.max || (
                         // skip those lying on the axes if we got a border
-                        || (t == "full"
-                            && ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0)
-                            && (v == axis.min || v == axis.max))) {
+                        t == "full" && ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0) &&
+                        (v == axis.min || v == axis.max)
+                    )) {
                         continue;
                     }
 
@@ -2997,10 +2997,11 @@ Licensed under the MIT license.
                 // clear auto-highlights
                 for (var i = 0; i < highlights.length; ++i) {
                     var h = highlights[i];
-                    if (h.auto == eventname &&
-                        !(item && h.series == item.series &&
-                          h.point[0] == item.datapoint[0] &&
-                          h.point[1] == item.datapoint[1])) {
+                    if (h.auto == eventname && !(
+                        item && h.series == item.series &&
+                        h.point[0] == item.datapoint[0] &&
+                        h.point[1] == item.datapoint[1]
+                    )) {
                         unhighlight(h.series, h.point);
                     }
                 }
@@ -3061,7 +3062,6 @@ Licensed under the MIT license.
             var i = indexOfHighlight(s, point);
             if (i == -1) {
                 highlights.push({ series: s, point: point, auto: auto });
-
                 triggerRedrawOverlay();
             } else if (!auto) {
                 highlights[i].auto = false;
@@ -3087,7 +3087,6 @@ Licensed under the MIT license.
             var i = indexOfHighlight(s, point);
             if (i != -1) {
                 highlights.splice(i, 1);
-
                 triggerRedrawOverlay();
             }
         }
@@ -3095,8 +3094,7 @@ Licensed under the MIT license.
         function indexOfHighlight(s, p) {
             for (var i = 0; i < highlights.length; ++i) {
                 var h = highlights[i];
-                if (h.series == s && h.point[0] == p[0]
-                    && h.point[1] == p[1]) {
+                if (h.series === s && h.point[0] === p[0] && h.point[1] === p[1]) {
                     return i;
                 }
             }

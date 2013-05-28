@@ -176,10 +176,10 @@ charts or filled areas).
                 }
 
                 // maintain the line steps invariant
-                if (withsteps && l != newpoints.length && l > 0
-                    && newpoints[l] != null
-                    && newpoints[l] != newpoints[l - ps]
-                    && newpoints[l + 1] != newpoints[l - ps + 1]) {
+                if (withsteps && l != newpoints.length && l > 0 &&
+                    newpoints[l] != null &&
+                    newpoints[l] != newpoints[l - ps] &&
+                    newpoints[l + 1] != newpoints[l - ps + 1]) {
                     for (m = 0; m < ps; ++m) {
                         newpoints[l + ps + m] = newpoints[l + m];
                     }
