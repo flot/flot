@@ -425,7 +425,7 @@ Licensed under the MIT license.
 			element: positions.length ? info.element.clone() : info.element,
 			x: x,
 			y: y
-		}
+		};
 
 		positions.push(position);
 
