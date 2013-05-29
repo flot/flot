@@ -110,11 +110,14 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
     }
 
     function categoriesTickGenerator(axis) {
-        var res = [];
-        for (var label in axis.categories) {
-            var v = axis.categories[label];
-            if (v >= axis.min && v <= axis.max) {
-                res.push([v, label]);
+        var res = [],
+            categories = axis.categories;
+        for (var label in categories) {
+            if (Object.prototype.hasOwnProperty.call(categories, label)) {
+                var v = categories[label];
+                if (v >= axis.min && v <= axis.max) {
+                    res.push([v, label]);
+                }
             }
         }
 
@@ -138,7 +141,9 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
             }
             else {
                 for (var v in o) {
-                    c[v] = o[v];
+                    if (Object.prototype.hasOwnProperty.call(o, v)) {
+                        c[v] = o[v];
+                    }
                 }
             }
 

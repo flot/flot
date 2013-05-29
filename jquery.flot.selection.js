@@ -237,16 +237,18 @@ The plugin allso adds the following methods to the plot object:
             var axis, from, to, key, axes = plot.getAxes();
 
             for (var k in axes) {
-                axis = axes[k];
-                if (axis.direction === coord) {
-                    key = coord + axis.n + "axis";
-                    if (!ranges[key] && axis.n === 1) {
-                        key = coord + "axis"; // support x1axis as xaxis
-                    }
-                    if (ranges[key]) {
-                        from = ranges[key].from;
-                        to = ranges[key].to;
-                        break;
+                if (Object.prototype.hasOwnProperty.call(axes, k)) {
+                    axis = axes[k];
+                    if (axis.direction === coord) {
+                        key = coord + axis.n + "axis";
+                        if (!ranges[key] && axis.n === 1) {
+                            key = coord + "axis"; // support x1axis as xaxis
+                        }
+                        if (ranges[key]) {
+                            from = ranges[key].from;
+                            to = ranges[key].to;
+                            break;
+                        }
                     }
                 }
             }

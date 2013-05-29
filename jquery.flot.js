@@ -1552,13 +1552,15 @@ Licensed under the MIT license.
         function setupGrid() {
             var axes = allAxes(),
                 showGrid = options.grid.show,
+                margin = options.grid.margin || 0,
                 i, a;
 
             // Initialize the plot's offset from the edge of the canvas
 
             for (a in plotOffset) {
-                var margin = options.grid.margin || 0;
-                plotOffset[a] = typeof margin === "number" ? margin : margin[a] || 0;
+                if (Object.prototype.hasOwnProperty.call(plotOffset, a)) {
+                    plotOffset[a] = typeof margin === "number" ? margin : margin[a] || 0;
+                }
             }
 
             executeHooks(hooks.processOffset, [plotOffset]);
