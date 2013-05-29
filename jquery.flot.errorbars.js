@@ -181,21 +181,23 @@ shadowSize and lineWidth are derived as well from the points series.
                 ps = s.datapoints.pointsize,
                 ax = [s.xaxis, s.yaxis],
                 radius = s.points.radius,
-                err = [s.points.xerr, s.points.yerr];
+                err = [s.points.xerr, s.points.yerr],
+                invertX = false,
+                invertY = false,
+                tmp;
 
         //sanity check, in case some inverted axis hack is applied to flot
-        var invertX = false;
+
         if (ax[0].p2c(ax[0].max) < ax[0].p2c(ax[0].min)) {
             invertX = true;
-            var tmp = err[0].lowerCap;
+            tmp = err[0].lowerCap;
             err[0].lowerCap = err[0].upperCap;
             err[0].upperCap = tmp;
         }
 
-        var invertY = false;
         if (ax[1].p2c(ax[1].min) < ax[1].p2c(ax[1].max)) {
             invertY = true;
-            var tmp = err[1].lowerCap;
+            tmp = err[1].lowerCap;
             err[1].lowerCap = err[1].upperCap;
             err[1].upperCap = tmp;
         }
@@ -249,7 +251,7 @@ shadowSize and lineWidth are derived as well from the points series.
                     //sanity check, in case some inverted axis hack is applied to flot
                     if ((err[e].err === "x" && invertX) || (err[e].err === "y" && invertY)) {
                         //swap coordinates
-                        var tmp = lower;
+                        tmp = lower;
                         lower = upper;
                         upper = tmp;
                         tmp = drawLower;

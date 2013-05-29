@@ -322,7 +322,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// Fill in the x & y positions of each line, adjusting them
 			// individually for horizontal alignment.
 
-			for (var i = 0, line; line = lines[i]; i++) {
+			for (var j = 0, line; line = lines[j]; j++) {
 				if (halign === "center") {
 					position.lines.push([Math.round(x - line.width / 2), y]);
 				} else if (halign === "right") {

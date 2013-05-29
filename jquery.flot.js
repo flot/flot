@@ -459,6 +459,7 @@ Licensed under the MIT license.
 	//     Angle is currently unused, it will be implemented in the future.
 
 	Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
+		var i, positions, position;
 		if (text == null) {
 			var layerCache = this._textCache[layer];
 			if (layerCache != null) {
@@ -467,8 +468,8 @@ Licensed under the MIT license.
 						var styleCache = layerCache[styleKey];
 						for (var key in styleCache) {
 							if (hasOwnProperty.call(styleCache, key)) {
-								var positions = styleCache[key].positions;
-								for (var i = 0, position; position = positions[i]; i++) {
+								positions = styleCache[key].positions;
+								for (i = 0; position = positions[i]; i++) {
 									position.active = false;
 								}
 							}
@@ -477,8 +478,8 @@ Licensed under the MIT license.
 				}
 			}
 		} else {
-			var positions = this.getTextInfo(layer, text, font, angle).positions;
-			for (var i = 0, position; position = positions[i]; i++) {
+			positions = this.getTextInfo(layer, text, font, angle).positions;
+			for (i = 0; position = positions[i]; i++) {
 				if (position.x === x && position.y === y) {
 					position.active = false;
 				}
@@ -1549,11 +1550,13 @@ Licensed under the MIT license.
         }
 
         function setupGrid() {
-            var i, axes = allAxes(), showGrid = options.grid.show;
+            var axes = allAxes(),
+                showGrid = options.grid.show,
+                i, a;
 
             // Initialize the plot's offset from the edge of the canvas
 
-            for (var a in plotOffset) {
+            for (a in plotOffset) {
                 var margin = options.grid.margin || 0;
                 plotOffset[a] = typeof margin === "number" ? margin : margin[a] || 0;
             }
@@ -1562,7 +1565,7 @@ Licensed under the MIT license.
 
             // If the grid is visible, add its border width to the offset
 
-            for (var a in plotOffset) {
+            for (a in plotOffset) {
                 if(typeof(options.grid.borderWidth) === "object") {
                     plotOffset[a] += showGrid ? options.grid.borderWidth[a] : 0;
                 } else {
@@ -2750,11 +2753,11 @@ Licensed under the MIT license.
             }
 
             var fragments = [], entries = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+                lf = options.legend.labelFormatter, s, label, i;
 
             // Build a list of legend entries, with each having a label and a color
 
-            for (var i = 0; i < series.length; ++i) {
+            for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 if (s.label) {
                     label = lf ? lf(s.label, s) : s.label;
@@ -2786,7 +2789,7 @@ Licensed under the MIT license.
 
             // Generate markup for the list of entries, in their final order
 
-            for (var i = 0; i < entries.length; ++i) {
+            for (i = 0; i < entries.length; ++i) {
 
                 var entry = entries[i];
 
@@ -2878,7 +2881,8 @@ Licensed under the MIT license.
                     mx = axisx.c2p(mouseX), // precompute some stuff to make the loop faster
                     my = axisy.c2p(mouseY),
                     maxx = maxDistance / axisx.scale,
-                    maxy = maxDistance / axisy.scale;
+                    maxy = maxDistance / axisy.scale,
+                    x, y;
 
                 ps = s.datapoints.pointsize;
                 // with inverse transforms, we can't use the maxx/maxy
@@ -2892,7 +2896,10 @@ Licensed under the MIT license.
 
                 if (s.lines.show || s.points.show) {
                     for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1];
+
+                        x = points[j];
+                        y = points[j + 1];
+
                         if (x == null) {
                             continue;
                         }
@@ -2924,7 +2931,9 @@ Licensed under the MIT license.
                         barRight = barLeft + s.bars.barWidth;
 
                     for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1], b = points[j + 2];
+                        x = points[j];
+                        y = points[j + 1];
+                        var b = points[j + 2];
                         if (x == null) {
                             continue;
                         }

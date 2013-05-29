@@ -165,13 +165,14 @@ More detail and specific examples can be found in the included HTML file.
 				combined = 0,
 				numCombined = 0,
 				color = options.series.pie.combine.color,
-				newdata = [];
+				newdata = [],
+				i, value;
 
 			// Fix up the raw data from Flot, ensuring the data is numeric
 
-			for (var i = 0; i < data.length; ++i) {
+			for (i = 0; i < data.length; ++i) {
 
-				var value = data[i].data;
+				value = data[i].data;
 
 				// If the data is an array, we'll assume that it's a standard
 				// Flot x-y pair, and are concerned only with the second value.
@@ -202,15 +203,15 @@ More detail and specific examples can be found in the included HTML file.
 
 			// Sum up all the slices, so we can calculate percentages for each
 
-			for (var i = 0; i < data.length; ++i) {
+			for (i = 0; i < data.length; ++i) {
 				total += data[i].data[0][1];
 			}
 
 			// Count the number of slices with percentages below the combine
 			// threshold; if it turns out to be just one, we won't combine.
 
-			for (var i = 0; i < data.length; ++i) {
-				var value = data[i].data[0][1];
+			for (i = 0; i < data.length; ++i) {
+				value = data[i].data[0][1];
 				if (value / total <= options.series.pie.combine.threshold) {
 					combined += value;
 					numCombined++;
@@ -220,8 +221,8 @@ More detail and specific examples can be found in the included HTML file.
 				}
 			}
 
-			for (var i = 0; i < data.length; ++i) {
-				var value = data[i].data[0][1];
+			for (i = 0; i < data.length; ++i) {
+				value = data[i].data[0][1];
 				if (numCombined < 2 || value / total > options.series.pie.combine.threshold) {
 					newdata.push({
 						data: [[1, value]],
@@ -373,8 +374,9 @@ More detail and specific examples can be found in the included HTML file.
 
 			function drawPie() {
 
-				var startAngle = Math.PI * options.series.pie.startAngle;
-				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+				var startAngle = Math.PI * options.series.pie.startAngle,
+					radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius,
+					i;
 
 				// center and rotate to starting position
 
@@ -387,7 +389,7 @@ More detail and specific examples can be found in the included HTML file.
 
 				ctx.save();
 				var currentAngle = startAngle;
-				for (var i = 0; i < slices.length; ++i) {
+				for (i = 0; i < slices.length; ++i) {
 					slices[i].startAngle = currentAngle;
 					drawSlice(slices[i].angle, slices[i].color, true);
 				}
@@ -399,7 +401,7 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.save();
 					ctx.lineWidth = options.series.pie.stroke.width;
 					currentAngle = startAngle;
-					for (var i = 0; i < slices.length; ++i) {
+					for (i = 0; i < slices.length; ++i) {
 						drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
 					}
 					ctx.restore();
