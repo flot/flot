@@ -269,7 +269,7 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function setSelection(ranges, preventEvent) {
-            var axis, range, o = plot.getOptions();
+            var range, o = plot.getOptions();
 
             if (o.selection.mode === "y") {
                 selection.first.x = 0;

@@ -149,7 +149,7 @@ More detail and specific examples can be found in the included HTML file.
 			}
 		});
 
-		function processDatapoints(plot, series, datapoints) {
+		function processDatapoints(plot) {
 			if (!processed)	{
 				processed = true;
 				canvas = plot.getCanvas();

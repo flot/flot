@@ -96,7 +96,7 @@ The plugin also adds four public methods:
             crosshair.locked = false;
         };
 
-        function onMouseOut(e) {
+        function onMouseOut() {
             if (crosshair.locked) {
                 return;
             }

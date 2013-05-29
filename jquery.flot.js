@@ -636,7 +636,7 @@ Licensed under the MIT license.
         };
         plot.getData = function () { return series; };
         plot.getAxes = function () {
-            var res = {}, i;
+            var res = {};
             $.each(xaxes.concat(yaxes), function (_, axis) {
                 if (axis) {
                     res[axis.direction + (axis.n !== 1 ? axis.n : "") + "axis"] = axis;
@@ -1069,8 +1069,8 @@ Licensed under the MIT license.
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 fakeInfinity = Number.MAX_VALUE,
-                i, j, k, m, length,
-                s, points, ps, x, y, axis, val, f, p,
+                i, j, k, m,
+                s, points, ps, val, f, p,
                 data, format;
 
             function updateAxis(axis, min, max) {
@@ -1443,7 +1443,7 @@ Licensed under the MIT license.
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction === "x" ? xaxes : yaxes,
-                index, innermost;
+                innermost;
 
             // determine axis margin
             var samePosition = $.grep(all, function (a) {
@@ -1518,7 +1518,7 @@ Licensed under the MIT license.
             // inside the canvas and isn't clipped off
 
             var minMargin = options.grid.minBorderMargin,
-                margins = { x: 0, y: 0 }, i, axis;
+                margins = { x: 0, y: 0 }, i;
 
             // check stuff from the plot (FIXME: this should just read
             // a value from the series, otherwise it's impossible to
@@ -2332,7 +2332,7 @@ Licensed under the MIT license.
                 var points = datapoints.points,
                     ps = datapoints.pointsize,
                     bottom = Math.min(Math.max(0, axisy.min), axisy.max),
-                    i = 0, top, areaOpen = false,
+                    i = 0, areaOpen = false,
                     ypos = 1, segmentStart = 0, segmentEnd = 0;
 
                 // we process each segment in two turns, first forward
@@ -2864,7 +2864,7 @@ Licensed under the MIT license.
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
                 smallestDistance = maxDistance * maxDistance + 1,
-                item = null, foundPoint = false, i, j, ps;
+                item = null, i, j, ps;
 
             for (i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(series[i])) {
@@ -2965,7 +2965,7 @@ Licensed under the MIT license.
         function onMouseLeave(e) {
             if (options.grid.hoverable) {
                 triggerClickHoverEvent("plothover", e,
-                                       function (s) { return false; });
+                                       function () { return false; });
             }
         }
 
