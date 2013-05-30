@@ -34,10 +34,6 @@ Licensed under the MIT license.
 // the actual Flot code
 (function($) {
 
-	// Cache the prototype hasOwnProperty for faster access
-
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-
 	///////////////////////////////////////////////////////////////////////////
 	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
 	//
@@ -172,7 +168,7 @@ Licensed under the MIT license.
 		// already been rendered, and remove those that are no longer active.
 
 		for (var layerKey in cache) {
-			if (hasOwnProperty.call(cache, layerKey)) {
+			if (Object.prototype.hasOwnProperty.call(cache, layerKey)) {
 
 				var layer = this.getTextLayer(layerKey),
 					layerCache = cache[layerKey];
@@ -180,10 +176,10 @@ Licensed under the MIT license.
 				layer.hide();
 
 				for (var styleKey in layerCache) {
-					if (hasOwnProperty.call(layerCache, styleKey)) {
+					if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 						var styleCache = layerCache[styleKey];
 						for (var key in styleCache) {
-							if (hasOwnProperty.call(styleCache, key)) {
+							if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
 
 								var positions = styleCache[key].positions;
 
@@ -464,10 +460,10 @@ Licensed under the MIT license.
 			var layerCache = this._textCache[layer];
 			if (layerCache != null) {
 				for (var styleKey in layerCache) {
-					if (hasOwnProperty.call(layerCache, styleKey)) {
+					if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 						var styleCache = layerCache[styleKey];
 						for (var key in styleCache) {
-							if (hasOwnProperty.call(styleCache, key)) {
+							if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
 								positions = styleCache[key].positions;
 								for (i = 0; position = positions[i]; i++) {
 									position.active = false;

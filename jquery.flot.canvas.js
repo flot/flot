@@ -35,10 +35,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 	var render, getTextInfo, addText;
 
-	// Cache the prototype hasOwnProperty for faster access
-
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-
 	function init(plot, classes) {
 
 		var Canvas = classes.Canvas;
@@ -70,14 +66,14 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			context.textBaseline = "middle";
 
 			for (var layerKey in cache) {
-				if (hasOwnProperty.call(cache, layerKey)) {
+				if (Object.prototype.hasOwnProperty.call(cache, layerKey)) {
 					var layerCache = cache[layerKey];
 					for (var styleKey in layerCache) {
-						if (hasOwnProperty.call(layerCache, styleKey)) {
+						if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 							var styleCache = layerCache[styleKey],
 								updateStyles = true;
 							for (var key in styleCache) {
-								if (hasOwnProperty.call(styleCache, key)) {
+								if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
 
 									var info = styleCache[key],
 										positions = info.positions,
