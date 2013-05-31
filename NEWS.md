@@ -1,5 +1,10 @@
 ## Flot 0.8.2 ##
 
+### Changes ###
+
+ - Added a table of contents to the API documentation.
+   (patch by Brian Peiris, pull request #1064)
+
 ### Bug fixes ###
 
  - Fixed a bug where the second axis in an xaxes/yaxes array incorrectly had
