@@ -22,6 +22,7 @@ The plugin supports these options:
 			innerRadius: 0-1 for percentage of fullsize or a specified pixel length, for creating a donut effect
 			startAngle: 0-2 factor of PI used for starting angle (in radians) i.e 3/2 starts at the top, 0 and 2 have the same result
 			tilt: 0-1 for percentage to tilt the pie, where 1 is no tilt, and 0 is completely flat (nothing will show)
+			thickness:  the thickness of a tilted pie (< 0.8) in pixels. default is 60
 			offset: {
 				top: integer value to move the pie up or down
 				left: integer value to move the pie left or right, or 'auto'
@@ -341,9 +342,14 @@ More detail and specific examples can be found in the included HTML file.
 
 				var shadowLeft = options.series.pie.shadow.left;
 				var shadowTop = options.series.pie.shadow.top;
+				var pieThickness = options.series.pie.thickness;
 				var edge = 10;
 				var alpha = options.series.pie.shadow.alpha;
 				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+				var innerRadius = 0;
+				if (options.series.pie.innerRadius > 0) {
+					innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
+				}
 
 				if (radius >= canvasWidth / 2 - shadowLeft || radius * options.series.pie.tilt >= canvasHeight / 2 - shadowTop || radius <= edge) {
 					return;	// shadow would be outside canvas, so don't draw it
@@ -351,7 +357,7 @@ More detail and specific examples can be found in the included HTML file.
 
 				ctx.save();
 				ctx.translate(shadowLeft,shadowTop);
-				ctx.globalAlpha = alpha;
+				//ctx.globalAlpha = alpha;
 				ctx.fillStyle = "#000";
 
 				// center and rotate to starting position
@@ -360,12 +366,26 @@ More detail and specific examples can be found in the included HTML file.
 				ctx.scale(1, options.series.pie.tilt);
 
 				//radius -= edge;
-
-				for (var i = 1; i <= edge; i++) {
+				if (innerRadius > 0) {
+					var grd=ctx.createRadialGradient(0,pieThickness + shadowTop,innerRadius,0,pieThickness + shadowTop,radius);
+					grd.addColorStop(0,"white");
+					grd.addColorStop(0.5,"grey");
+					grd.addColorStop(1.0,"white");
+					ctx.fillStyle=grd;
 					ctx.beginPath();
-					ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
+					ctx.arc(0, pieThickness + shadowTop, radius, 0, Math.PI * 2, false);
+					ctx.arc(0, pieThickness + shadowTop, innerRadius, Math.PI * 2, 0,  true);
 					ctx.fill();
-					radius -= i;
+
+				} else {
+					var grd=ctx.createRadialGradient(0,pieThickness + shadowTop,radius-(pieThickness + shadowTop),0,pieThickness + shadowTop,radius);
+					grd.addColorStop(0,"grey");
+					grd.addColorStop(1.0,"white");
+					ctx.fillStyle=grd;
+					ctx.beginPath();
+					ctx.arc(0, pieThickness + shadowTop, radius, 0, Math.PI * 2, false);
+					ctx.arc(0, pieThickness + shadowTop, radius-(pieThickness + shadowTop), Math.PI * 2, 0,  true);
+					ctx.fill();
 				}
 
 				ctx.restore();
@@ -375,13 +395,19 @@ More detail and specific examples can be found in the included HTML file.
 
 				var startAngle = Math.PI * options.series.pie.startAngle;
 				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
-
+				var innerRadius = 0;
+				if (options.series.pie.innerRadius > 0) {
+					innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
+				}
 				// center and rotate to starting position
-
 				ctx.save();
 				ctx.translate(centerLeft,centerTop);
 				ctx.scale(1, options.series.pie.tilt);
 				//ctx.rotate(startAngle); // start at top; -- This doesn't work properly in Opera
+
+				// draw donut hole
+
+				drawDonutHole(ctx);
 
 				// draw slices
 
@@ -394,7 +420,7 @@ More detail and specific examples can be found in the included HTML file.
 				ctx.restore();
 
 				// draw slice outlines
-
+				
 				if (options.series.pie.stroke.width > 0) {
 					ctx.save();
 					ctx.lineWidth = options.series.pie.stroke.width;
@@ -405,9 +431,25 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.restore();
 				}
 
-				// draw donut hole
-
-				drawDonutHole(ctx);
+				// draw slice thickness
+				if (options.series.pie.tilt <= 0.8) {
+					ctx.save();
+					var currentAngle = startAngle;
+					for (var i = 0; i < slices.length; ++i) {
+						slices[i].startAngle = currentAngle;
+						drawSliceThickness(slices[i].angle, slices[i].color, true);
+					}
+					ctx.restore();
+					
+					ctx.save();
+					var currentAngle = startAngle;
+					for (var i = 0; i < slices.length; ++i) {
+						slices[i].startAngle = currentAngle;
+						drawSliceThickness(slices[i].angle, options.series.pie.stroke.color, false);
+					}
+					ctx.restore();
+					
+				}
 
 				ctx.restore();
 
@@ -431,22 +473,98 @@ More detail and specific examples can be found in the included HTML file.
 					}
 
 					ctx.beginPath();
-					if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
-						ctx.moveTo(0, 0); // Center of the pie
+					if (innerRadius == 0) {
+						if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
+							ctx.moveTo(0, 0); // Center of the pie
+						}
 					}
 
 					//ctx.arc(0, 0, radius, 0, angle, false); // This doesn't work properly in Opera
 					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
 					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle + angle, false);
+					if (innerRadius > 0) {
+						var x, y, a;
+						var xa = currentAngle + angle;
+						if (xa > 2 * Math.PI) {
+							xa = xa - 2 * Math.PI;
+						}
+						if (xa > 0 && xa < Math.PI/2) {
+							x = innerRadius * Math.cos(xa);
+							y = innerRadius * Math.sin(xa);
+						} else if (xa < Math.PI) {
+							x = -1 * innerRadius * Math.cos(Math.PI - xa);
+							y = innerRadius * Math.sin(Math.PI - xa);
+						} else if (xa < 3/2 * Math.PI) {
+							x = -1 * innerRadius * Math.cos(xa - Math.PI);
+							y = -1 * innerRadius * Math.sin(xa - Math.PI);
+						} else {
+							x = innerRadius * Math.cos(2 * Math.PI - xa);
+							y = -1 * innerRadius * Math.sin(2 * Math.PI - xa);
+						}
+
+						ctx.lineTo(Math.round(x),Math.round(y));
+						ctx.arc(0, 0, innerRadius, currentAngle + angle, currentAngle + angle / 2,  true);
+						ctx.arc(0, 0, innerRadius, currentAngle + angle / 2, currentAngle,  true);
+					}
 					ctx.closePath();
 					//ctx.rotate(angle); // This doesn't work properly in Opera
-					currentAngle += angle;
 
 					if (fill) {
 						ctx.fill();
 					} else {
 						ctx.stroke();
 					}
+					currentAngle += angle;
+				}
+
+				function drawSliceThickness(angle, color, fill) {
+					if (angle <= 0 || isNaN(angle)) {
+						return;
+					}
+					var sliceColor = color;
+					if (fill) {
+						var jqColor = $.Color(color);
+						jqColor = jqColor.lightness("-=0.1");
+						sliceColor = jqColor.toRgbaString(); 
+					}
+					if (fill) {
+						ctx.fillStyle = sliceColor;
+					} else {
+						ctx.strokeStyle = color;
+						ctx.lineJoin = "round";
+					}
+					
+					if ((currentAngle < Math.PI || (currentAngle + angle) > Math.PI * 2)) {
+						if (currentAngle >= Math.PI) {
+							angle = (currentAngle + angle - 2 * Math.PI); 
+							currentAngle = 0;
+						}
+						if (currentAngle + angle > Math.PI) {
+							angle = Math.PI - currentAngle;
+						}
+						var x2,y2;
+						if (currentAngle + angle < Math.PI / 2) {
+							x2 = Math.round(radius * Math.sin(Math.PI / 2 - currentAngle - angle));
+							y2 = Math.round(radius * Math.cos(Math.PI / 2 - currentAngle - angle));
+						} else {
+							x2 = -1 * Math.round(radius * Math.cos(Math.PI - currentAngle - angle));
+							y2 = Math.round(radius * Math.sin(Math.PI - currentAngle - angle));
+						}
+						ctx.beginPath();
+						ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
+						ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle + angle, false);
+						ctx.lineTo(x2, y2);
+						ctx.arc(0, options.series.pie.thickness, radius, currentAngle + angle, currentAngle + angle / 2,  true);
+						ctx.arc(0, options.series.pie.thickness, radius, currentAngle + angle / 2, currentAngle, true);
+						ctx.closePath();
+						if (fill) {
+							ctx.fill();
+						} else {
+							ctx.stroke();
+						}
+					}
+					currentAngle += angle;
+					
 				}
 
 				function drawLabels() {
@@ -532,29 +650,99 @@ More detail and specific examples can be found in the included HTML file.
 		function drawDonutHole(layer) {
 			if (options.series.pie.innerRadius > 0) {
 
-				// subtract the center
-
-				layer.save();
-				var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
-				layer.globalCompositeOperation = "destination-out"; // this does not work with excanvas, but it will fall back to using the stroke color
-				layer.beginPath();
-				layer.fillStyle = options.series.pie.stroke.color;
-				layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
-				layer.fill();
-				layer.closePath();
-				layer.restore();
-
-				// add inner stroke
-
-				layer.save();
-				layer.beginPath();
-				layer.strokeStyle = options.series.pie.stroke.color;
-				layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
-				layer.stroke();
-				layer.closePath();
-				layer.restore();
-
 				// TODO: add extra shadow inside hole (with a mask) if the pie is tilted.
+				
+				function drawThickDonutHole(ctx) {
+					var slices = plot.getData();
+					var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
+					var startAngle = Math.PI * options.series.pie.startAngle;
+					var currentAngle = startAngle;
+
+					ctx.save();
+					for (var i = 0; i < slices.length; ++i) {
+						drawThickDonutHoleSlice(slices[i].angle, slices[i].color, true);
+					}
+					ctx.restore();
+					
+					ctx.save();
+					currentAngle = startAngle;
+					for (var i = 0; i < slices.length; ++i) {
+						drawThickDonutHoleSlice(slices[i].angle, options.series.pie.stroke.color, false);
+					}
+					ctx.restore();
+
+					function drawThickDonutHoleSlice(angle, color, fill) {
+						if (angle <= 0 || isNaN(angle)) {
+							return;
+						}
+						var holeColor = color;
+						if (fill) {
+							var jqColor = $.Color(color);
+							jqColor = jqColor.lightness("-=0.1");
+							holeColor = jqColor.toRgbaString(); 
+						}
+						if (fill) {
+							ctx.fillStyle = holeColor;
+						} else {
+							ctx.strokeStyle = color;
+							ctx.lineJoin = "round";
+						}
+						var x,y;
+						if (currentAngle > 3*Math.PI) {
+							x = Math.round(innerRadius * Math.cos(2 * Math.PI - currentAngle));
+							y = Math.round(innerRadius * Math.sin(2 * Math.PI - currentAngle));
+						} else if (currentAngle < Math.PI/2) {
+							x = Math.round(innerRadius * Math.cos(currentAngle));
+							y = -1 * Math.round(innerRadius * Math.sin(currentAngle));
+						} else if (currentAngle < Math.PI) {
+							x = -1 * Math.round(innerRadius * Math.cos(Math.PI - currentAngle));
+							y = -1 * Math.round(innerRadius * Math.sin(Math.PI - currentAngle));
+						} else {
+							x = -1 * Math.round(innerRadius * Math.cos(currentAngle - Math.PI));
+							y = Math.round(innerRadius * Math.sin(currentAngle - Math.PI));
+						}
+						ctx.moveTo(x, y);
+						ctx.beginPath();
+						ctx.arc(0, 0, innerRadius, currentAngle, currentAngle + angle / 2,  false);
+						ctx.arc(0, 0, innerRadius, currentAngle + angle / 2, currentAngle + angle, false);
+						ctx.arc(0, options.series.pie.thickness, innerRadius, currentAngle + angle, currentAngle + angle / 2, true);
+						ctx.arc(0, options.series.pie.thickness, innerRadius, currentAngle + angle / 2, currentAngle, true);
+						ctx.closePath();
+						if (fill) {
+							ctx.fill();
+						} else {
+							ctx.stroke();
+						}
+						currentAngle += angle;
+						if (currentAngle > 2*Math.PI) {
+							currentAngle = currentAngle - 2*Math.PI;
+						}
+					}
+				}
+				if (options.series.pie.tilt <= 0.8) {
+					drawThickDonutHole(layer);
+				} else {
+					// subtract the center
+					layer.save();
+					var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
+					layer.globalCompositeOperation = "destination-out"; // this does not work with excanvas, but it will fall back to using the stroke color
+					layer.beginPath();
+					layer.fillStyle = options.series.pie.stroke.color;
+					layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
+					layer.fill();
+					layer.closePath();
+					layer.restore();
+
+					// add inner stroke
+
+					layer.save();
+					layer.beginPath();
+					layer.strokeStyle = options.series.pie.stroke.color;
+					layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
+					layer.stroke();
+					layer.closePath();
+					layer.restore();
+				}
 			}
 		}
 
@@ -735,7 +923,7 @@ More detail and specific examples can be found in the included HTML file.
 				drawHighlight(highlights[i].series);
 			}
 
-			drawDonutHole(octx);
+			//drawDonutHole(octx);
 
 			octx.restore();
 
@@ -769,6 +957,7 @@ More detail and specific examples can be found in the included HTML file.
 				innerRadius: 0, /* for donut */
 				startAngle: 3/2,
 				tilt: 1,
+				thickness: 60,
 				shadow: {
 					left: 5,	// shadow left offset
 					top: 15,	// shadow top offset
