@@ -297,13 +297,13 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
 
             $.each(plot.getAxes(), function (_, axis) {
+
                 var opts = axis.options,
-                    min, max, d = delta[axis.direction];
+                    min = axis.c2p(axis.p2c(axis.min) + d),
+                    max = axis.c2p(axis.p2c(axis.max) + d),
+                    d = delta[axis.direction],
+                    pr = opts.panRange;
 
-                min = axis.c2p(axis.p2c(axis.min) + d),
-                max = axis.c2p(axis.p2c(axis.max) + d);
-
-                var pr = opts.panRange;
                 if (pr === false) { // no panning on this axis
                     return;
                 }

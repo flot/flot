@@ -40,10 +40,10 @@ API.txt for details.
 			return n.length === 1 ? pad + n : n;
 		};
 
-		var r = [];
-		var escape = false;
-		var hours = d.getHours();
-		var isAM = hours < 12;
+		var r = [],
+			escape = false,
+			hours = d.getHours(),
+			isAM = hours < 12;
 
 		if (monthNames == null) {
 			monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -203,9 +203,9 @@ API.txt for details.
 				if (opts.mode === "time") {
 					axis.tickGenerator = function(axis) {
 
-						var ticks = [];
-						var d = dateGenerator(axis.min, opts);
-						var minSize = 0;
+						var ticks = [],
+							d = dateGenerator(axis.min, opts),
+							minSize = 0;
 
 						// make quarter use a possibility if quarters are
 						// mentioned in either of these options
@@ -231,8 +231,8 @@ API.txt for details.
 							}
 						}
 
-						var size = spec[i][0];
-						var unit = spec[i][1];
+						var size = spec[i][0],
+							unit = spec[i][1];
 
 						// special-case the possibility of several years
 
@@ -245,8 +245,8 @@ API.txt for details.
 								size = Math.floor(opts.minTickSize[0]);
 							} else {
 
-								var magn = Math.pow(10, Math.floor(Math.log(axis.delta / timeUnitSize.year) / Math.LN10));
-								var norm = (axis.delta / timeUnitSize.year) / magn;
+								var magn = Math.pow(10, Math.floor(Math.log(axis.delta / timeUnitSize.year) / Math.LN10)),
+									norm = (axis.delta / timeUnitSize.year) / magn;
 
 								if (norm < 1.5) {
 									size = 1;
@@ -315,9 +315,9 @@ API.txt for details.
 							d.setMonth(0);
 						}
 
-						var carry = 0;
-						var v = Number.NaN;
-						var prev;
+						var carry = 0,
+							v = Number.NaN,
+							prev;
 
 						do {
 
@@ -370,13 +370,12 @@ API.txt for details.
 						var useQuarters = (axis.options.tickSize &&
 								axis.options.tickSize[1] === "quarter") ||
 								(axis.options.minTickSize &&
-								axis.options.minTickSize[1] === "quarter");
-
-						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
-						var span = axis.max - axis.min;
-						var suffix = (opts.twelveHourClock) ? " %p" : "";
-						var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
-						var fmt;
+								axis.options.minTickSize[1] === "quarter"),
+							t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]],
+							span = axis.max - axis.min,
+							suffix = (opts.twelveHourClock) ? " %p" : "",
+							hourCode = (opts.twelveHourClock) ? "%I" : "%H",
+							fmt;
 
 						if (t < timeUnitSize.minute) {
 							fmt = hourCode + ":%M:%S" + suffix;

@@ -113,13 +113,13 @@ shadowSize and lineWidth are derived as well from the points series.
 
         // read errors from points array
         var exl = null,
-                exu = null,
-                eyl = null,
-                eyu = null;
-        var xerr = series.points.xerr,
-                yerr = series.points.yerr;
+            exu = null,
+            eyl = null,
+            eyu = null,
+            xerr = series.points.xerr,
+            yerr = series.points.yerr,
+            eb = series.points.errorbars;
 
-        var eb = series.points.errorbars;
         // error bars - first X
         if (eb === "x" || eb === "xy") {
             if (xerr.asymmetric) {
@@ -178,13 +178,13 @@ shadowSize and lineWidth are derived as well from the points series.
     function drawSeriesErrors(plot, ctx, s){
 
         var points = s.datapoints.points,
-                ps = s.datapoints.pointsize,
-                ax = [s.xaxis, s.yaxis],
-                radius = s.points.radius,
-                err = [s.points.xerr, s.points.yerr],
-                invertX = false,
-                invertY = false,
-                tmp;
+            ps = s.datapoints.pointsize,
+            ax = [s.xaxis, s.yaxis],
+            radius = s.points.radius,
+            err = [s.points.xerr, s.points.yerr],
+            invertX = false,
+            invertY = false,
+            tmp;
 
         //sanity check, in case some inverted axis hack is applied to flot
 
@@ -204,7 +204,6 @@ shadowSize and lineWidth are derived as well from the points series.
 
         for (var i = 0; i < s.datapoints.points.length; i += ps) {
 
-            //parse
             var errRanges = parseErrors(s, i);
 
             //cycle xerr & yerr
@@ -367,7 +366,7 @@ shadowSize and lineWidth are derived as well from the points series.
     function drawPath(ctx, pts){
         ctx.beginPath();
         ctx.moveTo(pts[0][0], pts[0][1]);
-        for (var p=1; p < pts.length; p++) {
+        for (var p = 1; p < pts.length; p++) {
             ctx.lineTo(pts[p][0], pts[p][1]);
         }
         ctx.stroke();
@@ -392,9 +391,10 @@ shadowSize and lineWidth are derived as well from the points series.
     }
 
     $.plot.plugins.push({
-                init: init,
-                options: options,
-                name: "errorbars",
-                version: "1.0"
-            });
+        init: init,
+        options: options,
+        name: "errorbars",
+        version: "1.0"
+    });
+
 })(jQuery);

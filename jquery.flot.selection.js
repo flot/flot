@@ -80,8 +80,10 @@ The plugin allso adds the following methods to the plot object:
 
 (function ($) {
     function init(plot) {
+
         var selection = {
-                first: { x: -1, y: -1}, second: { x: -1, y: -1},
+                first: { x: -1, y: -1},
+                second: { x: -1, y: -1},
                 show: false,
                 active: false
             };
@@ -91,14 +93,13 @@ The plugin allso adds the following methods to the plot object:
         // the navigation plugin, this should be massaged a bit to fit
         // the Flot cases here better and reused. Doing this would
         // make this plugin much slimmer.
-        var savedhandlers = {};
 
-        var mouseUpHandler = null;
+        var savedhandlers = {},
+            mouseUpHandler = null;
 
         function onMouseMove(e) {
             if (selection.active) {
                 updateSelection(e);
-
                 plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
             }
         }
@@ -159,18 +160,19 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function getSelection() {
-            if (!selectionIsSane()) {
+
+            if (!selectionIsSane() || !selection.show) {
                 return null;
             }
 
-            if (!selection.show) {
-                return null;
-            }
+            var r = {},
+                c1 = selection.first,
+                c2 = selection.second;
 
-            var r = {}, c1 = selection.first, c2 = selection.second;
             $.each(plot.getAxes(), function (name, axis) {
                 if (axis.used) {
-                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]);
+                    var p1 = axis.c2p(c1[axis.direction]),
+                        p2 = axis.c2p(c2[axis.direction]);
                     r[name] = { from: Math.min(p1, p2), to: Math.max(p1, p2) };
                 }
             });
@@ -193,9 +195,10 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function setSelectionPos(pos, e) {
-            var o = plot.getOptions();
-            var offset = plot.getPlaceholder().offset();
-            var plotOffset = plot.getPlotOffset();
+            var o = plot.getOptions(),
+                offset = plot.getPlaceholder().offset(),
+                plotOffset = plot.getPlotOffset();
+
             pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plot.width());
             pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plot.height());
 
@@ -227,7 +230,7 @@ The plugin allso adds the following methods to the plot object:
                 selection.show = false;
                 plot.triggerRedrawOverlay();
                 if (!preventEvent) {
-                    plot.getPlaceholder().trigger("plotunselected", [ ]);
+                    plot.getPlaceholder().trigger("plotunselected", []);
                 }
             }
         }
@@ -276,10 +279,8 @@ The plugin allso adds the following methods to the plot object:
             if (o.selection.mode === "y") {
                 selection.first.x = 0;
                 selection.second.x = plot.width();
-            }
-            else {
+            } else {
                 range = extractRange(ranges, "x");
-
                 selection.first.x = range.axis.p2c(range.from);
                 selection.second.x = range.axis.p2c(range.to);
             }
@@ -287,10 +288,8 @@ The plugin allso adds the following methods to the plot object:
             if (o.selection.mode === "x") {
                 selection.first.y = 0;
                 selection.second.y = plot.height();
-            }
-            else {
+            } else {
                 range = extractRange(ranges, "y");
-
                 selection.first.y = range.axis.p2c(range.from);
                 selection.second.y = range.axis.p2c(range.to);
             }
@@ -352,7 +351,6 @@ The plugin allso adds the following methods to the plot object:
         plot.hooks.shutdown.push(function (plot, eventHolder) {
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mousedown", onMouseDown);
-
             if (mouseUpHandler) {
                 $(document).unbind("mouseup", mouseUpHandler);
             }

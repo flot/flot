@@ -138,8 +138,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
                 for (var i = 0; i < o.length; ++i) {
                     c[o[i]] = i;
                 }
-            }
-            else {
+            } else {
                 for (var v in o) {
                     if (Object.prototype.hasOwnProperty.call(o, v)) {
                         c[v] = o[v];

@@ -1030,8 +1030,7 @@ Licensed under the MIT license.
                 if (s.color == null) {
                     s.color = colors[colori].toString();
                     ++colori;
-                }
-                else if (typeof s.color === "number") {
+                } else if (typeof s.color === "number") {
                     s.color = colors[s.color].toString();
                 }
 
@@ -1066,9 +1065,7 @@ Licensed under the MIT license.
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 fakeInfinity = Number.MAX_VALUE,
-                i, j, k, m,
-                s, points, ps, val, f, p,
-                data, format;
+                i, j, k, m, s, points, ps, val, f, p, data, format;
 
             function updateAxis(axis, min, max) {
                 if (min < axis.datamin && min !== -fakeInfinity) {
@@ -1089,7 +1086,6 @@ Licensed under the MIT license.
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 s.datapoints = { points: [] };
-
                 executeHooks(hooks.processRawData, [ s, s.data, s.datapoints ]);
             }
 
@@ -1183,8 +1179,7 @@ Licensed under the MIT license.
                             }
                             points[k + m] = null;
                         }
-                    }
-                    else {
+                    } else {
                         // a little bit of line specific stuff that
                         // perhaps shouldn't be here, but lacking
                         // better means...
@@ -2383,8 +2378,7 @@ Licensed under the MIT license.
                         }
                         y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.min;
-                    }
-                    else if (x2 <= x1 && x2 < axisx.min) {
+                    } else if (x2 <= x1 && x2 < axisx.min) {
                         if (x1 < axisx.min) {
                             continue;
                         }
@@ -2399,8 +2393,7 @@ Licensed under the MIT license.
                         }
                         y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.max;
-                    }
-                    else if (x2 >= x1 && x2 > axisx.max) {
+                    } else if (x2 >= x1 && x2 > axisx.max) {
                         if (x1 > axisx.max) {
                             continue;
                         }

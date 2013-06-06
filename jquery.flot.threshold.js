@@ -49,8 +49,14 @@ You may need to check for this in hover events.
 
     function init(plot) {
         function thresholdData(plot, s, datapoints, below, color) {
-            var ps = datapoints.pointsize, i, x, y, p, prevp,
-                thresholded = $.extend({}, s); // note: shallow copy
+
+            var origpoints = datapoints.points,
+                ps = datapoints.pointsize,
+                addCrossingPoints = s.lines.show,
+                thresholded = $.extend({}, s), // note: shallow copy
+                threspoints = [],
+                newpoints = [],
+                prevp, i, x, y, p, m;
 
             thresholded.datapoints = { points: [], pointsize: ps, format: datapoints.format };
             thresholded.label = null;
@@ -58,13 +64,6 @@ You may need to check for this in hover events.
             thresholded.threshold = null;
             thresholded.originSeries = s;
             thresholded.data = [];
-
-            var origpoints = datapoints.points,
-                addCrossingPoints = s.lines.show;
-
-            var threspoints = [];
-            var newpoints = [];
-            var m;
 
             for (i = 0; i < origpoints.length; i += ps) {
                 x = origpoints[i];
@@ -129,8 +128,7 @@ You may need to check for this in hover events.
                 $(s.threshold).each(function(i, th) {
                     thresholdData(plot, s, datapoints, th.below, th.color);
                 });
-            }
-            else {
+            } else {
                 thresholdData(plot, s, datapoints, s.threshold.below, s.threshold.color);
             }
         }

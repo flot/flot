@@ -59,6 +59,7 @@ The plugin also adds four public methods:
 */
 
 (function ($) {
+
     var options = {
         crosshair: {
             mode: null, // one of null, "x", "y" or "xy",
@@ -178,4 +179,5 @@ The plugin also adds four public methods:
         name: "crosshair",
         version: "1.0"
     });
+
 })(jQuery);
