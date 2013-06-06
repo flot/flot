@@ -12,4 +12,4 @@ all: $(patsubst %.js,%.min.js,$(filter-out %.min.js,$(wildcard *.js)))
 # Flot's Travis test suite runs JSHint with the options in .jshintrc
 
 test:
-	./node_modules/.bin/jshint jquery.*.js
+	./node_modules/.bin/jshint jquery.flot*.js
