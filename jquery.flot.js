@@ -425,7 +425,7 @@ Licensed under the MIT license.
 			element: positions.length ? info.element.clone() : info.element,
 			x: x,
 			y: y
-		}
+		};
 
 		positions.push(position);
 
@@ -1351,7 +1351,7 @@ Licensed under the MIT license.
                 ticks = axis.ticks || [],
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
-                maxWidth = labelWidth || axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null;
+                maxWidth = labelWidth || axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
@@ -1396,13 +1396,13 @@ Licensed under the MIT license.
             if ($.inArray(axis, samePosition) == samePosition.length - 1)
                 axisMargin = 0; // outermost
 
-            // determine tick length - if we're innermost, we can use "full"
-            if (tickLength == null) {
-                var sameDirection = $.grep(all, function (a) {
-                    return a && a.reserveSpace;
-                });
+            // Determine whether the axis is the first (innermost) on its side
 
-                innermost = $.inArray(axis, sameDirection) == 0;
+            innermost = $.inArray(axis, samePosition) == 0;
+
+            // determine tick length - if we're innermost, we can use "full"
+
+            if (tickLength == null) {
                 if (innermost)
                     tickLength = "full";
                 else
