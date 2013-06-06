@@ -69,16 +69,18 @@ Google Maps).
         var urls = [], points = [];
 
         var defaultShow = options.series.images.show;
-        
+
         $.each(series, function (i, s) {
-            if (!(defaultShow || s.images.show))
+            if (!(defaultShow || s.images.show)) {
                 return;
-            
-            if (s.data)
+            }
+
+            if (s.data) {
                 s = s.data;
+            }
 
             $.each(s, function (i, p) {
-                if (typeof p[0] == "string") {
+                if (typeof p[0] === "string") {
                     urls.push(p[0]);
                     points.push(p);
                 }
@@ -88,42 +90,46 @@ Google Maps).
         $.plot.image.load(urls, function (loadedImages) {
             $.each(points, function (i, p) {
                 var url = p[0];
-                if (loadedImages[url])
+                if (loadedImages[url]) {
                     p[0] = loadedImages[url];
+                }
             });
 
             callback();
         });
-    }
-    
+    };
+
     $.plot.image.load = function (urls, callback) {
         var missing = urls.length, loaded = {};
-        if (missing == 0)
+        if (missing === 0) {
             callback({});
+        }
 
         $.each(urls, function (i, url) {
             var handler = function () {
                 --missing;
-                
+
                 loaded[url] = this;
-                
-                if (missing == 0)
+
+                if (missing === 0) {
                     callback(loaded);
+                }
             };
 
-            $('<img />').load(handler).error(handler).attr('src', url);
+            $("<img />").load(handler).error(handler).attr("src", url);
         });
     };
-    
+
     function drawSeries(plot, ctx, series) {
         var plotOffset = plot.getPlotOffset();
-        
-        if (!series.images || !series.images.show)
+
+        if (!series.images || !series.images.show) {
             return;
-        
+        }
+
         var points = series.datapoints.points,
             ps = series.datapoints.pointsize;
-        
+
         for (var i = 0; i < points.length; i += ps) {
             var img = points[i],
                 x1 = points[i + 1], y1 = points[i + 2],
@@ -134,8 +140,9 @@ Google Maps).
             // actually we should check img.complete, but it
             // appears to be a somewhat unreliable indicator in
             // IE6 (false even after load event)
-            if (!img || img.width <= 0 || img.height <= 0)
+            if (!img || img.width <= 0 || img.height <= 0) {
                 continue;
+            }
 
             if (x1 > x2) {
                 tmp = x2;
@@ -147,10 +154,10 @@ Google Maps).
                 y2 = y1;
                 y1 = tmp;
             }
-            
-            // if the anchor is at the center of the pixel, expand the 
+
+            // if the anchor is at the center of the pixel, expand the
             // image by 1/2 pixel in each direction
-            if (series.images.anchor == "center") {
+            if (series.images.anchor === "center") {
                 tmp = 0.5 * (x2-x1) / (img.width - 1);
                 x1 -= tmp;
                 x2 += tmp;
@@ -158,12 +165,13 @@ Google Maps).
                 y1 -= tmp;
                 y2 += tmp;
             }
-            
+
             // clip
-            if (x1 == x2 || y1 == y2 ||
+            if (x1 === x2 || y1 === y2 ||
                 x1 >= xaxis.max || x2 <= xaxis.min ||
-                y1 >= yaxis.max || y2 <= yaxis.min)
+                y1 >= yaxis.max || y2 <= yaxis.min) {
                 continue;
+            }
 
             var sx1 = 0, sy1 = 0, sx2 = img.width, sy2 = img.height;
             if (x1 < xaxis.min) {
@@ -185,12 +193,12 @@ Google Maps).
                 sy1 += (sy1 - sy2) * (yaxis.max - y2) / (y2 - y1);
                 y2 = yaxis.max;
             }
-            
+
             x1 = xaxis.p2c(x1);
             x2 = xaxis.p2c(x2);
             y1 = yaxis.p2c(y1);
             y2 = yaxis.p2c(y2);
-            
+
             // the transformation may have swapped us
             if (x1 > x2) {
                 tmp = x2;
@@ -214,8 +222,9 @@ Google Maps).
     }
 
     function processRawData(plot, series, data, datapoints) {
-        if (!series.images.show)
+        if (!series.images.show) {
             return;
+        }
 
         // format is Image, x1, y1, x2, y2 (opposite corners)
         datapoints.format = [
@@ -226,16 +235,16 @@ Google Maps).
             { y: true, number: true, required: true }
         ];
     }
-    
+
     function init(plot) {
         plot.hooks.processRawData.push(processRawData);
         plot.hooks.drawSeries.push(drawSeries);
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'image',
-        version: '1.1'
+        name: "image",
+        version: "1.1"
     });
 })(jQuery);

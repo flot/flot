@@ -35,10 +35,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 	var render, getTextInfo, addText;
 
-	// Cache the prototype hasOwnProperty for faster access
-
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-
 	function init(plot, classes) {
 
 		var Canvas = classes.Canvas;
@@ -70,14 +66,14 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			context.textBaseline = "middle";
 
 			for (var layerKey in cache) {
-				if (hasOwnProperty.call(cache, layerKey)) {
+				if (Object.prototype.hasOwnProperty.call(cache, layerKey)) {
 					var layerCache = cache[layerKey];
 					for (var styleKey in layerCache) {
-						if (hasOwnProperty.call(layerCache, styleKey)) {
+						if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 							var styleCache = layerCache[styleKey],
 								updateStyles = true;
 							for (var key in styleCache) {
-								if (hasOwnProperty.call(styleCache, key)) {
+								if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
 
 									var info = styleCache[key],
 										positions = info.positions,
@@ -103,7 +99,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 										}
 									}
 
-									if (positions.length == 0) {
+									if (positions.length === 0) {
 										delete styleCache[key];
 									}
 								}
@@ -280,9 +276,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 			// Tweak the initial y-position to match vertical alignment
 
-			if (valign == "middle") {
+			if (valign === "middle") {
 				y = Math.round(y - info.height / 2);
-			} else if (valign == "bottom") {
+			} else if (valign === "bottom") {
 				y = Math.round(y - info.height);
 			} else {
 				y = Math.round(y);
@@ -302,7 +298,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// If so, mark it for inclusion in the next render pass.
 
 			for (var i = 0, position; position = positions[i]; i++) {
-				if (position.x == x && position.y == y) {
+				if (position.x === x && position.y === y) {
 					position.active = true;
 					return;
 				}
@@ -322,10 +318,10 @@ browser, but needs to redraw with canvas text when exporting as an image.
 			// Fill in the x & y positions of each line, adjusting them
 			// individually for horizontal alignment.
 
-			for (var i = 0, line; line = lines[i]; i++) {
-				if (halign == "center") {
+			for (var j = 0, line; line = lines[j]; j++) {
+				if (halign === "center") {
 					position.lines.push([Math.round(x - line.width / 2), y]);
-				} else if (halign == "right") {
+				} else if (halign === "right") {
 					position.lines.push([Math.round(x - line.width), y]);
 				} else {
 					position.lines.push([Math.round(x), y]);

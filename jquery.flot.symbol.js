@@ -14,17 +14,17 @@ The symbols are accessed as strings through the standard symbol options:
 */
 
 (function ($) {
-    function processRawData(plot, series, datapoints) {
+    function processRawData(plot, series) {
         // we normalize the area of each symbol so it is approximately the
         // same as a circle of the given radius
 
         var handlers = {
-            square: function (ctx, x, y, radius, shadow) {
+            square: function (ctx, x, y, radius) {
                 // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
                 var size = radius * Math.sqrt(Math.PI) / 2;
                 ctx.rect(x - size, y - size, size + size, size + size);
             },
-            diamond: function (ctx, x, y, radius, shadow) {
+            diamond: function (ctx, x, y, radius) {
                 // pi * r^2 = 2s^2  =>  s = r * sqrt(pi/2)
                 var size = radius * Math.sqrt(Math.PI / 2);
                 ctx.moveTo(x - size, y);
@@ -44,7 +44,7 @@ The symbols are accessed as strings through the standard symbol options:
                     ctx.lineTo(x - size/2, y + height/2);
                 }
             },
-            cross: function (ctx, x, y, radius, shadow) {
+            cross: function (ctx, x, y, radius) {
                 // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
                 var size = radius * Math.sqrt(Math.PI) / 2;
                 ctx.moveTo(x - size, y - size);
@@ -55,17 +55,18 @@ The symbols are accessed as strings through the standard symbol options:
         };
 
         var s = series.points.symbol;
-        if (handlers[s])
+        if (handlers[s]) {
             series.points.symbol = handlers[s];
+        }
     }
-    
+
     function init(plot) {
         plot.hooks.processDatapoints.push(processRawData);
     }
-    
+
     $.plot.plugins.push({
         init: init,
-        name: 'symbols',
-        version: '1.0'
+        name: "symbols",
+        version: "1.0"
     });
 })(jQuery);
