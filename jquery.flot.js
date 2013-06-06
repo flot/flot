@@ -1157,9 +1157,9 @@ Licensed under the MIT license.
                         // perhaps shouldn't be here, but lacking
                         // better means...
                         if (insertSteps && k > 0 &&
-                        	points[k - ps] != null &&
-                        	points[k - ps] !== points[k] &&
-                        	points[k - ps + 1] !== points[k + 1]) {
+                            points[k - ps] != null &&
+                            points[k - ps] !== points[k] &&
+                            points[k - ps + 1] !== points[k + 1]) {
                             // copy the point to make room for a middle point
                             for (m = 0; m < ps; ++m) {
                                 points[k + ps + m] = points[k + m];
@@ -2508,9 +2508,9 @@ Licensed under the MIT license.
                 radius = series.points.radius,
                 symbol = series.points.symbol;
 
-            // If the user sets the line width to 0, we change it to a very 
+            // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
-            // Doing the conditional here allows the shadow setting to still be 
+            // Doing the conditional here allows the shadow setting to still be
             // optional even with a lineWidth of 0.
 
             if( lw === 0 ) {
