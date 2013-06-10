@@ -248,7 +248,6 @@ xaxis, yaxis: {
     timezone: null, "browser" or timezone (only makes sense for mode: "time")
 
     color: null or color spec
-    tickColor: null or color spec
     font: null or font spec object
 
     min: null or number
@@ -264,12 +263,14 @@ xaxis, yaxis: {
     tickFormatter: (fn: number, object -> string) or string
     tickDecimals: null or number
 
+    tickColor: null or color spec
     tickLength: null or number
+
     tickWidth: null or number
     tickHeight: null or number
 
-    reserveSpace: null or true
     alignTicksWithAxis: null or number
+    reserveSpace: null or true
 }
 ```
 
