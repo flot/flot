@@ -495,8 +495,8 @@ Licensed under the MIT license.
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
-                    labelWidth: null, // size of tick labels in pixels
-                    labelHeight: null,
+                    tickWidth: null, // size of tick labels in pixels
+                    tickHeight: null,
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
                     tickLength: null, // size in pixels of ticks, or "full" for whole line
                     alignTicksWithAxis: null, // axis number or null for no sync
@@ -1370,9 +1370,10 @@ Licensed under the MIT license.
 
             var opts = axis.options,
                 ticks = axis.ticks || [],
-                labelWidth = opts.labelWidth || 0,
-                labelHeight = opts.labelHeight || 0,
-                maxWidth = labelWidth || axis.direction === "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
+                // Label width & height are deprecated; remove in 1.0!
+                tickWidth = opts.tickWidth || opts.labelWidth || 0,
+                tickHeight = opts.tickHeight || opts.labelHeight || 0,
+                maxWidth = tickWidth || axis.direction === "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
@@ -1387,12 +1388,17 @@ Licensed under the MIT license.
 
                 var info = surface.getTextInfo(layer, t.label, font, null, maxWidth);
 
-                labelWidth = Math.max(labelWidth, info.width);
-                labelHeight = Math.max(labelHeight, info.height);
+                tickWidth = Math.max(tickWidth, info.width);
+                tickHeight = Math.max(tickHeight, info.height);
             }
 
-            axis.labelWidth = opts.labelWidth || labelWidth;
-            axis.labelHeight = opts.labelHeight || labelHeight;
+            axis.tickWidth = opts.tickWidth || opts.labelWidth || tickWidth;
+            axis.tickHeight = opts.tickHeight || opts.labelHeight || tickHeight;
+
+            // Label width/height properties are deprecated; remove in 1.0!
+
+            axis.labelWidth = axis.tickWidth;
+            axis.labelHeight = axis.tickHeight;
         }
 
         function allocateAxisBoxFirstPhase(axis) {
@@ -1402,8 +1408,8 @@ Licensed under the MIT license.
             // dimension per axis, the other dimension depends on the
             // other axes so will have to wait
 
-            var lw = axis.labelWidth,
-                lh = axis.labelHeight,
+            var lw = axis.tickWidth,
+                lh = axis.tickHeight,
                 pos = axis.options.position,
                 tickLength = axis.options.tickLength,
                 axisMargin = options.grid.axisMargin,
@@ -1471,11 +1477,11 @@ Licensed under the MIT license.
             // now that all axis boxes have been placed in one
             // dimension, we can set the remaining dimension coordinates
             if (axis.direction === "x") {
-                axis.box.left = plotOffset.left - axis.labelWidth / 2;
-                axis.box.width = surface.width - plotOffset.left - plotOffset.right + axis.labelWidth;
+                axis.box.left = plotOffset.left - axis.tickWidth / 2;
+                axis.box.width = surface.width - plotOffset.left - plotOffset.right + axis.tickWidth;
             } else {
-                axis.box.top = plotOffset.top - axis.labelHeight / 2;
-                axis.box.height = surface.height - plotOffset.bottom - plotOffset.top + axis.labelHeight;
+                axis.box.top = plotOffset.top - axis.tickHeight / 2;
+                axis.box.height = surface.height - plotOffset.bottom - plotOffset.top + axis.tickHeight;
             }
         }
 
@@ -1504,7 +1510,7 @@ Licensed under the MIT license.
             $.each(allAxes(), function (_, axis) {
                 var dir = axis.direction;
                 if (axis.reserveSpace) {
-                    margins[dir] = Math.ceil(Math.max(margins[dir], (dir === "x" ? axis.labelWidth : axis.labelHeight) / 2));
+                    margins[dir] = Math.ceil(Math.max(margins[dir], (dir === "x" ? axis.tickWidth : axis.tickHeight) / 2));
                 }
             });
 
@@ -1561,7 +1567,6 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-                    // find labelWidth/Height for axis
                     measureTickLabels(axis);
                 });
 

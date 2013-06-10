@@ -264,12 +264,11 @@ xaxis, yaxis: {
     tickFormatter: (fn: number, object -> string) or string
     tickDecimals: null or number
 
-    labelWidth: null or number
-    labelHeight: null or number
-    reserveSpace: null or true
-    
     tickLength: null or number
+    tickWidth: null or number
+    tickHeight: null or number
 
+    reserveSpace: null or true
     alignTicksWithAxis: null or number
 }
 ```
