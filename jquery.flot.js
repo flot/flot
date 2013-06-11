@@ -2420,7 +2420,7 @@ Licensed under the MIT license.
                     if (symbol == "circle")
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
                     else
-                        symbol(ctx, x, y, radius, shadow);
+                        symbol(ctx, x, y, radius, shadow, i);
                     ctx.closePath();
 
                     if (fillStyle) {
