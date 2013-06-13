@@ -108,6 +108,37 @@ Licensed under the MIT license.
 		this._textCache = {};
 	}
 
+	// get Width and Height after rotate
+	Canvas.prototype.getRotatedSize = function(width,height,angle_in_degrees) {
+		var angle = angle_in_degrees * Math.PI / 180,
+			sin   = Math.sin(angle),
+			cos   = Math.cos(angle);
+
+		// (0,0) stays as (0, 0)
+
+		// (w,0) rotation
+		var x1 = cos * width,
+			y1 = sin * width;
+
+		// (0,h) rotation
+		var x2 = -sin * height,
+			y2 = cos * height;
+
+		// (w,h) rotation
+		var x3 = cos * width - sin * height,
+			y3 = sin * width + cos * height;
+
+		var minX = Math.min(0, x1, x2, x3),
+			maxX = Math.max(0, x1, x2, x3),
+			minY = Math.min(0, y1, y2, y3),
+			maxY = Math.max(0, y1, y2, y3);
+
+		return {
+			width  : Math.ceil(maxX - minX),
+			height : Math.ceil(maxY - minY)
+		};
+	};
+
 	// Resizes the canvas to the given dimensions.
 	//
 	// @param {number} width New width of the canvas, in pixels.
@@ -343,6 +374,14 @@ Licensed under the MIT license.
 				})
 				.appendTo(this.getTextLayer(layer));
 
+			if(angle){
+				element.css({
+					"transform": "rotate("+angle+"deg)",
+					"-ms-transform": "rotate("+angle+"deg)", /* IE 9 */
+					"-webkit-transform": "rotate("+angle+"deg)" /* Safari and Chrome */
+				});
+			}
+			
 			if (typeof font === "object") {
 				element.css({
 					font: textStyle,
@@ -359,8 +398,21 @@ Licensed under the MIT license.
 				positions: []
 			};
 
+			var size = this.getRotatedSize(info.width,info.height,angle);
+			info.width = size.width;
+			info.height = size.height;
+			
 			element.detach();
-		}
+		} else if(angle) {
+			info.element.css({
+				"transform": "rotate("+angle+"deg)",
+				"-ms-transform": "rotate("+angle+"deg)", /* IE 9 */
+				"-webkit-transform": "rotate("+angle+"deg)" /* Safari and Chrome */
+			});
+			var size = this.getRotatedSize(info.width,info.height,angle);
+			info.width = size.width;
+			info.height = size.height;
+		};
 
 		return info;
 	};
@@ -532,7 +584,8 @@ Licensed under the MIT license.
                     alignTicksWithAxis: null, // axis number or null for no sync
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
-                    minTickSize: null // number or [number, "unit"]
+                    minTickSize: null, // number or [number, "unit"]
+                    rotate: null // number or [number, "deg"]
                 },
                 yaxis: {
                     autoscaleMargin: 0.02,
@@ -2107,6 +2160,7 @@ Licensed under the MIT license.
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
+					angle = axis.options.rotate || null,
                     tick, x, y, halign, valign;
 
                 surface.removeText(layer);
@@ -2137,7 +2191,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                    surface.addText(layer, x, y, tick.label, font, angle, null, halign, valign);
                 }
             });
         }
