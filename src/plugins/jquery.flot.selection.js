@@ -180,9 +180,19 @@ The plugin allso adds the following methods to the plot object:
 
             $.each(plot.getAxes(), function(name, axis) {
                 if (axis.used) {
-                    var p1 = axis.c2p(c1[axis.direction]),
-                        p2 = axis.c2p(c2[axis.direction]);
-                    r[name] = { from: Math.min(p1, p2), to: Math.max(p1, p2) };
+                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]);
+                    var from = Math.min(p1, p2);
+                    var to = Math.max(p1, p2);
+                    // lock to grid
+                    var borderGridLock = axis.options.borderGridLock;
+                    if (borderGridLock) {
+                      from = Math.floor(from / borderGridLock) * borderGridLock;
+                      to = Math.ceil(to / borderGridLock) * borderGridLock;
+                      // deal with floating point precision, e.g. Math.floor(4.6 / .001) * .001 = 4.6000000000000005
+                      from = parseFloat(from.toPrecision(12));
+                      to = parseFloat(to.toPrecision(12));
+                    }
+                    r[name] = { from: from, to: to };
                 }
             });
             return r;

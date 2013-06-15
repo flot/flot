@@ -218,7 +218,8 @@ can set the default in the options.
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
                     zr = opts.zoomRange,
-                    pr = opts.panRange;
+                    pr = opts.panRange,
+                    borderGridLock = opts.borderGridLock;
 
                 if (zr === false) { // no zooming on this axis
                     return;
@@ -248,6 +249,31 @@ can set the default in the options.
                     ((zr[0] != null && range < zr[0] && amount > 1) ||
                      (zr[1] != null && range > zr[1] && amount < 1))) {
                     return;
+                }
+
+                // lock to grid
+                if (borderGridLock) {
+                  if (amount > 1) {
+                    // zooming in
+                    var newMin = Math.round(min / borderGridLock) * borderGridLock;
+                    var newMax = Math.round(max / borderGridLock) * borderGridLock;
+                    if (newMin === opts.min && newMax === opts.max || newMin === newMax) {
+                      // didn't move in, or moved in too much
+                      if (opts.max - opts.min > borderGridLock) {
+                        // room to move in, nudge the side that wanted to move closer
+                        if (min - opts.min > opts.max - max) {
+                          newMin = opts.min + borderGridLock;
+                        } else {
+                          newMax = opts.max - borderGridLock;
+                        }
+                      }
+                    }
+                    min = newMin;
+                    max = newMax;
+                  } else {
+                    min = Math.floor(min / borderGridLock) * borderGridLock;
+                    max = Math.ceil(max / borderGridLock) * borderGridLock;
+                  }
                 }
 
                 opts.min = min;
