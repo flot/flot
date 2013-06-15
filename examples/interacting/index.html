@@ -41,20 +41,15 @@
 			}
 		});
 
-		function showTooltip(x, y, contents) {
-			$("<div id='tooltip'>" + contents + "</div>").css({
-				position: "absolute",
-				display: "none",
-				top: y + 5,
-				left: x + 5,
-				border: "1px solid #fdd",
-				padding: "2px",
-				"background-color": "#fee",
-				opacity: 0.80
-			}).appendTo("body").fadeIn(200);
-		}
+		$("<div id='tooltip'></div>").css({
+			position: "absolute",
+			display: "none",
+			border: "1px solid #fdd",
+			padding: "2px",
+			"background-color": "#fee",
+			opacity: 0.80
+		}).appendTo("body");
 
-		var previousPoint = null;
 		$("#placeholder").bind("plothover", function (event, pos, item) {
 
 			if ($("#enablePosition:checked").length > 0) {
@@ -64,20 +59,14 @@
 
 			if ($("#enableTooltip:checked").length > 0) {
 				if (item) {
-					if (previousPoint != item.dataIndex) {
-
-						previousPoint = item.dataIndex;
-
-						$("#tooltip").remove();
-						var x = item.datapoint[0].toFixed(2),
+					var x = item.datapoint[0].toFixed(2),
 						y = item.datapoint[1].toFixed(2);
 
-						showTooltip(item.pageX, item.pageY,
-						    item.series.label + " of " + x + " = " + y);
-					}
+					$("#tooltip").html(item.series.label + " of " + x + " = " + y)
+						.css({top: item.pageY+5, left: item.pageX+5})
+						.fadeIn(200);
 				} else {
-					$("#tooltip").remove();
-					previousPoint = null;            
+					$("#tooltip").hide();
 				}
 			}
 		});
@@ -97,7 +86,6 @@
 	</script>
 </head>
 <body>
-
 	<div id="header">
 		<h2>Interactivity</h2>
 	</div>
