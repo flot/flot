@@ -136,7 +136,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
         function onMouseWheel(e, delta) {
             e.preventDefault();
-            onZoomClick(e, delta < 0);
+            onZoomClick(e.originalEvent, e.originalEvent.wheelDelta < 0);
             return false;
         }
         
