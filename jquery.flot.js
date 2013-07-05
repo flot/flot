@@ -736,11 +736,12 @@ Licensed under the MIT license.
                 axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
                 options.xaxes[i] = axisOptions;
 
+                fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
-                    if (!axisOptions.font.color) {
-                        axisOptions.font.color = axisOptions.color;
-                    }
+                }
+                if (axisOptions.tickFont || axisOptions.font) {
+                    axisOptions.tickFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.tickFont);
                 }
             }
 
@@ -755,11 +756,12 @@ Licensed under the MIT license.
                 axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
                 options.yaxes[i] = axisOptions;
 
+                fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
-                    if (!axisOptions.font.color) {
-                        axisOptions.font.color = axisOptions.color;
-                    }
+                }
+                if (axisOptions.tickFont || axisOptions.font) {
+                    axisOptions.tickFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.tickFont);
                 }
             }
 
@@ -1376,7 +1378,7 @@ Licensed under the MIT license.
                 maxWidth = tickWidth || axis.direction === "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
-                font = opts.font || "flot-tick-label tickLabel";
+                font = opts.tickFont || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
 
@@ -2167,7 +2169,7 @@ Licensed under the MIT license.
                 var box = axis.box,
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
-                    font = axis.options.font || "flot-tick-label tickLabel",
+                    font = axis.options.tickFont || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
                 surface.removeText(layer);

@@ -268,6 +268,7 @@ xaxis, yaxis: {
 
     tickWidth: null or number
     tickHeight: null or number
+    tickFont: null or font spec object
 
     alignTicksWithAxis: null or number
     reserveSpace: null or true
