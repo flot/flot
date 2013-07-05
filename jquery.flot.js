@@ -482,27 +482,36 @@ Licensed under the MIT license.
                     sorted: null    // default to no legend sorting
                 },
                 xaxis: {
-                    show: null, // null = auto-detect, true = always, false = never
-                    position: "bottom", // or "top"
-                    mode: null, // null or "time"
-                    font: null, // null (derived from CSS in placeholder) or object like { size: 11, lineHeight: 13, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
-                    color: null, // base color, labels, ticks
-                    tickColor: null, // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
-                    transform: null, // null or f: number -> number to transform axis
+
+                    show: null,             // null = auto-detect, true = always, false = never
+                    position: "bottom",     // or "top"
+                    mode: null,             // null or "time"
+
+                    color: null,            // base color, labels, ticks
+                    font: null,             // null (derived from CSS in placeholder) or object like { size: 11, lineHeight: 13, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
+
+                    min: null,              // min. value to show, null means set automatically
+                    max: null,              // max. value to show, null means set automatically
+                    autoscaleMargin: null,  // margin in % to add if auto-setting min/max
+
+                    transform: null,        // null or f: number -> number to transform axis
                     inverseTransform: null, // if transform is set, this should be the inverse function
-                    min: null, // min. value to show, null means set automatically
-                    max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if auto-setting min/max
-                    ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
-                    tickFormatter: null, // fn: number -> string
-                    tickWidth: null, // size of tick labels in pixels
-                    tickHeight: null,
-                    reserveSpace: null, // whether to reserve space even if axis isn't shown
-                    tickLength: null, // size in pixels of ticks, or "full" for whole line
-                    alignTicksWithAxis: null, // axis number or null for no sync
-                    tickDecimals: null, // no. of decimals, null means auto
-                    tickSize: null, // number or [number, "unit"]
-                    minTickSize: null // number or [number, "unit"]
+
+                    ticks: null,            // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
+                    tickSize: null,         // number or [number, "unit"]
+                    minTickSize: null,      // number or [number, "unit"]
+                    tickFormatter: null,    // fn: number -> string
+                    tickDecimals: null,     // no. of decimals, null means auto
+
+                    tickColor: null,        // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
+                    tickLength: null,       // size in pixels of ticks, or "full" for whole line
+
+                    tickWidth: null,        // width of tick labels in pixels
+                    tickHeight: null,       // height of tick labels in pixels
+                    tickFont: null,         // null or font-spec object (see font, above)
+
+                    reserveSpace: null,     // whether to reserve space even if axis isn't shown
+                    alignTicksWithAxis: null    // axis number or null for no sync
                 },
                 yaxis: {
                     autoscaleMargin: 0.02,
