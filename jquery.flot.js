@@ -510,12 +510,17 @@ Licensed under the MIT license.
                     tickHeight: null,       // height of tick labels in pixels
                     tickFont: null,         // null or font-spec object (see font, above)
 
+                    label: null,            // null or an axis label string
+                    labelFont: null,        // null or font-spec object (see font, above)
+                    labelPadding: 2,        // spacing between the axis and its label
+
                     reserveSpace: null,     // whether to reserve space even if axis isn't shown
                     alignTicksWithAxis: null    // axis number or null for no sync
                 },
                 yaxis: {
+                    position: "left",       // or "right"
                     autoscaleMargin: 0.02,
-                    position: "left" // or "right"
+                    labelPadding: 2
                 },
                 xaxes: [],
                 yaxes: [],
@@ -742,6 +747,15 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+                // Compatibility with markrcote/flot-axislabels
+
+                if (!axisOptions.label && axisOptions.axisLabel) {
+                    axisOptions.label = axisOptions.axisLabel;
+                }
+                if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                    axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                }
+
                 axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
                 options.xaxes[i] = axisOptions;
 
@@ -751,6 +765,9 @@ Licensed under the MIT license.
                 }
                 if (axisOptions.tickFont || axisOptions.font) {
                     axisOptions.tickFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.tickFont);
+                }
+                if (axisOptions.label && (axisOptions.labelFont || axisOptions.font)) {
+                    axisOptions.labelFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.labelFont);
                 }
             }
 
@@ -762,6 +779,15 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+                // Compatibility with markrcote/flot-axislabels
+
+                if (!axisOptions.label && axisOptions.axisLabel) {
+                    axisOptions.label = axisOptions.axisLabel;
+                }
+                if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                    axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                }
+
                 axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
                 options.yaxes[i] = axisOptions;
 
@@ -771,6 +797,9 @@ Licensed under the MIT license.
                 }
                 if (axisOptions.tickFont || axisOptions.font) {
                     axisOptions.tickFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.tickFont);
+                }
+                if (axisOptions.label && (axisOptions.labelFont || axisOptions.font)) {
+                    axisOptions.labelFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.labelFont);
                 }
             }
 
@@ -1411,25 +1440,29 @@ Licensed under the MIT license.
             axis.labelHeight = axis.tickHeight;
         }
 
-        function allocateAxisBoxFirstPhase(axis) {
-            // find the bounding box of the axis by looking at label
-            // widths/heights and ticks, make room by diminishing the
-            // plotOffset; this first phase only looks at one
-            // dimension per axis, the other dimension depends on the
-            // other axes so will have to wait
+        ///////////////////////////////////////////////////////////////////////
+        // Compute the axis bounding box based on the dimensions of its label
+        // and tick labels, then adjust the plotOffset to make room for it.
+        //
+        // This first phase only considers one dimension per axis; the other
+        // dimension depends on the other axes, and will be calculated later.
 
-            var lw = axis.tickWidth,
-                lh = axis.tickHeight,
-                pos = axis.options.position,
-                tickLength = axis.options.tickLength,
+        function allocateAxisBoxFirstPhase(axis) {
+
+            var contentWidth = axis.tickWidth,
+                contentHeight = axis.tickHeight,
+                axisOptions = axis.options,
+                tickLength = axisOptions.tickLength,
+                axisPosition = axisOptions.position,
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction === "x" ? xaxes : yaxes,
                 innermost;
 
-            // determine axis margin
-            var samePosition = $.grep(all, function (a) {
-                return a && a.options.position === pos && a.reserveSpace;
+            // Determine the margin around the axis
+
+            var samePosition = $.grep(all, function(axis) {
+                return axis && axis.options.position === axisPosition && axis.reserveSpace;
             });
             if ($.inArray(axis, samePosition) === samePosition.length - 1) {
                 axisMargin = 0; // outermost
@@ -1439,7 +1472,7 @@ Licensed under the MIT license.
 
             innermost = $.inArray(axis, samePosition) === 0;
 
-            // determine tick length - if we're innermost, we can use "full"
+            // Determine the length of the tick marks
 
             if (tickLength == null) {
                 if (innermost) {
@@ -1453,31 +1486,39 @@ Licensed under the MIT license.
                 padding += +tickLength;
             }
 
-            // compute box
-            if (axis.direction === "x") {
-                lh += padding;
+            // Measure the dimensions of the axis label, if it has one
 
-                if (pos === "bottom") {
-                    plotOffset.bottom += lh + axisMargin;
-                    axis.box = { top: surface.height - plotOffset.bottom, height: lh };
+            if (axisOptions.label) {
+                var layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                    font = axisOptions.labelFont || "flot-axis-label axisLabels " + axis.direction + axis.n + "axisLabel",
+                    labelInfo = surface.getTextInfo(layer, axisOptions.label, font);
+                contentWidth += labelInfo.width + axisOptions.labelPadding;
+                contentHeight += labelInfo.height + axisOptions.labelPadding;
+            }
+
+            // Compute the axis bounding box and update the plot bounds
+
+            if (axis.direction === "x") {
+                contentHeight += padding;
+                if (axisPosition === "top") {
+                    axis.box = { top: plotOffset.top + axisMargin, height: contentHeight };
+                    plotOffset.top += contentHeight + axisMargin;
                 } else {
-                    axis.box = { top: plotOffset.top + axisMargin, height: lh };
-                    plotOffset.top += lh + axisMargin;
+                    plotOffset.bottom += contentHeight + axisMargin;
+                    axis.box = { top: surface.height - plotOffset.bottom, height: contentHeight };
                 }
             } else {
-                lw += padding;
-
-                if (pos === "left") {
-                    axis.box = { left: plotOffset.left + axisMargin, width: lw };
-                    plotOffset.left += lw + axisMargin;
+                contentWidth += padding;
+                if (axisPosition === "right") {
+                    plotOffset.right += contentWidth + axisMargin;
+                    axis.box = { left: surface.width - plotOffset.right, width: contentWidth };
                 } else {
-                    plotOffset.right += lw + axisMargin;
-                    axis.box = { left: surface.width - plotOffset.right, width: lw };
+                    axis.box = { left: plotOffset.left + axisMargin, width: contentWidth };
+                    plotOffset.left += contentWidth + axisMargin;
                 }
             }
 
-             // save for future reference
-            axis.position = pos;
+            axis.position = axisPosition;
             axis.tickLength = tickLength;
             axis.box.padding = padding;
             axis.innermost = innermost;
@@ -2175,11 +2216,31 @@ Licensed under the MIT license.
                 }
 
                 var box = axis.box,
+                    axisOptions = axis.options,
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
-                    font = axis.options.tickFont || "flot-tick-label tickLabel",
+                    labelFont = axisOptions.labelFont || "flot-axis-label axisLabels " + axis.direction + axis.n + "axisLabel",
+                    tickFont = axisOptions.tickFont || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
                 surface.removeText(layer);
+
+                if (axisOptions.label) {
+                    if (axis.direction === "x") {
+                        if (axisOptions.position === "top") {
+                            surface.addText(layer, box.left + box.width / 2, box.top, axisOptions.label, labelFont, null, null, "center", "top");
+                        } else {
+                            surface.addText(layer, box.left + box.width / 2, box.top + box.height, axisOptions.label, labelFont, null, null, "center", "bottom");
+                        }
+                    } else {
+                        if (axisOptions.position === "right") {
+                            surface.addText(layer, box.left + box.width, box.top + box.height / 2, axisOptions.label, labelFont, null, null, "right", "middle");
+                        } else {
+                            surface.addText(layer, box.left, box.top + box.height / 2, axisOptions.label, labelFont, null, null, "left", "middle");
+                        }
+                    }
+                }
+
+                // Add labels for the ticks on this axis
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
 
@@ -2208,7 +2269,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                    surface.addText(layer, x, y, tick.label, tickFont, null, null, halign, valign);
                 }
             });
         }

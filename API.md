@@ -270,6 +270,10 @@ xaxis, yaxis: {
     tickHeight: null or number
     tickFont: null or font-options object
 
+    label: null or string
+    labelFont: null or font spec object
+    labelPadding: null or number
+
     alignTicksWithAxis: null or number
     reserveSpace: null or true
 }
