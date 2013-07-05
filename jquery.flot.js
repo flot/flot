@@ -1385,8 +1385,7 @@ Licensed under the MIT license.
                 tickWidth = opts.tickWidth || opts.labelWidth || 0,
                 tickHeight = opts.tickHeight || opts.labelHeight || 0,
                 maxWidth = tickWidth || axis.direction === "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
-                legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
-                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
+                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 font = opts.tickFont || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
@@ -2176,8 +2175,7 @@ Licensed under the MIT license.
                 }
 
                 var box = axis.box,
-                    legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
-                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
+                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     font = axis.options.tickFont || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
