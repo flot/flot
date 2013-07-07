@@ -426,6 +426,7 @@ API.txt for details.
 	// formatDate function on the plot object.  Various plugins depend
 	// on the function, so we need to re-expose it here.
 
+	$.plot.dateGenerator = dateGenerator;
 	$.plot.formatDate = formatDate;
 
 })(jQuery);
