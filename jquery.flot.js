@@ -1609,7 +1609,8 @@ Licensed under the MIT license.
             if (axisOptions.label) {
                 var layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     font = axisOptions.labelFont || "flot-axis-label axisLabels " + axis.direction + axis.n + "axisLabel",
-                    labelInfo = surface.getTextInfo(layer, axisOptions.label, font);
+                    angle = axis.direction === "x" ? 0 : axisOptions.position === "right" ? 90 : -90,
+                    labelInfo = surface.getTextInfo(layer, axisOptions.label, font, angle);
                 contentWidth += labelInfo.width + axisOptions.labelPadding;
                 contentHeight += labelInfo.height + axisOptions.labelPadding;
             }
@@ -2345,15 +2346,15 @@ Licensed under the MIT license.
                 if (axisOptions.label) {
                     if (axis.direction === "x") {
                         if (axisOptions.position === "top") {
-                            surface.addText(layer, box.left + box.width / 2, box.top, axisOptions.label, labelFont, null, null, "center", "top");
+                            surface.addText(layer, box.left + box.width / 2, box.top, axisOptions.label, labelFont, 0, null, "center", "top");
                         } else {
-                            surface.addText(layer, box.left + box.width / 2, box.top + box.height, axisOptions.label, labelFont, null, null, "center", "bottom");
+                            surface.addText(layer, box.left + box.width / 2, box.top + box.height, axisOptions.label, labelFont, 0, null, "center", "bottom");
                         }
                     } else {
                         if (axisOptions.position === "right") {
-                            surface.addText(layer, box.left + box.width, box.top + box.height / 2, axisOptions.label, labelFont, null, null, "right", "middle");
+                            surface.addText(layer, box.left + box.width, box.top + box.height / 2, axisOptions.label, labelFont, 90, null, "right", "middle");
                         } else {
-                            surface.addText(layer, box.left, box.top + box.height / 2, axisOptions.label, labelFont, null, null, "left", "middle");
+                            surface.addText(layer, box.left, box.top + box.height / 2, axisOptions.label, labelFont, -90, null, "left", "middle");
                         }
                     }
                 }
