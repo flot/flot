@@ -151,28 +151,33 @@ Licensed under the MIT license.
 				for (var styleKey in layerCache) {
 					if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 						var styleCache = layerCache[styleKey];
-						for (var key in styleCache) {
-							if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
+                        for (var angleKey in styleCache) {
+                            if (Object.prototype.hasOwnProperty.call(styleCache, angleKey)) {
+                                var angleCache = styleCache[angleKey];
+                                for (var key in angleCache) {
+                                    if (Object.prototype.hasOwnProperty.call(angleCache, key)) {
 
-								var positions = styleCache[key].positions;
+                                        var positions = angleCache[key].positions;
 
-								for (var i = 0, position; position = positions[i]; i++) {
-									if (position.active) {
-										if (!position.rendered) {
-											layer.append(position.element);
-											position.rendered = true;
-										}
-									} else {
-										positions.splice(i--, 1);
-										if (position.rendered) {
-											position.element.detach();
-										}
-									}
-								}
+                                        for (var i = 0, position; position = positions[i]; i++) {
+                                            if (position.active) {
+                                                if (!position.rendered) {
+                                                    layer.append(position.element);
+                                                    position.rendered = true;
+                                                }
+                                            } else {
+                                                positions.splice(i--, 1);
+                                                if (position.rendered) {
+                                                    position.element.detach();
+                                                }
+                                            }
+                                        }
 
-								if (positions.length === 0) {
-									delete styleCache[key];
-								}
+                                        if (positions.length === 0) {
+                                            delete angleCache[key];
+                                        }
+                                    }
+                                }
 							}
 						}
 					}
@@ -264,17 +269,15 @@ Licensed under the MIT license.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which to rotate the text, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
 	// @param {number=} width Maximum width of the text before it wraps.
 	// @return {object} a text info object.
 
 	Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
 
-		var textStyle, layerCache, styleCache, info;
+        var textStyle, layerCache, styleCache, angleCache, info;
 
-		// Cast the value to a string, in case we were given a number or such
-
-		text = "" + text;
+        text = "" + text;    // Cast to string in case we have a number or such
+        angle = (360 + (angle || 0)) % 360;  // Normalize the angle to 0...359
 
 		// If the font is a font-spec object, generate a CSS font definition
 
@@ -284,21 +287,24 @@ Licensed under the MIT license.
 			textStyle = font;
 		}
 
-		// Retrieve (or create) the cache for the text's layer and styles
+        // Retrieve or create the caches for the text's layer, style, and angle
 
 		layerCache = this._textCache[layer];
-
 		if (layerCache == null) {
 			layerCache = this._textCache[layer] = {};
 		}
 
 		styleCache = layerCache[textStyle];
-
 		if (styleCache == null) {
 			styleCache = layerCache[textStyle] = {};
 		}
 
-		info = styleCache[text];
+        angleCache = styleCache[angle];
+        if (angleCache == null) {
+            angleCache = styleCache[angle] = {};
+        }
+
+        info = angleCache[text];
 
 		// If we can't find a matching element in our cache, create a new one
 
@@ -321,9 +327,117 @@ Licensed under the MIT license.
 				element.addClass(font);
 			}
 
-			info = styleCache[text] = {
-				width: element.outerWidth(true),
-				height: element.outerHeight(true),
+            // Save the original dimensions of the text; we'll modify these
+            // later to take into account rotation, if there is any.
+
+            var textWidth = element.outerWidth(true),
+                textHeight = element.outerHeight(true);
+
+            // Apply rotation to the text using CSS3/IE matrix transforms
+
+            // Note how we also set the element's width, as a work-around for
+            // the way most browsers resize the div on rotate, which may cause
+            // the contents to wrap differently. The extra +1 is because IE
+            // rounds the width differently and needs a little extra help.
+
+            if (angle) {
+
+                var radians = angle * Math.PI / 180,
+                    sin = Math.sin(radians),
+                    cos = Math.cos(radians),
+                    a = cos.toFixed(6),     // Use fixed-point so these don't
+                    b = (-sin).toFixed(6),  // show up in scientific notation
+                    c = sin.toFixed(6),     // when we add them to the string
+                    transformRule;
+
+                if ($.support.leadingWhitespace) {
+
+                    // The transform origin defaults to '50% 50%', producing
+                    // blurry text on some browsers (Chrome) when the width or
+                    // height happens to be odd, making 50% fractional. Avoid
+                    // this by setting the origin to rounded values.
+
+                    var cx = textWidth / 2,
+                        cy = textHeight / 2,
+                        transformOrigin = Math.floor(cx) + "px " + Math.floor(cy) + "px";
+
+                    // Transforms alter the div's appearance without changing
+                    // its origin. This will make it difficult to position it
+                    // later, since we'll be positioning the new bounding box
+                    // with respect to the old origin. We can work around this
+                    // by adding a translation to align the new bounding box's
+                    // top-left corner with the origin, using the same matrix.
+
+                    // Rather than examining all four points, we can use the
+                    // angle to figure out in advance which two points are in
+                    // the top-left quadrant; we can then use the x-coordinate
+                    // of the first (left-most) point and the y-coordinate of
+                    // the second (top-most) point as the bounding box corner.
+
+                    var x, y;
+                    if (angle < 90) {
+                        x = Math.floor(cx * cos + cy * sin - cx);
+                        y = Math.floor(cx * sin + cy * cos - cy);
+                    } else if (angle < 180) {
+                        x = Math.floor(cy * sin - cx * cos - cx);
+                        y = Math.floor(cx * sin - cy * cos - cy);
+                    } else if (angle < 270) {
+                        x = Math.floor(-cx * cos - cy * sin - cx);
+                        y = Math.floor(-cx * sin - cy * cos - cy);
+                    } else {
+                        x = Math.floor(cx * cos - cy * sin - cx);
+                        y = Math.floor(cy * cos - cx * sin - cy);
+                    }
+
+                    transformRule = "matrix(" + a + "," + c + "," + b + "," + a + "," + x + "," + y + ")";
+
+                    element.css({
+                        width: textWidth + 1,
+                        transform: transformRule,
+                        "-o-transform": transformRule,
+                        "-ms-transform": transformRule,
+                        "-moz-transform": transformRule,
+                        "-webkit-transform": transformRule,
+                        "transform-origin": transformOrigin,
+                        "-o-transform-origin": transformOrigin,
+                        "-ms-transform-origin": transformOrigin,
+                        "-moz-transform-origin": transformOrigin,
+                        "-webkit-transform-origin": transformOrigin
+                    });
+
+                } else {
+
+                    // The IE7/8 matrix filter produces very ugly aliasing for
+                    // text with a transparent background. Using a solid color
+                    // greatly improves text clarity, although it does result
+                    // in ugly boxes for plots using a non-white background.
+
+                    // TODO: Instead of white use the actual background color?
+                    // This still wouldn't solve the problem when the plot has
+                    // a gradient background, but it would at least help.
+
+                    transformRule = "progid:DXImageTransform.Microsoft.Matrix(M11=" + a + ", M12=" + b + ", M21=" + c + ", M22=" + a + ",sizingMethod='auto expand')";
+
+                    element.css({
+                        width: textWidth + 1,
+                        filter: transformRule,
+                        "-ms-filter": transformRule,
+                        "background-color": "#fff"
+                    });
+                }
+
+                // Compute the final dimensions of the text's bounding box
+
+                var ac = Math.abs(cos),
+                    as = Math.abs(sin),
+                    originalWidth = textWidth;
+                textWidth = Math.round(ac * textWidth + as * textHeight);
+                textHeight = Math.round(as * originalWidth + ac * textHeight);
+            }
+
+			info = angleCache[text] = {
+				width: textWidth,
+				height: textHeight,
 				element: element,
 				positions: []
 			};
@@ -347,7 +461,6 @@ Licensed under the MIT license.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which to rotate the text, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
 	// @param {number=} width Maximum width of the text before it wraps.
 	// @param {string=} halign Horizontal alignment of the text; either "left",
 	//     "center" or "right".
@@ -435,14 +548,19 @@ Licensed under the MIT license.
 				for (var styleKey in layerCache) {
 					if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 						var styleCache = layerCache[styleKey];
-						for (var key in styleCache) {
-							if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
-								positions = styleCache[key].positions;
-								for (i = 0; position = positions[i]; i++) {
-									position.active = false;
-								}
-							}
-						}
+                        for (var angleKey in styleCache) {
+                            if (Object.prototype.hasOwnProperty.call(styleCache, angleKey)) {
+                                var angleCache = styleCache[angleKey];
+                                for (var key in angleCache) {
+                                    if (Object.prototype.hasOwnProperty.call(angleCache, key)) {
+                                        positions = angleCache[key].positions;
+                                        for (i = 0; position = positions[i]; i++) {
+                                            position.active = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 					}
 				}
 			}
