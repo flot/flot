@@ -151,28 +151,33 @@ Licensed under the MIT license.
 				for (var styleKey in layerCache) {
 					if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 						var styleCache = layerCache[styleKey];
-						for (var key in styleCache) {
-							if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
+                        for (var angleKey in styleCache) {
+                            if (Object.prototype.hasOwnProperty.call(styleCache, angleKey)) {
+                                var angleCache = styleCache[angleKey];
+                                for (var key in angleCache) {
+                                    if (Object.prototype.hasOwnProperty.call(angleCache, key)) {
 
-								var positions = styleCache[key].positions;
+                                        var positions = angleCache[key].positions;
 
-								for (var i = 0, position; position = positions[i]; i++) {
-									if (position.active) {
-										if (!position.rendered) {
-											layer.append(position.element);
-											position.rendered = true;
-										}
-									} else {
-										positions.splice(i--, 1);
-										if (position.rendered) {
-											position.element.detach();
-										}
-									}
-								}
+                                        for (var i = 0, position; position = positions[i]; i++) {
+                                            if (position.active) {
+                                                if (!position.rendered) {
+                                                    layer.append(position.element);
+                                                    position.rendered = true;
+                                                }
+                                            } else {
+                                                positions.splice(i--, 1);
+                                                if (position.rendered) {
+                                                    position.element.detach();
+                                                }
+                                            }
+                                        }
 
-								if (positions.length === 0) {
-									delete styleCache[key];
-								}
+                                        if (positions.length === 0) {
+                                            delete angleCache[key];
+                                        }
+                                    }
+                                }
 							}
 						}
 					}
@@ -264,17 +269,15 @@ Licensed under the MIT license.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which to rotate the text, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
 	// @param {number=} width Maximum width of the text before it wraps.
 	// @return {object} a text info object.
 
 	Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
 
-		var textStyle, layerCache, styleCache, info;
+        var textStyle, layerCache, styleCache, angleCache, info;
 
-		// Cast the value to a string, in case we were given a number or such
-
-		text = "" + text;
+        text = "" + text;    // Cast to string in case we have a number or such
+        angle = (360 + (angle || 0)) % 360;  // Normalize the angle to 0...359
 
 		// If the font is a font-spec object, generate a CSS font definition
 
@@ -284,21 +287,24 @@ Licensed under the MIT license.
 			textStyle = font;
 		}
 
-		// Retrieve (or create) the cache for the text's layer and styles
+        // Retrieve or create the caches for the text's layer, style, and angle
 
 		layerCache = this._textCache[layer];
-
 		if (layerCache == null) {
 			layerCache = this._textCache[layer] = {};
 		}
 
 		styleCache = layerCache[textStyle];
-
 		if (styleCache == null) {
 			styleCache = layerCache[textStyle] = {};
 		}
 
-		info = styleCache[text];
+        angleCache = styleCache[angle];
+        if (angleCache == null) {
+            angleCache = styleCache[angle] = {};
+        }
+
+        info = angleCache[text];
 
 		// If we can't find a matching element in our cache, create a new one
 
@@ -321,9 +327,117 @@ Licensed under the MIT license.
 				element.addClass(font);
 			}
 
-			info = styleCache[text] = {
-				width: element.outerWidth(true),
-				height: element.outerHeight(true),
+            // Save the original dimensions of the text; we'll modify these
+            // later to take into account rotation, if there is any.
+
+            var textWidth = element.outerWidth(true),
+                textHeight = element.outerHeight(true);
+
+            // Apply rotation to the text using CSS3/IE matrix transforms
+
+            // Note how we also set the element's width, as a work-around for
+            // the way most browsers resize the div on rotate, which may cause
+            // the contents to wrap differently. The extra +1 is because IE
+            // rounds the width differently and needs a little extra help.
+
+            if (angle) {
+
+                var radians = angle * Math.PI / 180,
+                    sin = Math.sin(radians),
+                    cos = Math.cos(radians),
+                    a = cos.toFixed(6),     // Use fixed-point so these don't
+                    b = (-sin).toFixed(6),  // show up in scientific notation
+                    c = sin.toFixed(6),     // when we add them to the string
+                    transformRule;
+
+                if ($.support.leadingWhitespace) {
+
+                    // The transform origin defaults to '50% 50%', producing
+                    // blurry text on some browsers (Chrome) when the width or
+                    // height happens to be odd, making 50% fractional. Avoid
+                    // this by setting the origin to rounded values.
+
+                    var cx = textWidth / 2,
+                        cy = textHeight / 2,
+                        transformOrigin = Math.floor(cx) + "px " + Math.floor(cy) + "px";
+
+                    // Transforms alter the div's appearance without changing
+                    // its origin. This will make it difficult to position it
+                    // later, since we'll be positioning the new bounding box
+                    // with respect to the old origin. We can work around this
+                    // by adding a translation to align the new bounding box's
+                    // top-left corner with the origin, using the same matrix.
+
+                    // Rather than examining all four points, we can use the
+                    // angle to figure out in advance which two points are in
+                    // the top-left quadrant; we can then use the x-coordinate
+                    // of the first (left-most) point and the y-coordinate of
+                    // the second (top-most) point as the bounding box corner.
+
+                    var x, y;
+                    if (angle < 90) {
+                        x = Math.floor(cx * cos + cy * sin - cx);
+                        y = Math.floor(cx * sin + cy * cos - cy);
+                    } else if (angle < 180) {
+                        x = Math.floor(cy * sin - cx * cos - cx);
+                        y = Math.floor(cx * sin - cy * cos - cy);
+                    } else if (angle < 270) {
+                        x = Math.floor(-cx * cos - cy * sin - cx);
+                        y = Math.floor(-cx * sin - cy * cos - cy);
+                    } else {
+                        x = Math.floor(cx * cos - cy * sin - cx);
+                        y = Math.floor(cy * cos - cx * sin - cy);
+                    }
+
+                    transformRule = "matrix(" + a + "," + c + "," + b + "," + a + "," + x + "," + y + ")";
+
+                    element.css({
+                        width: textWidth + 1,
+                        transform: transformRule,
+                        "-o-transform": transformRule,
+                        "-ms-transform": transformRule,
+                        "-moz-transform": transformRule,
+                        "-webkit-transform": transformRule,
+                        "transform-origin": transformOrigin,
+                        "-o-transform-origin": transformOrigin,
+                        "-ms-transform-origin": transformOrigin,
+                        "-moz-transform-origin": transformOrigin,
+                        "-webkit-transform-origin": transformOrigin
+                    });
+
+                } else {
+
+                    // The IE7/8 matrix filter produces very ugly aliasing for
+                    // text with a transparent background. Using a solid color
+                    // greatly improves text clarity, although it does result
+                    // in ugly boxes for plots using a non-white background.
+
+                    // TODO: Instead of white use the actual background color?
+                    // This still wouldn't solve the problem when the plot has
+                    // a gradient background, but it would at least help.
+
+                    transformRule = "progid:DXImageTransform.Microsoft.Matrix(M11=" + a + ", M12=" + b + ", M21=" + c + ", M22=" + a + ",sizingMethod='auto expand')";
+
+                    element.css({
+                        width: textWidth + 1,
+                        filter: transformRule,
+                        "-ms-filter": transformRule,
+                        "background-color": "#fff"
+                    });
+                }
+
+                // Compute the final dimensions of the text's bounding box
+
+                var ac = Math.abs(cos),
+                    as = Math.abs(sin),
+                    originalWidth = textWidth;
+                textWidth = Math.round(ac * textWidth + as * textHeight);
+                textHeight = Math.round(as * originalWidth + ac * textHeight);
+            }
+
+			info = angleCache[text] = {
+				width: textWidth,
+				height: textHeight,
 				element: element,
 				positions: []
 			};
@@ -347,7 +461,6 @@ Licensed under the MIT license.
 	// @param {(string|object)=} font Either a string of space-separated CSS
 	//     classes or a font-spec object, defining the text's font and style.
 	// @param {number=} angle Angle at which to rotate the text, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
 	// @param {number=} width Maximum width of the text before it wraps.
 	// @param {string=} halign Horizontal alignment of the text; either "left",
 	//     "center" or "right".
@@ -435,14 +548,19 @@ Licensed under the MIT license.
 				for (var styleKey in layerCache) {
 					if (Object.prototype.hasOwnProperty.call(layerCache, styleKey)) {
 						var styleCache = layerCache[styleKey];
-						for (var key in styleCache) {
-							if (Object.prototype.hasOwnProperty.call(styleCache, key)) {
-								positions = styleCache[key].positions;
-								for (i = 0; position = positions[i]; i++) {
-									position.active = false;
-								}
-							}
-						}
+                        for (var angleKey in styleCache) {
+                            if (Object.prototype.hasOwnProperty.call(styleCache, angleKey)) {
+                                var angleCache = styleCache[angleKey];
+                                for (var key in angleCache) {
+                                    if (Object.prototype.hasOwnProperty.call(angleCache, key)) {
+                                        positions = angleCache[key].positions;
+                                        for (i = 0; position = positions[i]; i++) {
+                                            position.active = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 					}
 				}
 			}
@@ -482,31 +600,45 @@ Licensed under the MIT license.
                     sorted: null    // default to no legend sorting
                 },
                 xaxis: {
-                    show: null, // null = auto-detect, true = always, false = never
-                    position: "bottom", // or "top"
-                    mode: null, // null or "time"
-                    font: null, // null (derived from CSS in placeholder) or object like { size: 11, lineHeight: 13, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
-                    color: null, // base color, labels, ticks
-                    tickColor: null, // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
-                    transform: null, // null or f: number -> number to transform axis
+
+                    show: null,             // null = auto-detect, true = always, false = never
+                    position: "bottom",     // or "top"
+                    mode: null,             // null or "time"
+
+                    color: null,            // base color, labels, ticks
+                    font: null,             // null (derived from CSS in placeholder) or object like { size: 11, lineHeight: 13, style: "italic", weight: "bold", family: "sans-serif", variant: "small-caps" }
+
+                    min: null,              // min. value to show, null means set automatically
+                    max: null,              // max. value to show, null means set automatically
+                    autoscaleMargin: null,  // margin in % to add if auto-setting min/max
+
+                    transform: null,        // null or f: number -> number to transform axis
                     inverseTransform: null, // if transform is set, this should be the inverse function
-                    min: null, // min. value to show, null means set automatically
-                    max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if auto-setting min/max
-                    ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
-                    tickFormatter: null, // fn: number -> string
-                    labelWidth: null, // size of tick labels in pixels
-                    labelHeight: null,
-                    reserveSpace: null, // whether to reserve space even if axis isn't shown
-                    tickLength: null, // size in pixels of ticks, or "full" for whole line
-                    alignTicksWithAxis: null, // axis number or null for no sync
-                    tickDecimals: null, // no. of decimals, null means auto
-                    tickSize: null, // number or [number, "unit"]
-                    minTickSize: null // number or [number, "unit"]
+
+                    ticks: null,            // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
+                    tickSize: null,         // number or [number, "unit"]
+                    minTickSize: null,      // number or [number, "unit"]
+                    tickFormatter: null,    // fn: number -> string
+                    tickDecimals: null,     // no. of decimals, null means auto
+
+                    tickColor: null,        // possibly different color of ticks, e.g. "rgba(0,0,0,0.15)"
+                    tickLength: null,       // size in pixels of ticks, or "full" for whole line
+
+                    tickWidth: null,        // width of tick labels in pixels
+                    tickHeight: null,       // height of tick labels in pixels
+                    tickFont: null,         // null or font-spec object (see font, above)
+
+                    label: null,            // null or an axis label string
+                    labelFont: null,        // null or font-spec object (see font, above)
+                    labelPadding: 2,        // spacing between the axis and its label
+
+                    reserveSpace: null,     // whether to reserve space even if axis isn't shown
+                    alignTicksWithAxis: null    // axis number or null for no sync
                 },
                 yaxis: {
+                    position: "left",       // or "right"
                     autoscaleMargin: 0.02,
-                    position: "left" // or "right"
+                    labelPadding: 2
                 },
                 xaxes: [],
                 yaxes: [],
@@ -733,14 +865,27 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+                // Compatibility with markrcote/flot-axislabels
+
+                if (!axisOptions.label && axisOptions.axisLabel) {
+                    axisOptions.label = axisOptions.axisLabel;
+                }
+                if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                    axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                }
+
                 axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
                 options.xaxes[i] = axisOptions;
 
+                fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
-                    if (!axisOptions.font.color) {
-                        axisOptions.font.color = axisOptions.color;
-                    }
+                }
+                if (axisOptions.tickFont || axisOptions.font) {
+                    axisOptions.tickFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.tickFont);
+                }
+                if (axisOptions.label && (axisOptions.labelFont || axisOptions.font)) {
+                    axisOptions.labelFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.labelFont);
                 }
             }
 
@@ -752,14 +897,27 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+                // Compatibility with markrcote/flot-axislabels
+
+                if (!axisOptions.label && axisOptions.axisLabel) {
+                    axisOptions.label = axisOptions.axisLabel;
+                }
+                if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                    axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                }
+
                 axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
                 options.yaxes[i] = axisOptions;
 
+                fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
-                    if (!axisOptions.font.color) {
-                        axisOptions.font.color = axisOptions.color;
-                    }
+                }
+                if (axisOptions.tickFont || axisOptions.font) {
+                    axisOptions.tickFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.tickFont);
+                }
+                if (axisOptions.label && (axisOptions.labelFont || axisOptions.font)) {
+                    axisOptions.labelFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.labelFont);
                 }
             }
 
@@ -1370,12 +1528,12 @@ Licensed under the MIT license.
 
             var opts = axis.options,
                 ticks = axis.ticks || [],
-                labelWidth = opts.labelWidth || 0,
-                labelHeight = opts.labelHeight || 0,
-                maxWidth = labelWidth || axis.direction === "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
-                legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
-                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
-                font = opts.font || "flot-tick-label tickLabel";
+                // Label width & height are deprecated; remove in 1.0!
+                tickWidth = opts.tickWidth || opts.labelWidth || 0,
+                tickHeight = opts.tickHeight || opts.labelHeight || 0,
+                maxWidth = tickWidth || axis.direction === "x" ? Math.floor(surface.width / (ticks.length || 1)) : null,
+                layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                font = opts.tickFont || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
 
@@ -1387,33 +1545,42 @@ Licensed under the MIT license.
 
                 var info = surface.getTextInfo(layer, t.label, font, null, maxWidth);
 
-                labelWidth = Math.max(labelWidth, info.width);
-                labelHeight = Math.max(labelHeight, info.height);
+                tickWidth = Math.max(tickWidth, info.width);
+                tickHeight = Math.max(tickHeight, info.height);
             }
 
-            axis.labelWidth = opts.labelWidth || labelWidth;
-            axis.labelHeight = opts.labelHeight || labelHeight;
+            axis.tickWidth = opts.tickWidth || opts.labelWidth || tickWidth;
+            axis.tickHeight = opts.tickHeight || opts.labelHeight || tickHeight;
+
+            // Label width/height properties are deprecated; remove in 1.0!
+
+            axis.labelWidth = axis.tickWidth;
+            axis.labelHeight = axis.tickHeight;
         }
 
-        function allocateAxisBoxFirstPhase(axis) {
-            // find the bounding box of the axis by looking at label
-            // widths/heights and ticks, make room by diminishing the
-            // plotOffset; this first phase only looks at one
-            // dimension per axis, the other dimension depends on the
-            // other axes so will have to wait
+        ///////////////////////////////////////////////////////////////////////
+        // Compute the axis bounding box based on the dimensions of its label
+        // and tick labels, then adjust the plotOffset to make room for it.
+        //
+        // This first phase only considers one dimension per axis; the other
+        // dimension depends on the other axes, and will be calculated later.
 
-            var lw = axis.labelWidth,
-                lh = axis.labelHeight,
-                pos = axis.options.position,
-                tickLength = axis.options.tickLength,
+        function allocateAxisBoxFirstPhase(axis) {
+
+            var contentWidth = axis.tickWidth,
+                contentHeight = axis.tickHeight,
+                axisOptions = axis.options,
+                tickLength = axisOptions.tickLength,
+                axisPosition = axisOptions.position,
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction === "x" ? xaxes : yaxes,
                 innermost;
 
-            // determine axis margin
-            var samePosition = $.grep(all, function (a) {
-                return a && a.options.position === pos && a.reserveSpace;
+            // Determine the margin around the axis
+
+            var samePosition = $.grep(all, function(axis) {
+                return axis && axis.options.position === axisPosition && axis.reserveSpace;
             });
             if ($.inArray(axis, samePosition) === samePosition.length - 1) {
                 axisMargin = 0; // outermost
@@ -1423,7 +1590,7 @@ Licensed under the MIT license.
 
             innermost = $.inArray(axis, samePosition) === 0;
 
-            // determine tick length - if we're innermost, we can use "full"
+            // Determine the length of the tick marks
 
             if (tickLength == null) {
                 if (innermost) {
@@ -1437,31 +1604,40 @@ Licensed under the MIT license.
                 padding += +tickLength;
             }
 
-            // compute box
-            if (axis.direction === "x") {
-                lh += padding;
+            // Measure the dimensions of the axis label, if it has one
 
-                if (pos === "bottom") {
-                    plotOffset.bottom += lh + axisMargin;
-                    axis.box = { top: surface.height - plotOffset.bottom, height: lh };
+            if (axisOptions.label) {
+                var layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                    font = axisOptions.labelFont || "flot-axis-label axisLabels " + axis.direction + axis.n + "axisLabel",
+                    angle = axis.direction === "x" ? 0 : axisOptions.position === "right" ? 90 : -90,
+                    labelInfo = surface.getTextInfo(layer, axisOptions.label, font, angle);
+                contentWidth += labelInfo.width + axisOptions.labelPadding;
+                contentHeight += labelInfo.height + axisOptions.labelPadding;
+            }
+
+            // Compute the axis bounding box and update the plot bounds
+
+            if (axis.direction === "x") {
+                contentHeight += padding;
+                if (axisPosition === "top") {
+                    axis.box = { top: plotOffset.top + axisMargin, height: contentHeight };
+                    plotOffset.top += contentHeight + axisMargin;
                 } else {
-                    axis.box = { top: plotOffset.top + axisMargin, height: lh };
-                    plotOffset.top += lh + axisMargin;
+                    plotOffset.bottom += contentHeight + axisMargin;
+                    axis.box = { top: surface.height - plotOffset.bottom, height: contentHeight };
                 }
             } else {
-                lw += padding;
-
-                if (pos === "left") {
-                    axis.box = { left: plotOffset.left + axisMargin, width: lw };
-                    plotOffset.left += lw + axisMargin;
+                contentWidth += padding;
+                if (axisPosition === "right") {
+                    plotOffset.right += contentWidth + axisMargin;
+                    axis.box = { left: surface.width - plotOffset.right, width: contentWidth };
                 } else {
-                    plotOffset.right += lw + axisMargin;
-                    axis.box = { left: surface.width - plotOffset.right, width: lw };
+                    axis.box = { left: plotOffset.left + axisMargin, width: contentWidth };
+                    plotOffset.left += contentWidth + axisMargin;
                 }
             }
 
-             // save for future reference
-            axis.position = pos;
+            axis.position = axisPosition;
             axis.tickLength = tickLength;
             axis.box.padding = padding;
             axis.innermost = innermost;
@@ -1471,11 +1647,11 @@ Licensed under the MIT license.
             // now that all axis boxes have been placed in one
             // dimension, we can set the remaining dimension coordinates
             if (axis.direction === "x") {
-                axis.box.left = plotOffset.left - axis.labelWidth / 2;
-                axis.box.width = surface.width - plotOffset.left - plotOffset.right + axis.labelWidth;
+                axis.box.left = plotOffset.left - axis.tickWidth / 2;
+                axis.box.width = surface.width - plotOffset.left - plotOffset.right + axis.tickWidth;
             } else {
-                axis.box.top = plotOffset.top - axis.labelHeight / 2;
-                axis.box.height = surface.height - plotOffset.bottom - plotOffset.top + axis.labelHeight;
+                axis.box.top = plotOffset.top - axis.tickHeight / 2;
+                axis.box.height = surface.height - plotOffset.bottom - plotOffset.top + axis.tickHeight;
             }
         }
 
@@ -1504,7 +1680,7 @@ Licensed under the MIT license.
             $.each(allAxes(), function (_, axis) {
                 var dir = axis.direction;
                 if (axis.reserveSpace) {
-                    margins[dir] = Math.ceil(Math.max(margins[dir], (dir === "x" ? axis.labelWidth : axis.labelHeight) / 2));
+                    margins[dir] = Math.ceil(Math.max(margins[dir], (dir === "x" ? axis.tickWidth : axis.tickHeight) / 2));
                 }
             });
 
@@ -1561,7 +1737,6 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-                    // find labelWidth/Height for axis
                     measureTickLabels(axis);
                 });
 
@@ -2160,12 +2335,31 @@ Licensed under the MIT license.
                 }
 
                 var box = axis.box,
-                    legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
-                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
-                    font = axis.options.font || "flot-tick-label tickLabel",
+                    axisOptions = axis.options,
+                    layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + axis.direction + "Axis " + axis.direction + axis.n + "Axis",
+                    labelFont = axisOptions.labelFont || "flot-axis-label axisLabels " + axis.direction + axis.n + "axisLabel",
+                    tickFont = axisOptions.tickFont || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
                 surface.removeText(layer);
+
+                if (axisOptions.label) {
+                    if (axis.direction === "x") {
+                        if (axisOptions.position === "top") {
+                            surface.addText(layer, box.left + box.width / 2, box.top, axisOptions.label, labelFont, 0, null, "center", "top");
+                        } else {
+                            surface.addText(layer, box.left + box.width / 2, box.top + box.height, axisOptions.label, labelFont, 0, null, "center", "bottom");
+                        }
+                    } else {
+                        if (axisOptions.position === "right") {
+                            surface.addText(layer, box.left + box.width, box.top + box.height / 2, axisOptions.label, labelFont, 90, null, "right", "middle");
+                        } else {
+                            surface.addText(layer, box.left, box.top + box.height / 2, axisOptions.label, labelFont, -90, null, "left", "middle");
+                        }
+                    }
+                }
+
+                // Add labels for the ticks on this axis
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
 
@@ -2194,7 +2388,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                    surface.addText(layer, x, y, tick.label, tickFont, null, null, halign, valign);
                 }
             });
         }
