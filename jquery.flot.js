@@ -2106,6 +2106,10 @@ Licensed under the MIT license.
                     font = axis.options.font || "flot-tick-label tickLabel",
                     tick, x, y, halign, valign;
 
+                // Remove text before checking for axis.show and ticks.length;
+                // otherwise plugins, like flot-tickrotor, that draw their own
+                // tick labels will end up with both theirs and the defaults.
+
                 surface.removeText(layer);
 
                 if (!axis.show || axis.ticks.length == 0)
