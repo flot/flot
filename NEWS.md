@@ -14,6 +14,10 @@
    when the grid had a left/right border width of zero.
    (reported by Teq1, fix researched by ryleyb, issue #1056)
 
+ - Fixed an unexpected change in behavior that resulted in duplicate tick
+   labels when using a plugin, like flot-tickrotor, that overrode tick labels.
+   (patch by Mark Cote, pull request #1091)
+
 
 ## Flot 0.8.1 ##
 
