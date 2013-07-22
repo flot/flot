@@ -2544,13 +2544,8 @@ Licensed under the MIT license.
 
             // fill the bar
             if (fillStyleCallback) {
-                c.beginPath();
-                c.moveTo(left, bottom);
-                c.lineTo(left, top);
-                c.lineTo(right, top);
-                c.lineTo(right, bottom);
                 c.fillStyle = fillStyleCallback(bottom, top);
-                c.fill();
+                c.fillRect(left, top, right - left, bottom - top)
             }
 
             // draw outline
