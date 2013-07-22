@@ -2469,7 +2469,7 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, offset, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
             var left, right, bottom, top,
                 drawLeft, drawRight, drawTop, drawBottom,
                 tmp;
@@ -2553,35 +2553,35 @@ Licensed under the MIT license.
                 c.beginPath();
 
                 // FIXME: inline moveTo is buggy with excanvas
-                c.moveTo(left, bottom + offset);
+                c.moveTo(left, bottom);
                 if (drawLeft)
-                    c.lineTo(left, top + offset);
+                    c.lineTo(left, top);
                 else
-                    c.moveTo(left, top + offset);
+                    c.moveTo(left, top);
                 if (drawTop)
-                    c.lineTo(right, top + offset);
+                    c.lineTo(right, top);
                 else
-                    c.moveTo(right, top + offset);
+                    c.moveTo(right, top);
                 if (drawRight)
-                    c.lineTo(right, bottom + offset);
+                    c.lineTo(right, bottom);
                 else
-                    c.moveTo(right, bottom + offset);
+                    c.moveTo(right, bottom);
                 if (drawBottom)
-                    c.lineTo(left, bottom + offset);
+                    c.lineTo(left, bottom);
                 else
-                    c.moveTo(left, bottom + offset);
+                    c.moveTo(left, bottom);
                 c.stroke();
             }
         }
 
         function drawSeriesBars(series) {
-            function plotBars(datapoints, barLeft, barRight, offset, fillStyleCallback, axisx, axisy) {
+            function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points, ps = datapoints.pointsize;
 
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, offset, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 
@@ -2606,7 +2606,7 @@ Licensed under the MIT license.
             }
 
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
+            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
@@ -3017,7 +3017,7 @@ Licensed under the MIT license.
             octx.strokeStyle = highlightColor;
 
             drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
-                    0, function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
+                    function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
