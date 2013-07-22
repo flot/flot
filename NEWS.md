@@ -19,7 +19,7 @@
    (patch by Mark Cote, pull request #1091)
 
  - Right-aligned bars no longer highlight as though they were center-aligned.
-   (reported by mihaisdm, issue #1093)
+   (reported by BeWiBu and mihaisdm, issues #975 and #1093)
 
 
 ## Flot 0.8.1 ##
