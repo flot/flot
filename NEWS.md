@@ -18,6 +18,9 @@
    labels when using a plugin, like flot-tickrotor, that overrode tick labels.
    (patch by Mark Cote, pull request #1091)
 
+ - Right-aligned bars no longer highlight as though they were center-aligned.
+   (reported by mihaisdm, issue #1093)
+
 
 ## Flot 0.8.1 ##
 
