@@ -1218,11 +1218,8 @@ Licensed under the MIT license.
                         case "right":
                             delta = -s.bars.barWidth;
                             break;
-                        case "center":
-                            delta = -s.bars.barWidth / 2;
-                            break;
                         default:
-                            throw new Error("Invalid bar alignment: " + s.bars.align);
+                            delta = -s.bars.barWidth / 2;
                     }
 
                     if (s.bars.horizontal) {
@@ -2609,11 +2606,8 @@ Licensed under the MIT license.
                 case "right":
                     barLeft = -series.bars.barWidth;
                     break;
-                case "center":
-                    barLeft = -series.bars.barWidth / 2;
-                    break;
                 default:
-                    throw new Error("Invalid bar alignment: " + series.bars.align);
+                    barLeft = -series.bars.barWidth / 2;
             }
 
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
@@ -2809,11 +2803,8 @@ Licensed under the MIT license.
                         case "right":
                             barLeft = -s.bars.barWidth;
                             break;
-                        case "center":
-                            barLeft = -s.bars.barWidth / 2;
-                            break;
                         default:
-                            throw new Error("Invalid bar alignment: " + s.bars.align);
+                            barLeft = -s.bars.barWidth / 2;
                     }
 
                     barRight = barLeft + s.bars.barWidth;
@@ -3023,11 +3014,8 @@ Licensed under the MIT license.
                 case "right":
                     barLeft = -series.bars.barWidth;
                     break;
-                case "center":
-                    barLeft = -series.bars.barWidth / 2;
-                    break;
                 default:
-                    throw new Error("Invalid bar alignment: " + series.bars.align);
+                    barLeft = -series.bars.barWidth / 2;
             }
 
             octx.lineWidth = series.bars.lineWidth;
