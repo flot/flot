@@ -71,7 +71,6 @@ charts or filled areas).
                 withlines = s.lines.show,
                 horizontal = s.bars.horizontal,
                 withbottom = ps > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y),
-                withsteps = withlines && s.lines.steps,
                 fromgap = true,
                 keyOffset = horizontal ? 1 : 0,
                 accumulateOffset = horizontal ? 0 : 1,
@@ -161,17 +160,7 @@ charts or filled areas).
                     if (l != newpoints.length && withbottom)
                         newpoints[l + 2] += bottom;
                 }
-
-                // maintain the line steps invariant
-                if (withsteps && l != newpoints.length && l > 0
-                    && newpoints[l] != null
-                    && newpoints[l] != newpoints[l - ps]
-                    && newpoints[l + 1] != newpoints[l - ps + 1]) {
-                    for (m = 0; m < ps; ++m)
-                        newpoints[l + ps + m] = newpoints[l + m];
-                    newpoints[l + 1] = newpoints[l - ps + 1];
-                }
-            }
+            }         
 
             datapoints.points = newpoints;
         }
