@@ -121,8 +121,6 @@ Google Maps).
     };
 
     function drawSeries(plot, ctx, series) {
-        var plotOffset = plot.getPlotOffset();
-
         if (!series.images || !series.images.show) {
             return;
         }
@@ -215,7 +213,7 @@ Google Maps).
             ctx.globalAlpha *= series.images.alpha;
             ctx.drawImage(img,
                           sx1, sy1, sx2 - sx1, sy2 - sy1,
-                          x1 + plotOffset.left, y1 + plotOffset.top,
+                          x1, y1,
                           x2 - x1, y2 - y1);
             ctx.globalAlpha = tmp;
         }

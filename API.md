@@ -1385,6 +1385,7 @@ hooks in the plugins bundled with Flot.
     Hook for custom drawing of a single series. Called just before the
     standard drawing routine has been called in the loop that draws
     each series.
+	Canvas context is restricted to plot bounds.
 
  - draw  [phase 5]
 
