@@ -1131,7 +1131,7 @@ Licensed under the MIT license.
                             if (val != null) {
                                 f = format[m];
                                 // extract min/max info
-                                if (f.autoscale) {
+                                if (f.autoscale !== false) {
                                     if (f.x) {
                                         updateAxis(s.xaxis, val, val);
                                     }
