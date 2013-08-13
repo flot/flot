@@ -2670,8 +2670,10 @@ Licensed under the MIT license.
         function drawSeriesPoints(series) {
             function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
                 var points = datapoints.points, ps = datapoints.pointsize;
-
+	            
+                var dataIndex = -1;
                 for (var i = 0; i < points.length; i += ps) {
+                    dataIndex++;
                     var x = points[i], y = points[i + 1];
                     if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                         continue;
@@ -2683,7 +2685,7 @@ Licensed under the MIT license.
                     if (symbol === "circle") {
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
                     } else {
-                        symbol(ctx, x, y, radius, shadow);
+                        symbol(ctx, x, y, radius, shadow, dataIndex, series);
                     }
                     ctx.closePath();
 
