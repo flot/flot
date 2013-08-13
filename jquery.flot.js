@@ -865,6 +865,9 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+                axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
+                options.xaxes[i] = axisOptions;
+
                 // Compatibility with markrcote/flot-axislabels
 
                 if (!axisOptions.label && axisOptions.axisLabel) {
@@ -873,9 +876,6 @@ Licensed under the MIT license.
                 if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
                     axisOptions.labelPadding = axisOptions.axisLabelPadding;
                 }
-
-                axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
-                options.xaxes[i] = axisOptions;
 
                 fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
@@ -897,6 +897,9 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+				axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
+                options.yaxes[i] = axisOptions;
+				
                 // Compatibility with markrcote/flot-axislabels
 
                 if (!axisOptions.label && axisOptions.axisLabel) {
@@ -905,9 +908,6 @@ Licensed under the MIT license.
                 if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
                     axisOptions.labelPadding = axisOptions.axisLabelPadding;
                 }
-
-                axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
-                options.yaxes[i] = axisOptions;
 
                 fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
