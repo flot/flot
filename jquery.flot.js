@@ -867,10 +867,10 @@ Licensed under the MIT license.
 
                 // Compatibility with markrcote/flot-axislabels
 
-                if (!axisOptions.label && axisOptions.axisLabel) {
+                if (axisOptions && !axisOptions.label && axisOptions.axisLabel) {
                     axisOptions.label = axisOptions.axisLabel;
                 }
-                if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                if (axisOptions && !axisOptions.labelPadding && axisOptions.axisLabelPadding) {
                     axisOptions.labelPadding = axisOptions.axisLabelPadding;
                 }
 
@@ -899,10 +899,10 @@ Licensed under the MIT license.
 
                 // Compatibility with markrcote/flot-axislabels
 
-                if (!axisOptions.label && axisOptions.axisLabel) {
+                if (axisOptions && !axisOptions.label && axisOptions.axisLabel) {
                     axisOptions.label = axisOptions.axisLabel;
                 }
-                if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                if (axisOptions && !axisOptions.labelPadding && axisOptions.axisLabelPadding) {
                     axisOptions.labelPadding = axisOptions.axisLabelPadding;
                 }
 
