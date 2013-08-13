@@ -90,11 +90,8 @@ charts or filled areas).
                     i += ps;
                 }
                 else if (j >= otherpoints.length) {
-                    // for lines, we can't use the rest of the points
-                    if (!withlines) {
-                        for (m = 0; m < ps; ++m)
-                            newpoints.push(points[i + m]);
-                    }
+                    for (m = 0; m < ps; ++m)
+                        newpoints.push(points[i + m]);
                     i += ps;
                 }
                 else if (otherpoints[j] == null) {
@@ -137,12 +134,6 @@ charts or filled areas).
                         j += otherps;
                     }
                     else { // px < qx
-                        if (fromgap && withlines) {
-                            // if we come from a gap, we just skip this point
-                            i += ps;
-                            continue;
-                        }
-                            
                         for (m = 0; m < ps; ++m)
                             newpoints.push(points[i + m]);
                         
