@@ -164,6 +164,7 @@ More detail and specific examples can be found in the included HTML file.
 			var total = 0,
 				combined = 0,
 				numCombined = 0,
+				totalPercent = 0,
 				color = options.series.pie.combine.color,
 				newdata = [];
 
@@ -242,6 +243,18 @@ More detail and specific examples can be found in the included HTML file.
 					percent: combined / (total / 100)
 				});
 			}
+
+			// we change the last data, so that percentual value plus the other values can be equal to 100
+			
+			for (var i = 0, length = newdata.length - 1; i < length; i++) {
+				newdata[i].percent = Math.floor(newdata[i].percent * 100) / 100;
+				totalPercent += newdata[i].percent;
+			}
+			
+			var lastData = newdata.pop();						
+			lastData.percent = 100 - totalPercent;
+
+			newdata.push(lastData);			
 
 			return newdata;
 		}
