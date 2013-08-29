@@ -2791,6 +2791,8 @@ Licensed under the MIT license.
 
                 if (s.bars.show && !item) { // no other point can be nearby
 
+                    var barLeft, barRight;
+
                     switch (s.bars.align) {
                         case "left":
                             barLeft = 0;
