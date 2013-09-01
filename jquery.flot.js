@@ -569,6 +569,7 @@ Licensed under the MIT license.
                         horizontal: false,
                         zero: true
                     },
+		    show: true,
                     shadowSize: 3,
                     highlightColor: null
                 },
@@ -2144,12 +2145,14 @@ Licensed under the MIT license.
         }
 
         function drawSeries(series) {
-            if (series.lines.show)
-                drawSeriesLines(series);
-            if (series.bars.show)
-                drawSeriesBars(series);
-            if (series.points.show)
-                drawSeriesPoints(series);
+	    if (series.show) {
+                if (series.lines.show)
+                    drawSeriesLines(series);
+                if (series.bars.show)
+                    drawSeriesBars(series);
+                if (series.points.show)
+                    drawSeriesPoints(series);
+	    }
         }
 
         function drawSeriesLines(series) {
@@ -2627,6 +2630,7 @@ Licensed under the MIT license.
         function insertLegend() {
 
             placeholder.find(".legend").remove();
+            var legendIDBase  = placeholder.attr('id');
 
             if (!options.legend.show)
                 return;
@@ -2680,9 +2684,8 @@ Licensed under the MIT license.
                 }
 
                 fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + entry.label + '</td>'
-                );
+                    '<td id="' + legendIDBase + i + '" class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
+                    '<td class="legendLabel">' + entry.label + '</td>');
             }
 
             if (rowStarted)
@@ -3076,3 +3079,5 @@ Licensed under the MIT license.
     }
 
 })(jQuery);
+
+
