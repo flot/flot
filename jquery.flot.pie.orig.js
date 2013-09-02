@@ -594,36 +594,6 @@ More detail and specific examples can be found in the included HTML file.
 					if (ctx.isPointInPath) {
 						if (ctx.isPointInPath(mouseX - centerLeft, mouseY - centerTop)) {
 							ctx.restore();
-
-							/* bug fix for hover event being falsely fired when hovering over innerradius of donut */
-							var offset = plot.offset();
-							var eventX = parseInt(mouseX + offset.left);
-							var eventY = parseInt(mouseY + offset.top);
-							var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
-							if (innerRadius > 0) {
-								var elem = document.elementFromPoint(eventX, eventY);
-								if(elem != null){
-									var id = elem.parentNode.id;
-									if(('#'+id).indexOf(plot.getPlaceholder().selector) != -1){
-										var c = $('#' + id + ' > canvas[class$=overlay]');
-										var left =  parseInt(c.offset().left);
-										var top =  parseInt(c.offset().top);
-										var width = parseInt(c.width());
-										var height = parseInt(c.height());
-										var centerX = left + width / 2;
-										var centerY = top + height / 2;
-
-										var dx = eventX-centerX;
-					    				var dy = eventY-centerY;
-					    				if( dx*dx+dy*dy <= innerRadius*innerRadius){
-					    					// console.log('center')
-											return null;
-										}
-									}
-								}
-							}
-							/* end of bug fix */
-							
 							return {
 								datapoint: [s.percent, s.data],
 								dataIndex: 0,
