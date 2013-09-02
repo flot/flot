@@ -430,6 +430,26 @@ More detail and specific examples can be found in the included HTML file.
 						ctx.lineJoin = "round";
 					}
 
+					/*add for gradient*/
+					if (fill) {
+	                    if (typeof color === "object") {
+	                        var grad= ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+	                        var i;
+	                        var numColors= color.colors.length;
+	                        for (i=0; i< numColors ; i++) {
+	                            grad.addColorStop(i/(numColors-1), color.colors[i]);
+	                        }
+	                        ctx.fillStyle = grad; 
+	                    } else {
+	                        ctx.fillStyle = color;
+	                    }
+	                    ctx.fillStyle = color;
+	                } else {
+	                    ctx.strokeStyle = color;
+	                    ctx.lineJoin = 'round';
+	                }
+	                /*end: add for gradient*/
+
 					ctx.beginPath();
 					if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
 						ctx.moveTo(0, 0); // Center of the pie

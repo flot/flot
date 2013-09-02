@@ -2,6 +2,7 @@
 <html>
 <body>
 <h2 style="color:red;">Flot bug: Plot hovering triggered even when cursor within empty hole (innerradius) of donut. Using original jquery.flot.pie.js.</h2>
+<h2 style="color:red;">Gradient provided in pie slice colors but doesn't work.</h2>
 <div id="graphLoaderDiv" style="height:400px; width:400px;"></div>
 
 <script language="javascript" type="text/javascript" src="./jquery.js"></script>
@@ -12,26 +13,32 @@ var data = [
     {
     label: "Serie1",
     data: 10,
+    color: { colors: [ "#d3ffaf", "#beff88", "#76ff04", "#84f128", "#9cec57", "#88c257" ] },
     url: "http://stackoverflow.com"},
 {
     label: "Serie2",
     data: 30,
+    color: { colors: [ "#d3ffaf", "#beff88", "#76ff04", "#84f128", "#9cec57", "#88c257" ] },
     url: "http://serverfault.com"},
 {
     label: "Serie3",
     data: 90,
+    color: { colors: [ "#d3ffaf", "#beff88", "#76ff04", "#84f128", "#9cec57", "#88c257" ] },
     url: "http://superuser.com"},
 {
     label: "Serie4",
     data: 70,
+    color: { colors: [ "#d3ffaf", "#beff88", "#76ff04", "#84f128", "#9cec57", "#88c257" ] },
     url: "http://www.google.com"},
 {
     label: "Serie5",
     data: 80,
+    color: { colors: [ "#d3ffaf", "#beff88", "#76ff04", "#84f128", "#9cec57", "#88c257" ] },
     url: "http://www.oprah.com"},
 {
     label: "Serie6",
     data: 110,
+    color: { colors: [ "#d3ffaf", "#beff88", "#76ff04", "#84f128", "#9cec57", "#88c257" ] },
     url: "http://www.realultimatepower.net/"}
 ];
 var options = {
