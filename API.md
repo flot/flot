@@ -1454,7 +1454,7 @@ hooks in the plugins bundled with Flot.
     case a plot is overwritten by a new plot. If you're writing a
     plugin that adds extra DOM elements or event handlers, you should
     add a callback to clean up after you. Take a look at the section in
-    PLUGINS.txt for more info.
+    the [PLUGINS](PLUGINS.md) document for more info.
 
    
 ## Plugins ##
@@ -1476,7 +1476,7 @@ from the "option" attribute of the plugin. The init function gets a
 reference to the plot object created and uses this to register hooks
 and add new public methods if needed.
 
-See the PLUGINS.txt file for details on how to write a plugin. As the
+See the [PLUGINS](PLUGINS.md) document for details on how to write a plugin. As the
 above description hints, it's actually pretty easy.
 
 
