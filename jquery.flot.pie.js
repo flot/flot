@@ -69,6 +69,7 @@ More detail and specific examples can be found in the included HTML file.
 
 		var canvas = null,
 			target = null,
+			options = null,
 			maxRadius = null,
 			centerLeft = null,
 			centerTop = null,
