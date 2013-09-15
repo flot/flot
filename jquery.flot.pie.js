@@ -158,6 +158,10 @@ More detail and specific examples can be found in the included HTML file.
 				plot.setData(combine(plot.getData()));
 			}
 		}
+		
+		function getRadius() {
+			return options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+		}
 
 		function combine(data) {
 
@@ -254,7 +258,8 @@ More detail and specific examples can be found in the included HTML file.
 
 			var canvasWidth = plot.getPlaceholder().width(),
 				canvasHeight = plot.getPlaceholder().height(),
-				legendWidth = target.children().filter(".legend").children().width() || 0;
+				legendWidth = target.children().filter(".legend").children().width() || 0,
+				radius = getRadius();
 
 			ctx = newCtx;
 
@@ -297,10 +302,10 @@ More detail and specific examples can be found in the included HTML file.
 				centerLeft += options.series.pie.offset.left;
 			}
 
-			if (centerLeft < maxRadius) {
-				centerLeft = maxRadius;
-			} else if (centerLeft > canvasWidth - maxRadius) {
-				centerLeft = canvasWidth - maxRadius;
+			if (centerLeft < radius) {
+				centerLeft = radius;
+			} else if (centerLeft > canvasWidth - radius) {
+				centerLeft = canvasWidth - radius;
 			}
 
 			var slices = plot.getData(),
@@ -343,7 +348,7 @@ More detail and specific examples can be found in the included HTML file.
 				var shadowTop = options.series.pie.shadow.top;
 				var edge = 10;
 				var alpha = options.series.pie.shadow.alpha;
-				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+				var radius = getRadius();
 
 				if (radius >= canvasWidth / 2 - shadowLeft || radius * options.series.pie.tilt >= canvasHeight / 2 - shadowTop || radius <= edge) {
 					return;	// shadow would be outside canvas, so don't draw it
@@ -374,7 +379,7 @@ More detail and specific examples can be found in the included HTML file.
 			function drawPie() {
 
 				var startAngle = Math.PI * options.series.pie.startAngle;
-				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+				var radius = getRadius();
 
 				// center and rotate to starting position
 
@@ -725,7 +730,7 @@ More detail and specific examples can be found in the included HTML file.
 
 			var options = plot.getOptions();
 
-			var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+			var radius = getRadius();
 
 			octx.save();
 			octx.translate(centerLeft, centerTop);
