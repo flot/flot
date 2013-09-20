@@ -11,5 +11,4 @@ jquery.flot.image.js
 jquery.flot.js
 jquery.flot.navigate.js
 jquery.flot.pie.js
-jquery.flot.resize.js
 examples/axes-time-zone/date.js
