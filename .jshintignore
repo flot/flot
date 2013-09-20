@@ -16,5 +16,4 @@ jquery.flot.selection.js
 jquery.flot.stack.js
 jquery.flot.symbol.js
 jquery.flot.time.js
-jquery.flot.threshold.js
 examples/axes-time-zone/date.js

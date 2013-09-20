@@ -5,29 +5,29 @@ Licensed under the MIT license.
 
 The plugin supports these options:
 
-	series: {
-		threshold: {
-			below: number
-			color: colorspec
-		}
-	}
+    series: {
+        threshold: {
+            below: number
+            color: colorspec
+        }
+    }
 
 It can also be applied to a single series, like this:
 
-	$.plot( $("#placeholder"), [{
-		data: [ ... ],
-		threshold: { ... }
-	}])
+    $.plot( $("#placeholder"), [{
+        data: [ ... ],
+        threshold: { ... }
+    }])
 
 An array can be passed for multiple thresholding, like this:
 
-	threshold: [{
-		below: number1
-		color: color1
-	},{
-		below: number2
-		color: color2
-	}]
+    threshold: [{
+        below: number1
+        color: color1
+    },{
+        below: number2
+        color: color2
+    }]
 
 These multiple threshold objects can be passed in any order since they are
 sorted by the processing function.
@@ -71,33 +71,38 @@ You may need to check for this in hover events.
                 y = origpoints[i + 1];
 
                 prevp = p;
-                if (y < below)
+                if (y < below) {
                     p = threspoints;
-                else
+                } else {
                     p = newpoints;
-
-                if (addCrossingPoints && prevp != p && x != null
-                    && i > 0 && origpoints[i - ps] != null) {
+                }
+                
+                if (addCrossingPoints && prevp != p && x != null && i > 0 &&
+                    origpoints[i - ps] != null) {
                     var interx = x + (below - y) * (x - origpoints[i - ps]) / (y - origpoints[i - ps + 1]);
                     prevp.push(interx);
                     prevp.push(below);
-                    for (m = 2; m < ps; ++m)
+                    for (m = 2; m < ps; ++m) {
                         prevp.push(origpoints[i + m]);
-                    
+                    }
+
                     p.push(null); // start new segment
                     p.push(null);
-                    for (m = 2; m < ps; ++m)
+                    for (m = 2; m < ps; ++m) {
                         p.push(origpoints[i + m]);
+                    }
                     p.push(interx);
                     p.push(below);
-                    for (m = 2; m < ps; ++m)
+                    for (m = 2; m < ps; ++m) {
                         p.push(origpoints[i + m]);
+                    }
                 }
 
                 p.push(x);
                 p.push(y);
-                for (m = 2; m < ps; ++m)
+                for (m = 2; m < ps; ++m) {
                     p.push(origpoints[i + m]);
+                }
             }
 
             datapoints.points = newpoints;
@@ -113,8 +118,9 @@ You may need to check for this in hover events.
         }
         
         function processThresholds(plot, s, datapoints) {
-            if (!s.threshold)
+            if (!s.threshold) {
                 return;
+            }
             
             if (s.threshold instanceof Array) {
                 s.threshold.sort(function(a, b) {
