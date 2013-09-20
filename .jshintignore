@@ -6,6 +6,5 @@ jquery.colorhelpers.js
 jquery.flot.canvas.js
 jquery.flot.categories.js
 jquery.flot.crosshair.js
-jquery.flot.errorbars.js
 jquery.flot.js
 examples/axes-time-zone/date.js
