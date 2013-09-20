@@ -17,8 +17,10 @@ module.exports = function(grunt) {
 				expand: true,
 				flatten: true,
                 src: ['jquery.*.js', '!jquery.js'],
-                dest: 'dist',
-				ext: '.min.js'
+                dest: 'dist/',
+				rename: function(base, path) {
+					return base + path.replace(/\.js/, '.min.js');
+				}
             }
         },
         jshint: {
