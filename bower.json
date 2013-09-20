@@ -1,8 +1,30 @@
 {
-	"name": "Flot",
-	"version": "0.8.2-alpha",
-	"main": "jquery.flot.js",
-	"dependencies": {
-		"jquery": ">= 1.2.6"
-	}
+  "name": "Flot",
+  "version": "0.8.2-alpha",
+  "main": "jquery.flot.js",
+  "dependencies": {
+    "jquery": ">= 1.2.6",
+    "excanvas": "*"
+  },
+  "homepage": "https://github.com/flot/flot",
+  "authors": [
+    "Ole Laursen"
+  ],
+  "description": "Javascript plotting library for jQuery",
+  "keywords": [
+    "chart",
+    "plot",
+    "graph",
+    "visualization",
+    "canvas",
+    "graphics"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }
