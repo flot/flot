@@ -31,12 +31,23 @@ module.exports = function(grunt) {
 			flot: {
 				src: ['jquery.*.js']
 			}
+		},
+		watch: {
+			gruntfile: {
+				files: 'Gruntfile.js',
+				tasks: ['jshint:gruntfile']
+			},
+			flot: {
+				files: '<%= jshint.flot.src %>',
+				tasks: ['jshint:flot']
+			}
 		}
 	});
 
 	// These plugins provide necessary tasks.
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	// Default task.
 	grunt.registerTask('default', ['jshint', 'uglify']);

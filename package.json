@@ -26,21 +26,26 @@
     "name": "Ole Laursen",
     "url": "https://github.com/OleLaursen"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "http://github.com/flot/flot/blob/master/LICENSE.txt"
-  }],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/flot/flot/blob/master/LICENSE.txt"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/flot/flot/issues"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.6.4",
-    "grunt-contrib-uglify": "~0.2.4"
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-contrib-watch": "~0.5.3"
   },
-  "maintainers": [{
-    "name": "David Schnur",
-    "email": "dnschnur@gmail.com",
-    "url": "http://github.com/dnschnur"
-  }]
+  "maintainers": [
+    {
+      "name": "David Schnur",
+      "email": "dnschnur@gmail.com",
+      "url": "http://github.com/dnschnur"
+    }
+  ]
 }
