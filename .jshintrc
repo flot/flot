@@ -1,17 +1,18 @@
 {
-	"curly": true,
-	"eqeqeq": false,
-	"immed": true,
-	"latedef": true,
-	"newcap": true,
-	"noarg": true,
-	"sub": true,
-	"undef": true,
-	"unused": true,
-	"boss": true,
-	"eqnull": true,
-	"browser": true,
-	"globals": {
-		"jQuery": true
-	}
+    "curly": true,
+    "eqeqeq": false,
+    "immed": true,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "sub": true,
+    "undef": true,
+    "unused": true,
+    "boss": true,
+    "eqnull": true,
+    "browser": true,
+    "indent": 4,
+    "globals": {
+        "jQuery": true
+    }
 }
