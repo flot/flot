@@ -5,6 +5,7 @@ Licensed under the MIT license.
 
 */
 
+/*jshint -W033, -W064, -W041, -W065 */
 // first an inline dependency, jquery.colorhelpers.js, we inline it here
 // for convenience
 
@@ -33,461 +34,463 @@ Licensed under the MIT license.
 
 // the actual Flot code
 (function($) {
+    /*jshint +W033, +W064, +W041, +W065, latedef: nofunc */
+    
+    // Cache the prototype hasOwnProperty for faster access
 
-	// Cache the prototype hasOwnProperty for faster access
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
+    ///////////////////////////////////////////////////////////////////////////
+    // The Canvas object is a wrapper around an HTML5 <canvas> tag.
+    //
+    // @constructor
+    // @param {string} cls List of classes to apply to the canvas.
+    // @param {element} container Element onto which to append the canvas.
+    //
+    // Requiring a container is a little iffy, but unfortunately canvas
+    // operations don't work unless the canvas is attached to the DOM.
 
-	///////////////////////////////////////////////////////////////////////////
-	// The Canvas object is a wrapper around an HTML5 <canvas> tag.
-	//
-	// @constructor
-	// @param {string} cls List of classes to apply to the canvas.
-	// @param {element} container Element onto which to append the canvas.
-	//
-	// Requiring a container is a little iffy, but unfortunately canvas
-	// operations don't work unless the canvas is attached to the DOM.
+    function Canvas(cls, container) {
 
-	function Canvas(cls, container) {
+        var element = container.children("." + cls)[0];
 
-		var element = container.children("." + cls)[0];
+        if (element == null) {
 
-		if (element == null) {
+            element = document.createElement("canvas");
+            element.className = cls;
 
-			element = document.createElement("canvas");
-			element.className = cls;
+            $(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
+                .appendTo(container);
 
-			$(element).css({ direction: "ltr", position: "absolute", left: 0, top: 0 })
-				.appendTo(container);
+            // If HTML5 Canvas isn't available, fall back to [Ex|Flash]canvas
 
-			// If HTML5 Canvas isn't available, fall back to [Ex|Flash]canvas
+            if (!element.getContext) {
+                if (window.G_vmlCanvasManager) {
+                    element = window.G_vmlCanvasManager.initElement(element);
+                } else {
+                    throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
+                }
+            }
+        }
 
-			if (!element.getContext) {
-				if (window.G_vmlCanvasManager) {
-					element = window.G_vmlCanvasManager.initElement(element);
-				} else {
-					throw new Error("Canvas is not available. If you're using IE with a fall-back such as Excanvas, then there's either a mistake in your conditional include, or the page has no DOCTYPE and is rendering in Quirks Mode.");
-				}
-			}
-		}
+        this.element = element;
 
-		this.element = element;
+        var context = this.context = element.getContext("2d");
 
-		var context = this.context = element.getContext("2d");
+        // Determine the screen's ratio of physical to device-independent
+        // pixels.  This is the ratio between the canvas width that the browser
+        // advertises and the number of pixels actually present in that space.
 
-		// Determine the screen's ratio of physical to device-independent
-		// pixels.  This is the ratio between the canvas width that the browser
-		// advertises and the number of pixels actually present in that space.
+        // The iPhone 4, for example, has a device-independent width of 320px,
+        // but its screen is actually 640px wide.  It therefore has a pixel
+        // ratio of 2, while most normal devices have a ratio of 1.
 
-		// The iPhone 4, for example, has a device-independent width of 320px,
-		// but its screen is actually 640px wide.  It therefore has a pixel
-		// ratio of 2, while most normal devices have a ratio of 1.
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio = 
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1;
 
-		var devicePixelRatio = window.devicePixelRatio || 1,
-			backingStoreRatio =
-				context.webkitBackingStorePixelRatio ||
-				context.mozBackingStorePixelRatio ||
-				context.msBackingStorePixelRatio ||
-				context.oBackingStorePixelRatio ||
-				context.backingStorePixelRatio || 1;
+        this.pixelRatio = devicePixelRatio / backingStoreRatio;
 
-		this.pixelRatio = devicePixelRatio / backingStoreRatio;
+        // Size the canvas to match the internal dimensions of its container
 
-		// Size the canvas to match the internal dimensions of its container
+        this.resize(container.width(), container.height());
 
-		this.resize(container.width(), container.height());
+        // Collection of HTML div layers for text overlaid onto the canvas
 
-		// Collection of HTML div layers for text overlaid onto the canvas
+        this.textContainer = null;
+        this.text = {};
 
-		this.textContainer = null;
-		this.text = {};
+        // Cache of text fragments and metrics, so we can avoid expensively
+        // re-calculating them when the plot is re-rendered in a loop.
 
-		// Cache of text fragments and metrics, so we can avoid expensively
-		// re-calculating them when the plot is re-rendered in a loop.
+        this._textCache = {};
+    }
 
-		this._textCache = {};
-	}
+    // Resizes the canvas to the given dimensions.
+    //
+    // @param {number} width New width of the canvas, in pixels.
+    // @param {number} width New height of the canvas, in pixels.
 
-	// Resizes the canvas to the given dimensions.
-	//
-	// @param {number} width New width of the canvas, in pixels.
-	// @param {number} width New height of the canvas, in pixels.
+    Canvas.prototype.resize = function(width, height) {
 
-	Canvas.prototype.resize = function(width, height) {
+        if (width <= 0 || height <= 0) {
+            throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
+        }
 
-		if (width <= 0 || height <= 0) {
-			throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
-		}
+        var element = this.element,
+            context = this.context,
+            pixelRatio = this.pixelRatio;
 
-		var element = this.element,
-			context = this.context,
-			pixelRatio = this.pixelRatio;
+        // Resize the canvas, increasing its density based on the display's
+        // pixel ratio; basically giving it more pixels without increasing the
+        // size of its element, to take advantage of the fact that retina
+        // displays have that many more pixels in the same advertised space.
 
-		// Resize the canvas, increasing its density based on the display's
-		// pixel ratio; basically giving it more pixels without increasing the
-		// size of its element, to take advantage of the fact that retina
-		// displays have that many more pixels in the same advertised space.
+        // Resizing should reset the state (excanvas seems to be buggy though)
 
-		// Resizing should reset the state (excanvas seems to be buggy though)
+        if (this.width != width) {
+            element.width = width * pixelRatio;
+            element.style.width = width + "px";
+            this.width = width;
+        }
 
-		if (this.width != width) {
-			element.width = width * pixelRatio;
-			element.style.width = width + "px";
-			this.width = width;
-		}
-
-		if (this.height != height) {
-			element.height = height * pixelRatio;
-			element.style.height = height + "px";
-			this.height = height;
-		}
-
-		// Save the context, so we can reset in case we get replotted.  The
-		// restore ensure that we're really back at the initial state, and
-		// should be safe even if we haven't saved the initial state yet.
-
-		context.restore();
-		context.save();
-
-		// Scale the coordinate space to match the display density; so even though we
-		// may have twice as many pixels, we still want lines and other drawing to
-		// appear at the same size; the extra pixels will just make them crisper.
-
-		context.scale(pixelRatio, pixelRatio);
-	};
-
-	// Clears the entire canvas area, not including any overlaid HTML text
-
-	Canvas.prototype.clear = function() {
-		this.context.clearRect(0, 0, this.width, this.height);
-	};
-
-	// Finishes rendering the canvas, including managing the text overlay.
-
-	Canvas.prototype.render = function() {
-
-		var cache = this._textCache;
-
-		// For each text layer, add elements marked as active that haven't
-		// already been rendered, and remove those that are no longer active.
-
-		for (var layerKey in cache) {
-			if (hasOwnProperty.call(cache, layerKey)) {
-
-				var layer = this.getTextLayer(layerKey),
-					layerCache = cache[layerKey];
-
-				layer.hide();
-
-				for (var styleKey in layerCache) {
-					if (hasOwnProperty.call(layerCache, styleKey)) {
-						var styleCache = layerCache[styleKey];
-						for (var key in styleCache) {
-							if (hasOwnProperty.call(styleCache, key)) {
-
-								var positions = styleCache[key].positions;
-
-								for (var i = 0, position; position = positions[i]; i++) {
-									if (position.active) {
-										if (!position.rendered) {
-											layer.append(position.element);
-											position.rendered = true;
-										}
-									} else {
-										positions.splice(i--, 1);
-										if (position.rendered) {
-											position.element.detach();
-										}
-									}
-								}
-
-								if (positions.length == 0) {
-									delete styleCache[key];
-								}
-							}
-						}
-					}
-				}
-
-				layer.show();
-			}
-		}
-	};
-
-	// Creates (if necessary) and returns the text overlay container.
-	//
-	// @param {string} classes String of space-separated CSS classes used to
-	//     uniquely identify the text layer.
-	// @return {object} The jQuery-wrapped text-layer div.
-
-	Canvas.prototype.getTextLayer = function(classes) {
-
-		var layer = this.text[classes];
-
-		// Create the text layer if it doesn't exist
-
-		if (layer == null) {
-
-			// Create the text layer container, if it doesn't exist
-
-			if (this.textContainer == null) {
-				this.textContainer = $("<div class='flot-text'></div>")
-					.css({
-						position: "absolute",
-						top: 0,
-						left: 0,
-						bottom: 0,
-						right: 0,
-						'font-size': "smaller",
-						color: "#545454"
-					})
-					.insertAfter(this.element);
-			}
-
-			layer = this.text[classes] = $("<div></div>")
-				.addClass(classes)
-				.css({
-					position: "absolute",
-					top: 0,
-					left: 0,
-					bottom: 0,
-					right: 0
-				})
-				.appendTo(this.textContainer);
-		}
-
-		return layer;
-	};
-
-	// Creates (if necessary) and returns a text info object.
-	//
-	// The object looks like this:
-	//
-	// {
-	//     width: Width of the text's wrapper div.
-	//     height: Height of the text's wrapper div.
-	//     element: The jQuery-wrapped HTML div containing the text.
-	//     positions: Array of positions at which this text is drawn.
-	// }
-	//
-	// The positions array contains objects that look like this:
-	//
-	// {
-	//     active: Flag indicating whether the text should be visible.
-	//     rendered: Flag indicating whether the text is currently visible.
-	//     element: The jQuery-wrapped HTML div containing the text.
-	//     x: X coordinate at which to draw the text.
-	//     y: Y coordinate at which to draw the text.
-	// }
-	//
-	// Each position after the first receives a clone of the original element.
-	//
-	// The idea is that that the width, height, and general 'identity' of the
-	// text is constant no matter where it is placed; the placements are a
-	// secondary property.
-	//
-	// Canvas maintains a cache of recently-used text info objects; getTextInfo
-	// either returns the cached element or creates a new entry.
-	//
-	// @param {string} layer A string of space-separated CSS classes uniquely
-	//     identifying the layer containing this text.
-	// @param {string} text Text string to retrieve info for.
-	// @param {(string|object)=} font Either a string of space-separated CSS
-	//     classes or a font-spec object, defining the text's font and style.
-	// @param {number=} angle Angle at which to rotate the text, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
-	// @param {number=} width Maximum width of the text before it wraps.
-	// @return {object} a text info object.
-
-	Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
-
-		var textStyle, layerCache, styleCache, info;
-
-		// Cast the value to a string, in case we were given a number or such
-
-		text = "" + text;
-
-		// If the font is a font-spec object, generate a CSS font definition
-
-		if (typeof font === "object") {
-			textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px/" + font.lineHeight + "px " + font.family;
-		} else {
-			textStyle = font;
-		}
-
-		// Retrieve (or create) the cache for the text's layer and styles
-
-		layerCache = this._textCache[layer];
-
-		if (layerCache == null) {
-			layerCache = this._textCache[layer] = {};
-		}
-
-		styleCache = layerCache[textStyle];
-
-		if (styleCache == null) {
-			styleCache = layerCache[textStyle] = {};
-		}
-
-		info = styleCache[text];
-
-		// If we can't find a matching element in our cache, create a new one
-
-		if (info == null) {
-
-			var element = $("<div></div>").html(text)
-				.css({
-					position: "absolute",
-					'max-width': width,
-					top: -9999
-				})
-				.appendTo(this.getTextLayer(layer));
-
-			if (typeof font === "object") {
-				element.css({
-					font: textStyle,
-					color: font.color
-				});
-			} else if (typeof font === "string") {
-				element.addClass(font);
-			}
-
-			info = styleCache[text] = {
-				width: element.outerWidth(true),
-				height: element.outerHeight(true),
-				element: element,
-				positions: []
-			};
-
-			element.detach();
-		}
-
-		return info;
-	};
-
-	// Adds a text string to the canvas text overlay.
-	//
-	// The text isn't drawn immediately; it is marked as rendering, which will
-	// result in its addition to the canvas on the next render pass.
-	//
-	// @param {string} layer A string of space-separated CSS classes uniquely
-	//     identifying the layer containing this text.
-	// @param {number} x X coordinate at which to draw the text.
-	// @param {number} y Y coordinate at which to draw the text.
-	// @param {string} text Text string to draw.
-	// @param {(string|object)=} font Either a string of space-separated CSS
-	//     classes or a font-spec object, defining the text's font and style.
-	// @param {number=} angle Angle at which to rotate the text, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
-	// @param {number=} width Maximum width of the text before it wraps.
-	// @param {string=} halign Horizontal alignment of the text; either "left",
-	//     "center" or "right".
-	// @param {string=} valign Vertical alignment of the text; either "top",
-	//     "middle" or "bottom".
-
-	Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
-
-		var info = this.getTextInfo(layer, text, font, angle, width),
-			positions = info.positions;
-
-		// Tweak the div's position to match the text's alignment
-
-		if (halign == "center") {
-			x -= info.width / 2;
-		} else if (halign == "right") {
-			x -= info.width;
-		}
-
-		if (valign == "middle") {
-			y -= info.height / 2;
-		} else if (valign == "bottom") {
-			y -= info.height;
-		}
-
-		// Determine whether this text already exists at this position.
-		// If so, mark it for inclusion in the next render pass.
-
-		for (var i = 0, position; position = positions[i]; i++) {
-			if (position.x == x && position.y == y) {
-				position.active = true;
-				return;
-			}
-		}
-
-		// If the text doesn't exist at this position, create a new entry
-
-		// For the very first position we'll re-use the original element,
-		// while for subsequent ones we'll clone it.
-
-		position = {
-			active: true,
-			rendered: false,
-			element: positions.length ? info.element.clone() : info.element,
-			x: x,
-			y: y
-		};
-
-		positions.push(position);
-
-		// Move the element to its final position within the container
-
-		position.element.css({
-			top: Math.round(y),
-			left: Math.round(x),
-			'text-align': halign	// In case the text wraps
-		});
-	};
-
-	// Removes one or more text strings from the canvas text overlay.
-	//
-	// If no parameters are given, all text within the layer is removed.
-	//
-	// Note that the text is not immediately removed; it is simply marked as
-	// inactive, which will result in its removal on the next render pass.
-	// This avoids the performance penalty for 'clear and redraw' behavior,
-	// where we potentially get rid of all text on a layer, but will likely
-	// add back most or all of it later, as when redrawing axes, for example.
-	//
-	// @param {string} layer A string of space-separated CSS classes uniquely
-	//     identifying the layer containing this text.
-	// @param {number=} x X coordinate of the text.
-	// @param {number=} y Y coordinate of the text.
-	// @param {string=} text Text string to remove.
-	// @param {(string|object)=} font Either a string of space-separated CSS
-	//     classes or a font-spec object, defining the text's font and style.
-	// @param {number=} angle Angle at which the text is rotated, in degrees.
-	//     Angle is currently unused, it will be implemented in the future.
-
-	Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
-		if (text == null) {
-			var layerCache = this._textCache[layer];
-			if (layerCache != null) {
-				for (var styleKey in layerCache) {
-					if (hasOwnProperty.call(layerCache, styleKey)) {
-						var styleCache = layerCache[styleKey];
-						for (var key in styleCache) {
-							if (hasOwnProperty.call(styleCache, key)) {
-								var positions = styleCache[key].positions;
-								for (var i = 0, position; position = positions[i]; i++) {
-									position.active = false;
-								}
-							}
-						}
-					}
-				}
-			}
-		} else {
-			var positions = this.getTextInfo(layer, text, font, angle).positions;
-			for (var i = 0, position; position = positions[i]; i++) {
-				if (position.x == x && position.y == y) {
-					position.active = false;
-				}
-			}
-		}
-	};
-
-	///////////////////////////////////////////////////////////////////////////
-	// The top-level container for the entire plot.
+        if (this.height != height) {
+            element.height = height * pixelRatio;
+            element.style.height = height + "px";
+            this.height = height;
+        }
+
+        // Save the context, so we can reset in case we get replotted.  The
+        // restore ensure that we're really back at the initial state, and
+        // should be safe even if we haven't saved the initial state yet.
+
+        context.restore();
+        context.save();
+
+        // Scale the coordinate space to match the display density; so even though we
+        // may have twice as many pixels, we still want lines and other drawing to
+        // appear at the same size; the extra pixels will just make them crisper.
+
+        context.scale(pixelRatio, pixelRatio);
+    };
+
+    // Clears the entire canvas area, not including any overlaid HTML text
+
+    Canvas.prototype.clear = function() {
+        this.context.clearRect(0, 0, this.width, this.height);
+    };
+
+    // Finishes rendering the canvas, including managing the text overlay.
+
+    Canvas.prototype.render = function() {
+
+        var cache = this._textCache;
+
+        // For each text layer, add elements marked as active that haven't
+        // already been rendered, and remove those that are no longer active.
+
+        for (var layerKey in cache) {
+            if (hasOwnProperty.call(cache, layerKey)) {
+
+                var layer = this.getTextLayer(layerKey),
+                    layerCache = cache[layerKey];
+
+                layer.hide();
+
+                for (var styleKey in layerCache) {
+                    if (hasOwnProperty.call(layerCache, styleKey)) {
+                        var styleCache = layerCache[styleKey];
+                        for (var key in styleCache) {
+                            if (hasOwnProperty.call(styleCache, key)) {
+
+                                var positions = styleCache[key].positions;
+
+                                for (var i = 0, position; position = positions[i]; i++) {
+                                    if (position.active) {
+                                        if (!position.rendered) {
+                                            layer.append(position.element);
+                                            position.rendered = true;
+                                        }
+                                    } else {
+                                        positions.splice(i--, 1);
+                                        if (position.rendered) {
+                                            position.element.detach();
+                                        }
+                                    }
+                                }
+
+                                if (positions.length === 0) {
+                                    delete styleCache[key];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                layer.show();
+            }
+        }
+    };
+
+    // Creates (if necessary) and returns the text overlay container.
+    //
+    // @param {string} classes String of space-separated CSS classes used to
+    //     uniquely identify the text layer.
+    // @return {object} The jQuery-wrapped text-layer div.
+
+    Canvas.prototype.getTextLayer = function(classes) {
+
+        var layer = this.text[classes];
+
+        // Create the text layer if it doesn't exist
+
+        if (layer == null) {
+
+            // Create the text layer container, if it doesn't exist
+
+            if (this.textContainer == null) {
+                this.textContainer = $("<div class='flot-text'></div>")
+                    .css({
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        'font-size': "smaller",
+                        color: "#545454"
+                    })
+                    .insertAfter(this.element);
+            }
+
+            layer = this.text[classes] = $("<div></div>")
+                .addClass(classes)
+                .css({
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0
+                })
+                .appendTo(this.textContainer);
+        }
+
+        return layer;
+    };
+
+    // Creates (if necessary) and returns a text info object.
+    //
+    // The object looks like this:
+    //
+    // {
+    //     width: Width of the text's wrapper div.
+    //     height: Height of the text's wrapper div.
+    //     element: The jQuery-wrapped HTML div containing the text.
+    //     positions: Array of positions at which this text is drawn.
+    // }
+    //
+    // The positions array contains objects that look like this:
+    //
+    // {
+    //     active: Flag indicating whether the text should be visible.
+    //     rendered: Flag indicating whether the text is currently visible.
+    //     element: The jQuery-wrapped HTML div containing the text.
+    //     x: X coordinate at which to draw the text.
+    //     y: Y coordinate at which to draw the text.
+    // }
+    //
+    // Each position after the first receives a clone of the original element.
+    //
+    // The idea is that that the width, height, and general 'identity' of the
+    // text is constant no matter where it is placed; the placements are a
+    // secondary property.
+    //
+    // Canvas maintains a cache of recently-used text info objects; getTextInfo
+    // either returns the cached element or creates a new entry.
+    //
+    // @param {string} layer A string of space-separated CSS classes uniquely
+    //     identifying the layer containing this text.
+    // @param {string} text Text string to retrieve info for.
+    // @param {(string|object)=} font Either a string of space-separated CSS
+    //     classes or a font-spec object, defining the text's font and style.
+    // @param {number=} angle Angle at which to rotate the text, in degrees.
+    //     Angle is currently unused, it will be implemented in the future.
+    // @param {number=} width Maximum width of the text before it wraps.
+    // @return {object} a text info object.
+
+    Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
+
+        var textStyle, layerCache, styleCache, info;
+
+        // Cast the value to a string, in case we were given a number or such
+
+        text = "" + text;
+
+        // If the font is a font-spec object, generate a CSS font definition
+
+        if (typeof font === "object") {
+            textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px/" + font.lineHeight + "px " + font.family;
+        } else {
+            textStyle = font;
+        }
+
+        // Retrieve (or create) the cache for the text's layer and styles
+
+        layerCache = this._textCache[layer];
+
+        if (layerCache == null) {
+            layerCache = this._textCache[layer] = {};
+        }
+
+        styleCache = layerCache[textStyle];
+
+        if (styleCache == null) {
+            styleCache = layerCache[textStyle] = {};
+        }
+
+        info = styleCache[text];
+
+        // If we can't find a matching element in our cache, create a new one
+
+        if (info == null) {
+
+            var element = $("<div></div>").html(text)
+                .css({
+                    position: "absolute",
+                    'max-width': width,
+                    top: -9999
+                })
+                .appendTo(this.getTextLayer(layer));
+
+            if (typeof font === "object") {
+                element.css({
+                    font: textStyle,
+                    color: font.color
+                });
+            } else if (typeof font === "string") {
+                element.addClass(font);
+            }
+
+            info = styleCache[text] = {
+                width: element.outerWidth(true),
+                height: element.outerHeight(true),
+                element: element,
+                positions: []
+            };
+
+            element.detach();
+        }
+
+        return info;
+    };
+
+    // Adds a text string to the canvas text overlay.
+    //
+    // The text isn't drawn immediately; it is marked as rendering, which will
+    // result in its addition to the canvas on the next render pass.
+    //
+    // @param {string} layer A string of space-separated CSS classes uniquely
+    //     identifying the layer containing this text.
+    // @param {number} x X coordinate at which to draw the text.
+    // @param {number} y Y coordinate at which to draw the text.
+    // @param {string} text Text string to draw.
+    // @param {(string|object)=} font Either a string of space-separated CSS
+    //     classes or a font-spec object, defining the text's font and style.
+    // @param {number=} angle Angle at which to rotate the text, in degrees.
+    //     Angle is currently unused, it will be implemented in the future.
+    // @param {number=} width Maximum width of the text before it wraps.
+    // @param {string=} halign Horizontal alignment of the text; either "left",
+    //     "center" or "right".
+    // @param {string=} valign Vertical alignment of the text; either "top",
+    //     "middle" or "bottom".
+
+    Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
+
+        var info = this.getTextInfo(layer, text, font, angle, width),
+            positions = info.positions;
+
+        // Tweak the div's position to match the text's alignment
+
+        if (halign == "center") {
+            x -= info.width / 2;
+        } else if (halign == "right") {
+            x -= info.width;
+        }
+
+        if (valign == "middle") {
+            y -= info.height / 2;
+        } else if (valign == "bottom") {
+            y -= info.height;
+        }
+
+        // Determine whether this text already exists at this position.
+        // If so, mark it for inclusion in the next render pass.
+
+        for (var i = 0, position; position = positions[i]; i++) {
+            if (position.x == x && position.y == y) {
+                position.active = true;
+                return;
+            }
+        }
+
+        // If the text doesn't exist at this position, create a new entry
+
+        // For the very first position we'll re-use the original element,
+        // while for subsequent ones we'll clone it.
+
+        position = {
+            active: true,
+            rendered: false,
+            element: positions.length ? info.element.clone() : info.element,
+            x: x,
+            y: y
+        };
+
+        positions.push(position);
+
+        // Move the element to its final position within the container
+
+        position.element.css({
+            top: Math.round(y),
+            left: Math.round(x),
+            'text-align': halign    // In case the text wraps
+        });
+    };
+
+    // Removes one or more text strings from the canvas text overlay.
+    //
+    // If no parameters are given, all text within the layer is removed.
+    //
+    // Note that the text is not immediately removed; it is simply marked as
+    // inactive, which will result in its removal on the next render pass.
+    // This avoids the performance penalty for 'clear and redraw' behavior,
+    // where we potentially get rid of all text on a layer, but will likely
+    // add back most or all of it later, as when redrawing axes, for example.
+    //
+    // @param {string} layer A string of space-separated CSS classes uniquely
+    //     identifying the layer containing this text.
+    // @param {number=} x X coordinate of the text.
+    // @param {number=} y Y coordinate of the text.
+    // @param {string=} text Text string to remove.
+    // @param {(string|object)=} font Either a string of space-separated CSS
+    //     classes or a font-spec object, defining the text's font and style.
+    // @param {number=} angle Angle at which the text is rotated, in degrees.
+    //     Angle is currently unused, it will be implemented in the future.
+
+    Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
+        var i, position, positions;
+        if (text == null) {
+            var layerCache = this._textCache[layer];
+            if (layerCache != null) {
+                for (var styleKey in layerCache) {
+                    if (hasOwnProperty.call(layerCache, styleKey)) {
+                        var styleCache = layerCache[styleKey];
+                        for (var key in styleCache) {
+                            if (hasOwnProperty.call(styleCache, key)) {
+                                positions = styleCache[key].positions;
+                                for (i = 0; position = positions[i]; i++) {
+                                    position.active = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            positions = this.getTextInfo(layer, text, font, angle).positions;
+            for (i = 0; position = positions[i]; i++) {
+                if (position.x == x && position.y == y) {
+                    position.active = false;
+                }
+            }
+        }
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // The top-level container for the entire plot.
 
     function Plot(placeholder, data_, options_, plugins) {
         // data is on the form:
@@ -598,26 +601,26 @@ Licensed under the MIT license.
                 },
                 hooks: {}
             },
-        surface = null,     // the canvas for the plot itself
-        overlay = null,     // canvas for interactive stuff on top of plot
-        eventHolder = null, // jQuery object that events should be bound to
-        ctx = null, octx = null,
-        xaxes = [], yaxes = [],
-        plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        plotWidth = 0, plotHeight = 0,
-        hooks = {
-            processOptions: [],
-            processRawData: [],
-            processDatapoints: [],
-            processOffset: [],
-            drawBackground: [],
-            drawSeries: [],
-            draw: [],
-            bindEvents: [],
-            drawOverlay: [],
-            shutdown: []
-        },
-        plot = this;
+            surface = null,     // the canvas for the plot itself
+            overlay = null,     // canvas for interactive stuff on top of plot
+            eventHolder = null, // jQuery object that events should be bound to
+            ctx = null, octx = null,
+            xaxes = [], yaxes = [],
+            plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
+            plotWidth = 0, plotHeight = 0,
+            hooks = {
+                processOptions: [],
+                processRawData: [],
+                processDatapoints: [],
+                processOffset: [],
+                drawBackground: [],
+                drawSeries: [],
+                draw: [],
+                bindEvents: [],
+                drawOverlay: [],
+                shutdown: []
+            },
+            plot = this;
 
         // public functions
         plot.setData = setData;
@@ -636,10 +639,11 @@ Licensed under the MIT license.
         };
         plot.getData = function () { return series; };
         plot.getAxes = function () {
-            var res = {}, i;
+            var res = {};
             $.each(xaxes.concat(yaxes), function (_, axis) {
-                if (axis)
+                if (axis) {
                     res[axis.direction + (axis.n != 1 ? axis.n : "") + "axis"] = axis;
+                }
             });
             return res;
         };
@@ -659,8 +663,8 @@ Licensed under the MIT license.
         };
         plot.shutdown = shutdown;
         plot.resize = function () {
-        	var width = placeholder.width(),
-        		height = placeholder.height();
+            var width = placeholder.width(),
+                height = placeholder.height();
             surface.resize(width, height);
             overlay.resize(width, height);
         };
@@ -680,8 +684,9 @@ Licensed under the MIT license.
 
         function executeHooks(hook, args) {
             args = [plot].concat(args);
-            for (var i = 0; i < hook.length; ++i)
+            for (var i = 0; i < hook.length; ++i) {
                 hook[i].apply(this, args);
+            }
         }
 
         function initPlugins() {
@@ -695,8 +700,9 @@ Licensed under the MIT license.
             for (var i = 0; i < plugins.length; ++i) {
                 var p = plugins[i];
                 p.init(plot, classes);
-                if (p.options)
+                if (p.options) {
                     $.extend(true, options, p.options);
+                }
             }
         }
 
@@ -710,23 +716,31 @@ Licensed under the MIT license.
             // not expected behavior; avoid it by replacing them here.
 
             if (opts && opts.colors) {
-            	options.colors = opts.colors;
+                options.colors = opts.colors;
             }
 
-            if (options.xaxis.color == null)
+            if (options.xaxis.color == null) {
                 options.xaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
-            if (options.yaxis.color == null)
+            }
+            if (options.yaxis.color == null) {
                 options.yaxis.color = $.color.parse(options.grid.color).scale('a', 0.22).toString();
+            }
 
-            if (options.xaxis.tickColor == null) // grid.tickColor for back-compatibility
+            if (options.xaxis.tickColor == null) {
+                // grid.tickColor for back-compatibility
                 options.xaxis.tickColor = options.grid.tickColor || options.xaxis.color;
-            if (options.yaxis.tickColor == null) // grid.tickColor for back-compatibility
+            }
+            if (options.yaxis.tickColor == null) {
+                // grid.tickColor for back-compatibility
                 options.yaxis.tickColor = options.grid.tickColor || options.yaxis.color;
+            }
 
-            if (options.grid.borderColor == null)
+            if (options.grid.borderColor == null) {
                 options.grid.borderColor = options.grid.color;
-            if (options.grid.tickColor == null)
+            }
+            if (options.grid.tickColor == null) {
                 options.grid.tickColor = $.color.parse(options.grid.color).scale('a', 0.22).toString();
+            }
 
             // Fill in defaults for axis options, including any unspecified
             // font-spec fields, if a font-spec was provided.
@@ -784,10 +798,12 @@ Licensed under the MIT license.
             }
 
             // backwards compatibility, to be removed in future
-            if (options.xaxis.noTicks && options.xaxis.ticks == null)
+            if (options.xaxis.noTicks && options.xaxis.ticks == null) {
                 options.xaxis.ticks = options.xaxis.noTicks;
-            if (options.yaxis.noTicks && options.yaxis.ticks == null)
+            }
+            if (options.yaxis.noTicks && options.yaxis.ticks == null) {
                 options.yaxis.ticks = options.yaxis.noTicks;
+            }
             if (options.x2axis) {
                 options.xaxes[1] = $.extend(true, {}, options.xaxis, options.x2axis);
                 options.xaxes[1].position = "top";
@@ -796,31 +812,42 @@ Licensed under the MIT license.
                 options.yaxes[1] = $.extend(true, {}, options.yaxis, options.y2axis);
                 options.yaxes[1].position = "right";
             }
-            if (options.grid.coloredAreas)
+            if (options.grid.coloredAreas) {
                 options.grid.markings = options.grid.coloredAreas;
-            if (options.grid.coloredAreasColor)
+            }
+            if (options.grid.coloredAreasColor) {
                 options.grid.markingsColor = options.grid.coloredAreasColor;
-            if (options.lines)
+            }
+            if (options.lines) {
                 $.extend(true, options.series.lines, options.lines);
-            if (options.points)
+            }
+            if (options.points) {
                 $.extend(true, options.series.points, options.points);
-            if (options.bars)
+            }
+            if (options.bars) {
                 $.extend(true, options.series.bars, options.bars);
-            if (options.shadowSize != null)
+            }
+            if (options.shadowSize != null) {
                 options.series.shadowSize = options.shadowSize;
-            if (options.highlightColor != null)
+            }
+            if (options.highlightColor != null) {
                 options.series.highlightColor = options.highlightColor;
+            }
 
             // save options on axes for future reference
-            for (i = 0; i < options.xaxes.length; ++i)
+            for (i = 0; i < options.xaxes.length; ++i) {
                 getOrCreateAxis(xaxes, i + 1).options = options.xaxes[i];
-            for (i = 0; i < options.yaxes.length; ++i)
+            }
+            for (i = 0; i < options.yaxes.length; ++i) {
                 getOrCreateAxis(yaxes, i + 1).options = options.yaxes[i];
+            }
 
             // add hooks from options
-            for (var n in hooks)
-                if (options.hooks[n] && options.hooks[n].length)
+            for (var n in hooks) {
+                if (options.hooks[n] && options.hooks[n].length) {
                     hooks[n] = hooks[n].concat(options.hooks[n]);
+                }
+            }
 
             executeHooks(hooks.processOptions, [options]);
         }
@@ -843,9 +870,9 @@ Licensed under the MIT license.
                     $.extend(true, s, d[i]);
 
                     d[i].data = s.data;
-                }
-                else
+                } else {
                     s.data = d[i];
+                }
                 res.push(s);
             }
 
@@ -854,10 +881,13 @@ Licensed under the MIT license.
 
         function axisNumber(obj, coord) {
             var a = obj[coord + "axis"];
-            if (typeof a == "object") // if we got a real axis, extract number
+            if (typeof a == "object") {
+                // if we got a real axis, extract number
                 a = a.n;
-            if (typeof a != "number")
+            }
+            if (typeof a != "number") {
                 a = 1; // default to first axis
+            }
             return a;
         }
 
@@ -871,20 +901,24 @@ Licensed under the MIT license.
             var res = {}, i, axis;
             for (i = 0; i < xaxes.length; ++i) {
                 axis = xaxes[i];
-                if (axis && axis.used)
+                if (axis && axis.used) {
                     res["x" + axis.n] = axis.c2p(pos.left);
+                }
             }
 
             for (i = 0; i < yaxes.length; ++i) {
                 axis = yaxes[i];
-                if (axis && axis.used)
+                if (axis && axis.used) {
                     res["y" + axis.n] = axis.c2p(pos.top);
+                }
             }
 
-            if (res.x1 !== undefined)
+            if (res.x1 !== undefined) {
                 res.x = res.x1;
-            if (res.y1 !== undefined)
+            }
+            if (res.y1 !== undefined) {
                 res.y = res.y1;
+            }
 
             return res;
         }
@@ -897,8 +931,9 @@ Licensed under the MIT license.
                 axis = xaxes[i];
                 if (axis && axis.used) {
                     key = "x" + axis.n;
-                    if (pos[key] == null && axis.n == 1)
+                    if (pos[key] == null && axis.n == 1) {
                         key = "x";
+                    }
 
                     if (pos[key] != null) {
                         res.left = axis.p2c(pos[key]);
@@ -911,8 +946,9 @@ Licensed under the MIT license.
                 axis = yaxes[i];
                 if (axis && axis.used) {
                     key = "y" + axis.n;
-                    if (pos[key] == null && axis.n == 1)
+                    if (pos[key] == null && axis.n == 1) {
                         key = "y";
+                    }
 
                     if (pos[key] != null) {
                         res.top = axis.p2c(pos[key]);
@@ -925,12 +961,13 @@ Licensed under the MIT license.
         }
 
         function getOrCreateAxis(axes, number) {
-            if (!axes[number - 1])
+            if (!axes[number - 1]) {
                 axes[number - 1] = {
                     n: number, // save the number for future reference
                     direction: axes == xaxes ? "x" : "y",
                     options: $.extend(true, {}, axes == xaxes ? options.xaxis : options.yaxis)
                 };
+            }
 
             return axes[number - 1];
         }
@@ -977,12 +1014,16 @@ Licensed under the MIT license.
                 // Reset the variation after every few cycles, or else
                 // it will end up producing only white or black colors.
 
-                if (i % colorPoolSize == 0 && i) {
+                if (i % colorPoolSize === 0 && i) {
                     if (variation >= 0) {
                         if (variation < 0.5) {
                             variation = -variation - 0.2;
-                        } else variation = 0;
-                    } else variation = -variation;
+                        } else {
+                            variation = 0;
+                        }
+                    } else {
+                        variation = -variation;
+                    }
                 }
 
                 colors[i] = c.scale('rgb', 1 + variation);
@@ -998,20 +1039,22 @@ Licensed under the MIT license.
                 if (s.color == null) {
                     s.color = colors[colori].toString();
                     ++colori;
-                }
-                else if (typeof s.color == "number")
+                } else if (typeof s.color == "number") {
                     s.color = colors[s.color].toString();
+                }
 
                 // turn on lines automatically in case nothing is set
                 if (s.lines.show == null) {
                     var v, show = true;
-                    for (v in s)
+                    for (v in s) {
                         if (s[v] && s[v].show) {
                             show = false;
                             break;
                         }
-                    if (show)
+                    }
+                    if (show) {
                         s.lines.show = true;
+                    }
                 }
 
                 // If nothing was provided for lines.zero, default it to match
@@ -1031,15 +1074,15 @@ Licensed under the MIT license.
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 fakeInfinity = Number.MAX_VALUE,
-                i, j, k, m, length,
-                s, points, ps, x, y, axis, val, f, p,
-                data, format;
+                i, j, k, m, s, points, ps, val, f, p, data, format;
 
             function updateAxis(axis, min, max) {
-                if (min < axis.datamin && min != -fakeInfinity)
+                if (min < axis.datamin && min != -fakeInfinity) {
                     axis.datamin = min;
-                if (max > axis.datamax && max != fakeInfinity)
+                }
+                if (max > axis.datamax && max != fakeInfinity) {
                     axis.datamax = max;
+                }
             }
 
             $.each(allAxes(), function (_, axis) {
@@ -1081,8 +1124,9 @@ Licensed under the MIT license.
                     s.datapoints.format = format;
                 }
 
-                if (s.datapoints.pointsize != null)
+                if (s.datapoints.pointsize != null) {
                     continue; // already filled in
+                }
 
                 s.datapoints.pointsize = format.length;
 
@@ -1104,20 +1148,23 @@ Licensed under the MIT license.
                             if (f) {
                                 if (f.number && val != null) {
                                     val = +val; // convert to number
-                                    if (isNaN(val))
+                                    if (isNaN(val)) {
                                         val = null;
-                                    else if (val == Infinity)
+                                    } else if (val == Infinity) {
                                         val = fakeInfinity;
-                                    else if (val == -Infinity)
+                                    } else if (val == -Infinity) {
                                         val = -fakeInfinity;
+                                    }
                                 }
 
                                 if (val == null) {
-                                    if (f.required)
+                                    if (f.required) {
                                         nullify = true;
+                                    }
 
-                                    if (f.defaultValue != null)
+                                    if (f.defaultValue != null) {
                                         val = f.defaultValue;
+                                    }
                                 }
                             }
 
@@ -1142,18 +1189,18 @@ Licensed under the MIT license.
                             }
                             points[k + m] = null;
                         }
-                    }
-                    else {
+                    } else {
                         // a little bit of line specific stuff that
                         // perhaps shouldn't be here, but lacking
                         // better means...
-                        if (insertSteps && k > 0
-                            && points[k - ps] != null
-                            && points[k - ps] != points[k]
-                            && points[k - ps + 1] != points[k + 1]) {
+                        if (insertSteps && k > 0 &&
+                            points[k - ps] != null &&
+                            points[k - ps] != points[k] &&
+                            points[k - ps + 1] != points[k + 1]) {
                             // copy the point to make room for a middle point
-                            for (m = 0; m < ps; ++m)
+                            for (m = 0; m < ps; ++m) {
                                 points[k + ps + m] = points[k + m];
+                            }
 
                             // middle point has same y
                             points[k + 1] = points[k - ps + 1];
@@ -1183,26 +1230,32 @@ Licensed under the MIT license.
                     xmax = bottomSentry, ymax = bottomSentry;
 
                 for (j = 0; j < points.length; j += ps) {
-                    if (points[j] == null)
+                    if (points[j] == null) {
                         continue;
+                    }
 
                     for (m = 0; m < ps; ++m) {
                         val = points[j + m];
                         f = format[m];
-                        if (!f || f.autoscale === false || val == fakeInfinity || val == -fakeInfinity)
+                        if (!f || f.autoscale === false || val == fakeInfinity || val == -fakeInfinity) {
                             continue;
+                        }
 
                         if (f.x) {
-                            if (val < xmin)
+                            if (val < xmin) {
                                 xmin = val;
-                            if (val > xmax)
+                            }
+                            if (val > xmax) {
                                 xmax = val;
+                            }
                         }
                         if (f.y) {
-                            if (val < ymin)
+                            if (val < ymin) {
                                 ymin = val;
-                            if (val > ymax)
+                            }
+                            if (val > ymax) {
                                 ymax = val;
+                            }
                         }
                     }
                 }
@@ -1212,21 +1265,20 @@ Licensed under the MIT license.
                     var delta;
 
                     switch (s.bars.align) {
-                        case "left":
-                            delta = 0;
-                            break;
-                        case "right":
-                            delta = -s.bars.barWidth;
-                            break;
-                        default:
-                            delta = -s.bars.barWidth / 2;
+                    case "left":
+                        delta = 0;
+                        break;
+                    case "right":
+                        delta = -s.bars.barWidth;
+                        break;
+                    default:
+                        delta = -s.bars.barWidth / 2;
                     }
 
                     if (s.bars.horizontal) {
                         ymin += delta;
                         ymax += delta + s.bars.barWidth;
-                    }
-                    else {
+                    } else {
                         xmin += delta;
                         xmax += delta + s.bars.barWidth;
                     }
@@ -1237,10 +1289,12 @@ Licensed under the MIT license.
             }
 
             $.each(allAxes(), function (_, axis) {
-                if (axis.datamin == topSentry)
+                if (axis.datamin == topSentry) {
                     axis.datamin = null;
-                if (axis.datamax == bottomSentry)
+                }
+                if (axis.datamax == bottomSentry) {
                     axis.datamax = null;
+                }
             });
         }
 
@@ -1252,8 +1306,9 @@ Licensed under the MIT license.
             placeholder.css("padding", 0) // padding messes up the positioning
                 .children(":not(.flot-base,.flot-overlay)").remove();
 
-            if (placeholder.css("position") == 'static')
+            if (placeholder.css("position") == 'static') {
                 placeholder.css("position", "relative"); // for positioning labels and overlay
+            }
 
             surface = new Canvas("flot-base", placeholder);
             overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
@@ -1291,15 +1346,17 @@ Licensed under the MIT license.
                 eventHolder.bind("mouseleave", onMouseLeave);
             }
 
-            if (options.grid.clickable)
+            if (options.grid.clickable) {
                 eventHolder.click(onClick);
+            }
 
             executeHooks(hooks.bindEvents, [eventHolder]);
         }
 
         function shutdown() {
-            if (redrawTimeout)
+            if (redrawTimeout) {
                 clearTimeout(redrawTimeout);
+            }
 
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
@@ -1312,7 +1369,9 @@ Licensed under the MIT license.
             // set helper functions on the axis, assumes plot area
             // has been computed already
 
-            function identity(x) { return x; }
+            function identity(x) {
+                return x;
+            }
 
             var s, m, t = axis.options.transform || identity,
                 it = axis.options.inverseTransform;
@@ -1322,23 +1381,25 @@ Licensed under the MIT license.
             if (axis.direction == "x") {
                 s = axis.scale = plotWidth / Math.abs(t(axis.max) - t(axis.min));
                 m = Math.min(t(axis.max), t(axis.min));
-            }
-            else {
+            } else {
                 s = axis.scale = plotHeight / Math.abs(t(axis.max) - t(axis.min));
                 s = -s;
                 m = Math.max(t(axis.max), t(axis.min));
             }
 
             // data point to canvas coordinate
-            if (t == identity) // slight optimization
+            if (t == identity) {
+                // slight optimization
                 axis.p2c = function (p) { return (p - m) * s; };
-            else
+            } else {
                 axis.p2c = function (p) { return (t(p) - m) * s; };
+            }
             // canvas coordinate to data point
-            if (!it)
+            if (!it) {
                 axis.c2p = function (c) { return m + c / s; };
-            else
+            } else {
                 axis.c2p = function (c) { return it(m + c / s); };
+            }
         }
 
         function measureTickLabels(axis) {
@@ -1356,8 +1417,9 @@ Licensed under the MIT license.
 
                 var t = ticks[i];
 
-                if (!t.label)
+                if (!t.label) {
                     continue;
+                }
 
                 var info = surface.getTextInfo(layer, t.label, font, null, maxWidth);
 
@@ -1383,30 +1445,33 @@ Licensed under the MIT license.
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
                 all = axis.direction == "x" ? xaxes : yaxes,
-                index, innermost;
+                innermost;
 
             // determine axis margin
             var samePosition = $.grep(all, function (a) {
                 return a && a.options.position == pos && a.reserveSpace;
             });
-            if ($.inArray(axis, samePosition) == samePosition.length - 1)
+            if ($.inArray(axis, samePosition) == samePosition.length - 1) {
                 axisMargin = 0; // outermost
+            }
 
             // Determine whether the axis is the first (innermost) on its side
 
-            innermost = $.inArray(axis, samePosition) == 0;
+            innermost = $.inArray(axis, samePosition) === 0;
 
             // determine tick length - if we're innermost, we can use "full"
 
             if (tickLength == null) {
-                if (innermost)
+                if (innermost) {
                     tickLength = "full";
-                else
+                } else {
                     tickLength = 5;
+                }
             }
 
-            if (!isNaN(+tickLength))
+            if (!isNaN(+tickLength)) {
                 padding += +tickLength;
+            }
 
             // compute box
             if (axis.direction == "x") {
@@ -1459,15 +1524,16 @@ Licensed under the MIT license.
             // inside the canvas and isn't clipped off
 
             var minMargin = options.grid.minBorderMargin,
-                margins = { x: 0, y: 0 }, i, axis;
+                margins = { x: 0, y: 0 }, i;
 
             // check stuff from the plot (FIXME: this should just read
             // a value from the series, otherwise it's impossible to
             // customize)
             if (minMargin == null) {
                 minMargin = 0;
-                for (i = 0; i < series.length; ++i)
+                for (i = 0; i < series.length; ++i) {
                     minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
+                }
             }
 
             margins.x = margins.y = Math.ceil(minMargin);
@@ -1477,8 +1543,9 @@ Licensed under the MIT license.
             // jump as much around with replots
             $.each(allAxes(), function (_, axis) {
                 var dir = axis.direction;
-                if (axis.reserveSpace)
+                if (axis.reserveSpace) {
                     margins[dir] = Math.ceil(Math.max(margins[dir], (dir == "x" ? axis.labelWidth : axis.labelHeight) / 2));
+                }
             });
 
             plotOffset.left = Math.max(margins.x, plotOffset.left);
@@ -1488,11 +1555,11 @@ Licensed under the MIT license.
         }
 
         function setupGrid() {
-            var i, axes = allAxes(), showGrid = options.grid.show;
+            var a, i, axes = allAxes(), showGrid = options.grid.show;
 
             // Initialize the plot's offset from the edge of the canvas
 
-            for (var a in plotOffset) {
+            for (a in plotOffset) {
                 var margin = options.grid.margin || 0;
                 plotOffset[a] = typeof margin == "number" ? margin : margin[a] || 0;
             }
@@ -1501,11 +1568,10 @@ Licensed under the MIT license.
 
             // If the grid is visible, add its border width to the offset
 
-            for (var a in plotOffset) {
+            for (a in plotOffset) {
                 if(typeof(options.grid.borderWidth) == "object") {
                     plotOffset[a] += showGrid ? options.grid.borderWidth[a] : 0;
-                }
-                else {
+                } else {
                     plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
                 }
             }
@@ -1513,8 +1579,9 @@ Licensed under the MIT license.
             // init axes
             $.each(axes, function (_, axis) {
                 axis.show = axis.options.show;
-                if (axis.show == null)
+                if (axis.show == null) {
                     axis.show = axis.used; // by default an axis is visible if it's got data
+                }
 
                 axis.reserveSpace = axis.show || axis.options.reserveSpace;
 
@@ -1537,8 +1604,9 @@ Licensed under the MIT license.
                 // with all dimensions calculated, we can compute the
                 // axis bounding boxes, start from the outside
                 // (reverse order)
-                for (i = allocatedAxes.length - 1; i >= 0; --i)
+                for (i = allocatedAxes.length - 1; i >= 0; --i) {
                     allocateAxisBoxFirstPhase(allocatedAxes[i]);
+                }
 
                 // make sure we've got enough space for things that
                 // might stick out
@@ -1570,16 +1638,18 @@ Licensed under the MIT license.
                 max = +(opts.max != null ? opts.max : axis.datamax),
                 delta = max - min;
 
-            if (delta == 0.0) {
+            if (delta === 0.0) {
                 // degenerate case
-                var widen = max == 0 ? 1 : 0.01;
+                var widen = max === 0 ? 1 : 0.01;
 
-                if (opts.min == null)
+                if (opts.min == null) {
                     min -= widen;
+                }
                 // always widen max if we couldn't widen min to ensure we
                 // don't fall into min == max which doesn't work
-                if (opts.max == null || opts.min != null)
+                if (opts.max == null || opts.min != null) {
                     max += widen;
+                }
             }
             else {
                 // consider autoscaling
@@ -1589,13 +1659,15 @@ Licensed under the MIT license.
                         min -= delta * margin;
                         // make sure we don't go below zero if all values
                         // are positive
-                        if (min < 0 && axis.datamin != null && axis.datamin >= 0)
+                        if (min < 0 && axis.datamin != null && axis.datamin >= 0) {
                             min = 0;
+                        }
                     }
                     if (opts.max == null) {
                         max += delta * margin;
-                        if (max > 0 && axis.datamax != null && axis.datamax <= 0)
+                        if (max > 0 && axis.datamax != null && axis.datamax <= 0) {
                             max = 0;
+                        }
                     }
                 }
             }
@@ -1608,12 +1680,13 @@ Licensed under the MIT license.
 
             // estimate number of ticks
             var noTicks;
-            if (typeof opts.ticks == "number" && opts.ticks > 0)
+            if (typeof opts.ticks == "number" && opts.ticks > 0) {
                 noTicks = opts.ticks;
-            else
+            } else {
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
                 noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? surface.width : surface.height);
+            }
 
             var delta = (axis.max - axis.min) / noTicks,
                 dec = -Math.floor(Math.log(delta) / Math.LN10),
@@ -1681,28 +1754,29 @@ Licensed under the MIT license.
                     return ticks;
                 };
 
-				axis.tickFormatter = function (value, axis) {
+                axis.tickFormatter = function (value, axis) {
 
-					var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-					var formatted = "" + Math.round(value * factor) / factor;
+                    var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
+                    var formatted = "" + Math.round(value * factor) / factor;
 
-					// If tickDecimals was specified, ensure that we have exactly that
-					// much precision; otherwise default to the value's own precision.
+                    // If tickDecimals was specified, ensure that we have exactly that
+                    // much precision; otherwise default to the value's own precision.
 
-					if (axis.tickDecimals != null) {
-						var decimal = formatted.indexOf(".");
-						var precision = decimal == -1 ? 0 : formatted.length - decimal - 1;
-						if (precision < axis.tickDecimals) {
-							return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
-						}
-					}
+                    if (axis.tickDecimals != null) {
+                        var decimal = formatted.indexOf(".");
+                        var precision = decimal == -1 ? 0 : formatted.length - decimal - 1;
+                        if (precision < axis.tickDecimals) {
+                            return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
+                        }
+                    }
 
                     return formatted;
                 };
             }
 
-            if ($.isFunction(opts.tickFormatter))
+            if ($.isFunction(opts.tickFormatter)) {
                 axis.tickFormatter = function (v, axis) { return "" + opts.tickFormatter(v, axis); };
+            }
 
             if (opts.alignTicksWithAxis != null) {
                 var otherAxis = (axis.direction == "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
@@ -1710,10 +1784,12 @@ Licensed under the MIT license.
                     // consider snapping min/max to outermost nice ticks
                     var niceTicks = axis.tickGenerator(axis);
                     if (niceTicks.length > 0) {
-                        if (opts.min == null)
+                        if (opts.min == null) {
                             axis.min = Math.min(axis.min, niceTicks[0]);
-                        if (opts.max == null && niceTicks.length > 1)
+                        }
+                        if (opts.max == null && niceTicks.length > 1) {
                             axis.max = Math.max(axis.max, niceTicks[niceTicks.length - 1]);
+                        }
                     }
 
                     axis.tickGenerator = function (axis) {
@@ -1736,8 +1812,9 @@ Licensed under the MIT license.
                         // only proceed if the tick interval rounded
                         // with an extra decimal doesn't give us a
                         // zero at end
-                        if (!(ts.length > 1 && /\..*0$/.test((ts[1] - ts[0]).toFixed(extraDec))))
+                        if (!(ts.length > 1 && /\..*0$/.test((ts[1] - ts[0]).toFixed(extraDec)))) {
                             axis.tickDecimals = extraDec;
+                        }
                     }
                 }
             }
@@ -1745,14 +1822,15 @@ Licensed under the MIT license.
 
         function setTicks(axis) {
             var oticks = axis.options.ticks, ticks = [];
-            if (oticks == null || (typeof oticks == "number" && oticks > 0))
+            if (oticks == null || (typeof oticks == "number" && oticks > 0)) {
                 ticks = axis.tickGenerator(axis);
-            else if (oticks) {
-                if ($.isFunction(oticks))
+            } else if (oticks) {
+                if ($.isFunction(oticks)) {
                     // generate the ticks
                     ticks = oticks(axis);
-                else
+                } else {
                     ticks = oticks;
+                }
             }
 
             // clean up/labelify the supplied ticks, copy them over
@@ -1763,25 +1841,30 @@ Licensed under the MIT license.
                 var t = ticks[i];
                 if (typeof t == "object") {
                     v = +t[0];
-                    if (t.length > 1)
+                    if (t.length > 1) {
                         label = t[1];
-                }
-                else
+                    }
+                } else {
                     v = +t;
-                if (label == null)
+                }
+                if (label == null) {
                     label = axis.tickFormatter(v, axis);
-                if (!isNaN(v))
+                }
+                if (!isNaN(v)) {
                     axis.ticks.push({ v: v, label: label });
+                }
             }
         }
 
         function snapRangeToTicks(axis, ticks) {
             if (axis.options.autoscaleMargin && ticks.length > 0) {
                 // snap to ticks
-                if (axis.options.min == null)
+                if (axis.options.min == null) {
                     axis.min = Math.min(axis.min, ticks[0].v);
-                if (axis.options.max == null && ticks.length > 1)
+                }
+                if (axis.options.max == null && ticks.length > 1) {
                     axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
+                }
             }
         }
 
@@ -1794,8 +1877,9 @@ Licensed under the MIT license.
             var grid = options.grid;
 
             // draw background, if any
-            if (grid.show && grid.backgroundColor)
+            if (grid.show && grid.backgroundColor) {
                 drawBackground();
+            }
 
             if (grid.show && !grid.aboveData) {
                 drawGrid();
@@ -1827,8 +1911,9 @@ Licensed under the MIT license.
                 axis = axes[i];
                 if (axis.direction == coord) {
                     key = coord + axis.n + "axis";
-                    if (!ranges[key] && axis.n == 1)
+                    if (!ranges[key] && axis.n == 1) {
                         key = coord + "axis"; // support x1axis as xaxis
+                    }
                     if (ranges[key]) {
                         from = ranges[key].from;
                         to = ranges[key].to;
@@ -1890,27 +1975,33 @@ Licensed under the MIT license.
                         yrange = extractRange(m, "y");
 
                     // fill in missing
-                    if (xrange.from == null)
+                    if (xrange.from == null) {
                         xrange.from = xrange.axis.min;
-                    if (xrange.to == null)
+                    }
+                    if (xrange.to == null) {
                         xrange.to = xrange.axis.max;
-                    if (yrange.from == null)
+                    }
+                    if (yrange.from == null) {
                         yrange.from = yrange.axis.min;
-                    if (yrange.to == null)
+                    }
+                    if (yrange.to == null) {
                         yrange.to = yrange.axis.max;
+                    }
 
                     // clip
                     if (xrange.to < xrange.axis.min || xrange.from > xrange.axis.max ||
-                        yrange.to < yrange.axis.min || yrange.from > yrange.axis.max)
+                        yrange.to < yrange.axis.min || yrange.from > yrange.axis.max) {
                         continue;
+                    }
 
                     xrange.from = Math.max(xrange.from, xrange.axis.min);
                     xrange.to = Math.min(xrange.to, xrange.axis.max);
                     yrange.from = Math.max(yrange.from, yrange.axis.min);
                     yrange.to = Math.min(yrange.to, yrange.axis.max);
 
-                    if (xrange.from == xrange.to && yrange.from == yrange.to)
+                    if (xrange.from == xrange.to && yrange.from == yrange.to) {
                         continue;
+                    }
 
                     // then draw
                     xrange.from = xrange.axis.p2c(xrange.from);
@@ -1926,8 +2017,7 @@ Licensed under the MIT license.
                         ctx.moveTo(xrange.from, yrange.from);
                         ctx.lineTo(xrange.to, yrange.to);
                         ctx.stroke();
-                    }
-                    else {
+                    } else {
                         // fill area
                         ctx.fillStyle = m.color || options.grid.markingsColor;
                         ctx.fillRect(xrange.from, yrange.to,
@@ -1944,25 +2034,27 @@ Licensed under the MIT license.
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box,
                     t = axis.tickLength, x, y, xoff, yoff;
-                if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show || axis.ticks.length === 0) {
                     continue;
+                }
 
                 ctx.lineWidth = 1;
 
                 // find the edges
                 if (axis.direction == "x") {
                     x = 0;
-                    if (t == "full")
+                    if (t == "full") {
                         y = (axis.position == "top" ? 0 : plotHeight);
-                    else
+                    } else {
                         y = box.top - plotOffset.top + (axis.position == "top" ? box.height : 0);
-                }
-                else {
+                    }
+                } else {
                     y = 0;
-                    if (t == "full")
+                    if (t == "full") {
                         x = (axis.position == "left" ? 0 : plotWidth);
-                    else
+                    } else {
                         x = box.left - plotOffset.left + (axis.position == "left" ? box.width : 0);
+                    }
                 }
 
                 // draw tick bar
@@ -1970,10 +2062,11 @@ Licensed under the MIT license.
                     ctx.strokeStyle = axis.options.color;
                     ctx.beginPath();
                     xoff = yoff = 0;
-                    if (axis.direction == "x")
+                    if (axis.direction == "x") {
                         xoff = plotWidth + 1;
-                    else
+                    } else {
                         yoff = plotHeight + 1;
+                    }
 
                     if (ctx.lineWidth == 1) {
                         if (axis.direction == "x") {
@@ -1998,33 +2091,36 @@ Licensed under the MIT license.
 
                     xoff = yoff = 0;
 
-                    if (isNaN(v) || v < axis.min || v > axis.max
+                    if (isNaN(v) || v < axis.min || v > axis.max ||
                         // skip those lying on the axes if we got a border
-                        || (t == "full"
-                            && ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0)
-                            && (v == axis.min || v == axis.max)))
+                        (t == "full" &&
+                            ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0) &&
+                            (v == axis.min || v == axis.max))) {
                         continue;
+                    }
 
                     if (axis.direction == "x") {
                         x = axis.p2c(v);
                         yoff = t == "full" ? -plotHeight : t;
 
-                        if (axis.position == "top")
+                        if (axis.position == "top") {
                             yoff = -yoff;
-                    }
-                    else {
+                        }
+                    } else {
                         y = axis.p2c(v);
                         xoff = t == "full" ? -plotWidth : t;
 
-                        if (axis.position == "left")
+                        if (axis.position == "left") {
                             xoff = -xoff;
+                        }
                     }
 
                     if (ctx.lineWidth == 1) {
-                        if (axis.direction == "x")
+                        if (axis.direction == "x") {
                             x = Math.floor(x) + 0.5;
-                        else
+                        } else {
                             y = Math.floor(y) + 0.5;
+                        }
                     }
 
                     ctx.moveTo(x, y);
@@ -2083,8 +2179,7 @@ Licensed under the MIT license.
                         ctx.lineTo(0- bw.left/2, 0);
                         ctx.stroke();
                     }
-                }
-                else {
+                } else {
                     ctx.lineWidth = bw;
                     ctx.strokeStyle = options.grid.borderColor;
                     ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
@@ -2109,14 +2204,16 @@ Licensed under the MIT license.
 
                 surface.removeText(layer);
 
-                if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show || axis.ticks.length === 0) {
                     return;
+                }
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
 
                     tick = axis.ticks[i];
-                    if (!tick.label || tick.v < axis.min || tick.v > axis.max)
+                    if (!tick.label || tick.v < axis.min || tick.v > axis.max) {
                         continue;
+                    }
 
                     if (axis.direction == "x") {
                         halign = "center";
@@ -2144,12 +2241,15 @@ Licensed under the MIT license.
         }
 
         function drawSeries(series) {
-            if (series.lines.show)
+            if (series.lines.show) {
                 drawSeriesLines(series);
-            if (series.bars.show)
+            }
+            if (series.bars.show) {
                 drawSeriesBars(series);
-            if (series.points.show)
+            }
+            if (series.points.show) {
                 drawSeriesPoints(series);
+            }
         }
 
         function drawSeriesLines(series) {
@@ -2163,68 +2263,74 @@ Licensed under the MIT license.
                     var x1 = points[i - ps], y1 = points[i - ps + 1],
                         x2 = points[i], y2 = points[i + 1];
 
-                    if (x1 == null || x2 == null)
+                    if (x1 == null || x2 == null) {
                         continue;
+                    }
 
                     // clip with ymin
                     if (y1 <= y2 && y1 < axisy.min) {
-                        if (y2 < axisy.min)
+                        if (y2 < axisy.min) {
                             continue;   // line segment is outside
+                        }
                         // compute new intersection point
                         x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.min;
-                    }
-                    else if (y2 <= y1 && y2 < axisy.min) {
-                        if (y1 < axisy.min)
+                    } else if (y2 <= y1 && y2 < axisy.min) {
+                        if (y1 < axisy.min) {
                             continue;
+                        }
                         x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.min;
                     }
 
                     // clip with ymax
                     if (y1 >= y2 && y1 > axisy.max) {
-                        if (y2 > axisy.max)
+                        if (y2 > axisy.max) {
                             continue;
+                        }
                         x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.max;
-                    }
-                    else if (y2 >= y1 && y2 > axisy.max) {
-                        if (y1 > axisy.max)
+                    } else if (y2 >= y1 && y2 > axisy.max) {
+                        if (y1 > axisy.max) {
                             continue;
+                        }
                         x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.max;
                     }
 
                     // clip with xmin
                     if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min)
+                        if (x2 < axisx.min) {
                             continue;
+                        }
                         y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.min;
-                    }
-                    else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min)
+                    } else if (x2 <= x1 && x2 < axisx.min) {
+                        if (x1 < axisx.min) {
                             continue;
+                        }
                         y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.min;
                     }
 
                     // clip with xmax
                     if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max)
+                        if (x2 > axisx.max) {
                             continue;
+                        }
                         y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.max;
-                    }
-                    else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max)
+                    } else if (x2 >= x1 && x2 > axisx.max) {
+                        if (x1 > axisx.max) {
                             continue;
+                        }
                         y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.max;
                     }
 
-                    if (x1 != prevx || y1 != prevy)
+                    if (x1 != prevx || y1 != prevy) {
                         ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
+                    }
 
                     prevx = x2;
                     prevy = y2;
@@ -2237,15 +2343,16 @@ Licensed under the MIT license.
                 var points = datapoints.points,
                     ps = datapoints.pointsize,
                     bottom = Math.min(Math.max(0, axisy.min), axisy.max),
-                    i = 0, top, areaOpen = false,
+                    i = 0, areaOpen = false,
                     ypos = 1, segmentStart = 0, segmentEnd = 0;
 
                 // we process each segment in two turns, first forward
                 // direction to sketch out top, then once we hit the
                 // end we go backwards to sketch the bottom
                 while (true) {
-                    if (ps > 0 && i > points.length + ps)
+                    if (ps > 0 && i > points.length + ps) {
                         break;
+                    }
 
                     i += ps; // ps is negative if going backwards
 
@@ -2273,35 +2380,38 @@ Licensed under the MIT license.
                         }
                     }
 
-                    if (x1 == null || x2 == null)
+                    if (x1 == null || x2 == null) {
                         continue;
+                    }
 
                     // clip x values
 
                     // clip with xmin
                     if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min)
+                        if (x2 < axisx.min) {
                             continue;
+                        }
                         y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.min;
-                    }
-                    else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min)
+                    } else if (x2 <= x1 && x2 < axisx.min) {
+                        if (x1 < axisx.min) {
                             continue;
+                        }
                         y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.min;
                     }
 
                     // clip with xmax
                     if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max)
+                        if (x2 > axisx.max) {
                             continue;
+                        }
                         y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.max;
-                    }
-                    else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max)
+                    } else if (x2 >= x1 && x2 > axisx.max) {
+                        if (x1 > axisx.max) {
                             continue;
+                        }
                         y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.max;
                     }
@@ -2318,8 +2428,7 @@ Licensed under the MIT license.
                         ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
                         continue;
-                    }
-                    else if (y1 <= axisy.min && y2 <= axisy.min) {
+                    } else if (y1 <= axisy.min && y2 <= axisy.min) {
                         ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
                         ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
                         continue;
@@ -2338,8 +2447,7 @@ Licensed under the MIT license.
                     if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
                         x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.min;
-                    }
-                    else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
+                    } else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
                         x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.min;
                     }
@@ -2348,8 +2456,7 @@ Licensed under the MIT license.
                     if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
                         x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.max;
-                    }
-                    else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
+                    } else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
                         x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.max;
                     }
@@ -2401,8 +2508,9 @@ Licensed under the MIT license.
                 plotLineArea(series.datapoints, series.xaxis, series.yaxis);
             }
 
-            if (lw > 0)
+            if (lw > 0) {
                 plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
+            }
             ctx.restore();
         }
 
@@ -2412,16 +2520,18 @@ Licensed under the MIT license.
 
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i], y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                         continue;
+                    }
 
                     ctx.beginPath();
                     x = axisx.p2c(x);
                     y = axisy.p2c(y) + offset;
-                    if (symbol == "circle")
+                    if (symbol == "circle") {
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    else
+                    } else {
                         symbol(ctx, x, y, radius, shadow);
+                    }
                     ctx.closePath();
 
                     if (fillStyle) {
@@ -2445,8 +2555,9 @@ Licensed under the MIT license.
             // Doing the conditional here allows the shadow setting to still be 
             // optional even with a lineWidth of 0.
 
-            if( lw == 0 )
+            if( lw === 0 ) {
                 lw = 0.0001;
+            }
 
             if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
@@ -2493,8 +2604,7 @@ Licensed under the MIT license.
                     drawLeft = true;
                     drawRight = false;
                 }
-            }
-            else {
+            } else {
                 drawLeft = drawRight = drawTop = true;
                 drawBottom = false;
                 left = x + barLeft;
@@ -2514,8 +2624,9 @@ Licensed under the MIT license.
 
             // clip
             if (right < axisx.min || left > axisx.max ||
-                top < axisy.min || bottom > axisy.max)
+                top < axisy.min || bottom > axisy.max) {
                 return;
+            }
 
             if (left < axisx.min) {
                 left = axisx.min;
@@ -2545,7 +2656,7 @@ Licensed under the MIT license.
             // fill the bar
             if (fillStyleCallback) {
                 c.fillStyle = fillStyleCallback(bottom, top);
-                c.fillRect(left, top, right - left, bottom - top)
+                c.fillRect(left, top, right - left, bottom - top);
             }
 
             // draw outline
@@ -2554,22 +2665,26 @@ Licensed under the MIT license.
 
                 // FIXME: inline moveTo is buggy with excanvas
                 c.moveTo(left, bottom);
-                if (drawLeft)
+                if (drawLeft) {
                     c.lineTo(left, top);
-                else
+                } else {
                     c.moveTo(left, top);
-                if (drawTop)
+                }
+                if (drawTop) {
                     c.lineTo(right, top);
-                else
+                } else {
                     c.moveTo(right, top);
-                if (drawRight)
+                }
+                if (drawRight) {
                     c.lineTo(right, bottom);
-                else
+                } else {
                     c.moveTo(right, bottom);
-                if (drawBottom)
+                }
+                if (drawBottom) {
                     c.lineTo(left, bottom);
-                else
+                } else {
                     c.moveTo(left, bottom);
+                }
                 c.stroke();
             }
         }
@@ -2579,8 +2694,9 @@ Licensed under the MIT license.
                 var points = datapoints.points, ps = datapoints.pointsize;
 
                 for (var i = 0; i < points.length; i += ps) {
-                    if (points[i] == null)
+                    if (points[i] == null) {
                         continue;
+                    }
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
@@ -2595,14 +2711,14 @@ Licensed under the MIT license.
             var barLeft;
 
             switch (series.bars.align) {
-                case "left":
-                    barLeft = 0;
-                    break;
-                case "right":
-                    barLeft = -series.bars.barWidth;
-                    break;
-                default:
-                    barLeft = -series.bars.barWidth / 2;
+            case "left":
+                barLeft = 0;
+                break;
+            case "right":
+                barLeft = -series.bars.barWidth;
+                break;
+            default:
+                barLeft = -series.bars.barWidth / 2;
             }
 
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
@@ -2612,11 +2728,13 @@ Licensed under the MIT license.
 
         function getFillStyle(filloptions, seriesColor, bottom, top) {
             var fill = filloptions.fill;
-            if (!fill)
+            if (!fill) {
                 return null;
+            }
 
-            if (filloptions.fillColor)
+            if (filloptions.fillColor) {
                 return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
+            }
 
             var c = $.color.parse(seriesColor);
             c.a = typeof fill == "number" ? fill : 0.4;
@@ -2628,15 +2746,17 @@ Licensed under the MIT license.
 
             placeholder.find(".legend").remove();
 
-            if (!options.legend.show)
+            if (!options.legend.show) {
                 return;
+            }
 
-            var fragments = [], entries = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+            var i, s, label, 
+                fragments = [], entries = [], rowStarted = false,
+                lf = options.legend.labelFormatter;
 
             // Build a list of legend entries, with each having a label and a color
 
-            for (var i = 0; i < series.length; ++i) {
+            for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 if (s.label) {
                     label = lf ? lf(s.label, s) : s.label;
@@ -2655,7 +2775,7 @@ Licensed under the MIT license.
                 if ($.isFunction(options.legend.sorted)) {
                     entries.sort(options.legend.sorted);
                 } else if (options.legend.sorted == "reverse") {
-                	entries.reverse();
+                    entries.reverse();
                 } else {
                     var ascending = options.legend.sorted != "descending";
                     entries.sort(function(a, b) {
@@ -2668,13 +2788,14 @@ Licensed under the MIT license.
 
             // Generate markup for the list of entries, in their final order
 
-            for (var i = 0; i < entries.length; ++i) {
+            for (i = 0; i < entries.length; ++i) {
 
                 var entry = entries[i];
 
-                if (i % options.legend.noColumns == 0) {
-                    if (rowStarted)
+                if (i % options.legend.noColumns === 0) {
+                    if (rowStarted) {
                         fragments.push('</tr>');
+                    }
                     fragments.push('<tr>');
                     rowStarted = true;
                 }
@@ -2685,41 +2806,47 @@ Licensed under the MIT license.
                 );
             }
 
-            if (rowStarted)
+            if (rowStarted) {
                 fragments.push('</tr>');
+            }
 
-            if (fragments.length == 0)
+            if (fragments.length === 0) {
                 return;
+            }
 
             var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
-            if (options.legend.container != null)
+            if (options.legend.container != null) {
                 $(options.legend.container).html(table);
-            else {
+            } else {
                 var pos = "",
                     p = options.legend.position,
                     m = options.legend.margin;
-                if (m[0] == null)
+                if (m[0] == null) {
                     m = [m, m];
-                if (p.charAt(0) == "n")
+                }
+                if (p.charAt(0) == "n") {
                     pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
-                else if (p.charAt(0) == "s")
+                } else if (p.charAt(0) == "s") {
                     pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
-                if (p.charAt(1) == "e")
+                }
+                if (p.charAt(1) == "e") {
                     pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
-                else if (p.charAt(1) == "w")
+                } else if (p.charAt(1) == "w") {
                     pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
+                }
                 var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
-                if (options.legend.backgroundOpacity != 0.0) {
+                if (options.legend.backgroundOpacity !== 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
                     // label boxes
                     var c = options.legend.backgroundColor;
                     if (c == null) {
                         c = options.grid.backgroundColor;
-                        if (c && typeof c == "string")
+                        if (c && typeof c == "string") {
                             c = $.color.parse(c);
-                        else
+                        } else {
                             c = $.color.extract(legend, 'background-color');
+                        }
                         c.a = 1;
                         c = c.toString();
                     }
@@ -2739,11 +2866,12 @@ Licensed under the MIT license.
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
                 smallestDistance = maxDistance * maxDistance + 1,
-                item = null, foundPoint = false, i, j, ps;
+                item = null, i, j, ps, x, y, b;
 
             for (i = series.length - 1; i >= 0; --i) {
-                if (!seriesFilter(series[i]))
+                if (!seriesFilter(series[i])) {
                     continue;
+                }
 
                 var s = series[i],
                     axisx = s.xaxis,
@@ -2757,22 +2885,27 @@ Licensed under the MIT license.
                 ps = s.datapoints.pointsize;
                 // with inverse transforms, we can't use the maxx/maxy
                 // optimization, sadly
-                if (axisx.options.inverseTransform)
+                if (axisx.options.inverseTransform) {
                     maxx = Number.MAX_VALUE;
-                if (axisy.options.inverseTransform)
+                }
+                if (axisy.options.inverseTransform) {
                     maxy = Number.MAX_VALUE;
+                }
 
                 if (s.lines.show || s.points.show) {
                     for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1];
-                        if (x == null)
+                        x = points[j];
+                        y = points[j + 1];
+                        if (x == null) {
                             continue;
+                        }
 
                         // For points and lines, the cursor must be within a
                         // certain distance to the data point
                         if (x - mx > maxx || x - mx < -maxx ||
-                            y - my > maxy || y - my < -maxy)
+                            y - my > maxy || y - my < -maxy) {
                             continue;
+                        }
 
                         // We have to calculate distances in pixels, not in
                         // data units, because the scales of the axes may be different
@@ -2794,30 +2927,36 @@ Licensed under the MIT license.
                     var barLeft, barRight;
 
                     switch (s.bars.align) {
-                        case "left":
-                            barLeft = 0;
-                            break;
-                        case "right":
-                            barLeft = -s.bars.barWidth;
-                            break;
-                        default:
-                            barLeft = -s.bars.barWidth / 2;
+                    case "left":
+                        barLeft = 0;
+                        break;
+                    case "right":
+                        barLeft = -s.bars.barWidth;
+                        break;
+                    default:
+                        barLeft = -s.bars.barWidth / 2;
                     }
 
                     barRight = barLeft + s.bars.barWidth;
 
                     for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1], b = points[j + 2];
-                        if (x == null)
+                        x = points[j];
+                        if (x == null) {
                             continue;
-
+                        }
+                        
+                        y = points[j + 1];
+                        b = points[j + 2];
+                        
                         // for a bar graph, the cursor must be inside the bar
                         if (series[i].bars.horizontal ?
                             (mx <= Math.max(b, x) && mx >= Math.min(b, x) &&
                              my >= y + barLeft && my <= y + barRight) :
                             (mx >= x + barLeft && mx <= x + barRight &&
-                             my >= Math.min(b, y) && my <= Math.max(b, y)))
-                                item = [i, j / ps];
+                             my >= Math.min(b, y) && my <= Math.max(b, y))) {
+                            
+                            item = [i, j / ps];
+                        }
                     }
                 }
             }
@@ -2837,20 +2976,25 @@ Licensed under the MIT license.
         }
 
         function onMouseMove(e) {
-            if (options.grid.hoverable)
-                triggerClickHoverEvent("plothover", e,
-                                       function (s) { return s["hoverable"] != false; });
+            if (options.grid.hoverable) {
+                triggerClickHoverEvent("plothover", e, function (s) {
+                    return !!s["hoverable"]; 
+                });
+            }
         }
 
         function onMouseLeave(e) {
-            if (options.grid.hoverable)
-                triggerClickHoverEvent("plothover", e,
-                                       function (s) { return false; });
+            if (options.grid.hoverable) {
+                triggerClickHoverEvent("plothover", e, function() {
+                    return false;
+                });
+            }
         }
 
         function onClick(e) {
-            triggerClickHoverEvent("plotclick", e,
-                                   function (s) { return s["clickable"] != false; });
+            triggerClickHoverEvent("plotclick", e, function (s) {
+                return !!s["clickable"]; 
+            });
         }
 
         // trigger click or hover event (they send the same parameters
@@ -2879,12 +3023,14 @@ Licensed under the MIT license.
                     if (h.auto == eventname &&
                         !(item && h.series == item.series &&
                           h.point[0] == item.datapoint[0] &&
-                          h.point[1] == item.datapoint[1]))
+                          h.point[1] == item.datapoint[1])) {
                         unhighlight(h.series, h.point);
+                    }
                 }
 
-                if (item)
+                if (item) {
                     highlight(item.series, item.datapoint, eventname);
+                }
             }
 
             placeholder.trigger(eventname, [ pos, item ]);
@@ -2897,8 +3043,9 @@ Licensed under the MIT license.
                 return;
             }
 
-            if (!redrawTimeout)
+            if (!redrawTimeout) {
                 redrawTimeout = setTimeout(drawOverlay, t);
+            }
         }
 
         function drawOverlay() {
@@ -2913,10 +3060,11 @@ Licensed under the MIT license.
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];
 
-                if (hi.series.bars.show)
+                if (hi.series.bars.show) {
                     drawBarHighlight(hi.series, hi.point);
-                else
+                } else {
                     drawPointHighlight(hi.series, hi.point);
+                }
             }
             octx.restore();
 
@@ -2924,8 +3072,9 @@ Licensed under the MIT license.
         }
 
         function highlight(s, point, auto) {
-            if (typeof s == "number")
+            if (typeof s == "number") {
                 s = series[s];
+            }
 
             if (typeof point == "number") {
                 var ps = s.datapoints.pointsize;
@@ -2937,9 +3086,9 @@ Licensed under the MIT license.
                 highlights.push({ series: s, point: point, auto: auto });
 
                 triggerRedrawOverlay();
-            }
-            else if (!auto)
+            } else if (!auto) {
                 highlights[i].auto = false;
+            }
         }
 
         function unhighlight(s, point) {
@@ -2949,8 +3098,9 @@ Licensed under the MIT license.
                 return;
             }
 
-            if (typeof s == "number")
+            if (typeof s == "number") {
                 s = series[s];
+            }
 
             if (typeof point == "number") {
                 var ps = s.datapoints.pointsize;
@@ -2968,9 +3118,9 @@ Licensed under the MIT license.
         function indexOfHighlight(s, p) {
             for (var i = 0; i < highlights.length; ++i) {
                 var h = highlights[i];
-                if (h.series == s && h.point[0] == p[0]
-                    && h.point[1] == p[1])
+                if (h.series == s && h.point[0] == p[0] && h.point[1] == p[1]) {
                     return i;
+                }
             }
             return -1;
         }
@@ -2980,8 +3130,9 @@ Licensed under the MIT license.
                 axisx = series.xaxis, axisy = series.yaxis,
                 highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString();
 
-            if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+            if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                 return;
+            }
 
             var pointRadius = series.points.radius + series.points.lineWidth / 2;
             octx.lineWidth = pointRadius;
@@ -2991,10 +3142,11 @@ Licensed under the MIT license.
             y = axisy.p2c(y);
 
             octx.beginPath();
-            if (series.points.symbol == "circle")
+            if (series.points.symbol == "circle") {
                 octx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            else
+            } else {
                 series.points.symbol(octx, x, y, radius, false);
+            }
             octx.closePath();
             octx.stroke();
         }
@@ -3005,14 +3157,14 @@ Licensed under the MIT license.
                 barLeft;
 
             switch (series.bars.align) {
-                case "left":
-                    barLeft = 0;
-                    break;
-                case "right":
-                    barLeft = -series.bars.barWidth;
-                    break;
-                default:
-                    barLeft = -series.bars.barWidth / 2;
+            case "left":
+                barLeft = 0;
+                break;
+            case "right":
+                barLeft = -series.bars.barWidth;
+                break;
+            default:
+                barLeft = -series.bars.barWidth / 2;
             }
 
             octx.lineWidth = series.bars.lineWidth;
@@ -3023,9 +3175,9 @@ Licensed under the MIT license.
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
-            if (typeof spec == "string")
+            if (typeof spec == "string") {
                 return spec;
-            else {
+            } else {
                 // assume this is a gradient spec; IE currently only
                 // supports a simple vertical gradient properly, so that's
                 // what we support too
@@ -3035,10 +3187,12 @@ Licensed under the MIT license.
                     var c = spec.colors[i];
                     if (typeof c != "string") {
                         var co = $.color.parse(defaultColor);
-                        if (c.brightness != null)
+                        if (c.brightness != null) {
                             co = co.scale('rgb', c.brightness);
-                        if (c.opacity != null)
+                        }
+                        if (c.opacity != null) {
                             co.a *= c.opacity;
+                        }
                         c = co.toString();
                     }
                     gradient.addColorStop(i / (l - 1), c);

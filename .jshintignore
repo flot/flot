@@ -1,6 +1,4 @@
 node_modules/
 bower_components/
 **/*.min.js
-jquery.js
-jquery.flot.js
 examples/axes-time-zone/date.js
