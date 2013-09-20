@@ -4,6 +4,5 @@ bower_components/
 jquery.js
 jquery.colorhelpers.js
 jquery.flot.canvas.js
-jquery.flot.categories.js
 jquery.flot.js
 examples/axes-time-zone/date.js
