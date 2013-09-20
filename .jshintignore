@@ -1,0 +1,15 @@
+node_modules/
+bower_components/
+**/*.min.js
+jquery.js
+jquery.colorhelpers.js
+jquery.flot.canvas.js
+jquery.flot.categories.js
+jquery.flot.crosshair.js
+jquery.flot.errorbars.js
+jquery.flot.image.js
+jquery.flot.js
+jquery.flot.navigate.js
+jquery.flot.pie.js
+jquery.flot.resize.js
+examples/axes-time-zone/date.js
