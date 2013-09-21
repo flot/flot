@@ -42,12 +42,13 @@ charts or filled areas).
 
     function init(plot) {
         function findMatchingSeries(s, allseries) {
-            var res = null;
-            for (var i = 0; i < allseries.length; ++i) {
-                if (s == allseries[i]) {
+            var i,
+                res = null;
+            for (i = 0; i < allseries.length; ++i) {
+                if (s === allseries[i]) {
                     break;
                 }
-                if (allseries[i].stack == s.stack) {
+                if (allseries[i].stack === s.stack) {
                     res = allseries[i];
                 }
             }
@@ -56,36 +57,38 @@ charts or filled areas).
         }
 
         function stackData(plot, s, datapoints) {
+            var accumulateOffset, horizontal, keyOffset, len, m, other, otherpoints, otherps, points, ps, px, py, intery, qx, qy, bottom, withbottom, withlines, withsteps,
+                newpoints = [],
+                fromgap = true,
+                i = 0,
+                j = 0;
+
             if (s.stack == null || s.stack === false) {
                 return;
             }
 
-            var other = findMatchingSeries(s, plot.getData());
+            other = findMatchingSeries(s, plot.getData());
             if (!other) {
                 return;
             }
 
-            var ps = datapoints.pointsize,
-                points = datapoints.points,
-                otherps = other.datapoints.pointsize,
-                otherpoints = other.datapoints.points,
-                newpoints = [],
-                px, py, intery, qx, qy, bottom,
-                withlines = s.lines.show,
-                horizontal = s.bars.horizontal,
-                withbottom = ps > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y),
-                withsteps = withlines && s.lines.steps,
-                fromgap = true,
-                keyOffset = horizontal ? 1 : 0,
-                accumulateOffset = horizontal ? 0 : 1,
-                i = 0, j = 0, l, m;
+            ps = datapoints.pointsize;
+            points = datapoints.points;
+            otherps = other.datapoints.pointsize;
+            otherpoints = other.datapoints.points;
+            withlines = s.lines.show;
+            horizontal = s.bars.horizontal;
+            withbottom = ps > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y);
+            withsteps = withlines && s.lines.steps;
+            keyOffset = horizontal ? 1 : 0;
+            accumulateOffset = horizontal ? 0 : 1;
 
             while (true) {
                 if (i >= points.length) {
                     break;
                 }
 
-                l = newpoints.length;
+                len = newpoints.length;
 
                 if (points[i] == null) {
                     // copy gaps
@@ -116,12 +119,12 @@ charts or filled areas).
                     qy = otherpoints[j + accumulateOffset];
                     bottom = 0;
 
-                    if (px == qx) {
+                    if (px === qx) {
                         for (m = 0; m < ps; ++m) {
                             newpoints.push(points[i + m]);
                         }
 
-                        newpoints[l + accumulateOffset] += qy;
+                        newpoints[len + accumulateOffset] += qy;
                         bottom = qy;
 
                         i += ps;
@@ -157,27 +160,27 @@ charts or filled areas).
                             bottom = qy + (otherpoints[j - otherps + accumulateOffset] - qy) * (px - qx) / (otherpoints[j - otherps + keyOffset] - qx);
                         }
 
-                        newpoints[l + accumulateOffset] += bottom;
+                        newpoints[len + accumulateOffset] += bottom;
 
                         i += ps;
                     }
 
                     fromgap = false;
 
-                    if (l != newpoints.length && withbottom) {
-                        newpoints[l + 2] += bottom;
+                    if (len !== newpoints.length && withbottom) {
+                        newpoints[len + 2] += bottom;
                     }
                 }
 
                 // maintain the line steps invariant
-                if (withsteps && l != newpoints.length && l > 0 &&
-                    newpoints[l] != null &&
-                    newpoints[l] != newpoints[l - ps] &&
-                    newpoints[l + 1] != newpoints[l - ps + 1]) {
+                if (withsteps && len !== newpoints.length && len > 0 &&
+                    newpoints[len] != null &&
+                    newpoints[len] !== newpoints[len - ps] &&
+                    newpoints[len + 1] !== newpoints[len - ps + 1]) {
                     for (m = 0; m < ps; ++m) {
-                        newpoints[l + ps + m] = newpoints[l + m];
+                        newpoints[len + ps + m] = newpoints[len + m];
                     }
-                    newpoints[l + 1] = newpoints[l - ps + 1];
+                    newpoints[len + 1] = newpoints[len - ps + 1];
                 }
             }
 
@@ -190,7 +193,7 @@ charts or filled areas).
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'stack',
-        version: '1.2'
+        name: "stack",
+        version: "1.2"
     });
 })(jQuery);
