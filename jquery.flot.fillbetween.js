@@ -60,30 +60,30 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 		}
 
 		function computeFillBottoms( plot, s, datapoints ) {
+            var bottom, intery, len, m, ps, other, otherps, otherpoints,
+                points, px, py, qx, qy, withlines, withbottom, withsteps,
+                fromgap = true,
+                i = 0,
+                j = 0,
+                newpoints = [];
 
 			if ( s.fillBetween == null ) {
 				return;
 			}
 
-			var other = findBottomSeries( s, plot.getData() );
+			other = findBottomSeries( s, plot.getData() );
 
 			if ( !other ) {
 				return;
 			}
 
-			var ps = datapoints.pointsize,
-				points = datapoints.points,
-				otherps = other.datapoints.pointsize,
-				otherpoints = other.datapoints.points,
-				newpoints = [],
-				px, py, intery, qx, qy, bottom,
-				withlines = s.lines.show,
-				withbottom = ps > 2 && datapoints.format[2].y,
-				withsteps = withlines && s.lines.steps,
-				fromgap = true,
-				i = 0,
-				j = 0,
-				l, m;
+			ps = datapoints.pointsize;
+			points = datapoints.points;
+			otherps = other.datapoints.pointsize;
+			otherpoints = other.datapoints.points;
+			withlines = s.lines.show;
+			withbottom = ps > 2 && datapoints.format[2].y;
+			withsteps = withlines && s.lines.steps;
 
 			while ( true ) {
 
@@ -91,7 +91,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 					break;
 				}
 
-				l = newpoints.length;
+				len = newpoints.length;
 
 				if ( points[ i ] == null ) {
 
@@ -185,28 +185,26 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 							bottom = qy + ( otherpoints[ j - otherps + 1 ] - qy ) * ( px - qx ) / ( otherpoints[ j - otherps ] - qx );
 						}
 
-						//newpoints[l + 1] += bottom;
-
 						i += ps;
 					}
 
 					fromgap = false;
 
-					if ( l !== newpoints.length && withbottom ) {
-						newpoints[ l + 2 ] = bottom;
+					if ( len !== newpoints.length && withbottom ) {
+						newpoints[ len + 2 ] = bottom;
 					}
 				}
 
 				// maintain the line steps invariant
 
-				if ( withsteps && l !== newpoints.length && l > 0 &&
-					newpoints[ l ] !== null &&
-					newpoints[ l ] !== newpoints[ l - ps ] &&
-					newpoints[ l + 1 ] !== newpoints[ l - ps + 1 ] ) {
+				if ( withsteps && len !== newpoints.length && len > 0 &&
+					newpoints[ len ] !== null &&
+					newpoints[ len ] !== newpoints[ len - ps ] &&
+					newpoints[ len + 1 ] !== newpoints[ len - ps + 1 ] ) {
 					for (m = 0; m < ps; ++m) {
-						newpoints[ l + ps + m ] = newpoints[ l + m ];
+						newpoints[ len + ps + m ] = newpoints[ len + m ];
 					}
-					newpoints[ l + 1 ] = newpoints[ l - ps + 1 ];
+					newpoints[ len + 1 ] = newpoints[ len - ps + 1 ];
 				}
 			}
 
