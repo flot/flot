@@ -66,7 +66,7 @@ The plugin also adds four public methods:
             lineWidth: 1
         }
     };
-    
+
     function init(plot) {
         // position of crosshair in pixels
         var crosshair = { x: -1, y: -1, locked: false };
@@ -79,12 +79,12 @@ The plugin also adds four public methods:
                 crosshair.x = Math.max(0, Math.min(o.left, plot.width()));
                 crosshair.y = Math.max(0, Math.min(o.top, plot.height()));
             }
-            
+
             plot.triggerRedrawOverlay();
         };
-        
+
         plot.clearCrosshair = plot.setCrosshair; // passes null for pos
-        
+
         plot.lockCrosshair = function lockCrosshair(pos) {
             if (pos) {
                 plot.setCrosshair(pos);
@@ -101,7 +101,7 @@ The plugin also adds four public methods:
                 return;
             }
 
-            if (crosshair.x != -1) {
+            if (crosshair.x !== -1) {
                 crosshair.x = -1;
                 plot.triggerRedrawOverlay();
             }
@@ -111,18 +111,18 @@ The plugin also adds four public methods:
             if (crosshair.locked) {
                 return;
             }
-                
+
             if (plot.getSelection && plot.getSelection()) {
                 crosshair.x = -1; // hide the crosshair while selecting
                 return;
             }
-                
+
             var offset = plot.offset();
             crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
             crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
             plot.triggerRedrawOverlay();
         }
-        
+
         plot.hooks.bindEvents.push(function (plot, eventHolder) {
             if (!plot.getOptions().crosshair.mode) {
                 return;
@@ -133,31 +133,32 @@ The plugin also adds four public methods:
         });
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
-            var c = plot.getOptions().crosshair;
+            var adj, drawX, drawY, plotOffset,
+                c = plot.getOptions().crosshair;
             if (!c.mode) {
                 return;
             }
 
-            var plotOffset = plot.getPlotOffset();
-            
+            plotOffset = plot.getPlotOffset();
+
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            if (crosshair.x != -1) {
-                var adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
+            if (crosshair.x !== -1) {
+                adj = plot.getOptions().crosshair.lineWidth % 2 === 0 ? 0 : 0.5;
 
                 ctx.strokeStyle = c.color;
                 ctx.lineWidth = c.lineWidth;
                 ctx.lineJoin = "round";
 
                 ctx.beginPath();
-                if (c.mode.indexOf("x") != -1) {
-                    var drawX = Math.round(crosshair.x) + adj;
+                if (c.mode.indexOf("x") !== -1) {
+                    drawX = Math.round(crosshair.x) + adj;
                     ctx.moveTo(drawX, 0);
                     ctx.lineTo(drawX, plot.height());
                 }
-                if (c.mode.indexOf("y") != -1) {
-                    var drawY = Math.round(crosshair.y) + adj;
+                if (c.mode.indexOf("y") !== -1) {
+                    drawY = Math.round(crosshair.y) + adj;
                     ctx.moveTo(0, drawY);
                     ctx.lineTo(plot.width(), drawY);
                 }
@@ -171,11 +172,11 @@ The plugin also adds four public methods:
             eventHolder.unbind("mousemove", onMouseMove);
         });
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'crosshair',
-        version: '1.0'
+        name: "crosshair",
+        version: "1.0"
     });
 })(jQuery);
