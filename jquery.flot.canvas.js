@@ -29,15 +29,14 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 (function($) {
 
-    var options = {
-        canvas: true
-    };
+    var render, getTextInfo, addText,
+        options = {
+            canvas: true
+        },
 
-    var render, getTextInfo, addText;
+        // Cache the prototype hasOwnProperty for faster access
 
-    // Cache the prototype hasOwnProperty for faster access
-
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
+        hasOwnProperty = Object.prototype.hasOwnProperty;
 
     function init(plot, classes) {
 
@@ -61,7 +60,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
                 return render.call(this);
             }
 
-            var context = this.context,
+            var i, info, j, key, layerCache, layerKey, line, lines, position,
+                positions, styleCache, styleKey, updateStyles,
+                context = this.context,
                 cache = this._textCache;
 
             // For each text layer, render elements marked as active
@@ -69,19 +70,19 @@ browser, but needs to redraw with canvas text when exporting as an image.
             context.save();
             context.textBaseline = "middle";
 
-            for (var layerKey in cache) {
+            for (layerKey in cache) {
                 if (hasOwnProperty.call(cache, layerKey)) {
-                    var layerCache = cache[layerKey];
-                    for (var styleKey in layerCache) {
+                    layerCache = cache[layerKey];
+                    for (styleKey in layerCache) {
                         if (hasOwnProperty.call(layerCache, styleKey)) {
-                            var styleCache = layerCache[styleKey],
-                                updateStyles = true;
-                            for (var key in styleCache) {
+                            styleCache = layerCache[styleKey];
+                            updateStyles = true;
+                            for (key in styleCache) {
                                 if (hasOwnProperty.call(styleCache, key)) {
 
-                                    var info = styleCache[key],
-                                        positions = info.positions,
-                                        lines = info.lines;
+                                    info = styleCache[key];
+                                    positions = info.positions;
+                                    lines = info.lines;
 
                                     // Since every element at this level of the cache have the
                                     // same font and fill styles, we can just change them once
@@ -93,9 +94,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
                                         updateStyles = false;
                                     }
 
-                                    for (var i = 0, position; position = positions[i]; i++) {
+                                    for (i = 0; position = positions[i]; i++) {
                                         if (position.active) {
-                                            for (var j = 0, line; line = position.lines[j]; j++) {
+                                            for (j = 0; line = position.lines[j]; j++) {
                                                 context.fillText(lines[j].text, line[0], line[1]);
                                             }
                                         } else {
@@ -150,7 +151,8 @@ browser, but needs to redraw with canvas text when exporting as an image.
                 return getTextInfo.call(this, layer, text, font, angle, width);
             }
 
-            var textStyle, layerCache, styleCache, info;
+            var context, element, i, info, lines, layerCache, lineText,
+                measured, styleCache, textStyle;
 
             // Cast the value to a string, in case we were given a number
 
@@ -182,17 +184,17 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
             if (info == null) {
 
-                var context = this.context;
+                context = this.context;
 
                 // If the font was provided as CSS, create a div with those
                 // classes and examine it to generate a canvas font spec.
 
                 if (typeof font !== "object") {
 
-                    var element = $("<div>&nbsp;</div>")
-                        .css("position", "absolute")
-                        .addClass(typeof font === "string" ? font : null)
-                        .appendTo(this.getTextLayer(layer));
+                    element = $("<div>&nbsp;</div>")
+                    .css("position", "absolute")
+                    .addClass(typeof font === "string" ? font : null)
+                    .appendTo(this.getTextLayer(layer));
 
                     font = {
                         lineHeight: element.height(),
@@ -238,12 +240,12 @@ browser, but needs to redraw with canvas text when exporting as an image.
                 // Note that we could split directly on regexps, but IE < 9 is
                 // broken; revisit when we drop IE 7/8 support.
 
-                var lines = (text + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
+                lines = (text + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
 
-                for (var i = 0; i < lines.length; ++i) {
+                for (i = 0; i < lines.length; ++i) {
 
-                    var lineText = lines[i],
-                        measured = context.measureText(lineText);
+                    lineText = lines[i];
+                    measured = context.measureText(lineText);
 
                     info.width = Math.max(measured.width, info.width);
                     info.height += font.lineHeight;
@@ -264,15 +266,15 @@ browser, but needs to redraw with canvas text when exporting as an image.
         // Adds a text string to the canvas text overlay.
 
         Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
-            var i, line, position;
-            
+            var i, info, line, lines, position, positions;
+
             if (!plot.getOptions().canvas) {
                 return addText.call(this, layer, x, y, text, font, angle, width, halign, valign);
             }
 
-            var info = this.getTextInfo(layer, text, font, angle, width),
-                positions = info.positions,
-                lines = info.lines;
+            info = this.getTextInfo(layer, text, font, angle, width);
+            positions = info.positions;
+            lines = info.lines;
 
             // Text is drawn with baseline 'middle', which we need to account
             // for by adding half a line's height to the y position.
@@ -281,9 +283,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
             // Tweak the initial y-position to match vertical alignment
 
-            if (valign == "middle") {
+            if (valign === "middle") {
                 y = Math.round(y - info.height / 2);
-            } else if (valign == "bottom") {
+            } else if (valign === "bottom") {
                 y = Math.round(y - info.height);
             } else {
                 y = Math.round(y);
@@ -303,7 +305,7 @@ browser, but needs to redraw with canvas text when exporting as an image.
             // If so, mark it for inclusion in the next render pass.
 
             for (i = 0; position = positions[i]; i++) {
-                if (position.x == x && position.y == y) {
+                if (position.x === x && position.y === y) {
                     position.active = true;
                     return;
                 }
@@ -324,9 +326,9 @@ browser, but needs to redraw with canvas text when exporting as an image.
             // individually for horizontal alignment.
 
             for (i = 0; line = lines[i]; i++) {
-                if (halign == "center") {
+                if (halign === "center") {
                     position.lines.push([Math.round(x - line.width / 2), y]);
-                } else if (halign == "right") {
+                } else if (halign === "right") {
                     position.lines.push([Math.round(x - line.width), y]);
                 } else {
                     position.lines.push([Math.round(x), y]);
