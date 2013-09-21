@@ -4,52 +4,52 @@ module.exports = function(grunt) {
 	// Project configuration.
 	grunt.initConfig({
 		// Metadata.
-		pkg: grunt.file.readJSON('package.json'),
-		banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-			'* Copyright (c) <%= grunt.template.today("yyyy") %> IOLA and <%= pkg.author.name %>;' +
-			' Licensed <%= pkg.license %> */\n',
+		pkg: grunt.file.readJSON("package.json"),
+		banner: "/*! <%= pkg.name %> - v<%= pkg.version %> - " +
+			"* Copyright (c) <%= grunt.template.today('yyyy') %> IOLA and <%= pkg.author.name %>;" +
+			" Licensed <%= pkg.license %> */\n",
 		// Task configuration.
 		uglify: {
 			options: {
-				banner: '<%= banner %>'
+				banner: "<%= banner %>"
 			},
 			dist: {
 				expand: true,
 				flatten: true,
-				src: ['jquery.*.js', '!jquery.js'],
-				dest: 'dist/',
+				src: ["jquery.*.js", "!jquery.js"],
+				dest: "dist/",
 				rename: function(base, path) {
-					return base + path.replace(/\.js/, '.min.js');
+					return base + path.replace(/\.js/, ".min.js");
 				}
 			}
 		},
 		jshint: {
-			options: grunt.file.readJSON('.jshintrc'),
+			options: grunt.file.readJSON(".jshintrc"),
 			gruntfile: {
-				src: 'Gruntfile.js'
+				src: "Gruntfile.js"
 			},
 			flot: {
-				src: ['jquery.*.js']
+				src: ["jquery.*.js"]
 			}
 		},
 		watch: {
 			gruntfile: {
-				files: 'Gruntfile.js',
-				tasks: ['jshint:gruntfile']
+				files: "Gruntfile.js",
+				tasks: ["jshint:gruntfile"]
 			},
 			flot: {
-				files: '<%= jshint.flot.src %>',
-				tasks: ['jshint:flot']
+				files: "<%= jshint.flot.src %>",
+				tasks: ["jshint:flot"]
 			}
 		}
 	});
 
 	// These plugins provide necessary tasks.
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks("grunt-contrib-uglify");
+	grunt.loadNpmTasks("grunt-contrib-jshint");
+	grunt.loadNpmTasks("grunt-contrib-watch");
 
 	// Default task.
-	grunt.registerTask('default', ['jshint', 'uglify']);
+	grunt.registerTask("default", ["jshint", "uglify"]);
 
 };
