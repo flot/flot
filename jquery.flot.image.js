@@ -66,9 +66,9 @@ Google Maps).
     $.plot.image = {};
 
     $.plot.image.loadDataImages = function (series, options, callback) {
-        var urls = [], points = [];
-
-        var defaultShow = options.series.images.show;
+        var urls = [],
+            points = [],
+            defaultShow = options.series.images.show;
 
         $.each(series, function (i, s) {
             if (!(defaultShow || s.images.show)) {
@@ -80,7 +80,7 @@ Google Maps).
             }
 
             $.each(s, function (i, p) {
-                if (typeof p[0] == "string") {
+                if (typeof p[0] === "string") {
                     urls.push(p[0]);
                     points.push(p);
                 }
@@ -100,7 +100,8 @@ Google Maps).
     };
 
     $.plot.image.load = function (urls, callback) {
-        var missing = urls.length, loaded = {};
+        var missing = urls.length,
+            loaded = {};
         if (missing === 0) {
             callback({});
         }
@@ -116,26 +117,30 @@ Google Maps).
                 }
             };
 
-            $('<img />').load(handler).error(handler).attr('src', url);
+            $("<img />").load(handler).error(handler).attr("src", url);
         });
     };
 
     function drawSeries(plot, ctx, series) {
-        var plotOffset = plot.getPlotOffset();
+        var i, img, points, ps, sx1, sx2, sy1, sy2, tmp, x1, x2, xaxis, y1, y2,
+            yaxis,
+            plotOffset = plot.getPlotOffset();
 
         if (!series.images || !series.images.show) {
             return;
         }
 
-        var points = series.datapoints.points,
-            ps = series.datapoints.pointsize;
+        points = series.datapoints.points;
+        ps = series.datapoints.pointsize;
 
-        for (var i = 0; i < points.length; i += ps) {
-            var img = points[i],
-                x1 = points[i + 1], y1 = points[i + 2],
-                x2 = points[i + 3], y2 = points[i + 4],
-                xaxis = series.xaxis, yaxis = series.yaxis,
-                tmp;
+        for (i = 0; i < points.length; i += ps) {
+            img = points[i];
+            x1 = points[i + 1];
+            y1 = points[i + 2];
+            x2 = points[i + 3];
+            y2 = points[i + 4];
+            xaxis = series.xaxis;
+            yaxis = series.yaxis;
 
             // actually we should check img.complete, but it
             // appears to be a somewhat unreliable indicator in
@@ -157,7 +162,7 @@ Google Maps).
 
             // if the anchor is at the center of the pixel, expand the
             // image by 1/2 pixel in each direction
-            if (series.images.anchor == "center") {
+            if (series.images.anchor === "center") {
                 tmp = 0.5 * (x2-x1) / (img.width - 1);
                 x1 -= tmp;
                 x2 += tmp;
@@ -167,13 +172,17 @@ Google Maps).
             }
 
             // clip
-            if (x1 == x2 || y1 == y2 ||
+            if (x1 === x2 || y1 === y2 ||
                 x1 >= xaxis.max || x2 <= xaxis.min ||
                 y1 >= yaxis.max || y2 <= yaxis.min) {
                 continue;
             }
 
-            var sx1 = 0, sy1 = 0, sx2 = img.width, sy2 = img.height;
+            sx1 = 0;
+            sy1 = 0;
+            sx2 = img.width;
+            sy2 = img.height;
+
             if (x1 < xaxis.min) {
                 sx1 += (sx2 - sx1) * (xaxis.min - x1) / (x2 - x1);
                 x1 = xaxis.min;
@@ -244,7 +253,7 @@ Google Maps).
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'image',
-        version: '1.1'
+        name: "image",
+        version: "1.1"
     });
 })(jQuery);
