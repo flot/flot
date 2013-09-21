@@ -79,7 +79,7 @@ can set the default in the options.
 
 */
 
-/*jshint -W116, -W033, -W030, -W004, -W018, -W015, -W086 */
+/*jshint -W116, -W033, -W030, -W004, -W018, -W015, -W086, -W081 */
 
 // First two dependencies, jquery.event.drag.js and
 // jquery.mousewheel.js, we put them inline here to save people the
@@ -108,7 +108,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
 
 (function ($) {
-    /*jshint +W116, +W033, +W030, +W004, +W018, +W015, +W086 */
+    /*jshint +W116, +W033, +W030, +W004, +W018, +W015, +W086, +W081 */
     var options = {
         xaxis: {
             zoomRange: null, // or [number, number] (min range, max range)
@@ -143,27 +143,29 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             onZoomClick(e, delta < 0);
             return false;
         }
-        
-        var prevCursor = 'default', prevPageX = 0, prevPageY = 0,
+
+        var prevCursor = "default",
+            prevPageX = 0,
+            prevPageY = 0,
             panTimeout = null;
 
         function onDragStart(e) {
-        
+
             // only accept left-click
-            
-            if (e.which != 1) { 
+
+            if (e.which !== 1) {
                 return false;
             }
-            
-            var cursor = plot.getPlaceholder().css('cursor');
+
+            var cursor = plot.getPlaceholder().css("cursor");
             if (cursor) {
                 prevCursor = cursor;
             }
-            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
+            plot.getPlaceholder().css("cursor", plot.getOptions().pan.cursor);
             prevPageX = e.pageX;
             prevPageY = e.pageY;
         }
-        
+
         function onDrag(e) {
             var frameRate = plot.getOptions().pan.frameRate;
             if (panTimeout || !frameRate) {
@@ -175,7 +177,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                            top: prevPageY - e.pageY });
                 prevPageX = e.pageX;
                 prevPageY = e.pageY;
-                                                    
+
                 panTimeout = null;
             }, 1 / frameRate * 1000);
         }
@@ -185,12 +187,12 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 clearTimeout(panTimeout);
                 panTimeout = null;
             }
-                    
-            plot.getPlaceholder().css('cursor', prevCursor);
+
+            plot.getPlaceholder().css("cursor", prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
         }
-        
+
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
@@ -209,7 +211,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (!args) {
                 args = {};
             }
-            
+
             if (!args.amount) {
                 args.amount = plot.getOptions().zoom.amount;
             }
@@ -217,51 +219,53 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             args.amount = 1 / args.amount;
             plot.zoom(args);
         };
-        
+
         plot.zoom = function (args) {
             if (!args) {
                 args = {};
             }
-            
-            var c = args.center,
+
+            var minmax, xf, yf,
+                c = args.center,
                 amount = args.amount || plot.getOptions().zoom.amount,
                 w = plot.width(), h = plot.height();
 
             if (!c) {
                 c = { left: w / 2, top: h / 2 };
             }
-                
-            var xf = c.left / w,
-                yf = c.top / h,
-                minmax = {
-                    x: {
-                        min: c.left - xf * w / amount,
-                        max: c.left + (1 - xf) * w / amount
-                    },
-                    y: {
-                        min: c.top - yf * h / amount,
-                        max: c.top + (1 - yf) * h / amount
-                    }
-                };
+
+            xf = c.left / w;
+            yf = c.top / h;
+            minmax = {
+                x: {
+                    min: c.left - xf * w / amount,
+                    max: c.left + (1 - xf) * w / amount
+                },
+                y: {
+                    min: c.top - yf * h / amount,
+                    max: c.top + (1 - yf) * h / amount
+                }
+            };
 
             $.each(plot.getAxes(), function(_, axis) {
-                var opts = axis.options,
+                var range, tmp,
+                    opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
                     zr = opts.zoomRange,
                     pr = opts.panRange;
 
                 // no zooming on this axis
-                
+
                 if (zr === false) {
                     return;
                 }
-                    
+
                 min = axis.c2p(min);
                 max = axis.c2p(max);
                 if (min > max) {
                     // make sure min < max
-                    var tmp = min;
+                    tmp = min;
                     min = max;
                     max = tmp;
                 }
@@ -276,20 +280,20 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     }
                 }
 
-                var range = max - min;
+                range = max - min;
                 if (zr &&
                     ((zr[0] != null && range < zr[0]) ||
                      (zr[1] != null && range > zr[1]))) {
                     return;
                 }
-            
+
                 opts.min = min;
                 opts.max = max;
             });
-            
+
             plot.setupGrid();
             plot.draw();
-            
+
             if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotzoom", [ plot, args ]);
             }
@@ -312,16 +316,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var opts = axis.options,
                     d = delta[axis.direction],
                     min = axis.c2p(axis.p2c(axis.min) + d),
-                    max = axis.c2p(axis.p2c(axis.max) + d);
+                    max = axis.c2p(axis.p2c(axis.max) + d),
+                    pr = opts.panRange;
 
-                var pr = opts.panRange;
-                
                 // no panning on this axis
-                
+
                 if (pr === false) {
                     return;
                 }
-                
+
                 if (pr) {
                     // check whether we hit the wall
                     if (pr[0] != null && pr[0] > min) {
@@ -329,21 +332,21 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                         min += d;
                         max += d;
                     }
-                    
+
                     if (pr[1] != null && pr[1] < max) {
                         d = pr[1] - max;
                         min += d;
                         max += d;
                     }
                 }
-                
+
                 opts.min = min;
                 opts.max = max;
             });
-            
+
             plot.setupGrid();
             plot.draw();
-            
+
             if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotpan", [ plot, args ]);
             }
@@ -359,15 +362,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 clearTimeout(panTimeout);
             }
         }
-        
+
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'navigate',
-        version: '1.3'
+        name: "navigate",
+        version: "1.3"
     });
 })(jQuery);
