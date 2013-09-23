@@ -21,19 +21,19 @@ love to hear them! Please submit each suggestion as a separate new issue.
 If you would like to work on an existing issue, please make sure it is not
 already assigned to someone else. If an issue is assigned to someone, that
 person has already started working on it. So, pick unassigned issues to prevent
-duplicated efforts.
+duplicated effort.
 
 ### Pull Requests ###
 
 To make merging as easy as possible, please keep these rules in mind:
 
  1. Divide larger changes into a series of small, logical commits with
-	descriptive messages.
+    descriptive messages.
 
  2. Format your code according to the style guidelines below.
 
- 3. Submit new features or architectural changes to the <version>-work branch
-    for the next major release.  Submit bug fixes to the master branch.
+ 3. Submit new features or architectural changes to the *&lt;version&gt;-work*
+    branch for the next major release.  Submit bug fixes to the master branch.
 
  4. Rebase, if necessary, before submitting your pull request, to reduce the
     work we need to do to merge it.
@@ -45,21 +45,21 @@ with the following updates and exceptions:
 
 #### Spacing ####
 
-Do not add horizontal space around parameter lists, loop definitions, or
-array/object indices. For example:
+Use four-space indents, no tabs.  Do not add horizontal space around parameter
+lists, loop definitions, or array/object indices. For example:
 
 ```js
-	for ( var i = 0; i < data.length; i++ ) {	// This block is wrong!
-		if ( data[ i ] > 1 ) {
-			data[ i ] = 2;
-		}
-	}
+    for ( var i = 0; i < data.length; i++ ) {  // This block is wrong!
+        if ( data[ i ] > 1 ) {
+            data[ i ] = 2;
+        }
+    }
 
-	for (var i = 0; i < data.length; i++) {		// This block is correct!
-		if (data[i] > 1) {
-			data[i] = 2;
-		}
-	}
+    for (var i = 0; i < data.length; i++) {  // This block is correct!
+        if (data[i] > 1) {
+            data[i] = 2;
+        }
+    }
 ```
 
 #### Comments ####
@@ -71,12 +71,12 @@ All // comment blocks should have an empty line above *and* below them. For
 example:
 
 ```js
-	var a = 5;
+    var a = 5;
 
-	// We're going to loop here
-	// TODO: Make this loop faster, better, stronger!
+    // We're going to loop here
+    // TODO: Make this loop faster, better, stronger!
 
-	for (var x = 0; x < 10; x++) {}
+    for (var x = 0; x < 10; x++) {}
 ```
 
 #### Wrapping ####
@@ -91,9 +91,9 @@ Statements containing complex logic should not be wrapped arbitrarily if they
 do not exceed 80 characters. For example:
 
 ```js
-	if (a == 1 &&		// This block is wrong!
-		b == 2 &&
-		c == 3) {}
+    if (a == 1 &&    // This block is wrong!
+        b == 2 &&
+        c == 3) {}
 
-	if (a == 1 && b == 2 && c == 3) {}		// This block is correct!
+    if (a == 1 && b == 2 && c == 3) {}  // This block is correct!
 ```
