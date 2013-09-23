@@ -14,16 +14,16 @@ Two or more series are stacked when their "stack" attribute is set to the same
 key (which can be any number or string or just "true"). To specify the default
 stack, you can set the stack option like this:
 
-	series: {
-		stack: null/false, true, or a key (number/string)
-	}
+    series: {
+        stack: null/false, true, or a key (number/string)
+    }
 
 You can also specify it for a single series, like this:
 
-	$.plot( $("#placeholder"), [{
-		data: [ ... ],
-		stack: true
-	}])
+    $.plot( $("#placeholder"), [{
+        data: [ ... ],
+        stack: true
+    }])
 
 The stacking order is determined by the order of the data series in the array
 (later series end up on top of the previous).

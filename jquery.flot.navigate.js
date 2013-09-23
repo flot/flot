@@ -10,22 +10,22 @@ plot.pan( offset ) so you easily can add custom controls. It also fires
 
 The plugin supports these options:
 
-	zoom: {
-		interactive: false
-		trigger: "dblclick" // or "click" for single click
-		amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
-	}
+    zoom: {
+        interactive: false
+        trigger: "dblclick" // or "click" for single click
+        amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+    }
 
-	pan: {
-		interactive: false
-		cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-		frameRate: 20
-	}
+    pan: {
+        interactive: false
+        cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
+        frameRate: 20
+    }
 
-	xaxis, yaxis, x2axis, y2axis: {
-		zoomRange: null  // or [ number, number ] (min range, max range) or false
-		panRange: null   // or [ number, number ] (min, max) or false
-	}
+    xaxis, yaxis, x2axis, y2axis: {
+        zoomRange: null  // or [ number, number ] (min range, max range) or false
+        panRange: null   // or [ number, number ] (min, max) or false
+    }
 
 "interactive" enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
@@ -55,19 +55,19 @@ will be disabled.
 
 Example API usage:
 
-	plot = $.plot(...);
+    plot = $.plot(...);
 
-	// zoom default amount in on the pixel ( 10, 20 )
-	plot.zoom({ center: { left: 10, top: 20 } });
+    // zoom default amount in on the pixel ( 10, 20 )
+    plot.zoom({ center: { left: 10, top: 20 } });
 
-	// zoom out again
-	plot.zoomOut({ center: { left: 10, top: 20 } });
+    // zoom out again
+    plot.zoomOut({ center: { left: 10, top: 20 } });
 
-	// zoom 200% in on the pixel (10, 20)
-	plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
+    // zoom 200% in on the pixel (10, 20)
+    plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
 
-	// pan 100 pixels to the left and 20 down
-	plot.pan({ left: -100, top: 20 })
+    // pan 100 pixels to the left and 20 down
+    plot.pan({ left: -100, top: 20 })
 
 Here, "center" specifies where the center of the zooming should happen. Note
 that this is defined in pixel space, not the space of the data points (you can
