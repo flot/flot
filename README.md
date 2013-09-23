@@ -72,7 +72,7 @@ $.plot($("#placeholder"), data, options);
 Here, data is an array of data series and options is an object with
 settings if you want to customize the plot. Take a look at the
 examples for some ideas of what to put in or look at the 
-[API reference](API.md). Here's a quick example that'll draw a line 
+[API reference](docs/API.md). Here's a quick example that'll draw a line 
 from (0, 0) to (1, 1):
 
 ```js
