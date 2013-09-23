@@ -701,26 +701,26 @@ Licensed under the MIT license.
                 },
                 hooks: {}
             },
-        surface = null,     // the canvas for the plot itself
-        overlay = null,     // canvas for interactive stuff on top of plot
-        eventHolder = null, // jQuery object that events should be bound to
-        ctx = null, octx = null,
-        xaxes = [], yaxes = [],
-        plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
-        plotWidth = 0, plotHeight = 0,
-        hooks = {
-            processOptions: [],
-            processRawData: [],
-            processDatapoints: [],
-            processOffset: [],
-            drawBackground: [],
-            drawSeries: [],
-            draw: [],
-            bindEvents: [],
-            drawOverlay: [],
-            shutdown: []
-        },
-        plot = this;
+            surface = null,     // the canvas for the plot itself
+            overlay = null,     // canvas for interactive stuff on top of plot
+            eventHolder = null, // jQuery object that events should be bound to
+            ctx = null, octx = null,
+            xaxes = [], yaxes = [],
+            plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
+            plotWidth = 0, plotHeight = 0,
+            hooks = {
+                processOptions: [],
+                processRawData: [],
+                processDatapoints: [],
+                processOffset: [],
+                drawBackground: [],
+                drawSeries: [],
+                draw: [],
+                bindEvents: [],
+                drawOverlay: [],
+                shutdown: []
+            },
+            plot = this;
 
         // public functions
         plot.setData = setData;
@@ -1387,17 +1387,17 @@ Licensed under the MIT license.
                     var delta;
 
                     switch (s.bars.align) {
-                        case "left":
-                            delta = 0;
-                            break;
-                        case "right":
-                            delta = -s.bars.barWidth;
-                            break;
-                        case "center":
-                            delta = -s.bars.barWidth / 2;
-                            break;
-                        default:
-                            throw new Error("Invalid bar alignment: " + s.bars.align);
+                    case "left":
+                        delta = 0;
+                        break;
+                    case "right":
+                        delta = -s.bars.barWidth;
+                        break;
+                    case "center":
+                        delta = -s.bars.barWidth / 2;
+                        break;
+                    default:
+                        throw new Error("Invalid bar alignment: " + s.bars.align);
                     }
 
                     if (s.bars.horizontal) {
@@ -2869,17 +2869,17 @@ Licensed under the MIT license.
             var barLeft;
 
             switch (series.bars.align) {
-                case "left":
-                    barLeft = 0;
-                    break;
-                case "right":
-                    barLeft = -series.bars.barWidth;
-                    break;
-                case "center":
-                    barLeft = -series.bars.barWidth / 2;
-                    break;
-                default:
-                    throw new Error("Invalid bar alignment: " + series.bars.align);
+            case "left":
+                barLeft = 0;
+                break;
+            case "right":
+                barLeft = -series.bars.barWidth;
+                break;
+            case "center":
+                barLeft = -series.bars.barWidth / 2;
+                break;
+            default:
+                throw new Error("Invalid bar alignment: " + series.bars.align);
             }
 
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
@@ -3103,7 +3103,7 @@ Licensed under the MIT license.
                              my >= y + barLeft && my <= y + barRight) :
                             (mx >= x + barLeft && mx <= x + barRight &&
                              my >= Math.min(b, y) && my <= Math.max(b, y))) {
-                                item = [i, j / ps];
+                            item = [i, j / ps];
                         }
                     }
                 }
