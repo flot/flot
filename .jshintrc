@@ -19,5 +19,6 @@
 	},
 
 	"browser": true,
-	"jquery": true
+	"jquery": true,
+	"indent": 4
 }
