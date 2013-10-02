@@ -131,6 +131,23 @@ You may need to check for this in hover events.
         }
         
         plot.hooks.processDatapoints.push(processThresholds);
+
+        // Adds a second color to thresholded serie legend
+        function processThresholdsLegend(ctx, canvas, s) {
+            if (!s.threshold)
+                return;
+
+            $('.legendLabel').each(function(index, value) {
+                if($(this).text() == s.label)
+                {
+                    legend = $(this).prev().find('div > div');
+                    legend.css('border-right-color' , s.threshold.color);
+                    legend.css('border-bottom-color' , s.threshold.color);
+                }
+            });
+        }
+
+        plot.hooks.drawSeries.push(processThresholdsLegend);
     }
     
     $.plot.plugins.push({
