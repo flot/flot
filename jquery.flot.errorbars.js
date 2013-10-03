@@ -15,44 +15,44 @@ your data array (*even* if you do not intend to plot them later, by setting
 
 The plugin supports these options:
 
-	series: {
-		points: {
-			errorbars: "x" or "y" or "xy",
-			xerr: {
-				show: null/false or true,
-				asymmetric: null/false or true,
-				upperCap: null or "-" or function,
-				lowerCap: null or "-" or function,
-				color: null or color,
-				radius: null or number
-			},
-			yerr: { same options as xerr }
-		}
-	}
+    series: {
+        points: {
+            errorbars: "x" or "y" or "xy",
+            xerr: {
+                show: null/false or true,
+                asymmetric: null/false or true,
+                upperCap: null or "-" or function,
+                lowerCap: null or "-" or function,
+                color: null or color,
+                radius: null or number
+            },
+            yerr: { same options as xerr }
+        }
+    }
 
 Each data point array is expected to be of the type:
 
-	"x"  [ x, y, xerr ]
-	"y"  [ x, y, yerr ]
-	"xy" [ x, y, xerr, yerr ]
+    "x"  [ x, y, xerr ]
+    "y"  [ x, y, yerr ]
+    "xy" [ x, y, xerr, yerr ]
 
 Where xerr becomes xerr_lower,xerr_upper for the asymmetric error case, and
 equivalently for yerr. Eg., a datapoint for the "xy" case with symmetric
 error-bars on X and asymmetric on Y would be:
 
-	[ x, y, xerr, yerr_lower, yerr_upper ]
+    [ x, y, xerr, yerr_lower, yerr_upper ]
 
 By default no end caps are drawn. Setting upperCap and/or lowerCap to "-" will
 draw a small cap perpendicular to the error bar. They can also be set to a
 user-defined drawing function, with (ctx, x, y, radius) as parameters, as eg.
 
-	function drawSemiCircle( ctx, x, y, radius ) {
-		ctx.beginPath();
-		ctx.arc( x, y, radius, 0, Math.PI, false );
-		ctx.moveTo( x - radius, y );
-		ctx.lineTo( x + radius, y );
-		ctx.stroke();
-	}
+    function drawSemiCircle( ctx, x, y, radius ) {
+        ctx.beginPath();
+        ctx.arc( x, y, radius, 0, Math.PI, false );
+        ctx.moveTo( x - radius, y );
+        ctx.lineTo( x + radius, y );
+        ctx.stroke();
+    }
 
 Color and radius both default to the same ones of the points series if not
 set. The independent radius parameter on xerr/yerr is useful for the case when

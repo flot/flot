@@ -5,11 +5,11 @@ Licensed under the MIT license.
 
 The plugin supports these options:
 
-	crosshair: {
-		mode: null or "x" or "y" or "xy"
-		color: color
-		lineWidth: number
-	}
+    crosshair: {
+        mode: null or "x" or "y" or "xy"
+        color: color
+        lineWidth: number
+    }
 
 Set the mode to one of "x", "y" or "xy". The "x" mode enables a vertical
 crosshair that lets you trace the values on the x axis, "y" enables a
@@ -39,19 +39,19 @@ The plugin also adds four public methods:
 
     Example usage:
 
-	var myFlot = $.plot( $("#graph"), ..., { crosshair: { mode: "x" } } };
-	$("#graph").bind( "plothover", function ( evt, position, item ) {
-		if ( item ) {
-			// Lock the crosshair to the data point being hovered
-			myFlot.lockCrosshair({
-				x: item.datapoint[ 0 ],
-				y: item.datapoint[ 1 ]
-			});
-		} else {
-			// Return normal crosshair operation
-			myFlot.unlockCrosshair();
-		}
-	});
+    var myFlot = $.plot( $("#graph"), ..., { crosshair: { mode: "x" } } };
+    $("#graph").bind( "plothover", function ( evt, position, item ) {
+        if ( item ) {
+            // Lock the crosshair to the data point being hovered
+            myFlot.lockCrosshair({
+                x: item.datapoint[ 0 ],
+                y: item.datapoint[ 1 ]
+            });
+        } else {
+            // Return normal crosshair operation
+            myFlot.unlockCrosshair();
+        }
+    });
 
   - unlockCrosshair()
 

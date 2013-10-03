@@ -5,11 +5,11 @@ Licensed under the MIT license.
 
 The symbols are accessed as strings through the standard symbol options:
 
-	series: {
-		points: {
-			symbol: "square" // or "diamond", "triangle", "cross"
-		}
-	}
+    series: {
+        points: {
+            symbol: "square" // or "diamond", "triangle", "cross"
+        }
+    }
 
 */
 
