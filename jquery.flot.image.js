@@ -11,7 +11,7 @@ with new Image()). If the image is not complete, it's skipped when plotting.
 There are two helpers included for retrieving images. The easiest work the way
 that you put in URLs instead of images in the data, like this:
 
-	[ "myimage.png", 0, 0, 10, 10 ]
+    [ "myimage.png", 0, 0, 10, 10 ]
 
 Then call $.plot.image.loadData( data, options, callback ) where data and
 options are the same as you pass in to $.plot. This loads the images, replaces
@@ -25,20 +25,20 @@ Image object when all images are loaded or have failed loading.
 
 The plugin supports these options:
 
-	series: {
-		images: {
-			show: boolean
-			anchor: "corner" or "center"
-			alpha: [ 0, 1 ]
-		}
-	}
+    series: {
+        images: {
+            show: boolean
+            anchor: "corner" or "center"
+            alpha: [ 0, 1 ]
+        }
+    }
 
 They can be specified for a specific series:
 
-	$.plot( $("#placeholder"), [{
-		data: [ ... ],
-		images: { ... }
-	])
+    $.plot( $("#placeholder"), [{
+        data: [ ... ],
+        images: { ... }
+    ])
 
 Note that because the data format is different from usual data points, you
 can't use images with anything else in a specific data series.
