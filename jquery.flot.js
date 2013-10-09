@@ -2524,8 +2524,7 @@ Licensed under the MIT license.
                             Math.round((axisx.p2c(x1) + xoffset + axisx.p2c(x2) + xoffset) / 2), axisy.p2c(y2) + yoffset, // controlPoint2 (Q)
                             axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset); // endPoint (B)
                         break;
-                    case "line":
-                    default:
+                    default: // line
                         ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
                         break;
                     }
