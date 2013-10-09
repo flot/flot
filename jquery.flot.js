@@ -840,6 +840,17 @@ Licensed under the MIT license.
                 options.grid.tickColor = $.color.parse(options.grid.color).scale("a", 0.22).toString();
             }
 
+            // check options.xaxes and options.yaxes
+            // if they are undefined or empty set the default to
+            // an array with 1 empty obj so it does not crash later on
+
+            if (!options.xaxes || xaxes.length === 0) {
+                options.xaxes = [ {} ];
+            }
+            if (!options.yaxes || yaxes.length === 0) {
+                options.yaxes = [ {} ];
+            }
+
             // Fill in defaults for axis options, including any unspecified
             // font-spec fields, if a font-spec was provided.
 
