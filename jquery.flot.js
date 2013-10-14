@@ -865,6 +865,9 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+                axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
+                options.xaxes[i] = axisOptions;
+
                 // Compatibility with markrcote/flot-axislabels
 
                 if (axisOptions) {
@@ -875,9 +878,6 @@ Licensed under the MIT license.
                         axisOptions.labelPadding = axisOptions.axisLabelPadding;
                     }
                 }
-
-                axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
-                options.xaxes[i] = axisOptions;
 
                 fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
@@ -899,6 +899,9 @@ Licensed under the MIT license.
                     axisOptions.tickColor = axisOptions.color;
                 }
 
+				axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
+                options.yaxes[i] = axisOptions;
+				
                 // Compatibility with markrcote/flot-axislabels
 
                 if (axisOptions) {
@@ -909,9 +912,6 @@ Licensed under the MIT license.
                         axisOptions.labelPadding = axisOptions.axisLabelPadding;
                     }
                 }
-
-                axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
-                options.yaxes[i] = axisOptions;
 
                 fontDefaults.color = axisOptions.color;
                 if (axisOptions.font) {
@@ -2674,8 +2674,10 @@ Licensed under the MIT license.
         function drawSeriesPoints(series) {
             function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
                 var points = datapoints.points, ps = datapoints.pointsize;
-
+	            
+                var dataIndex = -1;
                 for (var i = 0; i < points.length; i += ps) {
+                    dataIndex++;
                     var x = points[i], y = points[i + 1];
                     if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                         continue;
@@ -2687,7 +2689,7 @@ Licensed under the MIT license.
                     if (symbol === "circle") {
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
                     } else {
-                        symbol(ctx, x, y, radius, shadow);
+                        symbol(ctx, x, y, radius, shadow, dataIndex, series);
                     }
                     ctx.closePath();
 
