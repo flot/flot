@@ -135,6 +135,26 @@ You may need to check for this in hover events.
         }
 
         plot.hooks.processDatapoints.push(processThresholds);
+        
+
+        function processThresholdsLegend(ctx, canvas, s) {
+            if (!s.threshold) {
+                return;
+            }
+
+            var color = s.threshold.color ? s.threshold.color : "black";
+
+            $(".legendLabel").each(function() {
+                if($(this).text() === s.label)
+                {
+                    var legend = $(this).prev().find("div > div");
+                    legend.css("border-right-color" , color);
+                    legend.css("border-bottom-color" , color);
+                }
+            });
+        }
+
+        plot.hooks.drawSeries.push(processThresholdsLegend);
     }
 
     $.plot.plugins.push({
