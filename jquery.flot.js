@@ -867,11 +867,13 @@ Licensed under the MIT license.
 
                 // Compatibility with markrcote/flot-axislabels
 
-                if (axisOptions && !axisOptions.label && axisOptions.axisLabel) {
-                    axisOptions.label = axisOptions.axisLabel;
-                }
-                if (axisOptions && !axisOptions.labelPadding && axisOptions.axisLabelPadding) {
-                    axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                if (axisOptions) {
+                    if (!axisOptions.label && axisOptions.axisLabel) {
+                        axisOptions.label = axisOptions.axisLabel;
+                    }
+                    if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                        axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                    }
                 }
 
                 axisOptions = $.extend(true, {}, options.xaxis, axisOptions);
@@ -899,11 +901,13 @@ Licensed under the MIT license.
 
                 // Compatibility with markrcote/flot-axislabels
 
-                if (axisOptions && !axisOptions.label && axisOptions.axisLabel) {
-                    axisOptions.label = axisOptions.axisLabel;
-                }
-                if (axisOptions && !axisOptions.labelPadding && axisOptions.axisLabelPadding) {
-                    axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                if (axisOptions) {
+                    if (!axisOptions.label && axisOptions.axisLabel) {
+                        axisOptions.label = axisOptions.axisLabel;
+                    }
+                    if (!axisOptions.labelPadding && axisOptions.axisLabelPadding) {
+                        axisOptions.labelPadding = axisOptions.axisLabelPadding;
+                    }
                 }
 
                 axisOptions = $.extend(true, {}, options.yaxis, axisOptions);
