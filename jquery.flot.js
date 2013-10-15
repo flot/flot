@@ -485,6 +485,69 @@ Licensed under the MIT license.
 			}
 		}
 	};
+    
+    // Draw a rounded rectangle
+    //
+    // @param {number=} x X coordinate of the left top corner of the exterior contact rectangle
+    // @param {number=} y Y coordinate of the left top corner of the exterior contact rectangle .
+    // @param {number=} w Width of the exteriol contact rectangle.
+    // @param {number=} h Height of the exteriol contact rectangle.
+    // @param {number=} radius The radius of the rouned corner.
+    
+	CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radius) {
+	    var r = x + w;
+	    var b = y + h;
+	    this.beginPath();
+	    this.moveTo(x + radius, y);
+	    this.lineTo(r - radius, y);
+	    this.quadraticCurveTo(r, y, r, y + radius);
+	    this.lineTo(r, y + h - radius);
+	    this.quadraticCurveTo(r, b, r - radius, b);
+	    this.lineTo(x + radius, b);
+	    this.quadraticCurveTo(x, b, x, b - radius);
+	    this.lineTo(x, y + radius);
+	    this.quadraticCurveTo(x, y, x + radius, y);
+	    this.closePath();
+	    return this;
+	};
+
+    // Measure the size [width, height] of the text
+    //
+    // @param {string=} text Text to be measured
+    // @param {bool=} bold If the text to be measured is in bold style.
+    // @param {string=} font Font family name of the text to be measured.
+    // @param {string=} size Font size of the text to be measured.
+    //      You can pass "12px" or "10pt", or just a number, in which case the unit will be "px" by default.
+    
+	CanvasRenderingContext2D.prototype.measureTextSize = function (text, bold, font, size) {
+	    // This global variable is used to cache repeated calls with the same arguments
+	    var str = text + ':' + bold + ':' + font + ':' + size;
+	    if (typeof (__measuretext_cache__) == 'object' && __measuretext_cache__[str]) {
+	        return __measuretext_cache__[str];
+	    }
+
+	    var div = document.createElement('DIV');
+	    div.innerHTML = text;
+	    div.style.position = 'absolute';
+	    div.style.top = '-100px';
+	    div.style.left = '-100px';
+	    div.style.fontFamily = font;
+	    div.style.fontWeight = bold ? 'bold' : 'normal';
+	    div.style.fontSize = isNaN(size) ? size : size + 'pt';
+	    document.body.appendChild(div);
+
+	    var result = [div.offsetWidth, div.offsetHeight];
+
+	    document.body.removeChild(div);
+
+	    // Add the sizes to the cache as adding DOM elements is costly and can cause slow downs
+	    if (typeof (__measuretext_cache__) != 'object') {
+	        __measuretext_cache__ = [];
+	    }
+	    __measuretext_cache__[str] = result;
+
+	    return result;
+	};
 
 	///////////////////////////////////////////////////////////////////////////
 	// The top-level container for the entire plot.
@@ -1868,75 +1931,7 @@ Licensed under the MIT license.
 
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
-
-            // draw markings
-            var markings = options.grid.markings;
-            if (markings) {
-                if ($.isFunction(markings)) {
-                    axes = plot.getAxes();
-                    // xmin etc. is backwards compatibility, to be
-                    // removed in the future
-                    axes.xmin = axes.xaxis.min;
-                    axes.xmax = axes.xaxis.max;
-                    axes.ymin = axes.yaxis.min;
-                    axes.ymax = axes.yaxis.max;
-
-                    markings = markings(axes);
-                }
-
-                for (i = 0; i < markings.length; ++i) {
-                    var m = markings[i],
-                        xrange = extractRange(m, "x"),
-                        yrange = extractRange(m, "y");
-
-                    // fill in missing
-                    if (xrange.from == null)
-                        xrange.from = xrange.axis.min;
-                    if (xrange.to == null)
-                        xrange.to = xrange.axis.max;
-                    if (yrange.from == null)
-                        yrange.from = yrange.axis.min;
-                    if (yrange.to == null)
-                        yrange.to = yrange.axis.max;
-
-                    // clip
-                    if (xrange.to < xrange.axis.min || xrange.from > xrange.axis.max ||
-                        yrange.to < yrange.axis.min || yrange.from > yrange.axis.max)
-                        continue;
-
-                    xrange.from = Math.max(xrange.from, xrange.axis.min);
-                    xrange.to = Math.min(xrange.to, xrange.axis.max);
-                    yrange.from = Math.max(yrange.from, yrange.axis.min);
-                    yrange.to = Math.min(yrange.to, yrange.axis.max);
-
-                    if (xrange.from == xrange.to && yrange.from == yrange.to)
-                        continue;
-
-                    // then draw
-                    xrange.from = xrange.axis.p2c(xrange.from);
-                    xrange.to = xrange.axis.p2c(xrange.to);
-                    yrange.from = yrange.axis.p2c(yrange.from);
-                    yrange.to = yrange.axis.p2c(yrange.to);
-
-                    if (xrange.from == xrange.to || yrange.from == yrange.to) {
-                        // draw line
-                        ctx.beginPath();
-                        ctx.strokeStyle = m.color || options.grid.markingsColor;
-                        ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
-                        ctx.moveTo(xrange.from, yrange.from);
-                        ctx.lineTo(xrange.to, yrange.to);
-                        ctx.stroke();
-                    }
-                    else {
-                        // fill area
-                        ctx.fillStyle = m.color || options.grid.markingsColor;
-                        ctx.fillRect(xrange.from, yrange.to,
-                                     xrange.to - xrange.from,
-                                     yrange.from - yrange.to);
-                    }
-                }
-            }
-
+            
             // draw the ticks
             axes = allAxes();
             bw = options.grid.borderWidth;
@@ -2088,6 +2083,158 @@ Licensed under the MIT license.
                     ctx.lineWidth = bw;
                     ctx.strokeStyle = options.grid.borderColor;
                     ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
+                }
+            }
+
+            // draw markings
+            var markings = options.grid.markings;
+            if (markings) {
+                if ($.isFunction(markings)) {
+                    axes = plot.getAxes();
+                    // xmin etc. is backwards compatibility, to be
+                    // removed in the future
+                    axes.xmin = axes.xaxis.min;
+                    axes.xmax = axes.xaxis.max;
+                    axes.ymin = axes.yaxis.min;
+                    axes.ymax = axes.yaxis.max;
+
+                    markings = markings(axes);
+                }
+
+                for (i = 0; i < markings.length; ++i) {
+                    var m = markings[i],
+                        xrange = extractRange(m, "x"),
+                        yrange = extractRange(m, "y");
+
+                    // fill in missing
+                    if (xrange.from == null)
+                        xrange.from = xrange.axis.min;
+                    if (xrange.to == null)
+                        xrange.to = xrange.axis.max;
+                    if (yrange.from == null)
+                        yrange.from = yrange.axis.min;
+                    if (yrange.to == null)
+                        yrange.to = yrange.axis.max;
+
+                    // clip
+                    if (xrange.to < xrange.axis.min || xrange.from > xrange.axis.max ||
+                        yrange.to < yrange.axis.min || yrange.from > yrange.axis.max)
+                        continue;
+
+                    xrange.from = Math.max(xrange.from, xrange.axis.min);
+                    xrange.to = Math.min(xrange.to, xrange.axis.max);
+                    yrange.from = Math.max(yrange.from, yrange.axis.min);
+                    yrange.to = Math.min(yrange.to, yrange.axis.max);
+
+                    if (xrange.from == xrange.to && yrange.from == yrange.to)
+                        continue;
+
+                    // then draw
+                    xrange.from = xrange.axis.p2c(xrange.from);
+                    xrange.to = xrange.axis.p2c(xrange.to);
+                    yrange.from = yrange.axis.p2c(yrange.from);
+                    yrange.to = yrange.axis.p2c(yrange.to);
+
+                    if (xrange.from == xrange.to || yrange.from == yrange.to) {
+                        // draw line
+                        ctx.beginPath();
+                        ctx.strokeStyle = m.color || options.grid.markingsColor;
+                        ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
+                        ctx.moveTo(xrange.from, yrange.from);
+                        ctx.lineTo(xrange.to, yrange.to);
+                        ctx.stroke();
+                    }
+                    else {
+                        // fill area
+                        ctx.fillStyle = m.color || options.grid.markingsColor;
+                        var rounded = parseFloat(m.rounded || (options.markings ? options.markings.rounded || 0 : 0));
+
+                        if (rounded == 0) {
+                            ctx.fillRect(xrange.from, yrange.to,
+                                xrange.to - xrange.from,
+                                yrange.from - yrange.to);
+                        } else {
+                            ctx.roundRect(xrange.from, yrange.to, xrange.to - xrange.from, yrange.from - yrange.to, rounded);
+                            ctx.fill();
+                        }
+                    }
+                    
+                    // draw text if any
+                    if (m.texts && m.texts.length > 0) {
+                        var blocks = m.texts;
+                        var blockCount = blocks.length;
+                        ctx.save();
+
+                        for (var k = 0; k < blockCount; k++) {
+                            var extraHeight = 0;
+                            var currentBlock = blocks[k];
+                            ctx.font = currentBlock.font || "bold 10px Arial";
+                            ctx.textAlign = currentBlock.textAlign || "center";
+                            ctx.textBaseline = currentBlock.textBaseline || "middle";
+                            ctx.fillStyle = currentBlock.textColor || "#fff";
+                            var marginTop = parseFloat(currentBlock.textMargin ? currentBlock.textMargin.split(" ")[0] || 0 : 0);
+                            var marginRight = parseFloat(currentBlock.textMargin ? currentBlock.textMargin.split(" ")[1] || 0 : 0);
+                            var marginBottom = parseFloat(currentBlock.textMargin ? currentBlock.textMargin.split(" ")[2] || 0 : 0);
+                            var marginLeft = parseFloat(currentBlock.textMargin ? currentBlock.textMargin.split(" ")[3] || 0 : 0);
+
+                            var xPos = (xrange.from + xrange.to) * 1 / 2;
+                            var yPos = yrange.from + (yrange.to - yrange.from) * (blockCount - k) / (blockCount + 1);
+                            switch (ctx.textAlign.toLowerCase()) {
+                                case "left":
+                                    xPos = xrange.from + marginLeft;
+                                    break;
+                                case "right":
+                                    xPos = xrange.to - marginRight;
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            switch (ctx.textBaseline.toLowerCase()) {
+                                case "top":
+                                    yPos = yrange.to - marginTop;
+                                    break;
+                                case "bottom":
+                                    yPos = yrange.from + marginBottom;
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            yPos += extraHeight;
+
+                            var lines = currentBlock.text.split(/[\r\n]+/);
+                            if (currentBlock.font) {
+                                var realFont = currentBlock.font.split(/\s+/);
+                                var realFontSize = !!realFont ? realFont[realFont.length - 2] : null;
+                                if (!!realFontSize) realFontSize = parseFloat(realFontSize);
+                            }
+                            var f = ctx.font.split(/\s+/);
+                            var fontSize = !!f ? f[f.length - 2] : null;
+                            if (!!fontSize) fontSize = parseFloat(fontSize);
+                            //var lineHeight = parseFloat(!!realFontSize ? realFontSize : !!fontSize ? fontSize : 10) / 2.8;
+                            var lineHeight = ctx.measureTextSize(currentBlock.text, false, f[f.length - 1], f[f.length - 2])[1];
+                            yPos -= lineHeight * (lines.length - 1) / 2;
+
+                            for (var l = 0 ; l < lines.length; l++) {
+                                if (!!realFontSize && !!fontSize && realFontSize < fontSize) {
+                                    // When you specify a font size smaller than 12px, the canvas context will 
+                                    // override it to 12px.
+                                    ctx.save();
+                                    var ratio = realFontSize / fontSize;
+                                    ctx.scale(ratio, ratio);
+                                    ctx.fillText(lines[l], xPos / ratio, yPos / ratio);
+                                    ctx.restore();
+                                } else {
+                                    ctx.fillText(lines[l], xPos, yPos);
+                                }
+                                extraHeight += lineHeight;
+                                yPos += extraHeight;
+                            }
+                        }
+
+                        ctx.restore();
+                    }
                 }
             }
 
