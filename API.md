@@ -107,6 +107,7 @@ The format of a single series object is as follows:
     hoverable: boolean
     shadowSize: number
     highlightColor: color or number
+    interpolation: line (default) or bezier, specifying how to render the lines
 }
 ```
 
