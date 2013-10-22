@@ -7,6 +7,12 @@ Licensed under the MIT license.
 
 (function($) {
 
+    // A jquery-esque isNumeric method since we currently support 1.4.4
+    // and $.isNumeric was introduced on in 1.7
+    var isNumeric = $.isNumeric || function(obj) {
+        return obj - parseFloat( obj ) >= 0;
+    };
+
     ///////////////////////////////////////////////////////////////////////////
     // The Canvas object is a wrapper around an HTML5 <canvas> tag.
     //
@@ -1012,7 +1018,7 @@ Licensed under the MIT license.
             if (typeof a === "object") { // if we got a real axis, extract number
                 a = a.n;
             }
-            if (typeof a !== "number") {
+            if (!isNumeric(a)) {
                 a = 1; // default to first axis
             }
             return a;
@@ -1110,7 +1116,7 @@ Licensed under the MIT license.
                 var sc = series[i].color;
                 if (sc != null) {
                     neededColors--;
-                    if (typeof sc === "number" && sc > maxIndex) {
+                    if (isNumeric(sc) && sc > maxIndex) {
                         maxIndex = sc;
                     }
                 }
@@ -1166,7 +1172,7 @@ Licensed under the MIT license.
                 if (s.color == null) {
                     s.color = colors[colori].toString();
                     ++colori;
-                } else if (typeof s.color === "number") {
+                } else if (isNumeric(s.color)) {
                     s.color = colors[s.color].toString();
                 }
 
@@ -1704,7 +1710,7 @@ Licensed under the MIT license.
 
             for (a in plotOffset) {
                 if (Object.prototype.hasOwnProperty.call(plotOffset, a)) {
-                    plotOffset[a] = typeof margin === "number" ? margin : margin[a] || 0;
+                    plotOffset[a] = isNumeric(margin) ? margin : margin[a] || 0;
                 }
             }
 
@@ -1822,7 +1828,7 @@ Licensed under the MIT license.
 
             // estimate number of ticks
             var noTicks;
-            if (typeof opts.ticks === "number" && opts.ticks > 0) {
+            if (isNumeric(opts.ticks) && opts.ticks > 0) {
                 noTicks = opts.ticks;
             } else {
                 // heuristic based on the model a*sqrt(x) fitted to
@@ -1964,7 +1970,7 @@ Licensed under the MIT license.
 
         function setTicks(axis) {
             var oticks = axis.options.ticks, ticks = [];
-            if (oticks == null || (typeof oticks === "number" && oticks > 0)) {
+            if (oticks == null || (isNumeric(oticks) && oticks > 0)) {
                 ticks = axis.tickGenerator(axis);
             } else if (oticks) {
                 if ($.isFunction(oticks)) {
@@ -2902,7 +2908,7 @@ Licensed under the MIT license.
             }
 
             var c = $.color.parse(seriesColor);
-            c.a = typeof fill === "number" ? fill : 0.4;
+            c.a = isNumeric(fill) ? fill : 0.4;
             c.normalize();
             return c.toString();
         }
@@ -3222,11 +3228,11 @@ Licensed under the MIT license.
         }
 
         function highlight(s, point, auto) {
-            if (typeof s === "number") {
+            if (isNumeric(s)) {
                 s = series[s];
             }
 
-            if (typeof point === "number") {
+            if (isNumeric(point)) {
                 var ps = s.datapoints.pointsize;
                 point = s.datapoints.points.slice(ps * point, ps * (point + 1));
             }
@@ -3247,11 +3253,11 @@ Licensed under the MIT license.
                 return;
             }
 
-            if (typeof s === "number") {
+            if (isNumeric(s)) {
                 s = series[s];
             }
 
-            if (typeof point === "number") {
+            if (isNumeric(point)) {
                 var ps = s.datapoints.pointsize;
                 point = s.datapoints.points.slice(ps * point, ps * (point + 1));
             }
