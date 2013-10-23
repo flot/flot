@@ -13,16 +13,16 @@ Licensed under the MIT license.
         return obj - parseFloat( obj ) >= 0;
     };
 
-    ///////////////////////////////////////////////////////////////////////////
-    // The Canvas object is a wrapper around an HTML5 <canvas> tag.
-    //
-    // @constructor
-    // @param {string} cls List of classes to apply to the canvas.
-    // @param {element} container Element onto which to append the canvas.
-    //
-    // Requiring a container is a little iffy, but unfortunately canvas
-    // operations don't work unless the canvas is attached to the DOM.
-
+    /**
+     * The Canvas object is a wrapper around an HTML5 <canvas> tag.
+     *
+     * @constructor
+     * @param {string} cls List of classes to apply to the canvas.
+     * @param {element} container Element onto which to append the canvas.
+     *
+     * Requiring a container is a little iffy, but unfortunately canvas
+     * operations don't work unless the canvas is attached to the DOM.
+     */
     function Canvas(cls, container) {
 
         var element = container.children("." + cls)[0];
@@ -83,11 +83,12 @@ Licensed under the MIT license.
         this._textCache = {};
     }
 
-    // Resizes the canvas to the given dimensions.
-    //
-    // @param {number} width New width of the canvas, in pixels.
-    // @param {number} width New height of the canvas, in pixels.
-
+    /**
+     * Resizes the canvas to the given dimensions.
+     *
+     * @param {number} width New width of the canvas, in pixels.
+     * @param {number} width New height of the canvas, in pixels.
+     */
     Canvas.prototype.resize = function(width, height) {
 
         if (width <= 0 || height <= 0) {
@@ -131,14 +132,16 @@ Licensed under the MIT license.
         context.scale(pixelRatio, pixelRatio);
     };
 
-    // Clears the entire canvas area, not including any overlaid HTML text
-
+    /**
+     * Clears the entire canvas area, not including any overlaid HTML text
+     */
     Canvas.prototype.clear = function() {
         this.context.clearRect(0, 0, this.width, this.height);
     };
 
-    // Finishes rendering the canvas, including managing the text overlay.
-
+    /**
+     * Finishes rendering the canvas, including managing the text overlay.
+     */
     Canvas.prototype.render = function() {
 
         var cache = this._textCache;
@@ -194,12 +197,13 @@ Licensed under the MIT license.
         }
     };
 
-    // Creates (if necessary) and returns the text overlay container.
-    //
-    // @param {string} classes String of space-separated CSS classes used to
-    //     uniquely identify the text layer.
-    // @return {object} The jQuery-wrapped text-layer div.
-
+    /**
+     * Creates (if necessary) and returns the text overlay container.
+     *
+     * @param {string} classes String of space-separated CSS classes used to
+     *     uniquely identify the text layer.
+     * @return {object} The jQuery-wrapped text-layer div.
+     */
     Canvas.prototype.getTextLayer = function(classes) {
 
         var layer = this.text[classes];
@@ -239,45 +243,46 @@ Licensed under the MIT license.
         return layer;
     };
 
-    // Creates (if necessary) and returns a text info object.
-    //
-    // The object looks like this:
-    //
-    // {
-    //     width: Width of the text's wrapper div.
-    //     height: Height of the text's wrapper div.
-    //     element: The jQuery-wrapped HTML div containing the text.
-    //     positions: Array of positions at which this text is drawn.
-    // }
-    //
-    // The positions array contains objects that look like this:
-    //
-    // {
-    //     active: Flag indicating whether the text should be visible.
-    //     rendered: Flag indicating whether the text is currently visible.
-    //     element: The jQuery-wrapped HTML div containing the text.
-    //     x: X coordinate at which to draw the text.
-    //     y: Y coordinate at which to draw the text.
-    // }
-    //
-    // Each position after the first receives a clone of the original element.
-    //
-    // The idea is that that the width, height, and general 'identity' of the
-    // text is constant no matter where it is placed; the placements are a
-    // secondary property.
-    //
-    // Canvas maintains a cache of recently-used text info objects; getTextInfo
-    // either returns the cached element or creates a new entry.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {string} text Text string to retrieve info for.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which to rotate the text, in degrees.
-    // @param {number=} width Maximum width of the text before it wraps.
-    // @return {object} a text info object.
-
+    /**
+     * Creates (if necessary) and returns a text info object.
+     *
+     * The object looks like this:
+     *
+     * {
+     *     width: Width of the text's wrapper div.
+     *     height: Height of the text's wrapper div.
+     *     element: The jQuery-wrapped HTML div containing the text.
+     *     positions: Array of positions at which this text is drawn.
+     * }
+     *
+     * The positions array contains objects that look like this:
+     *
+     * {
+     *     active: Flag indicating whether the text should be visible.
+     *     rendered: Flag indicating whether the text is currently visible.
+     *     element: The jQuery-wrapped HTML div containing the text.
+     *     x: X coordinate at which to draw the text.
+     *     y: Y coordinate at which to draw the text.
+     * }
+     *
+     * Each position after the first receives a clone of the original element.
+     *
+     * The idea is that that the width, height, and general 'identity' of the
+     * text is constant no matter where it is placed; the placements are a
+     * secondary property.
+     *
+     * Canvas maintains a cache of recently-used text info objects; getTextInfo
+     * either returns the cached element or creates a new entry.
+     *
+     * @param {string} layer A string of space-separated CSS classes uniquely
+     *     identifying the layer containing this text.
+     * @param {string} text Text string to retrieve info for.
+     * @param {(string|object)=} font Either a string of space-separated CSS
+     *     classes or a font-spec object, defining the text's font and style.
+     * @param {number=} angle Angle at which to rotate the text, in degrees.
+     * @param {number=} width Maximum width of the text before it wraps.
+     * @return {object} a text info object.
+     */
     Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
 
         var textStyle, layerCache, styleCache, angleCache, info;
@@ -454,25 +459,26 @@ Licensed under the MIT license.
         return info;
     };
 
-    // Adds a text string to the canvas text overlay.
-    //
-    // The text isn't drawn immediately; it is marked as rendering, which will
-    // result in its addition to the canvas on the next render pass.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {number} x X coordinate at which to draw the text.
-    // @param {number} y Y coordinate at which to draw the text.
-    // @param {string} text Text string to draw.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which to rotate the text, in degrees.
-    // @param {number=} width Maximum width of the text before it wraps.
-    // @param {string=} halign Horizontal alignment of the text; either "left",
-    //     "center" or "right".
-    // @param {string=} valign Vertical alignment of the text; either "top",
-    //     "middle" or "bottom".
-
+    /**
+     * Adds a text string to the canvas text overlay.
+     *
+     * The text isn't drawn immediately; it is marked as rendering, which will
+     * result in its addition to the canvas on the next render pass.
+     *
+     * @param {string} layer A string of space-separated CSS classes uniquely
+     *     identifying the layer containing this text.
+     * @param {number} x X coordinate at which to draw the text.
+     * @param {number} y Y coordinate at which to draw the text.
+     * @param {string} text Text string to draw.
+     * @param {(string|object)=} font Either a string of space-separated CSS
+     *     classes or a font-spec object, defining the text's font and style.
+     * @param {number=} angle Angle at which to rotate the text, in degrees.
+     * @param {number=} width Maximum width of the text before it wraps.
+     * @param {string=} halign Horizontal alignment of the text; either "left",
+     *     "center" or "right".
+     * @param {string=} valign Vertical alignment of the text; either "top",
+     *     "middle" or "bottom".
+     */
     Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
 
         var info = this.getTextInfo(layer, text, font, angle, width),
@@ -526,26 +532,27 @@ Licensed under the MIT license.
         });
     };
 
-    // Removes one or more text strings from the canvas text overlay.
-    //
-    // If no parameters are given, all text within the layer is removed.
-    //
-    // Note that the text is not immediately removed; it is simply marked as
-    // inactive, which will result in its removal on the next render pass.
-    // This avoids the performance penalty for 'clear and redraw' behavior,
-    // where we potentially get rid of all text on a layer, but will likely
-    // add back most or all of it later, as when redrawing axes, for example.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {number=} x X coordinate of the text.
-    // @param {number=} y Y coordinate of the text.
-    // @param {string=} text Text string to remove.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which the text is rotated, in degrees.
-    //     Angle is currently unused, it will be implemented in the future.
-
+    /**
+     * Removes one or more text strings from the canvas text overlay.
+     *
+     * If no parameters are given, all text within the layer is removed.
+     *
+     * Note that the text is not immediately removed; it is simply marked as
+     * inactive, which will result in its removal on the next render pass.
+     * This avoids the performance penalty for 'clear and redraw' behavior,
+     * where we potentially get rid of all text on a layer, but will likely
+     * add back most or all of it later, as when redrawing axes, for example.
+     *
+     * @param {string} layer A string of space-separated CSS classes uniquely
+     *     identifying the layer containing this text.
+     * @param {number=} x X coordinate of the text.
+     * @param {number=} y Y coordinate of the text.
+     * @param {string=} text Text string to remove.
+     * @param {(string|object)=} font Either a string of space-separated CSS
+     *     classes or a font-spec object, defining the text's font and style.
+     * @param {number=} angle Angle at which the text is rotated, in degrees.
+     *     Angle is currently unused, it will be implemented in the future.
+     */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
         var i, positions, position;
         if (text == null) {
@@ -580,9 +587,9 @@ Licensed under the MIT license.
         }
     };
 
-    ///////////////////////////////////////////////////////////////////////////
-    // The top-level container for the entire plot.
-
+    /**
+     * The top-level container for the entire plot.
+     */
     function Plot(placeholder, data_, options_, plugins) {
         // data is on the form:
         //   [ series1, series2 ... ]
