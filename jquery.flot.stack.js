@@ -57,7 +57,9 @@ charts or filled areas).
         }
 
         function stackData(plot, s, datapoints) {
-            if (s.stack == null || s.stack === false) {
+            // Reject for null, false and undefined
+            // But not for 0
+            if (((s.stack+"") !== "0") && !s.stack) {
                 return;
             }
 
