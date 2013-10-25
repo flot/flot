@@ -65,7 +65,7 @@ API.txt for details.
 
         for (var i = 0; i < fmt.length; ++i) {
 
-            var c = fmt.charAt(i);
+            var c = fmt[i];
 
             if (escape) {
                 switch (c) {

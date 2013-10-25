@@ -3001,14 +3001,14 @@ Licensed under the MIT license.
                 if (m[0] == null) {
                     m = [m, m];
                 }
-                if (p.charAt(0) === "n") {
+                if (p[0] === "n") {
                     pos += "top:" + (m[1] + plotOffset.top) + "px;";
-                } else if (p.charAt(0) === "s") {
+                } else if (p[0] === "s") {
                     pos += "bottom:" + (m[1] + plotOffset.bottom) + "px;";
                 }
-                if (p.charAt(1) === "e") {
+                if (p[1] === "e") {
                     pos += "right:" + (m[0] + plotOffset.right) + "px;";
-                } else if (p.charAt(1) === "w") {
+                } else if (p[1] === "w") {
                     pos += "left:" + (m[0] + plotOffset.left) + "px;";
                 }
                 var legend = $("<div class='legend'>" + table.replace("style='", "style='position:absolute;" + pos +";") + "</div>").appendTo(placeholder);
