@@ -162,7 +162,7 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
         var points = datapoints.points,
             ps = datapoints.pointsize,
             format = datapoints.format,
-            formatColumn = axis.charAt(0),
+            formatColumn = axis[0],
             index = getNextIndex(categories);
 
         for (var i = 0; i < points.length; i += ps) {
