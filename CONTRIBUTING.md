@@ -63,8 +63,8 @@ lists, loop definitions, or array/object indices. For example:
 
 #### Comments ####
 
-Use // for all comments except the header at the top of a file or inline
-include.
+Use [jsDoc](http://usejsdoc.org) comments for all file and function headers.
+Use // for all inline and block comments, regardless of length.
 
 All // comment blocks should have an empty line above *and* below them. For
 example:
