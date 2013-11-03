@@ -2626,8 +2626,12 @@ Licensed under the MIT license.
 
         function insertLegend() {
 
-            placeholder.find(".legend").remove();
-
+            if (options.legend.container!= null) {
+                $(options.legend.container).html("");
+            } else {
+                placeholder.find(".legend").remove();
+			}
+			
             if (!options.legend.show)
                 return;
 
