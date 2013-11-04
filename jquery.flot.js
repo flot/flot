@@ -658,9 +658,9 @@ Licensed under the MIT license.
             };
         };
         plot.shutdown = shutdown;
-        plot.resize = function () {
-        	var width = placeholder.width(),
-        		height = placeholder.height();
+        plot.resize = function (width, height) {
+            width = (width === undefined) || (width < 0) ? placeholder.width() : width,
+            height = (height === undefined) || (height < 0) ? placeholder.height() : height;
             surface.resize(width, height);
             overlay.resize(width, height);
         };
