@@ -3295,10 +3295,17 @@ Licensed under the MIT license.
                 return;
             }
 
-            var pointRadius = series.points.radius + series.points.lineWidth / 2;
+            var pointRadius;
+            var radius;
+            if (series.points.show) {
+              pointRadius = series.points.radius + series.points.lineWidth / 2;
+              radius = 1.5 * pointRadius;
+            } else {
+              pointRadius = series.points.radius;
+              radius = 0.5 * pointRadius;
+            }
             octx.lineWidth = pointRadius;
             octx.strokeStyle = highlightColor;
-            var radius = 1.5 * pointRadius;
             x = axisx.p2c(x);
             y = axisy.p2c(y);
 
