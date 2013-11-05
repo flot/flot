@@ -2928,7 +2928,7 @@ Licensed under the MIT license.
                 return;
             }
 
-            var fragments = [], entries = [], rowStarted = false,
+            var entries = [], rowBuffer = null,
                 lf = options.legend.labelFormatter, s, label, i;
 
             // Build a list of legend entries, with each having a label and a color
@@ -2944,6 +2944,12 @@ Licensed under the MIT license.
                         });
                     }
                 }
+            }
+
+            // No entries implies no legend
+
+            if (entries.length === 0) {
+                return;
             }
 
             // Sort the legend using either the default or a custom comparator
@@ -2965,53 +2971,52 @@ Licensed under the MIT license.
 
             // Generate markup for the list of entries, in their final order
 
+            var table = $("<table/>").css({
+                "font-size": "smaller",
+                "color": options.grid.color
+            });
+
             for (i = 0; i < entries.length; ++i) {
 
                 var entry = entries[i];
 
                 if (i % options.legend.noColumns === 0) {
-                    if (rowStarted) {
-                        fragments.push("</tr>");
+                    if (rowBuffer !== null) {
+                        table.append(rowBuffer);
                     }
-                    fragments.push("<tr>");
-                    rowStarted = true;
+                    rowBuffer = $("<tr/>");
                 }
 
-                fragments.push(
-                    "<td class='legendColorBox'><div style='border:1px solid " + options.legend.labelBoxBorderColor + ";padding:1px'><div style='width:4px;height:0;border:5px solid " + entry.color + ";overflow:hidden'></div></div></td>" +
-                    "<td class='legendLabel'>" + entry.label + "</td>"
+                rowBuffer.append(
+                    $("<td/>").addClass("legendColorBox").append(
+                        $("<div/>").css({"border": "1px solid " + options.legend.labelBoxBorderColor, "padding": "1px"}).append(
+                            $("<div/>").css({"width": "4px", "height": 0, "border": "5px solid " + entry.color, "overflow": "hidden"})
+                        )
+                    ),
+                    $("<td/>").addClass("legendLabel").html(entry.label)
                 );
             }
 
-            if (rowStarted) {
-                fragments.push("</tr>");
-            }
-
-            if (fragments.length === 0) {
-                return;
-            }
-
-            var table = "<table style='font-size:smaller;color:" + options.grid.color + "'>" + fragments.join("") + "</table>";
             if (options.legend.container != null) {
                 $(options.legend.container).html(table);
             } else {
-                var pos = "",
+                var pos = {"position": "absolute"},
                     p = options.legend.position,
                     m = options.legend.margin;
                 if (m[0] == null) {
                     m = [m, m];
                 }
                 if (p.charAt(0) === "n") {
-                    pos += "top:" + (m[1] + plotOffset.top) + "px;";
+                    pos.top = (m[1] + plotOffset.top) + "px";
                 } else if (p.charAt(0) === "s") {
-                    pos += "bottom:" + (m[1] + plotOffset.bottom) + "px;";
+                    pos.bottom = (m[1] + plotOffset.bottom) + "px";
                 }
                 if (p.charAt(1) === "e") {
-                    pos += "right:" + (m[0] + plotOffset.right) + "px;";
+                    pos.right = (m[0] + plotOffset.right) + "px";
                 } else if (p.charAt(1) === "w") {
-                    pos += "left:" + (m[0] + plotOffset.left) + "px;";
+                    pos.left = (m[0] + plotOffset.left) + "px";
                 }
-                var legend = $("<div class='legend'>" + table.replace("style='", "style='position:absolute;" + pos +";") + "</div>").appendTo(placeholder);
+                var legend = $("<div/>").addClass("legend").append(table.css(pos)).appendTo(placeholder);
                 if (options.legend.backgroundOpacity !== 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
@@ -3028,7 +3033,14 @@ Licensed under the MIT license.
                         c = c.toString();
                     }
                     var div = legend.children();
-                    $("<div style='position:absolute;width:" + div.width() + "px;height:" + div.height() + "px;" + pos +"background-color:" + c + ";'> </div>").prependTo(legend).css("opacity", options.legend.backgroundOpacity);
+
+                    // Position also applies to this
+                    $("<div/>").css(pos).css({
+                        "width": div.width() + "px",
+                        "height": div.height() + "px",
+                        "background-color": c,
+                        "opacity": options.legend.backgroundOpacity
+                    }).prependTo(legend);
                 }
             }
         }
