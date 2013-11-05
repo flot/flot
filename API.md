@@ -574,6 +574,17 @@ In Python you can get it with something like:
 ```python
 calendar.timegm(datetime_object.timetuple()) * 1000
 ```
+In Ruby you can get it using `#to_i` method on [`Time`](http://apidock.com/ruby/Time/to_i) object.
+If you're using `active_support` gem (default for Ruby on Rails application) `#to_i` is also available on  `DateTime` and `ActiveSupport::TimeWithZone` objects.
+After that multiply the result by 1000:
+
+```ruby
+Time.now.to_i * 1000     # => 1383582043000
+# ActiveSupport examples:
+DateTime.now.to_i * 1000 # => 1383582043000
+ActiveSupport::TimeZone.new('Asia/Shanghai').now.to_i * 1000
+# => 1383582043000
+```
 
 In .NET you can get it with something like:
 
