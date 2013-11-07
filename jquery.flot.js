@@ -2928,8 +2928,7 @@ Licensed under the MIT license.
                 return;
             }
 
-            var entries = [], rowBuffer = null,
-                lf = options.legend.labelFormatter, s, label, i;
+            var entries = [], lf = options.legend.labelFormatter, s, label, i;
 
             // Build a list of legend entries, with each having a label and a color
 
@@ -2971,10 +2970,10 @@ Licensed under the MIT license.
 
             // Generate markup for the list of entries, in their final order
 
-            var table = $("<table>").css({
+            var table = $("<table></table>").css({
                 "font-size": "smaller",
                 "color": options.grid.color
-            });
+            }), rowBuffer = null;
 
             for (i = 0; i < entries.length; ++i) {
 
@@ -2984,24 +2983,24 @@ Licensed under the MIT license.
                     if (rowBuffer !== null) {
                         table.append(rowBuffer);
                     }
-                    rowBuffer = $("<tr>");
+                    rowBuffer = $("<tr></tr>");
                 }
 
-                var colorbox = $("<div>").css({
+                var colorbox = $("<div></div>").css({
                     "width": "4px",
                     "height": 0,
                     "border": "5px solid " + entry.color,
                     "overflow": "hidden"
                 }),
 
-                borderbox = $("<div>").css({
+                borderbox = $("<div></div>").css({
                     "border": "1px solid " + options.legend.labelBoxBorderColor,
                     "padding": "1px"
                 });
 
                 rowBuffer.append(
-                    $("<td>").addClass("legendColorBox").append(borderbox.append(colorbox)),
-                    $("<td>").addClass("legendLabel").html(entry.label)
+                    $("<td></td>").addClass("legendColorBox").append(borderbox.append(colorbox)),
+                    $("<td></td>").addClass("legendLabel").html(entry.label)
                 );
             }
 
@@ -3026,7 +3025,7 @@ Licensed under the MIT license.
                 } else if (p.charAt(1) === "w") {
                     pos.left = (m[0] + plotOffset.left) + "px";
                 }
-                var legend = $("<div>").addClass("legend").append(table.css(pos)).appendTo(placeholder);
+                var legend = $("<div></div>").addClass("legend").append(table.css(pos)).appendTo(placeholder);
                 if (options.legend.backgroundOpacity !== 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
@@ -3045,7 +3044,7 @@ Licensed under the MIT license.
                     var div = legend.children();
 
                     // Position also applies to this
-                    $("<div>").css(pos).css({
+                    $("<div></div>").css(pos).css({
                         "width": div.width() + "px",
                         "height": div.height() + "px",
                         "background-color": c,
