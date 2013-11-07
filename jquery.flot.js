@@ -3005,6 +3005,8 @@ Licensed under the MIT license.
                 );
             }
 
+            table.append(rowBuffer);
+
             if (options.legend.container != null) {
                 $(options.legend.container).html(table);
             } else {
