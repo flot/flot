@@ -24,6 +24,10 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "examples",
+    "*.md",
+    "*.json",
+    "*.txt"
   ]
 }
