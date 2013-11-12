@@ -775,9 +775,9 @@ Licensed under the MIT license.
             };
         };
         plot.shutdown = shutdown;
-        plot.resize = function () {
-            var width = placeholder.width(),
-                height = placeholder.height();
+        plot.resize = function (width, height) {
+            width = width || placeholder.width();
+            height = height || placeholder.height();
             surface.resize(width, height);
             overlay.resize(width, height);
         };
