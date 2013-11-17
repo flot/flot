@@ -79,7 +79,6 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
                 px, py, intery, qx, qy, bottom,
                 withlines = s.lines.show,
                 withbottom = ps > 2 && datapoints.format[2].y,
-                withsteps = withlines && s.lines.steps,
                 fromgap = true,
                 i = 0,
                 j = 0,
@@ -195,18 +194,6 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
                     if (l !== newpoints.length && withbottom) {
                         newpoints[l + 2] = bottom;
                     }
-                }
-
-                // maintain the line steps invariant
-
-                if (withsteps && l !== newpoints.length && l > 0 &&
-                    newpoints[l] !== null &&
-                    newpoints[l] !== newpoints[ l - ps ] &&
-                    newpoints[l + 1] !== newpoints[l - ps + 1] ) {
-                    for (m = 0; m < ps; ++m) {
-                        newpoints[l + ps + m] = newpoints[l + m];
-                    }
-                    newpoints[l + 1] = newpoints[l - ps + 1];
                 }
             }
 

@@ -1271,8 +1271,7 @@ Licensed under the MIT license.
 
                 ps = s.datapoints.pointsize;
                 points = s.datapoints.points;
-
-                var insertSteps = s.lines.show && s.lines.steps;
+                
                 s.xaxis.used = s.yaxis.used = true;
 
                 for (j = k = 0; j < data.length; ++j, k += ps) {
@@ -1327,25 +1326,6 @@ Licensed under the MIT license.
                                 }
                             }
                             points[k + m] = null;
-                        }
-                    } else {
-                        // a little bit of line specific stuff that
-                        // perhaps shouldn't be here, but lacking
-                        // better means...
-                        if (insertSteps && k > 0 &&
-                            points[k - ps] != null &&
-                            points[k - ps] !== points[k] &&
-                            points[k - ps + 1] !== points[k + 1]) {
-                            // copy the point to make room for a middle point
-                            for (m = 0; m < ps; ++m) {
-                                points[k + ps + m] = points[k + m];
-                            }
-
-                            // middle point has same y
-                            points[k + 1] = points[k - ps + 1];
-
-                            // we've added a point, better reflect that
-                            k += ps;
                         }
                     }
                 }
@@ -2426,6 +2406,7 @@ Licensed under the MIT license.
             function plotLine(datapoints, xoffset, yoffset, axisx, axisy) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize,
+                    showSteps = series.lines.steps,
                     prevx = null, prevy = null;
 
                 ctx.beginPath();
@@ -2443,13 +2424,13 @@ Licensed under the MIT license.
                             continue;   // line segment is outside
                         }
                         // compute new intersection point
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x1 = showSteps ? x2 : (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.min;
                     } else if (y2 <= y1 && y2 < axisy.min) {
                         if (y1 < axisy.min) {
                             continue;
                         }
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x2 = showSteps ? x2 : (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.min;
                     }
 
@@ -2458,13 +2439,13 @@ Licensed under the MIT license.
                         if (y2 > axisy.max) {
                             continue;
                         }
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x1 = showSteps ? x2 : (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.max;
                     } else if (y2 >= y1 && y2 > axisy.max) {
                         if (y1 > axisy.max) {
                             continue;
                         }
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x2 = showSteps ? x2 : (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.max;
                     }
 
@@ -2473,13 +2454,13 @@ Licensed under the MIT license.
                         if (x2 < axisx.min) {
                             continue;
                         }
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y1 = showSteps ? y1 : (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.min;
                     } else if (x2 <= x1 && x2 < axisx.min) {
                         if (x1 < axisx.min) {
                             continue;
                         }
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y2 = showSteps ? y1 : (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.min;
                     }
 
@@ -2488,13 +2469,13 @@ Licensed under the MIT license.
                         if (x2 > axisx.max) {
                             continue;
                         }
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y1 = showSteps ? y1 : (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.max;
                     } else if (x2 >= x1 && x2 > axisx.max) {
                         if (x1 > axisx.max) {
                             continue;
                         }
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y2 = showSteps ? y1 : (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.max;
                     }
 
@@ -2504,6 +2485,14 @@ Licensed under the MIT license.
 
                     prevx = x2;
                     prevy = y2;
+                    // Draw a step
+                    if (showSteps) {
+                        if (x1 < x2) {
+                            ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y1) + yoffset);
+                        } else {
+                            ctx.lineTo(axisx.p2c(x1) + xoffset, axisy.p2c(y2) + yoffset);
+                        }
+                    }
                     ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
                 }
                 ctx.stroke();
@@ -2512,6 +2501,7 @@ Licensed under the MIT license.
             function plotLineArea(datapoints, axisx, axisy) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize,
+                    showSteps = series.lines.steps,
                     bottom = Math.min(Math.max(0, axisy.min), axisy.max),
                     i = 0, areaOpen = false,
                     ypos = 1, segmentStart = 0, segmentEnd = 0;
@@ -2561,13 +2551,13 @@ Licensed under the MIT license.
                         if (x2 < axisx.min) {
                             continue;
                         }
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y1 = showSteps ? y1 : (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.min;
                     } else if (x2 <= x1 && x2 < axisx.min) {
                         if (x1 < axisx.min) {
                             continue;
                         }
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y2 = showSteps ? y1 : (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.min;
                     }
 
@@ -2576,13 +2566,13 @@ Licensed under the MIT license.
                         if (x2 > axisx.max) {
                             continue;
                         }
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y1 = showSteps ? y1 : (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x1 = axisx.max;
                     } else if (x2 >= x1 && x2 > axisx.max) {
                         if (x1 > axisx.max) {
                             continue;
                         }
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                        y2 = showSteps ? y1 : (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                         x2 = axisx.max;
                     }
 
@@ -2615,19 +2605,19 @@ Licensed under the MIT license.
 
                     // clip with ymin
                     if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x1 = showSteps ? x2 : (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.min;
                     } else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x2 = showSteps ? x2 : (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.min;
                     }
 
                     // clip with ymax
                     if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x1 = showSteps ? x2 : (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y1 = axisy.max;
                     } else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                        x2 = showSteps ? x2 : (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                         y2 = axisy.max;
                     }
 
@@ -2642,6 +2632,14 @@ Licensed under the MIT license.
                     // in redundant points if (x1, y1) hasn't changed
                     // from previous line to, but we just ignore that
                     ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
+                    // Draw a step
+                    if (showSteps) {
+                        if (x1 < x2) {
+                            ctx.lineTo(axisx.p2c(x2), axisy.p2c(y1));
+                        } else {
+                            ctx.lineTo(axisx.p2c(x1), axisy.p2c(y2));
+                        }
+                    }
                     ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
 
                     // fill the other rectangle if it's there
