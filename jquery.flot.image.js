@@ -130,6 +130,8 @@ Google Maps).
         var points = series.datapoints.points,
             ps = series.datapoints.pointsize;
 
+        ctx.save();
+
         for (var i = 0; i < points.length; i += ps) {
             var img = points[i],
                 x1 = points[i + 1], y1 = points[i + 2],
@@ -166,34 +168,7 @@ Google Maps).
                 y2 += tmp;
             }
 
-            // clip
-            if (x1 === x2 || y1 === y2 ||
-                x1 >= xaxis.max || x2 <= xaxis.min ||
-                y1 >= yaxis.max || y2 <= yaxis.min) {
-                continue;
-            }
-
             var sx1 = 0, sy1 = 0, sx2 = img.width, sy2 = img.height;
-            if (x1 < xaxis.min) {
-                sx1 += (sx2 - sx1) * (xaxis.min - x1) / (x2 - x1);
-                x1 = xaxis.min;
-            }
-
-            if (x2 > xaxis.max) {
-                sx2 += (sx2 - sx1) * (xaxis.max - x2) / (x2 - x1);
-                x2 = xaxis.max;
-            }
-
-            if (y1 < yaxis.min) {
-                sy2 += (sy1 - sy2) * (yaxis.min - y1) / (y2 - y1);
-                y1 = yaxis.min;
-            }
-
-            if (y2 > yaxis.max) {
-                sy1 += (sy1 - sy2) * (yaxis.max - y2) / (y2 - y1);
-                y2 = yaxis.max;
-            }
-
             x1 = xaxis.p2c(x1);
             x2 = xaxis.p2c(x2);
             y1 = yaxis.p2c(y1);
@@ -219,6 +194,8 @@ Google Maps).
                           x2 - x1, y2 - y1);
             ctx.globalAlpha = tmp;
         }
+
+        ctx.restore();
     }
 
     function processRawData(plot, series, data, datapoints) {

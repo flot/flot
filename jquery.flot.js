@@ -2039,11 +2039,18 @@ Licensed under the MIT license.
             if (grid.show && !grid.aboveData) {
                 drawGrid();
             }
+            
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+            ctx.rect(0, 0, plotWidth, plotHeight);
+            ctx.clip();
 
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i]);
             }
+
+            ctx.restore();
 
             executeHooks(hooks.draw, [ctx]);
 
@@ -2437,67 +2444,6 @@ Licensed under the MIT license.
                         continue;
                     }
 
-                    // clip with ymin
-                    if (y1 <= y2 && y1 < axisy.min) {
-                        if (y2 < axisy.min) {
-                            continue;   // line segment is outside
-                        }
-                        // compute new intersection point
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.min;
-                    } else if (y2 <= y1 && y2 < axisy.min) {
-                        if (y1 < axisy.min) {
-                            continue;
-                        }
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.min;
-                    }
-
-                    // clip with ymax
-                    if (y1 >= y2 && y1 > axisy.max) {
-                        if (y2 > axisy.max) {
-                            continue;
-                        }
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.max;
-                    } else if (y2 >= y1 && y2 > axisy.max) {
-                        if (y1 > axisy.max) {
-                            continue;
-                        }
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.max;
-                    }
-
-                    // clip with xmin
-                    if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min) {
-                            continue;
-                        }
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.min;
-                    } else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min) {
-                            continue;
-                        }
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.min;
-                    }
-
-                    // clip with xmax
-                    if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max) {
-                            continue;
-                        }
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.max;
-                    } else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max) {
-                            continue;
-                        }
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.max;
-                    }
-
                     if (x1 !== prevx || y1 !== prevy) {
                         ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
                     }
@@ -2554,38 +2500,6 @@ Licensed under the MIT license.
                         continue;
                     }
 
-                    // clip x values
-
-                    // clip with xmin
-                    if (x1 <= x2 && x1 < axisx.min) {
-                        if (x2 < axisx.min) {
-                            continue;
-                        }
-                        y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.min;
-                    } else if (x2 <= x1 && x2 < axisx.min) {
-                        if (x1 < axisx.min) {
-                            continue;
-                        }
-                        y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.min;
-                    }
-
-                    // clip with xmax
-                    if (x1 >= x2 && x1 > axisx.max) {
-                        if (x2 > axisx.max) {
-                            continue;
-                        }
-                        y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x1 = axisx.max;
-                    } else if (x2 >= x1 && x2 > axisx.max) {
-                        if (x1 > axisx.max) {
-                            continue;
-                        }
-                        y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                        x2 = axisx.max;
-                    }
-
                     if (!areaOpen) {
                         // open area
                         ctx.beginPath();
@@ -2593,67 +2507,15 @@ Licensed under the MIT license.
                         areaOpen = true;
                     }
 
-                    // now first check the case where both is outside
-                    if (y1 >= axisy.max && y2 >= axisy.max) {
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
-                        continue;
-                    } else if (y1 <= axisy.min && y2 <= axisy.min) {
-                        ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
-                        continue;
-                    }
-
-                    // else it's a bit more complicated, there might
-                    // be a flat maxed out rectangle first, then a
-                    // triangular cutout or reverse; to find these
-                    // keep track of the current x values
-                    var x1old = x1, x2old = x2;
-
-                    // clip the y values, without shortcutting, we
-                    // go through all cases in turn
-
-                    // clip with ymin
-                    if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
-                        x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.min;
-                    } else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
-                        x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.min;
-                    }
-
-                    // clip with ymax
-                    if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
-                        x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y1 = axisy.max;
-                    } else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
-                        x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                        y2 = axisy.max;
-                    }
-
-                    // if the x value was changed we got a rectangle
-                    // to fill
-                    if (x1 !== x1old) {
-                        ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
-                        // it goes to (x1, y1), but we fill that below
-                    }
-
                     // fill triangular section, this sometimes result
                     // in redundant points if (x1, y1) hasn't changed
                     // from previous line to, but we just ignore that
                     ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
                     ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
-
-                    // fill the other rectangle if it's there
-                    if (x2 !== x2old) {
-                        ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
-                        ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
-                    }
                 }
             }
 
             ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
 
             var lw = series.lines.lineWidth,
@@ -2690,7 +2552,7 @@ Licensed under the MIT license.
 
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i], y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
+                    if (x == null) {
                         continue;
                     }
 
@@ -2713,7 +2575,6 @@ Licensed under the MIT license.
             }
 
             ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
 
             var lw = series.points.lineWidth,
                 sw = series.shadowSize,
@@ -2792,32 +2653,6 @@ Licensed under the MIT license.
                 }
             }
 
-            // clip
-            if (right < axisx.min || left > axisx.max ||
-                top < axisy.min || bottom > axisy.max) {
-                return;
-            }
-
-            if (left < axisx.min) {
-                left = axisx.min;
-                drawLeft = false;
-            }
-
-            if (right > axisx.max) {
-                right = axisx.max;
-                drawRight = false;
-            }
-
-            if (bottom < axisy.min) {
-                bottom = axisy.min;
-                drawBottom = false;
-            }
-
-            if (top > axisy.max) {
-                top = axisy.max;
-                drawTop = false;
-            }
-
             left = axisx.p2c(left);
             bottom = axisy.p2c(bottom);
             right = axisx.p2c(right);
@@ -2835,7 +2670,7 @@ Licensed under the MIT license.
             }
 
             // draw outline
-            if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
+            if (lineWidth > 0) {
                 c.beginPath();
 
                 // FIXME: inline moveTo is buggy with excanvas
@@ -2877,7 +2712,6 @@ Licensed under the MIT license.
             }
 
             ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
 
             // FIXME: figure out a way to add shadows (for instance along the right edge)
             ctx.lineWidth = series.bars.lineWidth;
