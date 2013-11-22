@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Flot Examples: Customising the Grid</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="../../lib/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../../lib/jquery.colorhelpers.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script type="text/javascript">
+
+	$(function() {
+
+		var d1 = [];
+		for (var i = 0; i < 14; i += 0.5) {
+			d1.push([i, Math.sin(i)]);
+		}
+
+		var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
+
+		// A null signifies separate line segments
+
+		var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
+
+		var options = {
+		    grid: {
+                color:"#335588", //
+		        borderWidth: 1,
+		        hoverable: true,
+		        clickable: true,
+		        borderColor: "#66AAFF",
+		        labelMargin: 20,		        
+		        tickPattern: {
+		            xaxis:
+                        { style: 'dotted' }, //set the tick pattern to dotted (same as dashed, [1,1])
+		            yaxis: {
+                            style: 'dashed', //set the tick pattern to dashed
+                            pattern: [12, 2] //set the interval to 12px filled 2px empty
+                        }
+		        }
+		    }
+		}
+
+		$.plot("#placeholder", [ d1, d2, d3 ],options);
+
+		// Add the Flot version string to the footer
+
+		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+	});
+
+    </script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Customise Grid</h2>
+	</div>
+
+	<div id="content">
+
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+
+		<p>It's very simple to customise the grid. Different colors for borders, background and ticks and three different tick patterns, solid, dotted and dashed. </p>
+		
+
+	</div>
+
+	<div id="footer">
+		Copyright &copy; 2007 - 2013 IOLA and Ole Laursen
+	</div>
+
+</body>
+</html>

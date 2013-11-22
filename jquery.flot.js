@@ -695,6 +695,7 @@ Licensed under the MIT license.
                     backgroundColor: null, // null for transparent, else color
                     borderColor: null, // set if different from the grid color
                     tickColor: null, // color for the ticks, e.g. "rgba(0,0,0,0.15)"
+                    tickPattern: null, //pattern for the ticks. Solid, dashed or dotted
                     margin: 0, // distance from the canvas edge to the grid
                     labelMargin: 5, // in pixels
                     axisMargin: 8, // in pixels
@@ -2258,8 +2259,33 @@ Licensed under the MIT license.
                         }
                     }
 
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + xoff, y + yoff);
+                    if (options.grid.tickPattern) {
+                        var style = null;
+                        var pattern = null;
+                        console.log(options.grid.tickPattern);
+                        if (axis.direction === "x" && options.grid.tickPattern.xaxis !== undefined) {
+                            style = options.grid.tickPattern.xaxis.style;
+                            pattern = options.grid.tickPattern.xaxis.pattern;
+                        } else if (axis.direction === "y" && options.grid.tickPattern.yaxis !== undefined) {
+                            style = options.grid.tickPattern.yaxis.style;;
+                            pattern = options.grid.tickPattern.yaxis.pattern;
+                        }
+
+                        console.log(style);
+                        if (style === 'dotted') {
+                            dashedLineTo(ctx, x, y, x + xoff, y + yoff, [1, 1]);
+                        } else if (style === 'dashed') {
+                            dashedLineTo(ctx, x, y, x + xoff, y + yoff, pattern);
+                        } else {  //if not defined or solid
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(x + xoff, y + yoff);
+                        }
+
+                    }
+                    else {
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x + xoff, y + yoff);
+                    }
                 }
 
                 ctx.stroke();
@@ -2901,6 +2927,48 @@ Licensed under the MIT license.
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, 0, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
+
+        //draw a dashed line on the given ctx, in the given coordinates, following the given pattern
+
+        function dashedLineTo(ctx, fromX, fromY, toX, toY, pattern) {
+
+            //taken from: http://davidowens.wordpress.com/2010/09/07/html-5-canvas-and-dashed-lines/ and modified a little            
+
+            var lt = function (a, b) { return a <= b; };
+            var gt = function (a, b) { return a >= b; };
+            var capmin = function (a, b) { return Math.min(a, b); };
+            var capmax = function (a, b) { return Math.max(a, b); };
+
+            var checkX = { thereYet: gt, cap: capmin };
+            var checkY = { thereYet: gt, cap: capmin };
+
+            if (fromY - toY > 0) {
+                checkY.thereYet = lt;
+                checkY.cap = capmax;
+            }
+            if (fromX - toX > 0) {
+                checkX.thereYet = lt;
+                checkX.cap = capmax;
+            }
+
+            ctx.moveTo(fromX, fromY);
+            var offsetX = fromX;
+            var offsetY = fromY;
+            var idx = 0, dash = true;
+            while (!(checkX.thereYet(offsetX, toX) && checkY.thereYet(offsetY, toY))) {
+                var ang = Math.atan2(toY - fromY, toX - fromX);
+                var len = pattern[idx];
+
+                offsetX = checkX.cap(toX, offsetX + (Math.cos(ang) * len));
+                offsetY = checkY.cap(toY, offsetY + (Math.sin(ang) * len));
+
+                if (dash) ctx.lineTo(offsetX, offsetY);
+                else ctx.moveTo(offsetX, offsetY);
+
+                idx = (idx + 1) % pattern.length;
+                dash = !dash;
+            }
+        };
 
         function getFillStyle(filloptions, seriesColor, bottom, top) {
             var fill = filloptions.fill;
