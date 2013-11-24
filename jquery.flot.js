@@ -658,6 +658,23 @@ Licensed under the MIT license.
             };
         };
         plot.shutdown = shutdown;
+        plot.destroy = function () {
+            shutdown();
+            placeholder.removeData("plot").empty();
+
+            series = [];
+            options = null;
+            surface = null;
+            overlay = null;
+            eventHolder = null;
+            ctx = null;
+            octx = null;
+            xaxes = [];
+            yaxes = [];
+            hooks = null;
+            highlights = [];
+            plot = null;
+        };
         plot.resize = function () {
         	var width = placeholder.width(),
         		height = placeholder.height();
