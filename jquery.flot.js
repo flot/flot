@@ -1400,37 +1400,50 @@ Licensed under the MIT license.
             var lw = axis.labelWidth,
                 lh = axis.labelHeight,
                 pos = axis.options.position,
+                isXAxis = axis.direction === "x",
                 tickLength = axis.options.tickLength,
                 axisMargin = options.grid.axisMargin,
                 padding = options.grid.labelMargin,
-                all = axis.direction == "x" ? xaxes : yaxes,
-                index, innermost;
+                innermost = true,
+                outermost = true,
+                first = true,
+                found = false;
 
-            // determine axis margin
-            var samePosition = $.grep(all, function (a) {
-                return a && a.options.position == pos && a.reserveSpace;
+            // Determine the axis's position in its direction and on its side
+
+            $.each(isXAxis ? xaxes : yaxes, function(i, a) {
+                if (a && a.reserveSpace) {
+                    if (a === axis) {
+                        found = true;
+                    } else if (a.options.position === pos) {
+                        if (found) {
+                            outermost = false;
+                        } else {
+                            innermost = false;
+                        }
+                    }
+                    if (!found) {
+                        first = false;
+                    }
+                }
             });
-            if ($.inArray(axis, samePosition) == samePosition.length - 1)
-                axisMargin = 0; // outermost
 
-            // Determine whether the axis is the first (innermost) on its side
+            // The outermost axis on each side has no margin
 
-            innermost = $.inArray(axis, samePosition) == 0;
+            if (outermost) {
+                axisMargin = 0;
+            }
 
-            // determine tick length - if we're innermost, we can use "full"
+            // The ticks for the first axis in each direction stretch across
 
             if (tickLength == null) {
-                if (innermost)
-                    tickLength = "full";
-                else
-                    tickLength = 5;
+                tickLength = first ? "full" : 5;
             }
 
             if (!isNaN(+tickLength))
                 padding += +tickLength;
 
-            // compute box
-            if (axis.direction == "x") {
+            if (isXAxis) {
                 lh += padding;
 
                 if (pos == "bottom") {
