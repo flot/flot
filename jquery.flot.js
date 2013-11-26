@@ -762,8 +762,6 @@ Licensed under the MIT license.
                     family: placeholder.css("font-family")
                 };
 
-            fontDefaults.lineHeight = fontDefaults.size * 1.15;
-
             axisCount = options.xaxes.length || 1;
             for (i = 0; i < axisCount; ++i) {
 
@@ -779,6 +777,9 @@ Licensed under the MIT license.
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
                     if (!axisOptions.font.color) {
                         axisOptions.font.color = axisOptions.color;
+                    }
+                    if (!axisOptions.font.lineHeight) {
+                        axisOptions.font.lineHeight = Math.round(axisOptions.font.size * 1.15);
                     }
                 }
             }
@@ -798,6 +799,9 @@ Licensed under the MIT license.
                     axisOptions.font = $.extend({}, fontDefaults, axisOptions.font);
                     if (!axisOptions.font.color) {
                         axisOptions.font.color = axisOptions.color;
+                    }
+                    if (!axisOptions.font.lineHeight) {
+                        axisOptions.font.lineHeight = Math.round(axisOptions.font.size * 1.15);
                     }
                 }
             }
