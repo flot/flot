@@ -866,7 +866,8 @@ Licensed under the MIT license.
                     variant: placeholder.css("font-variant"),
                     weight: placeholder.css("font-weight"),
                     family: placeholder.css("font-family")
-                };
+                },
+                markings;
 
             fontDefaults.lineHeight = fontDefaults.size * 1.15;
 
@@ -935,6 +936,16 @@ Licensed under the MIT license.
                 }
                 if (axisOptions.label && (axisOptions.labelFont || axisOptions.font)) {
                     axisOptions.labelFont = $.extend({}, axisOptions.font || fontDefaults, axisOptions.labelFont);
+                }
+            }
+
+            markings = options.grid.markings;
+            if ($.isArray(markings)) {
+                for (i = 0; i < markings.length; ++i) {
+
+                    if (markings[i].font) {
+                        markings[i].font = $.extend({}, fontDefaults, markings[i].font);
+                    }
                 }
             }
 
@@ -2089,7 +2100,13 @@ Licensed under the MIT license.
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            // draw markings
+            var markingLayer = "flot-markings";
+            surface.removeText(markingLayer);
+
+            // process markings
+            var markingsUnderGrid = [];
+            var markingsAboveGrid = [];
+            
             var markings = options.grid.markings;
             if (markings) {
                 if ($.isFunction(markings)) {
@@ -2105,62 +2122,17 @@ Licensed under the MIT license.
                 }
 
                 for (i = 0; i < markings.length; ++i) {
-                    var m = markings[i],
-                        xrange = extractRange(m, "x"),
-                        yrange = extractRange(m, "y");
-
-                    // fill in missing
-                    if (xrange.from == null) {
-                        xrange.from = xrange.axis.min;
-                    }
-                    if (xrange.to == null) {
-                        xrange.to = xrange.axis.max;
-                    }
-                    if (yrange.from == null) {
-                        yrange.from = yrange.axis.min;
-                    }
-                    if (yrange.to == null) {
-                        yrange.to = yrange.axis.max;
-                    }
-
-                    // clip
-                    if (xrange.to < xrange.axis.min || xrange.from > xrange.axis.max ||
-                        yrange.to < yrange.axis.min || yrange.from > yrange.axis.max) {
-                        continue;
-                    }
-
-                    xrange.from = Math.max(xrange.from, xrange.axis.min);
-                    xrange.to = Math.min(xrange.to, xrange.axis.max);
-                    yrange.from = Math.max(yrange.from, yrange.axis.min);
-                    yrange.to = Math.min(yrange.to, yrange.axis.max);
-
-                    if (xrange.from === xrange.to && yrange.from === yrange.to) {
-                        continue;
-                    }
-
-                    // then draw
-                    xrange.from = xrange.axis.p2c(xrange.from);
-                    xrange.to = xrange.axis.p2c(xrange.to);
-                    yrange.from = yrange.axis.p2c(yrange.from);
-                    yrange.to = yrange.axis.p2c(yrange.to);
-
-                    if (xrange.from === xrange.to || yrange.from === yrange.to) {
-                        // draw line
-                        ctx.beginPath();
-                        ctx.strokeStyle = m.color || options.grid.markingsColor;
-                        ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
-                        ctx.moveTo(xrange.from, yrange.from);
-                        ctx.lineTo(xrange.to, yrange.to);
-                        ctx.stroke();
+                    var m = markings[i];
+                    
+                    if (m.aboveGrid) {
+                        markingsAboveGrid.push(m);
                     } else {
-                        // fill area
-                        ctx.fillStyle = m.color || options.grid.markingsColor;
-                        ctx.fillRect(xrange.from, yrange.to,
-                                     xrange.to - xrange.from,
-                                     yrange.from - yrange.to);
+                        markingsUnderGrid.push(m);
                     }
                 }
             }
+            
+            drawMarkings(markingsUnderGrid, markingLayer);
 
             // draw the ticks
             axes = allAxes();
@@ -2265,6 +2237,7 @@ Licensed under the MIT license.
                 ctx.stroke();
             }
 
+            drawMarkings(markingsAboveGrid, markingLayer);
 
             // draw border
             if (bw) {
@@ -2322,6 +2295,109 @@ Licensed under the MIT license.
             }
 
             ctx.restore();
+        }
+        
+        function drawMarkings(markings, markingLayer) {
+	        if (!markings) {
+		        return;
+	        }
+
+	        for (var i = 0; i < markings.length; i++) {
+                drawMarking(markings[i], markingLayer);
+            }
+        }
+        
+        function drawMarking(m, markingLayer) {
+            var xrange = extractRange(m, "x"),
+                yrange = extractRange(m, "y");
+
+            // fill in missing
+            if (xrange.from == null) {
+                xrange.from = xrange.axis.min;
+            }
+            if (xrange.to == null) {
+                xrange.to = xrange.axis.max;
+            }
+            if (yrange.from == null) {
+                yrange.from = yrange.axis.min;
+            }
+            if (yrange.to == null) {
+                yrange.to = yrange.axis.max;
+            }
+
+            // clip
+            if (xrange.to < xrange.axis.min || xrange.from > xrange.axis.max ||
+                yrange.to < yrange.axis.min || yrange.from > yrange.axis.max) {
+                return;
+            }
+
+            xrange.from = Math.max(xrange.from, xrange.axis.min);
+            xrange.to = Math.min(xrange.to, xrange.axis.max);
+            yrange.from = Math.max(yrange.from, yrange.axis.min);
+            yrange.to = Math.min(yrange.to, yrange.axis.max);
+
+            if (xrange.from === xrange.to && yrange.from === yrange.to) {
+                return;
+            }
+
+            // then draw
+            xrange.from = xrange.axis.p2c(xrange.from);
+            xrange.to = xrange.axis.p2c(xrange.to);
+            yrange.from = yrange.axis.p2c(yrange.from);
+            yrange.to = yrange.axis.p2c(yrange.to);
+
+            if (xrange.from === xrange.to || yrange.from === yrange.to) {
+                // draw line
+                ctx.beginPath();
+                ctx.strokeStyle = m.color || options.grid.markingsColor;
+                ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
+                ctx.moveTo(xrange.from, yrange.from);
+                ctx.lineTo(xrange.to, yrange.to);
+                ctx.stroke();
+            } else {
+                // fill area
+                ctx.fillStyle = m.color || options.grid.markingsColor;
+                
+                if (!m.rounded) {
+                    ctx.fillRect(xrange.from, yrange.to,
+                        xrange.to - xrange.from,
+                        yrange.from - yrange.to);
+                } else {
+                    roundRect(ctx, xrange.from, yrange.to, xrange.to - xrange.from, yrange.from - yrange.to, m.rounded);
+                    ctx.fill();
+                }
+            }
+
+            if (m.text) {
+                // left aligned horizontal position:
+                var xPos = xrange.from + plotOffset.left;
+                // top baselined vertical position:
+                var yPos = (yrange.to + plotOffset.top);
+
+                if (!!m.textAlign) {
+                    switch (m.textAlign.toLowerCase()) {
+                    case "right":
+                        xPos = xrange.to + plotOffset.left;
+                        break;
+                    case "center":
+                        xPos = (xrange.from + plotOffset.left + xrange.to + plotOffset.left) / 2;
+                        break;
+                    }
+                }
+
+                if (!!m.textBaseline) {
+                    switch (m.textBaseline.toLowerCase()) {
+                    case "bottom":
+                        yPos = (yrange.from + plotOffset.top);
+                        break;
+                    case "middle":
+                        yPos = (yrange.from + plotOffset.top + yrange.to + plotOffset.top) / 2;
+                        break;
+                    }
+                }
+
+                surface.addText(markingLayer, xPos, yPos, m.text, m.font || "flot-marking", 0, null, m.textAlign, m.textBaseline);
+            }
         }
 
         function drawAxisLabels() {
@@ -3403,6 +3479,34 @@ Licensed under the MIT license.
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
         return base * Math.floor(n / base);
+    }
+
+    // Draw a rectangle with rounded corner on the canvas.
+    //
+    // @param {CanvasRenderingContext2D} ctx The canvas 2D context.
+    // @param {number} x The x-axis coordinate of the upper left corner of 
+    //      the rectangle to be drawn.
+    // @param {number} y The y-axis coordinate of the upper left corner of 
+    //      the rectangle to be drawn.
+    // @param {number} width The width of the rectangle to be drawn.
+    // @param {number} height The height of the rectangle to be drawn.
+    // @param {number} radius The radius of the corner of the rectangle
+    //      to be drawn.
+    function roundRect(ctx, x, y, width, height, radius) {
+        var r = x + width;
+        var b = y + height;
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(r - radius, y);
+        ctx.quadraticCurveTo(r, y, r, y + radius);
+        ctx.lineTo(r, y + height - radius);
+        ctx.quadraticCurveTo(r, b, r - radius, b);
+        ctx.lineTo(x + radius, b);
+        ctx.quadraticCurveTo(x, b, x, b - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        return ctx;
     }
 
 })(jQuery);
