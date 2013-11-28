@@ -64,9 +64,6 @@
    correctly even when using an external container.
    (patch by Luis Silva, issue #1159, pull request #1160)
 
- - Right-aligned bars no longer highlight as though they were center-aligned.
-   (reported by BeWiBu and mihaisdm, issues #975 and #1093)
-
  - The pie plugin no longer ignores the value of the left offset option.
    (reported by melanker, issue #1136)
 
