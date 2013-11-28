@@ -1519,8 +1519,8 @@ Licensed under the MIT license.
             // labels but instead use the overall width/height to not
             // jump as much around with replots
             $.each(allAxes(), function (_, axis) {
-                var lastTick = axis.ticks[axis.ticks.length - 1];
-                if (axis.reserveSpace && lastTick) {
+                if (axis.reserveSpace && axis.ticks && axis.ticks.length) {
+                    var lastTick = axis.ticks[axis.ticks.length - 1];
                     if (axis.direction === "x") {
                         margins.left = Math.max(margins.left, axis.labelWidth / 2);
                         if (lastTick.v <= axis.max) {
