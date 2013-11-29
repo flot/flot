@@ -948,6 +948,50 @@ markings: function (axes) {
 }
 ```
 
+By default, the markings will be drawn under the grid ticks, if you 
+need to draw a marking above the grid ticks, you can specifiy a 
+"aboveGrid" attribute and set it to true, e.g.
+
+```js
+markings: [ { xaxis: { from: 1, to: 2 }, yaxis: { from: 1, to: 2 }, aboveGrid: true }, ... ]
+```
+Usually a marking is a regular rectangle, when you want it to have a rounded
+corner, you can specify a "rounded" value to it, e.g.
+
+```js
+markings: [ { xaxis: { from: 1, to: 2 }, yaxis: { from: 1, to: 2 }, aboveGrid: true, rounded: 3 }, ... ]
+```
+
+In case you want to put some texts attaching to markings, you can specifiy
+an "text" object to the marking object, along with a font object as well as 
+other 2 attributes (textAlign and textBaseline) to align texts well in the 
+marking if you want to give the texts a customized look, e.g.
+
+```js
+markings: [ 
+	{ 
+		xaxis: { from: 1, to: 2 }, 
+		yaxis: { from: 1, to: 2 }, 
+		aboveGrid: true, 
+		color: "#000",
+		rounded: 3,
+		text: "<strong style='margin: 0 0 0 1px;'>The 1st line.</strong><br />The 2nd line.",
+		textAlign: "center",
+		textBaseline: "middle",
+		font: {
+			color: "#fff",
+			size: "12"
+		}
+	}, 
+	... 
+]
+```
+
+As you see from the above code example, you can control the look and feel
+of the texts by inline css style, besides this approach, you can also 
+customize the look and feel of these texts by defining css rules to the 
+class *flot-marking*, which class the texts has.
+
 If you set "clickable" to true, the plot will listen for click events
 on the plot area and fire a "plotclick" event on the placeholder with
 a position and a nearby data item object as parameters. The coordinates
