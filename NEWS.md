@@ -1,4 +1,136 @@
-## Flot 0.8 alpha ##
+## Flot 0.8.2 ##
+
+### Changes ###
+
+ - Added a plot.destroy method as a way to free memory when emptying the plot
+   placeholder and then re-using it for some other purpose.
+   (patch by Thodoris Greasidis, issue #1129, pull request #1130)
+
+ - Added a table of contents and PLUGINS link to the API documentation.
+   (patches by Brian Peiris, pull requests #1064 and #1127)
+
+ - Added Ruby code examples for time conversion.
+   (patch by Mike Połtyn, pull request #1182)
+
+ - Minor improvements to API.md and README.md.
+   (patches by Patrik Ragnarsson, pull requests #1085 and #1086)
+
+ - Updated inlined jQuery Resize to the latest version to fix errors.
+   (reported by Matthew Sabol and sloker, issues #997 ad #1081)
+
+### Bug fixes ###
+
+ - Fixed an unexpected change in behavior that resulted in duplicate tick
+   labels when using a plugin, like flot-tickrotor, that overrode tick labels.
+   (patch by Mark Cote, pull request #1091)
+
+ - Fixed a regression from 0.7 where axis labels were given the wrong width,
+   causing them to overlap at certain scales and ignore the labelWidth option.
+   (patch by Benjamin Gram, pull request #1177)
+
+ - Fixed a bug where the second axis in an xaxes/yaxes array incorrectly had
+   its 'innermost' property set to false or undefined, even if it was on the
+   other side of the plot from the first axis. This resulted in the axis bar
+   being visible when it shouldn't have been, which was especially obvious
+   when the grid had a left/right border width of zero.
+   (reported by Teq1, fix researched by ryleyb, issue #1056)
+
+ - Fixed an error when using a placeholder that has no font-size property.
+   (patch by Craig Oldford, pull request #1135)
+
+ - Fixed a regression from 0.7 where nulls at the end of a series were ignored
+   for purposes of determing the range of the x-axis.
+   (reported by Munsifali Rashid, issue #1095)
+
+ - If a font size is provided, base the default lineHeight on that size rather
+   that the font size of the plot placeholder, which may be very different.
+   (reported by Daniel Hoffmann Bernardes, issue #1131, pull request #1199)
+
+ - Fix broken highlighting for right-aligned bars.
+   (reported by BeWiBu and Mihai Stanciu, issues #975 and #1093, with further
+   assistance by Eric Byers, pull request #1120)
+
+ - Prevent white circles from sometimes showing up inside of pie charts.
+   (reported by Pierre Dubois and Jack Klink, issues #1128 and #1073)
+
+ - Label formatting no longer breaks when a page contains multiple pie charts.
+   (reported by Brend Wanders, issue #1055)
+
+ - When using multiple axes on opposite sides of the plot, the innermost axis
+   coming later in the list no longer has its bar drawn incorrectly.
+   (reported by ryleyb, issue #1056)
+
+ - When removing series labels and redrawing the plot, the legend now updates
+   correctly even when using an external container.
+   (patch by Luis Silva, issue #1159, pull request #1160)
+
+ - The pie plugin no longer ignores the value of the left offset option.
+   (reported by melanker, issue #1136)
+
+ - Fixed a regression from 0.7, where extra padding was added unnecessarily to
+   sides of the plot where there was no last tick label.
+   (reported by sknob001, issue #1048, pull request #1200)
+
+ - Fixed incorrect tooltip behavior in the interacting example.
+   (patch by cleroux, issue #686, pull request #1074)
+
+ - Fixed an error in CSS color extraction with elements outside the DOM.
+   (patch by execjosh, pull request #1084)
+
+ - Fixed :not selector error when using jQuery without Sizzle.
+   (patch by Anthony Ryan, pull request #1180)
+
+ - Worked around a browser issue that caused bars to appear un-filled.
+   (reported by irbian, issue #915)
+
+## Flot 0.8.1 ##
+
+### Bug fixes ###
+
+ - Fixed a regression in the time plugin, introduced in 0.8, that caused dates
+   to align to the minute rather than to the highest appropriate unit. This
+   caused many x-axes in 0.8 to have different ticks than they did in 0.7.
+   (reported by Tom Sheppard, patch by Daniel Shapiro, issue #1017, pull
+   request #1023)
+
+ - Fixed a regression in text rendering, introduced in 0.8, that caused axis
+   labels with the same text as another label on the same axis to disappear.
+   More generally, it's again possible to have the same text in two locations.
+   (issue #1032)
+
+ - Fixed a regression in text rendering, introduced in 0.8, where axis labels
+   were no longer assigned an explicit width, and their text could not wrap.
+   (reported by sabregreen, issue #1019)
+
+ - Fixed a regression in the pie plugin, introduced in 0.8, that prevented it
+   from accepting data in the format '[[x, y]]'.
+   (patch by Nicolas Morel, pull request #1024)
+
+ - The 'zero' series option and 'autoscale' format option are no longer
+   ignored when the series contains a null value.
+   (reported by Daniel Shapiro, issue #1033)
+
+ - Avoid triggering the time-mode plugin exception when there are zero series.
+   (reported by Daniel Rothig, patch by Mark Raymond, issue #1016)
+
+ - When a custom color palette has fewer colors than the default palette, Flot
+   no longer fills out the colors with the remainder of the default.
+   (patch by goorpy, issue #1031, pull request #1034)
+
+ - Fixed missing update for bar highlights after a zoom or other redraw.
+   (reported by Paolo Valleri, issue #1030)
+
+ - Fixed compatibility with jQuery versions earlier than 1.7.
+   (patch by Lee Willis, issue #1027, pull request #1027)
+
+ - The mouse wheel no longer scrolls the page when using the navigate plugin.
+   (patch by vird, pull request #1020)
+
+ - Fixed missing semicolons in the core library.
+   (reported by Michal Zglinski)
+
+
+## Flot 0.8.0 ##
 
 ### API changes ###
 
@@ -17,12 +149,32 @@ standard strftime specifiers, plus one nonstandard specifier for quarters.
 Additionally, if a strftime function is found in the Date object's prototype,
 it will be used instead of the built-in formatter.
 
-Axis labels are now drawn with canvas text with some parsing to support
-newlines. This solves various issues but also means that they no longer
-support HTML markup, can be accessed as DOM elements or styled directly with
-CSS. Some older browsers lack this function of the canvas API (this doesn't
-affect IE); if this is a problem, either continue using an older version of
-Flot or try an emulation helper such as canvas-text or Flashcanvas.
+Axis tick labels now use the class 'flot-tick-label' instead of 'tickLabel'.
+The text containers  for each axis now use the classes 'flot-[x|y]-axis' and
+'flot-[x|y]#-axis' instead of '[x|y]Axis' and '[x|y]#Axis'. For compatibility
+with Flot 0.7 and earlier text will continue to use the old classes as well,
+but they are considered deprecated and will be removed in a future version.
+
+In previous versions the axis 'color' option was used to set the color of tick
+marks and their label text. It now controls the color of the axis line, which
+previously could not be changed separately, and continues to act as a default
+for the tick-mark color.  The color of tick label text is now set either by
+overriding the 'flot-tick-label' CSS rule or via the axis 'font' option.
+
+A new plugin, jquery.flot.canvas.js, allows axis tick labels to be rendered
+directly to the canvas, rather than using HTML elements. This feature can be
+toggled with a simple option, making it easy to create interactive plots in the
+browser using HTML, then re-render them to canvas for export as an image.
+
+The plugin tries to remain as faithful as possible to the original HTML render,
+and goes so far as to automatically extract styles from CSS, to avoid having to
+provide a separate set of styles when rendering to canvas. Due to limitations
+of the canvas text API, the plugin cannot reproduce certain features, including
+HTML markup embedded in labels, and advanced text styles such as 'em' units.
+
+The plugin requires support for canvas text, which may not be present in some
+older browsers, even if they support the canvas tag itself. To use the plugin
+with these browsers try using a shim such as canvas-text or FlashCanvas.
 
 The base and overlay canvas are now using the CSS classes "flot-base" and
 "flot-overlay" to prevent accidental clashes (issue 540).
@@ -43,7 +195,8 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Display time series in different time zones. (patch by Knut Forkalsrud,
    issue 141)
 
- - Canvas text support for labels. (sponsored by YCharts.com)
+ - Added a canvas plugin to enable rendering axis tick labels to the canvas.
+   (sponsored by YCharts.com, implementation by Ole Laursen and David Schnur)
 
  - Support for setting the interval between redraws of the overlay canvas with
    redrawOverlayInterval. (suggested in issue 185)
@@ -103,6 +256,17 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
 
  - Added a new option called 'zero' to bars and filled lines series, to control
    whether the y-axis minimum is scaled to fit the data or set to zero.
+   (patch by David Schnur, issues #316, #529, and #856, pull request #911)
+
+ - The plot function is now also a jQuery chainable property.
+   (patch by David Schnur, issues #734 and #816, pull request #953)
+
+ - When only a single pie slice is beneath the combine threshold it is no longer
+   replaced by an 'other' slice. (suggested by Devin Bayer, issue #638)
+
+ - Added lineJoin and minSize options to the selection plugin to control the
+   corner style and minimum size of the selection, respectively.
+   (patch by Ruth Linehan, pull request #963)
 
 ### Bug fixes ###
 
@@ -182,6 +346,27 @@ The base and overlay canvas are now using the CSS classes "flot-base" and
  - Fixed rendering issues when using the threshold plugin with several series.
    (patch by Ivan Novikov, pull request #934)
 
+ - Pie charts no longer disappear when redrawn after calling setData().
+   (reported by zengge1984 and pareeohnos, issues #810 and #945)
+
+ - Added a work-around for the problem where points with a lineWidth of zero
+   still showed up with a visible line. (reported by SalvoSav, issue #842,
+   patch by Jamie Hamel-Smith, pull request #937)
+
+ - Pie charts now accept values in string form, like other plot types.
+   (reported by laerdal.no, issue #534)
+
+ - Avoid rounding errors in the threshold plugin.
+   (reported by jerikojerk, issue #895)
+
+ - Fixed an error when using the navigate plugin with jQuery 1.9.x or later.
+   (reported by Paolo Valleri, issue #964)
+
+ - Fixed inconsistencies between the highlight and unhighlight functions.
+   (reported by djamshed, issue #987)
+
+ - Fixed recalculation of tickSize and tickDecimals on calls to setupGrid.
+   (patch by thecountofzero, pull request #861, issues #860, #1000)
 
 
 ## Flot 0.7 ##

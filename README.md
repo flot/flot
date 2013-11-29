@@ -1,3 +1,5 @@
+# Flot [![Build status](https://travis-ci.org/flot/flot.png)](https://travis-ci.org/flot/flot)
+
 ## About ##
 
 Flot is a Javascript plotting library for jQuery.  
@@ -28,7 +30,7 @@ support for VML which Excanvas is relying on. It appears that some
 stripped down versions used for test environments on virtual machines
 lack the VML support.
 
-You can also try using [Flashcanvas] [flashcanvas], which uses Flash to
+You can also try using [Flashcanvas][flashcanvas], which uses Flash to
 do the emulation. Although Flash can be a bit slower to load than VML,
 if you've got a lot of points, the Flash version can be much faster
 overall. Flot contains some wrapper code for activating Excanvas which
@@ -69,9 +71,9 @@ $.plot($("#placeholder"), data, options);
 
 Here, data is an array of data series and options is an object with
 settings if you want to customize the plot. Take a look at the
-examples for some ideas of what to put in or look at the reference
-in the file `API.txt`. Here's a quick example that'll draw a line from
-(0, 0) to (1, 1):
+examples for some ideas of what to put in or look at the 
+[API reference](API.md). Here's a quick example that'll draw a line 
+from (0, 0) to (1, 1):
 
 ```js
 $.plot($("#placeholder"), [ [[0, 0], [1, 1]] ], { yaxis: { max: 1 } });
@@ -99,10 +101,10 @@ In order to have a useful, functional example of time-series plots using time
 zones, date.js from [timezone-js][timezone-js] (released under the Apache 2.0
 license) and the [Olson][olson] time zone database (released to the public
 domain) have been included in the examples directory.  They are used in
-examples/timezones.html.
+examples/axes-time-zones/index.html.
 
 
 [excanvas]: http://code.google.com/p/explorercanvas/
 [flashcanvas]: http://code.google.com/p/flashcanvas/
 [timezone-js]: https://github.com/mde/timezone-js
-[olson]: ftp://ftp.iana.org/tz/
+[olson]: http://ftp.iana.org/time-zones

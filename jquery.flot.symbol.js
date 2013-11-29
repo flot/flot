@@ -1,6 +1,6 @@
 /* Flot plugin that adds some extra symbols for plotting points.
 
-Copyright (c) 2007-2012 IOLA and Ole Laursen.
+Copyright (c) 2007-2013 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
 The symbols are accessed as strings through the standard symbol options:
