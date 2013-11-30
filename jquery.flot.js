@@ -1489,8 +1489,8 @@ Licensed under the MIT license.
             // from a previous plot in this container that we'll try to re-use.
 
             placeholder.css("padding", 0) // padding messes up the positioning
-                .children().filter(function(){
-                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base');
+                .children().filter(function() {
+                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass("flot-base");
                 }).remove();
 
             if (placeholder.css("position") === "static") {
@@ -1742,7 +1742,7 @@ Licensed under the MIT license.
             if (minMargin == null) {
                 minMargin = 0;
                 for (var i = 0; i < series.length; ++i) {
-                    minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth/2));
+                    minMargin = Math.max(minMargin, 2 * (series[i].points.radius + series[i].points.lineWidth / 2));
                 }
             }
 
@@ -1798,7 +1798,7 @@ Licensed under the MIT license.
             // If the grid is visible, add its border width to the offset
 
             for (a in plotOffset) {
-                if(typeof(options.grid.borderWidth) === "object") {
+                if (typeof(options.grid.borderWidth) === "object") {
                     plotOffset[a] += showGrid ? options.grid.borderWidth[a] : 0;
                 } else {
                     plotOffset[a] += showGrid ? options.grid.borderWidth : 0;
@@ -2325,7 +2325,7 @@ Licensed under the MIT license.
                 // If either borderWidth or borderColor is an object, then draw the border
                 // line by line instead of as one rectangle
                 bc = options.grid.borderColor;
-                if(typeof bw === "object" || typeof bc === "object") {
+                if (typeof bw === "object" || typeof bc === "object") {
                     if (typeof bw !== "object") {
                         bw = {top: bw, right: bw, bottom: bw, left: bw};
                     }
@@ -2337,8 +2337,8 @@ Licensed under the MIT license.
                         ctx.strokeStyle = bc.top;
                         ctx.lineWidth = bw.top;
                         ctx.beginPath();
-                        ctx.moveTo(0 - bw.left, 0 - bw.top/2);
-                        ctx.lineTo(plotWidth, 0 - bw.top/2);
+                        ctx.moveTo(0 - bw.left, 0 - bw.top / 2);
+                        ctx.lineTo(plotWidth, 0 - bw.top / 2);
                         ctx.stroke();
                     }
 
@@ -2364,14 +2364,14 @@ Licensed under the MIT license.
                         ctx.strokeStyle = bc.left;
                         ctx.lineWidth = bw.left;
                         ctx.beginPath();
-                        ctx.moveTo(0 - bw.left/2, plotHeight + bw.bottom);
-                        ctx.lineTo(0- bw.left/2, 0);
+                        ctx.moveTo(0 - bw.left / 2, plotHeight + bw.bottom);
+                        ctx.lineTo(0- bw.left / 2, 0);
                         ctx.stroke();
                     }
                 } else {
                     ctx.lineWidth = bw;
                     ctx.strokeStyle = options.grid.borderColor;
-                    ctx.strokeRect(-bw/2, -bw/2, plotWidth + bw, plotHeight + bw);
+                    ctx.strokeRect(-bw / 2, -bw / 2, plotWidth + bw, plotHeight + bw);
                 }
             }
 
@@ -2825,10 +2825,10 @@ Licensed under the MIT license.
                 ctx.lineWidth = sw;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
                 // position shadow at angle from the mid of line
-                var angle = Math.PI/18;
-                plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/2), Math.cos(angle) * (lw/2 + sw/2), series.xaxis, series.yaxis);
-                ctx.lineWidth = sw/2;
-                plotLine(series.datapoints, Math.sin(angle) * (lw/2 + sw/4), Math.cos(angle) * (lw/2 + sw/4), series.xaxis, series.yaxis);
+                var angle = Math.PI / 18;
+                plotLine(series.datapoints, Math.sin(angle) * (lw / 2 + sw / 2), Math.cos(angle) * (lw / 2 + sw / 2), series.xaxis, series.yaxis);
+                ctx.lineWidth = sw / 2;
+                plotLine(series.datapoints, Math.sin(angle) * (lw / 2 + sw / 4), Math.cos(angle) * (lw / 2 + sw / 4), series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
@@ -2886,7 +2886,7 @@ Licensed under the MIT license.
             // Doing the conditional here allows the shadow setting to still be
             // optional even with a lineWidth of 0.
 
-            if( lw === 0 ) {
+            if (lw === 0) {
                 lw = 0.0001;
             }
 
@@ -2895,11 +2895,11 @@ Licensed under the MIT license.
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, null, w + w/2, true,
+                plotPoints(series.datapoints, radius, null, w + w / 2, true,
                            series.xaxis, series.yaxis, symbol);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, null, w/2, true,
+                plotPoints(series.datapoints, radius, null, w / 2, true,
                            series.xaxis, series.yaxis, symbol);
             }
 
@@ -2987,7 +2987,7 @@ Licensed under the MIT license.
             // fill the bar
             if (fillStyleCallback) {
                 c.fillStyle = fillStyleCallback(bottom, top);
-                c.fillRect(left, top, right - left, bottom - top)
+                c.fillRect(left, top, right - left, bottom - top);
             }
 
             // draw outline
@@ -2996,22 +2996,26 @@ Licensed under the MIT license.
 
                 // FIXME: inline moveTo is buggy with excanvas
                 c.moveTo(left, bottom);
-                if (drawLeft)
+                if (drawLeft) {
                     c.lineTo(left, top);
-                else
+                } else {
                     c.moveTo(left, top);
-                if (drawTop)
+                }
+                if (drawTop) {
                     c.lineTo(right, top);
-                else
+                } else {
                     c.moveTo(right, top);
-                if (drawRight)
+                }
+                if (drawRight) {
                     c.lineTo(right, bottom);
-                else
+                } else {
                     c.moveTo(right, bottom);
-                if (drawBottom)
+                }
+                if (drawBottom) {
                     c.lineTo(left, bottom);
-                else
+                } else {
                     c.moveTo(left, bottom);
+                }
                 c.stroke();
             }
         }
