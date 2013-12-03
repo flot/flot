@@ -111,9 +111,9 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
-            if (e.type === 'touchstart' && e.originalEvent.touches.length === 1) { // only accept single touch
+            if (e.type === "touchstart" && e.originalEvent.touches.length === 1) { // only accept single touch
                 selection.touch = true;
-            } else if (e.which != 1 || e.originalEvent.touches && e.originalEvent.touches.length > 1) { // only accept left-click
+            } else if (e.which !== 1 || e.originalEvent.touches && e.originalEvent.touches.length > 1) { // only accept left-click
                 return;
             }
 
@@ -328,13 +328,13 @@ The plugin allso adds the following methods to the plot object:
             if (o.selection.mode != null) {
                 eventHolder.mousemove(onMouseMove);
                 eventHolder.mousedown(onMouseDown);
-                eventHolder.bind('touchstart', function(e) {
+                eventHolder.bind("touchstart", function(e) {
                     // Using a touch device, disable mouse events to prevent 
                     // event handlers being called twice
-                    eventHolder.unbind('mousedown', onMouseDown);
+                    eventHolder.unbind("mousedown", onMouseDown);
                     onMouseDown(e);
-                    });
-                    eventHolder.bind('touchmove', onMouseMove);
+                });
+                eventHolder.bind("touchmove", onMouseMove);
             }
         });
 
