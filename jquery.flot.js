@@ -2417,35 +2417,33 @@ Licensed under the MIT license.
             yrange.from = Math.max(yrange.from, yrange.axis.min);
             yrange.to = Math.min(yrange.to, yrange.axis.max);
 
-            if (xrange.from === xrange.to && yrange.from === yrange.to) {
-                return;
-            }
-
             // then draw
             xrange.from = xrange.axis.p2c(xrange.from);
             xrange.to = xrange.axis.p2c(xrange.to);
             yrange.from = yrange.axis.p2c(yrange.from);
             yrange.to = yrange.axis.p2c(yrange.to);
 
-            if (xrange.from === xrange.to || yrange.from === yrange.to) {
-                // draw line
-                ctx.beginPath();
-                ctx.strokeStyle = m.color || options.grid.markingsColor;
-                ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
-                ctx.moveTo(xrange.from, yrange.from);
-                ctx.lineTo(xrange.to, yrange.to);
-                ctx.stroke();
-            } else {
-                // fill area
-                ctx.fillStyle = m.color || options.grid.markingsColor;
-                
-                if (!m.rounded) {
-                    ctx.fillRect(xrange.from, yrange.to,
-                        xrange.to - xrange.from,
-                        yrange.from - yrange.to);
+            if (xrange.from !== xrange.to || xrange.from !== yrange.to) {
+                if (xrange.from === xrange.to || yrange.from === yrange.to) {
+                    // draw line
+                    ctx.beginPath();
+                    ctx.strokeStyle = m.color || options.grid.markingsColor;
+                    ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
+                    ctx.moveTo(xrange.from, yrange.from);
+                    ctx.lineTo(xrange.to, yrange.to);
+                    ctx.stroke();
                 } else {
-                    roundRect(ctx, xrange.from, yrange.to, xrange.to - xrange.from, yrange.from - yrange.to, m.rounded);
-                    ctx.fill();
+                    // fill area
+                    ctx.fillStyle = m.color || options.grid.markingsColor;
+
+                    if (!m.rounded) {
+                        ctx.fillRect(xrange.from, yrange.to,
+                            xrange.to - xrange.from,
+                            yrange.from - yrange.to);
+                    } else {
+                        roundRect(ctx, xrange.from, yrange.to, xrange.to - xrange.from, yrange.from - yrange.to, m.rounded);
+                        ctx.fill();
+                    }
                 }
             }
 
