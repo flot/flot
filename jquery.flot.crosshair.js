@@ -147,12 +147,12 @@ The plugin also adds four public methods:
 
                 ctx.beginPath();
                 if (c.mode.indexOf("x") != -1) {
-                    var drawX = Math.round(crosshair.x) + adj;
+                    var drawX = Math.floor(crosshair.x) + adj;
                     ctx.moveTo(drawX, 0);
                     ctx.lineTo(drawX, plot.height());
                 }
                 if (c.mode.indexOf("y") != -1) {
-                    var drawY = Math.round(crosshair.y) + adj;
+                    var drawY = Math.floor(crosshair.y) + adj;
                     ctx.moveTo(0, drawY);
                     ctx.lineTo(plot.width(), drawY);
                 }
