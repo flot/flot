@@ -1963,26 +1963,34 @@ Licensed under the MIT license.
                     yrange.from = Math.max(yrange.from, yrange.axis.min);
                     yrange.to = Math.min(yrange.to, yrange.axis.max);
 
-                    if (xrange.from == xrange.to && yrange.from == yrange.to)
+                    var xequal = xrange.from === xrange.to,
+                        yequal = yrange.from === yrange.to;
+
+                    if (xequal && yequal) {
                         continue;
+                    }
 
                     // then draw
-                    xrange.from = xrange.axis.p2c(xrange.from);
-                    xrange.to = xrange.axis.p2c(xrange.to);
-                    yrange.from = yrange.axis.p2c(yrange.from);
-                    yrange.to = yrange.axis.p2c(yrange.to);
+                    xrange.from = Math.floor(xrange.axis.p2c(xrange.from));
+                    xrange.to = Math.floor(xrange.axis.p2c(xrange.to));
+                    yrange.from = Math.floor(yrange.axis.p2c(yrange.from));
+                    yrange.to = Math.floor(yrange.axis.p2c(yrange.to));
 
-                    if (xrange.from == xrange.to || yrange.from == yrange.to) {
-                        // draw line
+                    if (xequal || yequal) {
+                        var lineWidth = m.lineWidth || options.grid.markingsLineWidth,
+                            subPixel = lineWidth % 2 ? 0.5 : 0;
                         ctx.beginPath();
                         ctx.strokeStyle = m.color || options.grid.markingsColor;
-                        ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
-                        ctx.moveTo(xrange.from, yrange.from);
-                        ctx.lineTo(xrange.to, yrange.to);
+                        ctx.lineWidth = lineWidth;
+                        if (xequal) {
+                            ctx.moveTo(xrange.to + subPixel, yrange.from);
+                            ctx.lineTo(xrange.to + subPixel, yrange.to);
+                        } else {
+                            ctx.moveTo(xrange.from, yrange.to + subPixel);
+                            ctx.lineTo(xrange.to, yrange.to + subPixel);                            
+                        }
                         ctx.stroke();
-                    }
-                    else {
-                        // fill area
+                    } else {
                         ctx.fillStyle = m.color || options.grid.markingsColor;
                         ctx.fillRect(xrange.from, yrange.to,
                                      xrange.to - xrange.from,
