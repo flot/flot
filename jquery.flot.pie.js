@@ -735,7 +735,13 @@ More detail and specific examples can be found in the included HTML file.
 				drawHighlight(highlights[i].series);
 			}
 
-			drawDonutHole(octx);
+			// after the innerRadius value is set, somehow it carries over to
+			// all other '.flot-overlay' canvases in the DOM as they are redrawn
+			// so, check this particular instance's options to determine whether
+			// we really do need to drawDonutHole() at this point
+			if (options.series.pie.innerRadius > 0) {
+				drawDonutHole(octx);	
+			}
 
 			octx.restore();
 
