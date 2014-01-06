@@ -260,8 +260,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 var range = max - min;
                 if (zr &&
-                    ((zr[0] != null && range < zr[0]) ||
-                     (zr[1] != null && range > zr[1])))
+                    ((zr[0] != null && range < zr[0] && amount >1) ||
+                     (zr[1] != null && range > zr[1] && amount <1)))
                     return;
             
                 opts.min = min;
