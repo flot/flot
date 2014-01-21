@@ -62,7 +62,7 @@ shadowSize and lineWidth are derived as well from the points series.
 
 */
 
-(function ($) {
+(function($) {
     var options = {
         series: {
             points: {
@@ -377,7 +377,7 @@ shadowSize and lineWidth are derived as well from the points series.
 
         ctx.save();
         ctx.translate(plotOffset.left, plotOffset.top);
-        $.each(plot.getData(), function (i, s) {
+        $.each(plot.getData(), function(i, s) {
             if (s.points.errorbars && (s.points.xerr.show || s.points.yerr.show)) {
                 drawSeriesErrors(plot, ctx, s);
             }

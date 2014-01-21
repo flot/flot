@@ -11,7 +11,7 @@ can just fix the size of their placeholders.
 
 */
 
-(function ($) {
+(function($) {
     var options = { }; // no options
 
     function init(plot) {

@@ -35,7 +35,7 @@ charts or filled areas).
 
 */
 
-(function ($) {
+(function($) {
     var options = {
         series: { stack: null } // or number/string
     };

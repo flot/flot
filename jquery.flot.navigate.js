@@ -79,7 +79,7 @@ can set the default in the options.
 
 */
 
-(function ($) {
+(function($) {
     var options = {
         xaxis: {
             zoomRange: null, // or [number, number] (min range, max range)
@@ -137,7 +137,7 @@ can set the default in the options.
                 return;
             }
 
-            panTimeout = setTimeout(function () {
+            panTimeout = setTimeout(function() {
                 plot.pan({ left: prevPageX - e.pageX,
                            top: prevPageY - e.pageY });
                 prevPageX = e.pageX;
@@ -172,7 +172,7 @@ can set the default in the options.
             }
         }
 
-        plot.zoomOut = function (args) {
+        plot.zoomOut = function(args) {
             if (!args) {
                 args = {};
             }
@@ -185,7 +185,7 @@ can set the default in the options.
             plot.zoom(args);
         };
 
-        plot.zoom = function (args) {
+        plot.zoom = function(args) {
             if (!args) {
                 args = {};
             }
@@ -260,7 +260,7 @@ can set the default in the options.
             }
         };
 
-        plot.pan = function (args) {
+        plot.pan = function(args) {
             var delta = {
                 x: +args.left,
                 y: +args.top
@@ -273,7 +273,7 @@ can set the default in the options.
                 delta.y = 0;
             }
 
-            $.each(plot.getAxes(), function (_, axis) {
+            $.each(plot.getAxes(), function(_, axis) {
 
                 var opts = axis.options,
                     min = axis.c2p(axis.p2c(axis.min) + d),

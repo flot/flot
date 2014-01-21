@@ -52,7 +52,7 @@ Google Maps).
 
 */
 
-(function ($) {
+(function($) {
     var options = {
         series: {
             images: {
@@ -65,12 +65,12 @@ Google Maps).
 
     $.plot.image = {};
 
-    $.plot.image.loadDataImages = function (series, options, callback) {
+    $.plot.image.loadDataImages = function(series, options, callback) {
         var urls = [], points = [];
 
         var defaultShow = options.series.images.show;
 
-        $.each(series, function (i, s) {
+        $.each(series, function(i, s) {
             if (!(defaultShow || s.images.show)) {
                 return;
             }
@@ -79,7 +79,7 @@ Google Maps).
                 s = s.data;
             }
 
-            $.each(s, function (i, p) {
+            $.each(s, function(i, p) {
                 if (typeof p[0] === "string") {
                     urls.push(p[0]);
                     points.push(p);
@@ -87,8 +87,8 @@ Google Maps).
             });
         });
 
-        $.plot.image.load(urls, function (loadedImages) {
-            $.each(points, function (i, p) {
+        $.plot.image.load(urls, function(loadedImages) {
+            $.each(points, function(i, p) {
                 var url = p[0];
                 if (loadedImages[url]) {
                     p[0] = loadedImages[url];
@@ -99,14 +99,14 @@ Google Maps).
         });
     };
 
-    $.plot.image.load = function (urls, callback) {
+    $.plot.image.load = function(urls, callback) {
         var missing = urls.length, loaded = {};
         if (missing === 0) {
             callback({});
         }
 
-        $.each(urls, function (i, url) {
-            var handler = function () {
+        $.each(urls, function(i, url) {
+            var handler = function() {
                 --missing;
 
                 loaded[url] = this;
