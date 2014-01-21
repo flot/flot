@@ -55,7 +55,7 @@ module.exports = function(grunt) {
                 "requireMultipleVarDecl": true,
                 "requireSpacesInsideObjectBrackets": "all", // Different from jQuery preset
                 "disallowSpacesInsideArrayBrackets": true, // Different from jQuery preset
-                "disallowLeftStickedOperators": [ "?", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<=" ],
+                "disallowLeftStickedOperators": [ "?", "/", "*", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<=" ],
                 "disallowRightStickedOperators": [ "?", "/", "*", ":", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<="],
                 "requireSpaceBeforeBinaryOperators": ["+", "-", "/", "*", "=", "==", "===", "!=", "!=="],
                 "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-"],

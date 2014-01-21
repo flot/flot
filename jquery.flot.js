@@ -710,7 +710,7 @@ Licensed under the MIT license.
                     mouseActiveRadius: 10 // how far the mouse can be away to activate an item
                 },
                 interaction: {
-                    redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
+                    redrawOverlayInterval: 1000 / 60 // time between updates, -1 means in same flow
                 },
                 hooks: {}
             },
@@ -1337,7 +1337,7 @@ Licensed under the MIT license.
 
                 ps = s.datapoints.pointsize;
                 points = s.datapoints.points;
-                
+
                 s.xaxis.used = s.yaxis.used = true;
 
                 for (j = k = 0; j < data.length; ++j, k += ps) {
@@ -2187,7 +2187,7 @@ Licensed under the MIT license.
             // process markings
             var markingsUnderGrid = [];
             var markingsAboveGrid = [];
-            
+
             var markings = options.grid.markings;
             if (markings) {
                 if ($.isFunction(markings)) {
@@ -2204,7 +2204,7 @@ Licensed under the MIT license.
 
                 for (i = 0; i < markings.length; ++i) {
                     var m = markings[i];
-                    
+
                     if (m.aboveGrid) {
                         markingsAboveGrid.push(m);
                     } else {
@@ -2212,7 +2212,7 @@ Licensed under the MIT license.
                     }
                 }
             }
-            
+
             drawMarkings(markingsUnderGrid, markingLayer);
 
             // draw the ticks
@@ -2365,7 +2365,7 @@ Licensed under the MIT license.
                         ctx.lineWidth = bw.left;
                         ctx.beginPath();
                         ctx.moveTo(0 - bw.left / 2, plotHeight + bw.bottom);
-                        ctx.lineTo(0- bw.left / 2, 0);
+                        ctx.lineTo(0 - bw.left / 2, 0);
                         ctx.stroke();
                     }
                 } else {
@@ -2377,7 +2377,7 @@ Licensed under the MIT license.
 
             ctx.restore();
         }
-        
+
         function drawMarkings(markings, markingLayer) {
 	        if (!markings) {
 		        return;
@@ -2387,7 +2387,7 @@ Licensed under the MIT license.
                 drawMarking(markings[i], markingLayer);
             }
         }
-        
+
         function drawMarking(m, markingLayer) {
             var xrange = extractRange(m, "x"),
                 yrange = extractRange(m, "y");
@@ -3589,9 +3589,9 @@ Licensed under the MIT license.
     // Draw a rectangle with rounded corner on the canvas.
     //
     // @param {CanvasRenderingContext2D} ctx The canvas 2D context.
-    // @param {number} x The x-axis coordinate of the upper left corner of 
+    // @param {number} x The x-axis coordinate of the upper left corner of
     //      the rectangle to be drawn.
-    // @param {number} y The y-axis coordinate of the upper left corner of 
+    // @param {number} y The y-axis coordinate of the upper left corner of
     //      the rectangle to be drawn.
     // @param {number} width The width of the rectangle to be drawn.
     // @param {number} height The height of the rectangle to be drawn.

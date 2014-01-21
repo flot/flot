@@ -278,13 +278,13 @@ shadowSize and lineWidth are derived as well from the points series.
                         var w = sw / 2;
                         ctx.lineWidth = w;
                         ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                        drawError(ctx, err[e], x, y, upper, lower, drawUpper, drawLower, radius, w + w/2, minmax);
+                        drawError(ctx, err[e], x, y, upper, lower, drawUpper, drawLower, radius, w + w / 2, minmax);
 
                         ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                        drawError(ctx, err[e], x, y, upper, lower, drawUpper, drawLower, radius, w/2, minmax);
+                        drawError(ctx, err[e], x, y, upper, lower, drawUpper, drawLower, radius, w / 2, minmax);
                     }
 
-                    ctx.strokeStyle = err[e].color? err[e].color: s.color;
+                    ctx.strokeStyle = err[e].color ? err[e].color : s.color;
                     ctx.lineWidth = lw;
                     //draw it
                     drawError(ctx, err[e], x, y, upper, lower, drawUpper, drawLower, radius, 0, minmax);
@@ -327,7 +327,7 @@ shadowSize and lineWidth are derived as well from the points series.
 
         //internal radius value in errorbar, allows to plot radius 0 points and still keep proper sized caps
         //this is a way to get errorbars on lines without visible connecting dots
-        radius = err.radius != null? err.radius: radius;
+        radius = err.radius != null ? err.radius : radius;
 
         // upper cap
         if (drawUpper) {

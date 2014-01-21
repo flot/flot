@@ -101,7 +101,7 @@ More detail and specific examples can be found in the included HTML file.
 
                 if (options.series.pie.radius === "auto") {
                     if (options.series.pie.label.show) {
-                        options.series.pie.radius = 3/4;
+                        options.series.pie.radius = 3 / 4;
                     } else {
                         options.series.pie.radius = 1;
                     }
@@ -567,7 +567,7 @@ More detail and specific examples can be found in the included HTML file.
         function isPointInPoly(poly, pt) {
             for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) {
                 ((poly[i][1] <= pt[1] && pt[1] < poly[j][1]) ||
-                 (poly[j][1] <= pt[1] && pt[1]< poly[i][1])) &&
+                 (poly[j][1] <= pt[1] && pt[1] < poly[i][1])) &&
                 (pt[0] < (poly[j][0] - poly[i][0]) * (pt[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0]) &&
                 (c = !c);
             }
@@ -774,7 +774,7 @@ More detail and specific examples can be found in the included HTML file.
                 show: false,
                 radius: "auto",    // actual radius of the visible pie (based on full calculated radius if <=1, or hard pixel value)
                 innerRadius: 0, /* for donut */
-                startAngle: 3/2,
+                startAngle: 3 / 2,
                 tilt: 1,
                 shadow: {
                     left: 5,    // shadow left offset
