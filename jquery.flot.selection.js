@@ -87,15 +87,15 @@ The plugin allso adds the following methods to the plot object:
                 show: false,
                 active: false,
                 touch: false
-            };
+            },
 
-        // FIXME: The drag handling implemented here should be
-        // abstracted out, there's some similar code from a library in
-        // the navigation plugin, this should be massaged a bit to fit
-        // the Flot cases here better and reused. Doing this would
-        // make this plugin much slimmer.
+            // FIXME: The drag handling implemented here should be
+            // abstracted out, there's some similar code from a library in
+            // the navigation plugin, this should be massaged a bit to fit
+            // the Flot cases here better and reused. Doing this would
+            // make this plugin much slimmer.
 
-        var savedhandlers = {},
+            savedhandlers = {},
             mouseUpHandler = null;
 
         function onMouseMove(e) {
@@ -206,9 +206,9 @@ The plugin allso adds the following methods to the plot object:
         function setSelectionPos(pos, e) {
             var o = plot.getOptions(),
                 offset = plot.getPlaceholder().offset(),
-                plotOffset = plot.getPlotOffset();
+                plotOffset = plot.getPlotOffset(),
+                coordHolder = selection.touch ? e.originalEvent.changedTouches[0] : e;
 
-            var coordHolder = selection.touch ? e.originalEvent.changedTouches[0] : e;
             pos.x = clamp(0, coordHolder.pageX - offset.left - plotOffset.left, plot.width());
             pos.y = clamp(0, coordHolder.pageY - offset.top - plotOffset.top, plot.height());
 
@@ -340,23 +340,24 @@ The plugin allso adds the following methods to the plot object:
         plot.hooks.drawOverlay.push(function(plot, ctx) {
             // draw selection
             if (selection.show && selectionIsSane()) {
-                var plotOffset = plot.getPlotOffset();
-                var o = plot.getOptions();
+                var plotOffset = plot.getPlotOffset(),
+                    o = plot.getOptions(),
+                    c, x, y, w, h;
 
                 ctx.save();
                 ctx.translate(plotOffset.left, plotOffset.top);
 
-                var c = $.color.parse(o.selection.color);
+                c = $.color.parse(o.selection.color);
 
                 ctx.strokeStyle = c.scale("a", 0.8).toString();
                 ctx.lineWidth = 1;
                 ctx.lineJoin = o.selection.shape;
                 ctx.fillStyle = c.scale("a", 0.4).toString();
 
-                var x = Math.min(selection.first.x, selection.second.x) + 0.5,
-                    y = Math.min(selection.first.y, selection.second.y) + 0.5,
-                    w = Math.abs(selection.second.x - selection.first.x) - 1,
-                    h = Math.abs(selection.second.y - selection.first.y) - 1;
+                x = Math.min(selection.first.x, selection.second.x) + 0.5;
+                y = Math.min(selection.first.y, selection.second.y) + 0.5;
+                w = Math.abs(selection.second.x - selection.first.x) - 1;
+                h = Math.abs(selection.second.y - selection.first.y) - 1;
 
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeRect(x, y, w, h);

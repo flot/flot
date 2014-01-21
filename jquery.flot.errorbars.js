@@ -82,9 +82,8 @@ shadowSize and lineWidth are derived as well from the points series.
         var format = [
             { x: true, number: true, required: true },
             { y: true, number: true, required: true }
-        ];
-
-        var errors = series.points.errorbars;
+        ],
+        errors = series.points.errorbars;
         // error bars - first X then Y
         if (errors === "x" || errors === "xy") {
             // lower / upper error
@@ -95,6 +94,7 @@ shadowSize and lineWidth are derived as well from the points series.
                 format.push({ x: true, number: true, required: true });
             }
         }
+
         if (errors === "y" || errors === "xy") {
             // lower / upper error
             if (series.points.yerr.asymmetric) {
@@ -109,10 +109,10 @@ shadowSize and lineWidth are derived as well from the points series.
 
     function parseErrors(series, i) {
 
-        var points = series.datapoints.points;
+        var points = series.datapoints.points,
 
-        // read errors from points array
-        var exl = null,
+            // read errors from points array
+            exl = null,
             exu = null,
             eyl = null,
             eyu = null,
@@ -184,7 +184,7 @@ shadowSize and lineWidth are derived as well from the points series.
             err = [s.points.xerr, s.points.yerr],
             invertX = false,
             invertY = false,
-            tmp;
+            tmp, errRanges, minmax, e, x, y, upper, lower, drawLower, drawUpper;
 
         //sanity check, in case some inverted axis hack is applied to flot
 
@@ -204,23 +204,23 @@ shadowSize and lineWidth are derived as well from the points series.
 
         for (var i = 0; i < s.datapoints.points.length; i += ps) {
 
-            var errRanges = parseErrors(s, i);
+            errRanges = parseErrors(s, i);
 
             //cycle xerr & yerr
-            for (var e = 0; e < err.length; e++){
+            for (e = 0; e < err.length; e++){
 
-                var minmax = [ax[e].min, ax[e].max];
+                minmax = [ax[e].min, ax[e].max];
 
                 //draw this error?
                 if (errRanges[e * err.length]){
 
                     //data coordinates
-                    var x = points[i],
-                        y = points[i + 1];
+                    x = points[i];
+                    y = points[i + 1];
 
                     //errorbar ranges
-                    var upper = [x, y][e] + errRanges[e * err.length + 1],
-                        lower = [x, y][e] - errRanges[e * err.length];
+                    upper = [x, y][e] + errRanges[e * err.length + 1];
+                    lower = [x, y][e] - errRanges[e * err.length];
 
                     //points outside of the canvas
                     if (err[e].err === "x") {
@@ -235,8 +235,8 @@ shadowSize and lineWidth are derived as well from the points series.
                     }
 
                     // prevent errorbars getting out of the canvas
-                    var drawUpper = true,
-                        drawLower = true;
+                    drawUpper = true,
+                    drawLower = true;
 
                     if (upper > minmax[1]) {
                         drawUpper = false;

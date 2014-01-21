@@ -66,9 +66,9 @@ Google Maps).
     $.plot.image = {};
 
     $.plot.image.loadDataImages = function(series, options, callback) {
-        var urls = [], points = [];
-
-        var defaultShow = options.series.images.show;
+        var urls = [],
+            points = [],
+            defaultShow = options.series.images.show;
 
         $.each(series, function(i, s) {
             if (!(defaultShow || s.images.show)) {

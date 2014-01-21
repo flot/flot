@@ -48,17 +48,17 @@ Licensed under the MIT license.
 
         this.element = element;
 
-        var context = this.context = element.getContext("2d");
+        var context = this.context = element.getContext("2d"),
 
-        // Determine the screen's ratio of physical to device-independent
-        // pixels.  This is the ratio between the canvas width that the browser
-        // advertises and the number of pixels actually present in that space.
+            // Determine the screen's ratio of physical to device-independent
+            // pixels.  This is the ratio between the canvas width that the browser
+            // advertises and the number of pixels actually present in that space.
 
-        // The iPhone 4, for example, has a device-independent width of 320px,
-        // but its screen is actually 640px wide.  It therefore has a pixel
-        // ratio of 2, while most normal devices have a ratio of 1.
+            // The iPhone 4, for example, has a device-independent width of 320px,
+            // but its screen is actually 640px wide.  It therefore has a pixel
+            // ratio of 2, while most normal devices have a ratio of 1.
 
-        var devicePixelRatio = window.devicePixelRatio || 1,
+            devicePixelRatio = window.devicePixelRatio || 1,
             backingStoreRatio =
                 context.webkitBackingStorePixelRatio ||
                 context.mozBackingStorePixelRatio ||
@@ -370,22 +370,23 @@ Licensed under the MIT license.
 
                     var cx = textWidth / 2,
                         cy = textHeight / 2,
-                        transformOrigin = Math.floor(cx) + "px " + Math.floor(cy) + "px";
+                        transformOrigin = Math.floor(cx) + "px " + Math.floor(cy) + "px",
 
-                    // Transforms alter the div's appearance without changing
-                    // its origin. This will make it difficult to position it
-                    // later, since we'll be positioning the new bounding box
-                    // with respect to the old origin. We can work around this
-                    // by adding a translation to align the new bounding box's
-                    // top-left corner with the origin, using the same matrix.
+                        // Transforms alter the div's appearance without changing
+                        // its origin. This will make it difficult to position it
+                        // later, since we'll be positioning the new bounding box
+                        // with respect to the old origin. We can work around this
+                        // by adding a translation to align the new bounding box's
+                        // top-left corner with the origin, using the same matrix.
 
-                    // Rather than examining all four points, we can use the
-                    // angle to figure out in advance which two points are in
-                    // the top-left quadrant; we can then use the x-coordinate
-                    // of the first (left-most) point and the y-coordinate of
-                    // the second (top-most) point as the bounding box corner.
+                        // Rather than examining all four points, we can use the
+                        // angle to figure out in advance which two points are in
+                        // the top-left quadrant; we can then use the x-coordinate
+                        // of the first (left-most) point and the y-coordinate of
+                        // the second (top-most) point as the bounding box corner.
 
-                    var x, y;
+                        x, y;
+
                     if (angle < 90) {
                         x = Math.floor(cx * cos + cy * sin - cx);
                         y = Math.floor(cx * sin + cy * cos - cy);
@@ -1902,10 +1903,12 @@ Licensed under the MIT license.
         }
 
         function setupTickGeneration(axis) {
-            var opts = axis.options;
+            var opts = axis.options,
 
-            // estimate number of ticks
-            var noTicks;
+                // estimate number of ticks
+
+                noTicks;
+
             if (isNumeric(opts.ticks) && opts.ticks > 0) {
                 noTicks = opts.ticks;
             } else {
@@ -1982,15 +1985,16 @@ Licensed under the MIT license.
 
                 axis.tickFormatter = function(value, axis) {
 
-                    var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-                    var formatted = "" + Math.round(value * factor) / factor;
+                    var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
+                        formatted = "" + Math.round(value * factor) / factor;
 
                     // If tickDecimals was specified, ensure that we have exactly that
                     // much precision; otherwise default to the value's own precision.
 
                     if (axis.tickDecimals != null) {
-                        var decimal = formatted.indexOf(".");
-                        var precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+                        var decimal = formatted.indexOf("."),
+                            precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+
                         if (precision < axis.tickDecimals) {
                             return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
                         }
@@ -2063,8 +2067,9 @@ Licensed under the MIT license.
             var i, v;
             axis.ticks = [];
             for (i = 0; i < ticks.length; ++i) {
-                var label = null;
-                var t = ticks[i];
+                var label = null,
+                    t = ticks[i];
+
                 if (typeof t === "object") {
                     v = +t[0];
                     if (t.length > 1) {
@@ -2184,10 +2189,10 @@ Licensed under the MIT license.
             surface.removeText(markingLayer);
 
             // process markings
-            var markingsUnderGrid = [];
-            var markingsAboveGrid = [];
+            var markingsUnderGrid = [],
+                markingsAboveGrid = [],
+                markings = options.grid.markings;
 
-            var markings = options.grid.markings;
             if (markings) {
                 if ($.isFunction(markings)) {
                     axes = plot.getAxes();
@@ -2448,9 +2453,12 @@ Licensed under the MIT license.
 
             if (m.text) {
                 // left aligned horizontal position:
-                var xPos = xrange.from + plotOffset.left;
-                // top baselined vertical position:
-                var yPos = (yrange.to + plotOffset.top);
+
+                var xPos = xrange.from + plotOffset.left,
+
+                    // top baselined vertical position:
+
+                    yPos = (yrange.to + plotOffset.top);
 
                 if (!!m.textAlign) {
                     switch (m.textAlign.toLowerCase()) {
@@ -3482,8 +3490,8 @@ Licensed under the MIT license.
                 return;
             }
 
-            var pointRadius;
-            var radius;
+            var pointRadius, radius;
+
             if (series.points.show) {
                 pointRadius = series.points.radius + series.points.lineWidth / 2;
                 radius = 1.5 * pointRadius;
@@ -3596,8 +3604,9 @@ Licensed under the MIT license.
     // @param {number} radius The radius of the corner of the rectangle
     //      to be drawn.
     function roundRect(ctx, x, y, width, height, radius) {
-        var r = x + width;
-        var b = y + height;
+        var r = x + width,
+            b = y + height;
+
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
         ctx.lineTo(r - radius, y);

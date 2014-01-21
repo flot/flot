@@ -31,9 +31,8 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
     var options = {
         canvas: true
-    };
-
-    var render, getTextInfo, addText;
+    },
+    render, getTextInfo, addText;
 
     function init(plot, classes) {
 
