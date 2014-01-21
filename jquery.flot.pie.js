@@ -302,7 +302,7 @@ More detail and specific examples can be found in the included HTML file.
 			} else {
 				centerLeft += options.series.pie.offset.left;
 			}
-			var innerRadius = 0
+			var innerRadius = 0;
 			if (options.series.pie.innerRadius) {
 				innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
 			}
@@ -433,12 +433,12 @@ More detail and specific examples can be found in the included HTML file.
 
 					ctx.beginPath();
 					if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
-						ctx.moveTo(innerRadius * Math.cos(currentAngle), innerRadius * Math.sin(currentAngle)); // Center of the pie
+						ctx.moveTo(innerRadius * Math.cos(currentAngle), innerRadius * Math.sin(currentAngle)); // Center of the pie + donut's radius
 					}
 
 					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
 					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle+angle, false);
-					ctx.lineTo(innerRadius * Math.cos(currentAngle+angle), 0 + innerRadius * Math.sin(currentAngle+angle))
+					ctx.lineTo(innerRadius * Math.cos(currentAngle+angle), 0 + innerRadius * Math.sin(currentAngle+angle));
 					ctx.arc(0, 0 , innerRadius,currentAngle+angle, currentAngle + angle / 2, true);
 					ctx.arc(0, 0 , innerRadius,currentAngle + angle / 2, currentAngle, true);
 					ctx.closePath();
@@ -726,7 +726,7 @@ More detail and specific examples can be found in the included HTML file.
 				}
 				octx.arc(0, 0, radius, series.startAngle, series.startAngle + series.angle / 2, false);
 				octx.arc(0, 0, radius, series.startAngle + series.angle / 2, series.startAngle + series.angle, false);
-				octx.lineTo(innerRadius*Math.cos(series.startAngle + series.angle), innerRadius*Math.sin(series.startAngle + series.angle))
+				octx.lineTo(innerRadius*Math.cos(series.startAngle + series.angle), innerRadius*Math.sin(series.startAngle + series.angle));
 				octx.arc(0, 0, innerRadius, series.startAngle + series.angle, series.startAngle + series.angle / 2, true);
 				octx.arc(0, 0, innerRadius, series.startAngle + series.angle / 2, series.startAngle , true);
 				octx.closePath();
