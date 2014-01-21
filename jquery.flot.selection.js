@@ -117,7 +117,6 @@ The plugin allso adds the following methods to the plot object:
                 return;
             }
 
-
             // cancel out any text selections
             document.body.focus();
 
@@ -337,7 +336,6 @@ The plugin allso adds the following methods to the plot object:
                 eventHolder.bind("touchmove", onMouseMove);
             }
         });
-
 
         plot.hooks.drawOverlay.push(function(plot, ctx) {
             // draw selection

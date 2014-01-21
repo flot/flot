@@ -136,7 +136,6 @@ You may need to check for this in hover events.
 
         plot.hooks.processDatapoints.push(processThresholds);
 
-
         function processThresholdsLegend(ctx, canvas, s) {
             if (!s.threshold) {
                 return;

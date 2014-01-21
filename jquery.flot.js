@@ -811,7 +811,6 @@ Licensed under the MIT license.
         draw();
         bindEvents();
 
-
         function executeHooks(hook, args) {
             args = [plot].concat(args);
             for (var i = 0; i < hook.length; ++i) {
@@ -3208,7 +3207,6 @@ Licensed under the MIT license.
                 }
             }
         }
-
 
         // interactive features
 
