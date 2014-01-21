@@ -302,7 +302,10 @@ More detail and specific examples can be found in the included HTML file.
 			} else {
 				centerLeft += options.series.pie.offset.left;
 			}
-
+			var innerRadius = 0
+			if (options.series.pie.innerRadius) {
+				innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
+			}
 			var slices = plot.getData(),
 				attempts = 0;
 
@@ -364,6 +367,7 @@ More detail and specific examples can be found in the included HTML file.
 				for (var i = 1; i <= edge; i++) {
 					ctx.beginPath();
 					ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
+					ctx.arc(0, 0, innerRadius,  Math.PI * 2, 0, true);
 					ctx.fill();
 					radius -= i;
 				}
@@ -405,9 +409,6 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.restore();
 				}
 
-				// draw donut hole
-
-				drawDonutHole(ctx);
 
 				ctx.restore();
 
@@ -432,12 +433,14 @@ More detail and specific examples can be found in the included HTML file.
 
 					ctx.beginPath();
 					if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
-						ctx.moveTo(0, 0); // Center of the pie
+						ctx.moveTo(innerRadius * Math.cos(currentAngle), innerRadius * Math.sin(currentAngle)); // Center of the pie
 					}
 
-					//ctx.arc(0, 0, radius, 0, angle, false); // This doesn't work properly in Opera
 					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
-					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle + angle, false);
+					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle+angle, false);
+					ctx.lineTo(innerRadius * Math.cos(currentAngle+angle), 0 + innerRadius * Math.sin(currentAngle+angle))
+					ctx.arc(0, 0 , innerRadius,currentAngle+angle, currentAngle + angle / 2, true);
+					ctx.arc(0, 0 , innerRadius,currentAngle + angle / 2, currentAngle, true);
 					ctx.closePath();
 					//ctx.rotate(angle); // This doesn't work properly in Opera
 					currentAngle += angle;
@@ -527,36 +530,7 @@ More detail and specific examples can be found in the included HTML file.
 			} // end drawPie function
 		} // end draw function
 
-		// Placed here because it needs to be accessed from multiple locations
-
-		function drawDonutHole(layer) {
-			if (options.series.pie.innerRadius > 0) {
-
-				// subtract the center
-
-				layer.save();
-				var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
-				layer.globalCompositeOperation = "destination-out"; // this does not work with excanvas, but it will fall back to using the stroke color
-				layer.beginPath();
-				layer.fillStyle = options.series.pie.stroke.color;
-				layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
-				layer.fill();
-				layer.closePath();
-				layer.restore();
-
-				// add inner stroke
-
-				layer.save();
-				layer.beginPath();
-				layer.strokeStyle = options.series.pie.stroke.color;
-				layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
-				layer.stroke();
-				layer.closePath();
-				layer.restore();
-
-				// TODO: add extra shadow inside hole (with a mask) if the pie is tilted.
-			}
-		}
+	
 
 		//-- Additional Interactive related functions --
 
@@ -735,7 +709,6 @@ More detail and specific examples can be found in the included HTML file.
 				drawHighlight(highlights[i].series);
 			}
 
-			drawDonutHole(octx);
 
 			octx.restore();
 
@@ -749,10 +722,13 @@ More detail and specific examples can be found in the included HTML file.
 				octx.fillStyle = "rgba(255, 255, 255, " + options.series.pie.highlight.opacity + ")"; // this is temporary until we have access to parseColor
 				octx.beginPath();
 				if (Math.abs(series.angle - Math.PI * 2) > 0.000000001) {
-					octx.moveTo(0, 0); // Center of the pie
+					octx.moveTo(innerRadius*Math.cos(series.startAngle), innerRadius*Math.sin(series.startAngle));
 				}
 				octx.arc(0, 0, radius, series.startAngle, series.startAngle + series.angle / 2, false);
 				octx.arc(0, 0, radius, series.startAngle + series.angle / 2, series.startAngle + series.angle, false);
+				octx.lineTo(innerRadius*Math.cos(series.startAngle + series.angle), innerRadius*Math.sin(series.startAngle + series.angle))
+				octx.arc(0, 0, innerRadius, series.startAngle + series.angle, series.startAngle + series.angle / 2, true);
+				octx.arc(0, 0, innerRadius, series.startAngle + series.angle / 2, series.startAngle , true);
 				octx.closePath();
 				octx.fill();
 			}
