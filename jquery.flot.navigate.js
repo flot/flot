@@ -256,7 +256,7 @@ can set the default in the options.
             plot.draw();
 
             if (!args.preventEvent) {
-                plot.getPlaceholder().trigger("plotzoom", [ plot, args ]);
+                plot.getPlaceholder().trigger("plotzoom", [plot, args]);
             }
         };
 
@@ -308,7 +308,7 @@ can set the default in the options.
             plot.draw();
 
             if (!args.preventEvent) {
-                plot.getPlaceholder().trigger("plotpan", [ plot, args ]);
+                plot.getPlaceholder().trigger("plotpan", [plot, args]);
             }
         };
 
