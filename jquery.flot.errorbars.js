@@ -67,13 +67,13 @@ shadowSize and lineWidth are derived as well from the points series.
         series: {
             points: {
                 errorbars: null, //should be 'x', 'y' or 'xy'
-                xerr: { err: "x", show: null, asymmetric: null, upperCap: null, lowerCap: null, color: null, radius: null},
-                yerr: { err: "y", show: null, asymmetric: null, upperCap: null, lowerCap: null, color: null, radius: null}
+                xerr: { err: "x", show: null, asymmetric: null, upperCap: null, lowerCap: null, color: null, radius: null },
+                yerr: { err: "y", show: null, asymmetric: null, upperCap: null, lowerCap: null, color: null, radius: null }
             }
         }
     };
 
-    function processRawData(plot, series, data, datapoints){
+    function processRawData(plot, series, data, datapoints) {
         if (!series.points.errorbars) {
             return;
         }
@@ -107,7 +107,7 @@ shadowSize and lineWidth are derived as well from the points series.
         datapoints.format = format;
     }
 
-    function parseErrors(series, i){
+    function parseErrors(series, i) {
 
         var points = series.datapoints.points;
 
@@ -175,7 +175,7 @@ shadowSize and lineWidth are derived as well from the points series.
         return errRanges;
     }
 
-    function drawSeriesErrors(plot, ctx, s){
+    function drawSeriesErrors(plot, ctx, s) {
 
         var points = s.datapoints.points,
             ps = s.datapoints.pointsize,
@@ -293,7 +293,7 @@ shadowSize and lineWidth are derived as well from the points series.
         }
     }
 
-    function drawError(ctx,err,x,y,upper,lower,drawUpper,drawLower,radius,offset,minmax){
+    function drawError(ctx,err,x,y,upper,lower,drawUpper,drawLower,radius,offset,minmax) {
 
         //shadow offset
         y += offset;
@@ -363,7 +363,7 @@ shadowSize and lineWidth are derived as well from the points series.
         }
     }
 
-    function drawPath(ctx, pts){
+    function drawPath(ctx, pts) {
         ctx.beginPath();
         ctx.moveTo(pts[0][0], pts[0][1]);
         for (var p = 1; p < pts.length; p++) {
@@ -372,7 +372,7 @@ shadowSize and lineWidth are derived as well from the points series.
         ctx.stroke();
     }
 
-    function draw(plot, ctx){
+    function draw(plot, ctx) {
         var plotOffset = plot.getPlotOffset();
 
         ctx.save();

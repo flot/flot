@@ -82,8 +82,8 @@ The plugin allso adds the following methods to the plot object:
     function init(plot) {
 
         var selection = {
-                first: { x: -1, y: -1},
-                second: { x: -1, y: -1},
+                first: { x: -1, y: -1 },
+                second: { x: -1, y: -1 },
                 show: false,
                 active: false,
                 touch: false
@@ -329,7 +329,7 @@ The plugin allso adds the following methods to the plot object:
                 eventHolder.mousemove(onMouseMove);
                 eventHolder.mousedown(onMouseDown);
                 eventHolder.bind("touchstart", function(e) {
-                    // Using a touch device, disable mouse events to prevent 
+                    // Using a touch device, disable mouse events to prevent
                     // event handlers being called twice
                     eventHolder.unbind("mousedown", onMouseDown);
                     onMouseDown(e);

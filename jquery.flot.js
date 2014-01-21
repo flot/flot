@@ -719,7 +719,7 @@ Licensed under the MIT license.
             eventHolder = null, // jQuery object that events should be bound to
             ctx = null, octx = null,
             xaxes = [], yaxes = [],
-            plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
+            plotOffset = { left: 0, right: 0, top: 0, bottom: 0 },
             plotWidth = 0, plotHeight = 0,
             hooks = {
                 processOptions: [],
@@ -2327,10 +2327,10 @@ Licensed under the MIT license.
                 bc = options.grid.borderColor;
                 if (typeof bw === "object" || typeof bc === "object") {
                     if (typeof bw !== "object") {
-                        bw = {top: bw, right: bw, bottom: bw, left: bw};
+                        bw = { top: bw, right: bw, bottom: bw, left: bw };
                     }
                     if (typeof bc !== "object") {
-                        bc = {top: bc, right: bc, bottom: bc, left: bc};
+                        bc = { top: bc, right: bc, bottom: bc, left: bc };
                     }
 
                     if (bw.top > 0) {
@@ -3164,7 +3164,7 @@ Licensed under the MIT license.
             if (options.legend.container != null) {
                 $(options.legend.container).html(table);
             } else {
-                var pos = {"position": "absolute"},
+                var pos = { "position": "absolute" },
                     p = options.legend.position,
                     m = options.legend.margin;
                 if (m[0] == null) {

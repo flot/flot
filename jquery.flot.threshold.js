@@ -145,7 +145,7 @@ You may need to check for this in hover events.
             var color = s.threshold.color ? s.threshold.color : "black";
 
             $(".legendLabel").each(function() {
-                if($(this).text() === s.label)
+                if ($(this).text() === s.label)
                 {
                     var legend = $(this).prev().find("div > div");
                     legend.css("border-right-color", color);
