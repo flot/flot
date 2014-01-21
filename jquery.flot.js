@@ -87,7 +87,7 @@ Licensed under the MIT license.
      * Resizes the canvas to the given dimensions.
      *
      * @param {number} width New width of the canvas, in pixels.
-     * @param {number} width New height of the canvas, in pixels.
+     * @param {number} height New height of the canvas, in pixels.
      */
     Canvas.prototype.resize = function(width, height) {
 
