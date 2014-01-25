@@ -72,9 +72,7 @@ module.exports = function(grunt) {
                     "checkRedundantParams": true,
                     "requireParamTypes": true
                 },
-                "validateQuoteMarks": "\"",
-                reporter: "checkstyle",
-                reporterOutput: "jscs.xml"
+                "validateQuoteMarks": "\""
             },
             flot: {
                 src: "<%= jshint.flot.src %>"
@@ -90,6 +88,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-jscs-checker");
 
     // Default task.
-    grunt.registerTask("default", ["jshint", "uglify"]);
+    grunt.registerTask("default", ["jscs", "jshint", "uglify"]);
 
 };
