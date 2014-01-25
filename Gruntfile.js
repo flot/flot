@@ -16,7 +16,7 @@ module.exports = function(grunt) {
             dist: {
                 expand: true,
                 flatten: true,
-                src: ["jquery.*.js", "!jquery.js"],
+                src: ["src/**/*.js"],
                 dest: "dist/",
                 rename: function(base, path) {
                     return base + path.replace(/\.js/, ".min.js");
@@ -29,7 +29,7 @@ module.exports = function(grunt) {
                 src: "Gruntfile.js"
             },
             flot: {
-                src: ["jquery.flot*.js"]
+                src: ["src/**/*.js"]
             }
         },
         watch: {
