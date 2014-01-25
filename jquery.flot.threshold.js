@@ -43,7 +43,7 @@ You may need to check for this in hover events.
 
 */
 
-(function ($) {
+(function($) {
     var options = {
         series: { threshold: null } // or { below: number, color: color spec}
     };
@@ -135,7 +135,6 @@ You may need to check for this in hover events.
         }
 
         plot.hooks.processDatapoints.push(processThresholds);
-        
 
         function processThresholdsLegend(ctx, canvas, s) {
             if (!s.threshold) {
@@ -145,11 +144,11 @@ You may need to check for this in hover events.
             var color = s.threshold.color ? s.threshold.color : "black";
 
             $(".legendLabel").each(function() {
-                if($(this).text() === s.label)
+                if ($(this).text() === s.label)
                 {
                     var legend = $(this).prev().find("div > div");
-                    legend.css("border-right-color" , color);
-                    legend.css("border-bottom-color" , color);
+                    legend.css("border-right-color", color);
+                    legend.css("border-bottom-color", color);
                 }
             });
         }

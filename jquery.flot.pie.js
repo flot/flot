@@ -59,11 +59,11 @@ More detail and specific examples can be found in the included HTML file.
 
     // Maximum redraw attempts when fitting labels within the plot
 
-    var REDRAW_ATTEMPTS = 10;
+    var REDRAW_ATTEMPTS = 10,
 
-    // Factor by which to shrink the pie when fitting labels within the plot
+        // Factor by which to shrink the pie when fitting labels within the plot
 
-    var REDRAW_SHRINK = 0.95;
+        REDRAW_SHRINK = 0.95;
 
     function init(plot) {
 
@@ -74,11 +74,11 @@ More detail and specific examples can be found in the included HTML file.
             centerLeft = null,
             centerTop = null,
             processed = false,
-            ctx = null;
+            ctx = null,
 
-        // interactive variables
+            // interactive variables
 
-        var highlights = [];
+            highlights = [];
 
         // add hook to determine if pie plugin in enabled, and then perform necessary operations
 
@@ -101,7 +101,7 @@ More detail and specific examples can be found in the included HTML file.
 
                 if (options.series.pie.radius === "auto") {
                     if (options.series.pie.label.show) {
-                        options.series.pie.radius = 3/4;
+                        options.series.pie.radius = 3 / 4;
                     } else {
                         options.series.pie.radius = 1;
                     }
@@ -340,11 +340,11 @@ More detail and specific examples can be found in the included HTML file.
 
             function drawShadow() {
 
-                var shadowLeft = options.series.pie.shadow.left;
-                var shadowTop = options.series.pie.shadow.top;
-                var edge = 10;
-                var alpha = options.series.pie.shadow.alpha;
-                var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+                var shadowLeft = options.series.pie.shadow.left,
+                    shadowTop = options.series.pie.shadow.top,
+                    edge = 10,
+                    alpha = options.series.pie.shadow.alpha,
+                    radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
 
                 if (radius >= canvasWidth / 2 - shadowLeft || radius * options.series.pie.tilt >= canvasHeight / 2 - shadowTop || radius <= edge) {
                     return;    // shadow would be outside canvas, so don't draw it
@@ -455,8 +455,8 @@ More detail and specific examples can be found in the included HTML file.
 
                 function drawLabels() {
 
-                    var currentAngle = startAngle;
-                    var radius = options.series.pie.label.radius > 1 ? options.series.pie.label.radius : maxRadius * options.series.pie.label.radius;
+                    var currentAngle = startAngle,
+                        radius = options.series.pie.label.radius > 1 ? options.series.pie.label.radius : maxRadius * options.series.pie.label.radius;
 
                     for (var i = 0; i < slices.length; ++i) {
                         if (slices[i].percent >= options.series.pie.label.threshold * 100) {
@@ -489,16 +489,16 @@ More detail and specific examples can be found in the included HTML file.
                             text = plf(text, slice);
                         }
 
-                        var halfAngle = ((startAngle + slice.angle) + startAngle) / 2;
-                        var x = centerLeft + Math.round(Math.cos(halfAngle) * radius);
-                        var y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt;
+                        var halfAngle = ((startAngle + slice.angle) + startAngle) / 2,
+                            x = centerLeft + Math.round(Math.cos(halfAngle) * radius),
+                            y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt,
+                            html = "<span class='pieLabel' id='pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
 
-                        var html = "<span class='pieLabel' id='pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
                         target.append(html);
 
-                        var label = target.children("#pieLabel" + index);
-                        var labelTop = (y - label.height() / 2);
-                        var labelLeft = (x - label.width() / 2);
+                        var label = target.children("#pieLabel" + index),
+                            labelTop = (y - label.height() / 2),
+                            labelLeft = (x - label.width() / 2);
 
                         label.css("top", labelTop);
                         label.css("left", labelLeft);
@@ -565,9 +565,9 @@ More detail and specific examples can be found in the included HTML file.
         //-- Additional Interactive related functions --
 
         function isPointInPoly(poly, pt) {
-            for(var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) {
+            for (var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i) {
                 ((poly[i][1] <= pt[1] && pt[1] < poly[j][1]) ||
-                 (poly[j][1] <= pt[1] && pt[1]< poly[i][1])) &&
+                 (poly[j][1] <= pt[1] && pt[1] < poly[i][1])) &&
                 (pt[0] < (poly[j][0] - poly[i][0]) * (pt[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0]) &&
                 (c = !c);
             }
@@ -656,10 +656,10 @@ More detail and specific examples can be found in the included HTML file.
 
         function triggerClickHoverEvent(eventname, e) {
 
-            var offset = plot.offset();
-            var canvasX = parseInt(e.pageX - offset.left, 10);
-            var canvasY =  parseInt(e.pageY - offset.top, 10);
-            var item = findNearbySlice(canvasX, canvasY);
+            var offset = plot.offset(),
+                canvasX = parseInt(e.pageX - offset.left, 10),
+                canvasY = parseInt(e.pageY - offset.top, 10),
+                item = findNearbySlice(canvasX, canvasY);
 
             if (options.grid.autoHighlight) {
 
@@ -730,9 +730,8 @@ More detail and specific examples can be found in the included HTML file.
 
         function drawOverlay(plot, octx) {
 
-            var options = plot.getOptions();
-
-            var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
+            var options = plot.getOptions(),
+                radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
 
             octx.save();
             octx.translate(centerLeft, centerTop);
@@ -774,7 +773,7 @@ More detail and specific examples can be found in the included HTML file.
                 show: false,
                 radius: "auto",    // actual radius of the visible pie (based on full calculated radius if <=1, or hard pixel value)
                 innerRadius: 0, /* for donut */
-                startAngle: 3/2,
+                startAngle: 3 / 2,
                 tilt: 1,
                 shadow: {
                     left: 5,    // shadow left offset

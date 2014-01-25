@@ -48,17 +48,17 @@ Licensed under the MIT license.
 
         this.element = element;
 
-        var context = this.context = element.getContext("2d");
+        var context = this.context = element.getContext("2d"),
 
-        // Determine the screen's ratio of physical to device-independent
-        // pixels.  This is the ratio between the canvas width that the browser
-        // advertises and the number of pixels actually present in that space.
+            // Determine the screen's ratio of physical to device-independent
+            // pixels.  This is the ratio between the canvas width that the browser
+            // advertises and the number of pixels actually present in that space.
 
-        // The iPhone 4, for example, has a device-independent width of 320px,
-        // but its screen is actually 640px wide.  It therefore has a pixel
-        // ratio of 2, while most normal devices have a ratio of 1.
+            // The iPhone 4, for example, has a device-independent width of 320px,
+            // but its screen is actually 640px wide.  It therefore has a pixel
+            // ratio of 2, while most normal devices have a ratio of 1.
 
-        var devicePixelRatio = window.devicePixelRatio || 1,
+            devicePixelRatio = window.devicePixelRatio || 1,
             backingStoreRatio =
                 context.webkitBackingStorePixelRatio ||
                 context.mozBackingStorePixelRatio ||
@@ -87,7 +87,7 @@ Licensed under the MIT license.
      * Resizes the canvas to the given dimensions.
      *
      * @param {number} width New width of the canvas, in pixels.
-     * @param {number} width New height of the canvas, in pixels.
+     * @param {number} height New height of the canvas, in pixels.
      */
     Canvas.prototype.resize = function(width, height) {
 
@@ -370,22 +370,23 @@ Licensed under the MIT license.
 
                     var cx = textWidth / 2,
                         cy = textHeight / 2,
-                        transformOrigin = Math.floor(cx) + "px " + Math.floor(cy) + "px";
+                        transformOrigin = Math.floor(cx) + "px " + Math.floor(cy) + "px",
 
-                    // Transforms alter the div's appearance without changing
-                    // its origin. This will make it difficult to position it
-                    // later, since we'll be positioning the new bounding box
-                    // with respect to the old origin. We can work around this
-                    // by adding a translation to align the new bounding box's
-                    // top-left corner with the origin, using the same matrix.
+                        // Transforms alter the div's appearance without changing
+                        // its origin. This will make it difficult to position it
+                        // later, since we'll be positioning the new bounding box
+                        // with respect to the old origin. We can work around this
+                        // by adding a translation to align the new bounding box's
+                        // top-left corner with the origin, using the same matrix.
 
-                    // Rather than examining all four points, we can use the
-                    // angle to figure out in advance which two points are in
-                    // the top-left quadrant; we can then use the x-coordinate
-                    // of the first (left-most) point and the y-coordinate of
-                    // the second (top-most) point as the bounding box corner.
+                        // Rather than examining all four points, we can use the
+                        // angle to figure out in advance which two points are in
+                        // the top-left quadrant; we can then use the x-coordinate
+                        // of the first (left-most) point and the y-coordinate of
+                        // the second (top-most) point as the bounding box corner.
 
-                    var x, y;
+                        x, y;
+
                     if (angle < 90) {
                         x = Math.floor(cx * cos + cy * sin - cx);
                         y = Math.floor(cx * sin + cy * cos - cy);
@@ -710,7 +711,7 @@ Licensed under the MIT license.
                     mouseActiveRadius: 10 // how far the mouse can be away to activate an item
                 },
                 interaction: {
-                    redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
+                    redrawOverlayInterval: 1000 / 60 // time between updates, -1 means in same flow
                 },
                 hooks: {}
             },
@@ -719,7 +720,7 @@ Licensed under the MIT license.
             eventHolder = null, // jQuery object that events should be bound to
             ctx = null, octx = null,
             xaxes = [], yaxes = [],
-            plotOffset = { left: 0, right: 0, top: 0, bottom: 0},
+            plotOffset = { left: 0, right: 0, top: 0, bottom: 0 },
             plotWidth = 0, plotHeight = 0,
             hooks = {
                 processOptions: [],
@@ -742,29 +743,29 @@ Licensed under the MIT license.
         plot.getPlaceholder = function() { return placeholder; };
         plot.getCanvas = function() { return surface.element; };
         plot.getPlotOffset = function() { return plotOffset; };
-        plot.width = function () { return plotWidth; };
-        plot.height = function () { return plotHeight; };
-        plot.offset = function () {
+        plot.width = function() { return plotWidth; };
+        plot.height = function() { return plotHeight; };
+        plot.offset = function() {
             var o = eventHolder.offset();
             o.left += plotOffset.left;
             o.top += plotOffset.top;
             return o;
         };
-        plot.getData = function () { return series; };
-        plot.getAxes = function () {
+        plot.getData = function() { return series; };
+        plot.getAxes = function() {
             var res = {};
-            $.each(xaxes.concat(yaxes), function (_, axis) {
+            $.each(xaxes.concat(yaxes), function(_, axis) {
                 if (axis) {
                     res[axis.direction + (axis.n !== 1 ? axis.n : "") + "axis"] = axis;
                 }
             });
             return res;
         };
-        plot.getXAxes = function () { return xaxes; };
-        plot.getYAxes = function () { return yaxes; };
+        plot.getXAxes = function() { return xaxes; };
+        plot.getYAxes = function() { return yaxes; };
         plot.c2p = canvasToAxisCoords;
         plot.p2c = axisToCanvasCoords;
-        plot.getOptions = function () { return options; };
+        plot.getOptions = function() { return options; };
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
         plot.triggerRedrawOverlay = triggerRedrawOverlay;
@@ -775,7 +776,7 @@ Licensed under the MIT license.
             };
         };
         plot.shutdown = shutdown;
-        plot.destroy = function () {
+        plot.destroy = function() {
             shutdown();
             placeholder.removeData("plot").empty();
 
@@ -792,7 +793,7 @@ Licensed under the MIT license.
             highlights = [];
             plot = null;
         };
-        plot.resize = function (width, height) {
+        plot.resize = function(width, height) {
             width = width || placeholder.width();
             height = height || placeholder.height();
             surface.resize(width, height);
@@ -810,7 +811,6 @@ Licensed under the MIT license.
         setupGrid();
         draw();
         bindEvents();
-
 
         function executeHooks(hook, args) {
             args = [plot].concat(args);
@@ -1099,7 +1099,7 @@ Licensed under the MIT license.
 
         function allAxes() {
             // return flat array without annoying null entries
-            return $.grep(xaxes.concat(yaxes), function (a) { return a; });
+            return $.grep(xaxes.concat(yaxes), function(a) { return a; });
         }
 
         function canvasToAxisCoords(pos) {
@@ -1291,7 +1291,7 @@ Licensed under the MIT license.
                 }
             }
 
-            $.each(allAxes(), function (_, axis) {
+            $.each(allAxes(), function(_, axis) {
                 // init axis
                 axis.datamin = topSentry;
                 axis.datamax = bottomSentry;
@@ -1301,7 +1301,7 @@ Licensed under the MIT license.
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
                 s.datapoints = { points: [] };
-                executeHooks(hooks.processRawData, [ s, s.data, s.datapoints ]);
+                executeHooks(hooks.processRawData, [s, s.data, s.datapoints]);
             }
 
             // first pass: clean and copy data
@@ -1337,7 +1337,7 @@ Licensed under the MIT license.
 
                 ps = s.datapoints.pointsize;
                 points = s.datapoints.points;
-                
+
                 s.xaxis.used = s.yaxis.used = true;
 
                 for (j = k = 0; j < data.length; ++j, k += ps) {
@@ -1401,7 +1401,7 @@ Licensed under the MIT license.
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
 
-                executeHooks(hooks.processDatapoints, [ s, s.datapoints]);
+                executeHooks(hooks.processDatapoints, [s, s.datapoints]);
             }
 
             // second pass: find datamax/datamin for auto-scaling
@@ -1473,7 +1473,7 @@ Licensed under the MIT license.
                 updateAxis(s.yaxis, ymin, ymax);
             }
 
-            $.each(allAxes(), function (_, axis) {
+            $.each(allAxes(), function(_, axis) {
                 if (axis.datamin === topSentry) {
                     axis.datamin = null;
                 }
@@ -1574,15 +1574,15 @@ Licensed under the MIT license.
 
             // data point to canvas coordinate
             if (t === identity) { // slight optimization
-                axis.p2c = function (p) { return (p - m) * s; };
+                axis.p2c = function(p) { return (p - m) * s; };
             } else {
-                axis.p2c = function (p) { return (t(p) - m) * s; };
+                axis.p2c = function(p) { return (t(p) - m) * s; };
             }
             // canvas coordinate to data point
             if (!it) {
-                axis.c2p = function (c) { return m + c / s; };
+                axis.c2p = function(c) { return m + c / s; };
             } else {
-                axis.c2p = function (c) { return it(m + c / s); };
+                axis.c2p = function(c) { return it(m + c / s); };
             }
         }
 
@@ -1756,7 +1756,7 @@ Licensed under the MIT license.
             // check axis labels, note we don't check the actual
             // labels but instead use the overall width/height to not
             // jump as much around with replots
-            $.each(allAxes(), function (_, axis) {
+            $.each(allAxes(), function(_, axis) {
                 if (axis.reserveSpace && axis.ticks && axis.ticks.length) {
                     var lastTick = axis.ticks[axis.ticks.length - 1];
                     if (axis.direction === "x") {
@@ -1806,7 +1806,7 @@ Licensed under the MIT license.
             }
 
             // init axes
-            $.each(axes, function (_, axis) {
+            $.each(axes, function(_, axis) {
                 axis.show = axis.options.show;
                 if (axis.show == null) {
                     axis.show = axis.used; // by default an axis is visible if it's got data
@@ -1819,9 +1819,9 @@ Licensed under the MIT license.
 
             if (showGrid) {
 
-                var allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
+                var allocatedAxes = $.grep(axes, function(axis) { return axis.reserveSpace; });
 
-                $.each(allocatedAxes, function (_, axis) {
+                $.each(allocatedAxes, function(_, axis) {
                     // make the ticks
                     setupTickGeneration(axis);
                     setTicks(axis);
@@ -1840,7 +1840,7 @@ Licensed under the MIT license.
                 // might stick out
                 adjustLayoutForThingsStickingOut();
 
-                $.each(allocatedAxes, function (_, axis) {
+                $.each(allocatedAxes, function(_, axis) {
                     allocateAxisBoxSecondPhase(axis);
                 });
             }
@@ -1849,7 +1849,7 @@ Licensed under the MIT license.
             plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
 
             // now we got the proper plot dimensions, we can compute the scaling
-            $.each(axes, function (_, axis) {
+            $.each(axes, function(_, axis) {
                 setTransformationHelpers(axis);
             });
 
@@ -1903,10 +1903,12 @@ Licensed under the MIT license.
         }
 
         function setupTickGeneration(axis) {
-            var opts = axis.options;
+            var opts = axis.options,
 
-            // estimate number of ticks
-            var noTicks;
+                // estimate number of ticks
+
+                noTicks;
+
             if (isNumeric(opts.ticks) && opts.ticks > 0) {
                 noTicks = opts.ticks;
             } else {
@@ -1964,7 +1966,7 @@ Licensed under the MIT license.
 
             if (!axis.tickGenerator) {
 
-                axis.tickGenerator = function (axis) {
+                axis.tickGenerator = function(axis) {
 
                     var ticks = [],
                         start = floorInBase(axis.min, axis.tickSize),
@@ -1981,17 +1983,18 @@ Licensed under the MIT license.
                     return ticks;
                 };
 
-                axis.tickFormatter = function (value, axis) {
+                axis.tickFormatter = function(value, axis) {
 
-                    var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-                    var formatted = "" + Math.round(value * factor) / factor;
+                    var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
+                        formatted = "" + Math.round(value * factor) / factor;
 
                     // If tickDecimals was specified, ensure that we have exactly that
                     // much precision; otherwise default to the value's own precision.
 
                     if (axis.tickDecimals != null) {
-                        var decimal = formatted.indexOf(".");
-                        var precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+                        var decimal = formatted.indexOf("."),
+                            precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+
                         if (precision < axis.tickDecimals) {
                             return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
                         }
@@ -2002,7 +2005,7 @@ Licensed under the MIT license.
             }
 
             if ($.isFunction(opts.tickFormatter)) {
-                axis.tickFormatter = function (v, axis) { return "" + opts.tickFormatter(v, axis); };
+                axis.tickFormatter = function(v, axis) { return "" + opts.tickFormatter(v, axis); };
             }
 
             if (opts.alignTicksWithAxis != null) {
@@ -2019,7 +2022,7 @@ Licensed under the MIT license.
                         }
                     }
 
-                    axis.tickGenerator = function (axis) {
+                    axis.tickGenerator = function(axis) {
                         // copy ticks, scaled to this axis
                         var ticks = [], v, i;
                         for (i = 0; i < otherAxis.ticks.length; ++i) {
@@ -2064,8 +2067,9 @@ Licensed under the MIT license.
             var i, v;
             axis.ticks = [];
             for (i = 0; i < ticks.length; ++i) {
-                var label = null;
-                var t = ticks[i];
+                var label = null,
+                    t = ticks[i];
+
                 if (typeof t === "object") {
                     v = +t[0];
                     if (t.length > 1) {
@@ -2185,10 +2189,10 @@ Licensed under the MIT license.
             surface.removeText(markingLayer);
 
             // process markings
-            var markingsUnderGrid = [];
-            var markingsAboveGrid = [];
-            
-            var markings = options.grid.markings;
+            var markingsUnderGrid = [],
+                markingsAboveGrid = [],
+                markings = options.grid.markings;
+
             if (markings) {
                 if ($.isFunction(markings)) {
                     axes = plot.getAxes();
@@ -2204,7 +2208,7 @@ Licensed under the MIT license.
 
                 for (i = 0; i < markings.length; ++i) {
                     var m = markings[i];
-                    
+
                     if (m.aboveGrid) {
                         markingsAboveGrid.push(m);
                     } else {
@@ -2212,7 +2216,7 @@ Licensed under the MIT license.
                     }
                 }
             }
-            
+
             drawMarkings(markingsUnderGrid, markingLayer);
 
             // draw the ticks
@@ -2327,10 +2331,10 @@ Licensed under the MIT license.
                 bc = options.grid.borderColor;
                 if (typeof bw === "object" || typeof bc === "object") {
                     if (typeof bw !== "object") {
-                        bw = {top: bw, right: bw, bottom: bw, left: bw};
+                        bw = { top: bw, right: bw, bottom: bw, left: bw };
                     }
                     if (typeof bc !== "object") {
-                        bc = {top: bc, right: bc, bottom: bc, left: bc};
+                        bc = { top: bc, right: bc, bottom: bc, left: bc };
                     }
 
                     if (bw.top > 0) {
@@ -2365,7 +2369,7 @@ Licensed under the MIT license.
                         ctx.lineWidth = bw.left;
                         ctx.beginPath();
                         ctx.moveTo(0 - bw.left / 2, plotHeight + bw.bottom);
-                        ctx.lineTo(0- bw.left / 2, 0);
+                        ctx.lineTo(0 - bw.left / 2, 0);
                         ctx.stroke();
                     }
                 } else {
@@ -2377,7 +2381,7 @@ Licensed under the MIT license.
 
             ctx.restore();
         }
-        
+
         function drawMarkings(markings, markingLayer) {
 	        if (!markings) {
 		        return;
@@ -2387,7 +2391,7 @@ Licensed under the MIT license.
                 drawMarking(markings[i], markingLayer);
             }
         }
-        
+
         function drawMarking(m, markingLayer) {
             var xrange = extractRange(m, "x"),
                 yrange = extractRange(m, "y");
@@ -2449,9 +2453,12 @@ Licensed under the MIT license.
 
             if (m.text) {
                 // left aligned horizontal position:
-                var xPos = xrange.from + plotOffset.left;
-                // top baselined vertical position:
-                var yPos = (yrange.to + plotOffset.top);
+
+                var xPos = xrange.from + plotOffset.left,
+
+                    // top baselined vertical position:
+
+                    yPos = (yrange.to + plotOffset.top);
 
                 if (!!m.textAlign) {
                     switch (m.textAlign.toLowerCase()) {
@@ -2481,7 +2488,7 @@ Licensed under the MIT license.
 
         function drawAxisLabels() {
 
-            $.each(allAxes(), function (_, axis) {
+            $.each(allAxes(), function(_, axis) {
 
                 var box = axis.box,
                     axisOptions = axis.options,
@@ -3050,7 +3057,7 @@ Licensed under the MIT license.
                 barLeft = -series.bars.barWidth / 2;
             }
 
-            var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
+            var fillStyleCallback = series.bars.fill ? function(bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
@@ -3164,7 +3171,7 @@ Licensed under the MIT license.
             if (options.legend.container != null) {
                 $(options.legend.container).html(table);
             } else {
-                var pos = {"position": "absolute"},
+                var pos = { "position": "absolute" },
                     p = options.legend.position,
                     m = options.legend.margin;
                 if (m[0] == null) {
@@ -3208,7 +3215,6 @@ Licensed under the MIT license.
                 }
             }
         }
-
 
         // interactive features
 
@@ -3332,20 +3338,20 @@ Licensed under the MIT license.
         function onMouseMove(e) {
             if (options.grid.hoverable) {
                 triggerClickHoverEvent("plothover", e,
-                                       function (s) { return s.hoverable !== false; });
+                                       function(s) { return s.hoverable !== false; });
             }
         }
 
         function onMouseLeave(e) {
             if (options.grid.hoverable) {
                 triggerClickHoverEvent("plothover", e,
-                                       function () { return false; });
+                                       function() { return false; });
             }
         }
 
         function onClick(e) {
             triggerClickHoverEvent("plotclick", e,
-                                   function (s) { return s.clickable !== false; });
+                                   function(s) { return s.clickable !== false; });
         }
 
         // trigger click or hover event (they send the same parameters
@@ -3385,7 +3391,7 @@ Licensed under the MIT license.
                 }
             }
 
-            placeholder.trigger(eventname, [ pos, item ]);
+            placeholder.trigger(eventname, [pos, item]);
         }
 
         function triggerRedrawOverlay() {
@@ -3484,8 +3490,8 @@ Licensed under the MIT license.
                 return;
             }
 
-            var pointRadius;
-            var radius;
+            var pointRadius, radius;
+
             if (series.points.show) {
                 pointRadius = series.points.radius + series.points.lineWidth / 2;
                 radius = 1.5 * pointRadius;
@@ -3528,7 +3534,7 @@ Licensed under the MIT license.
             octx.strokeStyle = highlightColor;
 
             drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
-                    function () { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
+                    function() { return fillStyle; }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
@@ -3589,17 +3595,18 @@ Licensed under the MIT license.
     // Draw a rectangle with rounded corner on the canvas.
     //
     // @param {CanvasRenderingContext2D} ctx The canvas 2D context.
-    // @param {number} x The x-axis coordinate of the upper left corner of 
+    // @param {number} x The x-axis coordinate of the upper left corner of
     //      the rectangle to be drawn.
-    // @param {number} y The y-axis coordinate of the upper left corner of 
+    // @param {number} y The y-axis coordinate of the upper left corner of
     //      the rectangle to be drawn.
     // @param {number} width The width of the rectangle to be drawn.
     // @param {number} height The height of the rectangle to be drawn.
     // @param {number} radius The radius of the corner of the rectangle
     //      to be drawn.
     function roundRect(ctx, x, y, width, height, radius) {
-        var r = x + width;
-        var b = y + height;
+        var r = x + width,
+            b = y + height;
+
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
         ctx.lineTo(r - radius, y);

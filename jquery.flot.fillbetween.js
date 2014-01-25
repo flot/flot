@@ -29,7 +29,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 
 */
 
-(function ($) {
+(function($) {
 
     var options = {
         series: {

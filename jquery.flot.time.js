@@ -35,15 +35,15 @@ API.txt for details.
         }
 
         var leftPad = function(n, pad) {
-            n = "" + n;
-            pad = "" + (pad == null ? "0" : pad);
-            return n.length === 1 ? pad + n : n;
-        };
-
-        var r = [],
+                n = "" + n;
+                pad = "" + (pad == null ? "0" : pad);
+                return n.length === 1 ? pad + n : n;
+            },
+            r = [],
             escape = false,
             hours = d.getHours(),
-            isAM = hours < 12;
+            isAM = hours < 12,
+            c, hours12;
 
         if (monthNames == null) {
             monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -52,8 +52,6 @@ API.txt for details.
         if (dayNames == null) {
             dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         }
-
-        var hours12;
 
         if (hours > 12) {
             hours12 = hours - 12;
@@ -65,7 +63,7 @@ API.txt for details.
 
         for (var i = 0; i < fmt.length; ++i) {
 
-            var c = fmt.charAt(i);
+            c = fmt.charAt(i);
 
             if (escape) {
                 switch (c) {
@@ -81,7 +79,7 @@ API.txt for details.
                 case "e":
                     c = leftPad(d.getDate(), " ");
                     break;
-                case "h":	// For back-compat with 0.7; remove in 1.0
+                case "h": // For back-compat with 0.7; remove in 1.0
                 case "H":
                     c = leftPad(hours);
                     break;
@@ -193,40 +191,46 @@ API.txt for details.
     // map of app. size of time units in milliseconds
 
     var timeUnitSize = {
-        "second": 1000,
-        "minute": 60 * 1000,
-        "hour": 60 * 60 * 1000,
-        "day": 24 * 60 * 60 * 1000,
-        "month": 30 * 24 * 60 * 60 * 1000,
-        "quarter": 3 * 30 * 24 * 60 * 60 * 1000,
-        "year": 365.2425 * 24 * 60 * 60 * 1000
-    };
+            "second": 1000,
+            "minute": 60 * 1000,
+            "hour": 60 * 60 * 1000,
+            "day": 24 * 60 * 60 * 1000,
+            "month": 30 * 24 * 60 * 60 * 1000,
+            "quarter": 3 * 30 * 24 * 60 * 60 * 1000,
+            "year": 365.2425 * 24 * 60 * 60 * 1000
+        },
 
-    // the allowed tick sizes, after 1 year we use
-    // an integer algorithm
+        // the allowed tick sizes, after 1 year we use
+        // an integer algorithm
 
-    var baseSpec = [
-        [1, "second"], [2, "second"], [5, "second"], [10, "second"],
-        [30, "second"],
-        [1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
-        [30, "minute"],
-        [1, "hour"], [2, "hour"], [4, "hour"],
-        [8, "hour"], [12, "hour"],
-        [1, "day"], [2, "day"], [3, "day"],
-        [0.25, "month"], [0.5, "month"], [1, "month"],
-        [2, "month"]
-    ];
+        baseSpec = [
+            [1, "second"], [2, "second"], [5, "second"], [10, "second"],
+            [30, "second"],
+            [1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
+            [30, "minute"],
+            [1, "hour"], [2, "hour"], [4, "hour"],
+            [8, "hour"], [12, "hour"],
+            [1, "day"], [2, "day"], [3, "day"],
+            [0.25, "month"], [0.5, "month"], [1, "month"],
+            [2, "month"]
+        ],
 
-    // we don't know which variant(s) we'll need yet, but generating both is
-    // cheap
+        // we don't know which variant(s) we'll need yet, but generating both is
+        // cheap
 
-    var specMonths = baseSpec.concat([[3, "month"], [6, "month"],
-        [1, "year"]]);
-    var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
-        [1, "year"]]);
+        specMonths = baseSpec.concat([
+            [3, "month"],
+            [6, "month"],
+            [1, "year"]
+        ]),
+        specQuarters = baseSpec.concat([
+            [1, "quarter"],
+            [2, "quarter"],
+            [1, "year"]
+        ]);
 
     function init(plot) {
-        plot.hooks.processOptions.push(function (plot) {
+        plot.hooks.processOptions.push(function(plot) {
             $.each(plot.getAxes(), function(axisName, axis) {
 
                 var opts = axis.options;
@@ -236,12 +240,12 @@ API.txt for details.
 
                         var ticks = [],
                             d = dateGenerator(axis.min, opts),
-                            minSize = 0;
+                            minSize = 0,
 
-                        // make quarter use a possibility if quarters are
-                        // mentioned in either of these options
+                            // make quarter use a possibility if quarters are
+                            // mentioned in either of these options
 
-                        var spec = (opts.tickSize && opts.tickSize[1] ===
+                            spec = (opts.tickSize && opts.tickSize[1] ===
                             "quarter") ||
                             (opts.minTickSize && opts.minTickSize[1] ===
                             "quarter") ? specQuarters : specMonths;
@@ -385,7 +389,7 @@ API.txt for details.
                         return ticks;
                     };
 
-                    axis.tickFormatter = function (v, axis) {
+                    axis.tickFormatter = function(v, axis) {
 
                         var d = dateGenerator(v, axis.options);
 
