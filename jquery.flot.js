@@ -672,9 +672,12 @@ Licensed under the MIT license.
                         lineWidth: 2, // in pixels
                         fill: false,
                         fillColor: null,
-                        steps: false
+                        steps: false,
                         // Omit 'zero', so we can later default its value to
                         // match that of the 'fill' option.
+                        defaultValue: 0
+                        // Additional option parameter for lines to set the 
+                        // default value used to control where the 'fill' will originate from.
                     },
                     bars: {
                         show: false,
@@ -1319,7 +1322,7 @@ Licensed under the MIT license.
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
                         var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
-                        format.push({ y: true, number: true, required: false, defaultValue: 0, autoscale: autoscale });
+                        format.push({ y: true, number: true, required: false, defaultValue: s.lines.defaultValue, autoscale: autoscale });
                         if (s.bars.horizontal) {
                             delete format[format.length - 1].y;
                             format[format.length - 1].x = true;
