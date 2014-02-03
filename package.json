@@ -1,5 +1,5 @@
 {
-  "name": "Flot",
+  "name": "flot",
   "version": "0.9.0-alpha",
   "main": "jquery.flot.js",
   "scripts": {
