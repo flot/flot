@@ -361,7 +361,7 @@ Licensed under the MIT license.
                     c = sin.toFixed(6),     // when we add them to the string
                     transformRule;
 
-                if ($.support.leadingWhitespace) {
+                if (!($.support.leadingWhitespace === false)) {
 
                     // The transform origin defaults to '50% 50%', producing
                     // blurry text on some browsers (Chrome) when the width or
