@@ -361,7 +361,10 @@ Licensed under the MIT license.
                     c = sin.toFixed(6),     // when we add them to the string
                     transformRule;
 
-                if ($.support.leadingWhitespace) {
+                // Detect IE7/8 to use microsofts proprietary matrix filter
+                // $.support.leadingWhitespace is false on IE7/8, true on other browsers and
+                // undefined with jQuery greater 2.0, which dropped support for IE7/8.
+                if ($.support.leadingWhitespace !== false) {
 
                     // The transform origin defaults to '50% 50%', producing
                     // blurry text on some browsers (Chrome) when the width or
