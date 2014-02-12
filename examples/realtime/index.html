@@ -84,10 +84,9 @@
 			// Since the axes don't change, we don't need to call plot.setupGrid()
 
 			plot.draw();
-			setTimeout(update, updateInterval);
 		}
 
-		update();
+		setInterval(update, updateInterval)
 
 		// Add the Flot version string to the footer
 
