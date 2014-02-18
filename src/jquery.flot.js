@@ -1801,7 +1801,7 @@ Licensed under the MIT license.
 
             // insert the legend so we have its height
             insertLegend();
-            // if we want to draw the legend out of the grid we need to adjust the offset of the main graph
+            // if we want to draw the legend out of the grid we need to adjust its offset
             if (options.legend.show && legendOutOfGrid()) {
                 originalBottom = plotOffset.bottom;
                 plotOffset.bottom += placeholder.find(".legend > div").height();
