@@ -1786,6 +1786,7 @@ Licensed under the MIT license.
             var axes = allAxes(),
                 showGrid = options.grid.show,
                 margin = options.grid.margin || 0,
+                originalBottom,
                 i, a;
 
             // Initialize the plot's offset from the edge of the canvas
@@ -1797,6 +1798,14 @@ Licensed under the MIT license.
             }
 
             executeHooks(hooks.processOffset, [plotOffset]);
+
+            // insert the legend so we have its height
+            insertLegend();
+            // if we want to draw the legend out of the grid we need to adjust the offset of the main graph
+            if (options.legend.show && legendOutOfGrid()) {
+                originalBottom = plotOffset.bottom;
+                plotOffset.bottom += placeholder.find(".legend > div").height();
+            }
 
             // If the grid is visible, add its border width to the offset
 
@@ -1860,7 +1869,18 @@ Licensed under the MIT license.
                 drawAxisLabels();
             }
 
-            insertLegend();
+            // position legend out of grid or inside grid
+            if (options.legend.show && legendOutOfGrid()) {
+                alignLegend({
+                    "bottom": originalBottom,
+                    "left":   plotOffset.left,
+                    "top":    "auto",
+                    "right":  "auto"
+                });
+            } else {
+                alignLegend();
+            }
+
         }
 
         function setRange(axis) {
@@ -3174,23 +3194,7 @@ Licensed under the MIT license.
             if (options.legend.container != null) {
                 $(options.legend.container).html(table);
             } else {
-                var pos = { "position": "absolute" },
-                    p = options.legend.position,
-                    m = options.legend.margin;
-                if (m[0] == null) {
-                    m = [m, m];
-                }
-                if (p.charAt(0) === "n") {
-                    pos.top = (m[1] + plotOffset.top) + "px";
-                } else if (p.charAt(0) === "s") {
-                    pos.bottom = (m[1] + plotOffset.bottom) + "px";
-                }
-                if (p.charAt(1) === "e") {
-                    pos.right = (m[0] + plotOffset.right) + "px";
-                } else if (p.charAt(1) === "w") {
-                    pos.left = (m[0] + plotOffset.left) + "px";
-                }
-                var legend = $("<div></div>").addClass("legend").append(table.css(pos)).appendTo(placeholder);
+                var legend = $("<div></div>").addClass("legend").append(table).appendTo(placeholder);
                 if (options.legend.backgroundOpacity !== 0.0) {
                     // put in the transparent background
                     // separately to avoid blended labels and
@@ -3208,8 +3212,7 @@ Licensed under the MIT license.
                     }
                     var div = legend.children();
 
-                    // Position also applies to this
-                    $("<div></div>").css(pos).css({
+                    $("<div></div>").css({
                         "width": div.width() + "px",
                         "height": div.height() + "px",
                         "background-color": c,
@@ -3217,6 +3220,39 @@ Licensed under the MIT license.
                     }).prependTo(legend);
                 }
             }
+        }
+
+        function alignLegend(offset) {
+            if (options.legend.container != null || !options.legend.show) {
+                return;
+            }
+
+            var pos = { "position": "absolute" },
+                p = options.legend.position,
+                m = options.legend.margin;
+            if (m[0] == null) {
+                m = [m, m];
+            }
+            if (offset != null) {
+                $.extend(pos, offset);
+            } else {
+                if (p.charAt(0) === "n") {
+                    pos.top = (m[1] + plotOffset.top) + "px";
+                } else if (p.charAt(0) === "s") {
+                    pos.bottom = (m[1] + plotOffset.bottom) + "px";
+                }
+                if (p.charAt(1) === "e") {
+                    pos.right = (m[0] + plotOffset.right) + "px";
+                } else if (p.charAt(1) === "w") {
+                    pos.left = (m[0] + plotOffset.left) + "px";
+                }
+            }
+
+            placeholder.find(".legend > *").css(pos);
+        }
+
+        function legendOutOfGrid() {
+            return options.legend.position === "bottom";
         }
 
         // interactive features
