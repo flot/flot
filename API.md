@@ -180,7 +180,7 @@ legend: {
     labelFormatter: null or (fn: string, series object -> string)
     labelBoxBorderColor: color
     noColumns: number
-    position: "ne" or "nw" or "se" or "sw"
+    position: "ne" or "nw" or "se" or "sw" or "bottom"
     margin: number of pixels or [x margin, y margin]
     backgroundColor: null or color
     backgroundOpacity: number between 0 and 1
@@ -209,7 +209,9 @@ return null.
 "position" specifies the overall placement of the legend within the
 plot (top-right, top-left, etc.) and margin the distance to the plot
 edge (this can be either a number or an array of two numbers like [x,
-y]). "backgroundColor" and "backgroundOpacity" specifies the
+y]). Position "bottom" moves the legend outside the grid at bottom of the graph,
+margin is ignored.
+"backgroundColor" and "backgroundOpacity" specifies the
 background. The default is a partly transparent auto-detected
 background.
 
