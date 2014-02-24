@@ -224,13 +224,16 @@ More detail and specific examples can be found in the included HTML file.
 			for (var i = 0; i < data.length; ++i) {
 				var value = data[i].data[0][1];
 				if (numCombined < 2 || value / total > options.series.pie.combine.threshold) {
-					newdata.push({
-						data: [[1, value]],
-						color: data[i].color,
-						label: data[i].label,
-						angle: value * Math.PI * 2 / total,
-						percent: value / (total / 100)
-					});
+					newdata.push(
+						$.extend(data[i], {     /* extend to allow keeping all other original data values
+						                           and using them e.g. in labelFormatter. */
+							data: [[1, value]],
+							color: data[i].color,
+							label: data[i].label,
+							angle: value * Math.PI * 2 / total,
+							percent: value / (total / 100)
+						})
+					);
 				}
 			}
 
