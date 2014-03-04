@@ -20,6 +20,7 @@ The plugin supports these options:
         interactive: false
         cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
         frameRate: 20
+    		triggerOnDrag: true // trigger the callback during dragging
     }
 
     xaxis, yaxis, x2axis, y2axis: {
@@ -93,7 +94,8 @@ can set the default in the options.
         pan: {
             interactive: false,
             cursor: "move",
-            frameRate: 20
+            frameRate: 20,
+            triggerOnDrag: true // trigger the callback during dragging
         }
     };
 
@@ -137,9 +139,11 @@ can set the default in the options.
                 return;
             }
 
+            var callTrigger = plot.getOptions().pan.triggerOnDrag;
             panTimeout = setTimeout(function() {
                 plot.pan({ left: prevPageX - e.pageX,
-                           top: prevPageY - e.pageY });
+                           top: prevPageY - e.pageY,
+                           preventEvent: !callTrigger });
                 prevPageX = e.pageX;
                 prevPageY = e.pageY;
 
