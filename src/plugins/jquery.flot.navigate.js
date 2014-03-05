@@ -157,7 +157,7 @@ can set the default in the options.
             plot.getPlaceholder().css("cursor", prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY,
-                       dragEnded: true, });
+                       dragEnded: true });
         }
 
         function bindEvents(plot, eventHolder) {
