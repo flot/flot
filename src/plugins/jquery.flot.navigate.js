@@ -139,7 +139,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.pan({ left: prevPageX - e.pageX,
-                           top: prevPageY - e.pageY });
+                           top: prevPageY - e.pageY,
+                           dragEnded: false });
                 prevPageX = e.pageX;
                 prevPageY = e.pageY;
 
@@ -155,7 +156,8 @@ can set the default in the options.
 
             plot.getPlaceholder().css("cursor", prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
-                       top: prevPageY - e.pageY });
+                       top: prevPageY - e.pageY,
+                       dragEnded: true });
         }
 
         function bindEvents(plot, eventHolder) {
