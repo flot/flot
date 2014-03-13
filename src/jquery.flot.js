@@ -1417,7 +1417,7 @@ Licensed under the MIT license.
 
                 var xmin = topSentry, ymin = topSentry,
                     xmax = bottomSentry, ymax = bottomSentry;
-                var deltaLeft, deltaRight;
+                var deltaLeft, deltaRight, shiftedVal;
 
                 //This adds bar width to current min/max width/height depending on the settings
                 var addBarWidth = function(val, j, isHorizontal, isMin) {
