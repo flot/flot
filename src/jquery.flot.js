@@ -683,7 +683,6 @@ Licensed under the MIT license.
                         show: false,
                         lineWidth: 2, // in pixels
                         barWidth: 1, // in units of the x axis
-                        barWidths: null, // array of widths for each data point
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
@@ -1419,7 +1418,6 @@ Licensed under the MIT license.
                 var xmin = topSentry, ymin = topSentry,
                     xmax = bottomSentry, ymax = bottomSentry;
                 var deltaLeft, deltaRight;
-                var isExtremal = false;
 
                 //This adds bar width to current min/max width/height depending on the settings
                 var addBarWidth = function(val, j, isHorizontal, isMin) {
