@@ -1422,7 +1422,7 @@ Licensed under the MIT license.
                 //This adds bar width to current min/max width/height depending on the settings
                 var addBarWidth = function(val, j, isHorizontal, isMin) {
                 
-                    //Only do this when we have bars and the corresponding axis is effected by the current val
+                    //Only do this when we have bars and the corresponding axis is affected by the current val
                     if (s.bars.show && !(s.bars.horizontal ^ isHorizontal)) {
                         var deltaLeft, deltaRight;
                         var barWidth = (points[j + 3] === undefined) ? s.bars.barWidth : points[j + 3];
