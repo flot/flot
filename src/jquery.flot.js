@@ -1423,7 +1423,7 @@ Licensed under the MIT license.
                 var addBarWidth = function(val, j, isHorizontal, isMin) {
                 
                     //Only do this when we have bars and the corresponding axis is affected by the current val
-                    if (s.bars.show && !(s.bars.horizontal ^ isHorizontal)) {
+                    if (s.bars.show && (s.bars.horizontal && isHorizontal || !s.bars.horizontal && !isHorizontal)) {
                         var deltaLeft, deltaRight;
                         var barWidth = (points[j + 3] === undefined) ? s.bars.barWidth : points[j + 3];
                         
