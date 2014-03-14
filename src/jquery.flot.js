@@ -1416,13 +1416,16 @@ Licensed under the MIT license.
                 format = s.datapoints.format;
 
                 var xmin = topSentry, ymin = topSentry,
-                    xmax = bottomSentry, ymax = bottomSentry;
-                var deltaLeft, deltaRight, shiftedVal;
+                    xmax = bottomSentry, ymax = bottomSentry,
+                    shiftedVal;
 
                 //This adds bar width to current min/max width/height depending on the settings
                 var addBarWidth = function(val, j, isHorizontal, isMin) {
-                    if (s.bars.show) {
-                        barWidth = (points[j+3] === undefined) ? s.bars.barWidth : points[j+3];
+                
+                    //Only do this when we have bars and the corresponding axis is effected by the current val
+                    if (s.bars.show && !(s.bars.horizontal ^ isHorizontal)) {
+                        var deltaLeft, deltaRight;
+                        var barWidth = (points[j + 3] === undefined) ? s.bars.barWidth : points[j + 3];
                         
                         switch (s.bars.align) {
                         case "left":
@@ -1435,22 +1438,10 @@ Licensed under the MIT license.
                             break;
                         default:
                             deltaLeft = -barWidth / 2;
-                            deltaRight = barWidth / 2;
+                            deltaRight = -deltaLeft;
                         }
                         
-                        if (s.bars.horizontal && isHorizontal) {
-                            if (isMin) {
-                                val += deltaLeft;
-                            } else {
-                                val += deltaRight;
-                            }
-                        } else if (!s.bars.horizontal && !isHorizontal) {
-                            if (isMin) {
-                                val += deltaLeft;
-                            } else {
-                                val += deltaRight;
-                            }
-                        }
+                        val += (isMin) ? deltaLeft : deltaRight;
                     }
                     
                     return val;
