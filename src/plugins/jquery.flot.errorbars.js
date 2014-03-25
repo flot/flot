@@ -23,6 +23,7 @@ The plugin supports these options:
                 asymmetric: null/false or true,
                 upperCap: null or "-" or function,
                 lowerCap: null or "-" or function,
+                hideLines: null/false or true,
                 color: null or color,
                 radius: null or number
             },
@@ -300,31 +301,34 @@ shadowSize and lineWidth are derived as well from the points series.
         upper += offset;
         lower += offset;
 
-        // error bar - avoid plotting over circles
-        if (err.err === "x"){
-            if (upper > x + radius) {
-                drawPath(ctx, [[upper,y],[Math.max(x + radius,minmax[0]),y]]);
+        // draw lines between base points and upper/lower caps?
+        if (!err.hideLines) {
+            // error bar - avoid plotting over circles
+            if (err.err === "x"){
+                if (upper > x + radius) {
+                    drawPath(ctx, [[upper,y],[Math.max(x + radius,minmax[0]),y]]);
+                } else {
+                    drawUpper = false;
+                }
+                if (lower < x - radius) {
+                    drawPath(ctx, [[Math.min(x - radius,minmax[1]),y],[lower,y]] );
+                } else {
+                    drawLower = false;
+                }
             } else {
-                drawUpper = false;
-            }
-            if (lower < x - radius) {
-                drawPath(ctx, [[Math.min(x - radius,minmax[1]),y],[lower,y]] );
-            } else {
-                drawLower = false;
-            }
-        } else {
-            if (upper < y - radius) {
-                drawPath(ctx, [[x,upper],[x,Math.min(y - radius,minmax[0])]] );
-            } else {
-                drawUpper = false;
-            }
-            if (lower > y + radius) {
-                drawPath(ctx, [[x,Math.max(y + radius,minmax[1])],[x,lower]] );
-            } else {
-                drawLower = false;
+                if (upper < y - radius) {
+                    drawPath(ctx, [[x,upper],[x,Math.min(y - radius,minmax[0])]] );
+                } else {
+                    drawUpper = false;
+                }
+                if (lower > y + radius) {
+                    drawPath(ctx, [[x,Math.max(y + radius,minmax[1])],[x,lower]] );
+                } else {
+                    drawLower = false;
+                }
             }
         }
-
+        
         //internal radius value in errorbar, allows to plot radius 0 points and still keep proper sized caps
         //this is a way to get errorbars on lines without visible connecting dots
         radius = err.radius != null ? err.radius : radius;
