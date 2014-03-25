@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Examples: Bar-plot</title>
+    <link href="../examples.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../lib/excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../../lib/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../../lib/jquery.colorhelpers.js"></script>
+    <script language="javascript" type="text/javascript" src="../../src/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../src/plugins/jquery.flot.time.js"></script>
+    <script type="text/javascript">
+
+    $(function() {
+
+        var data = [
+            [[0, 5, 0, 0.5], [2, 3, 0, 10], [4, 10, 0, 2]],
+            [[1, 4], [7, 4]]
+        ]; 
+
+        $.plot('#placeholder-0', data, {
+            series: {
+                bars: {
+                    show: true,
+                    barWidth: 2,
+                }
+            }
+        });
+        
+        
+        $.plot('#placeholder-1', data, {
+            series: {
+                bars: {
+                    show: true,
+                    align: 'right',
+                    barWidth: 2,
+                }
+            }
+        });
+        
+        
+        $.plot('#placeholder-2', data, {
+            series: {
+                bars: {
+                    show: true,
+                    align: 'center',
+                    barWidth: 2,
+                }
+            }
+        });
+        
+        var horizontalData = [
+            [[2, 8], [5, 10, 0, 10], [3, 9]],
+            [[1, 2], [2, 2, 0, 5]]
+        ];
+        
+        $.plot('#placeholder-3', horizontalData, {
+            series: {
+                bars: {
+                    show: true,
+                    horizontal: true,
+                    align: 'left',
+                    barWidth: 1,
+                }
+            }
+        });
+        
+        $.plot('#placeholder-4', horizontalData, {
+            series: {
+                bars: {
+                    show: true,
+                    horizontal: true,
+                    align: 'center',
+                    barWidth: 1,
+                }
+            }
+        });
+        
+        $.plot('#placeholder-5', horizontalData, {
+            series: {
+                bars: {
+                    show: true,
+                    horizontal: true,
+                    align: 'right',
+                    barWidth: 1,
+                }
+            }
+        });
+
+        // Add the Flot version string to the footer
+
+        $("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+    });
+
+    </script>
+</head>
+<body>
+
+    <div id="header">
+        <h2>Bar plots</h2>
+    </div>
+
+    <div id="content">
+
+        <p>Left-aligned vertical barplot</p>
+        <div class="demo-container">
+            <div id="placeholder-0" class="demo-placeholder"></div>
+        </div>
+        
+        <p>Center-aligned vertical barplot</p>
+        <div class="demo-container">
+            <div id="placeholder-1" class="demo-placeholder"></div>
+        </div>
+        
+        <p>Right-aligned vertical barplot</p>
+        <div class="demo-container">
+            <div id="placeholder-2" class="demo-placeholder"></div>
+        </div>
+        
+        <p>Left-aligned horizontal barplot</p>
+        <div class="demo-container">
+            <div id="placeholder-3" class="demo-placeholder"></div>
+        </div>
+        
+        <p>Center-aligned horizontal barplot</p>
+        <div class="demo-container">
+            <div id="placeholder-4" class="demo-placeholder"></div>
+        </div>
+        
+        <p>Right-aligned horizontal barplot</p>
+        <div class="demo-container">
+            <div id="placeholder-5" class="demo-placeholder"></div>
+        </div>
+        
+
+    </div>
+
+    <div id="footer">
+        Copyright &copy; 2007 - 2013 IOLA and Ole Laursen
+    </div>
+
+</body>
+</html>

@@ -1327,6 +1327,7 @@ Licensed under the MIT license.
                             delete format[format.length - 1].y;
                             format[format.length - 1].x = true;
                         }
+                        format.push({number: true, required: false, defaultValue: null});
                     }
 
                     s.datapoints.format = format;
@@ -1415,7 +1416,36 @@ Licensed under the MIT license.
                 format = s.datapoints.format;
 
                 var xmin = topSentry, ymin = topSentry,
-                    xmax = bottomSentry, ymax = bottomSentry;
+                    xmax = bottomSentry, ymax = bottomSentry,
+                    shiftedVal;
+
+                //This adds bar width to current min/max width/height depending on the settings
+                var addBarWidth = function(val, j, isHorizontal, isMin) {
+                
+                    //Only do this when we have bars and the corresponding axis is affected by the current val
+                    if (s.bars.show && (s.bars.horizontal && isHorizontal || !s.bars.horizontal && !isHorizontal)) {
+                        var deltaLeft, deltaRight;
+                        var barWidth = (points[j + 3] === undefined) ? s.bars.barWidth : points[j + 3];
+                        
+                        switch (s.bars.align) {
+                        case "left":
+                            deltaLeft = 0;
+                            deltaRight = barWidth;
+                            break;
+                        case "right":
+                            deltaLeft = -barWidth;
+                            deltaRight = 0;
+                            break;
+                        default:
+                            deltaLeft = -barWidth / 2;
+                            deltaRight = -deltaLeft;
+                        }
+                        
+                        val += (isMin) ? deltaLeft : deltaRight;
+                    }
+                    
+                    return val;
+                };
 
                 for (j = 0; j < points.length; j += ps) {
                     if (points[j] == null) {
@@ -1428,50 +1458,28 @@ Licensed under the MIT license.
                         if (!f || f.autoscale === false || val === fakeInfinity || val === -fakeInfinity) {
                             continue;
                         }
-
                         if (f.x) {
-                            if (val < xmin) {
-                                xmin = val;
+                            shiftedVal = addBarWidth(val, j, false, true)
+                            if (shiftedVal < xmin) {
+                                xmin = shiftedVal;
                             }
-                            if (val > xmax) {
-                                xmax = val;
+                            shiftedVal = addBarWidth(val, j, false, false)
+                            if (shiftedVal > xmax) {
+                                xmax = shiftedVal;
                             }
                         }
                         if (f.y) {
-                            if (val < ymin) {
-                                ymin = val;
+                            shiftedVal = addBarWidth(val, j, true, true);
+                            if (shiftedVal < ymin) {
+                                ymin = shiftedVal;
                             }
-                            if (val > ymax) {
-                                ymax = val;
+                            shiftedVal = addBarWidth(val, j, true, false);
+                            if (shiftedVal > ymax) {
+                                ymax = shiftedVal;
                             }
                         }
                     }
                 }
-
-                if (s.bars.show) {
-                    // make sure we got room for the bar on the dancing floor
-                    var delta;
-
-                    switch (s.bars.align) {
-                    case "left":
-                        delta = 0;
-                        break;
-                    case "right":
-                        delta = -s.bars.barWidth;
-                        break;
-                    default:
-                        delta = -s.bars.barWidth / 2;
-                    }
-
-                    if (s.bars.horizontal) {
-                        ymin += delta;
-                        ymax += delta + s.bars.barWidth;
-                    } else {
-                        xmin += delta;
-                        xmax += delta + s.bars.barWidth;
-                    }
-                }
-
                 updateAxis(s.xaxis, xmin, xmax);
                 updateAxis(s.yaxis, ymin, ymax);
             }
@@ -2386,11 +2394,11 @@ Licensed under the MIT license.
         }
 
         function drawMarkings(markings, markingLayer) {
-	        if (!markings) {
-		        return;
-	        }
+            if (!markings) {
+                return;
+            }
 
-	        for (var i = 0; i < markings.length; i++) {
+            for (var i = 0; i < markings.length; i++) {
                 drawMarking(markings[i], markingLayer);
             }
         }
@@ -3029,12 +3037,28 @@ Licensed under the MIT license.
         }
 
         function drawSeriesBars(series) {
-            function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
-                var points = datapoints.points, ps = datapoints.pointsize;
+            function plotBars(series, fillStyleCallback, axisx, axisy) {
+                var points = series.datapoints.points, ps = series.datapoints.pointsize;
+                var barWidth, barLeft, barRight;
 
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
                         continue;
+                    }
+                    
+                    barWidth = (points[i + 3] === undefined) ? series.bars.barWidth : points[i + 3]; 
+                    switch (series.bars.align) {
+                    case "left":
+                        barLeft = 0;
+                        barRight = barWidth;
+                        break;
+                    case "right":
+                        barLeft = -barWidth;
+                        barRight = 0;
+                        break;
+                    default:
+                        barLeft = -barWidth / 2;
+                        barRight = -barLeft;
                     }
                     drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
@@ -3047,21 +3071,8 @@ Licensed under the MIT license.
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
 
-            var barLeft;
-
-            switch (series.bars.align) {
-            case "left":
-                barLeft = 0;
-                break;
-            case "right":
-                barLeft = -series.bars.barWidth;
-                break;
-            default:
-                barLeft = -series.bars.barWidth / 2;
-            }
-
             var fillStyleCallback = series.bars.fill ? function(bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
+            plotBars(series, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
