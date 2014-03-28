@@ -1731,7 +1731,7 @@ Licensed under the MIT license.
                         v = start + i * axis.tickSize;
                         ticks.push(v);
                         ++i;
-                    } while (v < axis.max && v != prev);
+                    } while (v <= axis.max && v != prev);
                     return ticks;
                 };
 
