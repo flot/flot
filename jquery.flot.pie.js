@@ -576,7 +576,8 @@ More detail and specific examples can be found in the included HTML file.
 			var slices = plot.getData(),
 				options = plot.getOptions(),
 				radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius,
-				x, y;
+				x, y,
+				innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
 
 			for (var i = 0; i < slices.length; ++i) {
 
@@ -590,6 +591,8 @@ More detail and specific examples can be found in the included HTML file.
 					//ctx.scale(1, options.series.pie.tilt);	// this actually seems to break everything when here.
 					ctx.arc(0, 0, radius, s.startAngle, s.startAngle + s.angle / 2, false);
 					ctx.arc(0, 0, radius, s.startAngle + s.angle / 2, s.startAngle + s.angle, false);
+					ctx.arc(0, 0, innerRadius, s.startAngle + s.angle, s.startAngle + s.angle / 2, true);
+					ctx.arc(0, 0, innerRadius, s.startAngle + s.angle / 2, s.startAngle, true);
 					ctx.closePath();
 					x = mouseX - centerLeft;
 					y = mouseY - centerTop;
