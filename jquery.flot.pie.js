@@ -533,7 +533,7 @@ More detail and specific examples can be found in the included HTML file.
 		// Placed here because it needs to be accessed from multiple locations
 
 		function drawDonutHole(layer) {
-			if (options.series.pie.innerRadius > 0) {
+			if (options && options.series.pie.innerRadius > 0) {
 
 				// subtract the center
 
