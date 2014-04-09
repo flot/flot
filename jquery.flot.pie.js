@@ -577,7 +577,23 @@ More detail and specific examples can be found in the included HTML file.
 				options = plot.getOptions(),
 				radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius,
 				innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius,
-				x, y;
+				x, y, innerPX, innerPY,
+				innerArrPoly = [],
+				arrPoint = [];
+
+			x = mouseX - centerLeft;
+			y = mouseY - centerTop;
+			arrPoint = [x, y];
+
+			for (var i = 1; i < 11; ++i) {
+				innerPX = innerRadius * Math.cos(i * 2 * Math.PI / 10);
+				innerPY = innerRadius * Math.sin(i * 2 * Math.PI / 10);
+				innerArrPoly.push([innerPX, innerPY]);
+			}
+
+			if (isPointInPoly(innerArrPoly, arrPoint)) {
+				return null;
+			}
 
 			for (var i = 0; i < slices.length; ++i) {
 
@@ -592,29 +608,9 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.arc(0, 0, radius, s.startAngle, s.startAngle + s.angle / 2, false);
 					ctx.arc(0, 0, radius, s.startAngle + s.angle / 2, s.startAngle + s.angle, false);
 					ctx.closePath();
-					x = mouseX - centerLeft;
-					y = mouseY - centerTop;
-
-
-					var innerP1X = innerRadius * Math.cos(s.startAngle),
-						innerP1Y = innerRadius * Math.sin(s.startAngle),
-						innerP2X = innerRadius * Math.cos(s.startAngle + s.angle / 4),
-						innerP2Y = innerRadius * Math.sin(s.startAngle + s.angle / 4),
-						innerP3X = innerRadius * Math.cos(s.startAngle + s.angle / 2),
-						innerP3Y = innerRadius * Math.sin(s.startAngle + s.angle / 2),
-						innerP4X = innerRadius * Math.cos(s.startAngle + s.angle / 1.5),
-						innerP4Y = innerRadius * Math.sin(s.startAngle + s.angle / 1.5),
-						innerP5X = innerRadius * Math.cos(s.startAngle + s.angle),
-						innerP5Y = innerRadius * Math.sin(s.startAngle + s.angle),
-						innerArrPoly = [[0, 0], [innerP1X, innerP1Y], [innerP2X, innerP2Y], [innerP3X, innerP3Y], [innerP4X, innerP4Y], [innerP5X, innerP5Y]],
-						arrPoint = [x, y];
-
 
 					if (ctx.isPointInPath) {
 						if (ctx.isPointInPath(mouseX - centerLeft, mouseY - centerTop)) {
-							if (isPointInPoly(innerArrPoly, arrPoint)) {
-								return null;
-							}
 							ctx.restore();
 							return {
 								datapoint: [s.percent, s.data],
@@ -640,9 +636,6 @@ More detail and specific examples can be found in the included HTML file.
 							arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]];
 						
 						// TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?
-						if (isPointInPoly(innerArrPoly, arrPoint)) {
-							return null;
-						}
 						if (isPointInPoly(arrPoly, arrPoint)) {
 							ctx.restore();
 							return {
