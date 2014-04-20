@@ -1550,17 +1550,12 @@ Licensed under the MIT license.
             // jump as much around with replots
             $.each(allAxes(), function (_, axis) {
                 if (axis.reserveSpace && axis.ticks && axis.ticks.length) {
-                    var lastTick = axis.ticks[axis.ticks.length - 1];
                     if (axis.direction === "x") {
                         margins.left = Math.max(margins.left, axis.labelWidth / 2);
-                        if (lastTick.v <= axis.max) {
-                            margins.right = Math.max(margins.right, axis.labelWidth / 2);
-                        }
+                        margins.right = Math.max(margins.right, axis.labelWidth / 2);
                     } else {
                         margins.bottom = Math.max(margins.bottom, axis.labelHeight / 2);
-                        if (lastTick.v <= axis.max) {
-                            margins.top = Math.max(margins.top, axis.labelHeight / 2);
-                        }
+                        margins.top = Math.max(margins.top, axis.labelHeight / 2);
                     }
                 }
             });
