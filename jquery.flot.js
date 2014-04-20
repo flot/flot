@@ -1446,7 +1446,7 @@ Licensed under the MIT license.
             // Determine the axis's position in its direction and on its side
 
             $.each(isXAxis ? xaxes : yaxes, function(i, a) {
-                if (a && a.reserveSpace) {
+                if (a && (a.show || a.reserveSpace)) {
                     if (a === axis) {
                         found = true;
                     } else if (a.options.position === pos) {
@@ -1589,20 +1589,18 @@ Licensed under the MIT license.
                 }
             }
 
-            // init axes
             $.each(axes, function (_, axis) {
-                axis.show = axis.options.show;
-                if (axis.show == null)
-                    axis.show = axis.used; // by default an axis is visible if it's got data
-
-                axis.reserveSpace = axis.show || axis.options.reserveSpace;
-
+                var axisOpts = axis.options;
+                axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
+                axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setRange(axis);
             });
 
             if (showGrid) {
 
-                var allocatedAxes = $.grep(axes, function (axis) { return axis.reserveSpace; });
+                var allocatedAxes = $.grep(axes, function (axis) {
+                    return axis.show || axis.reserveSpace;
+                });
 
                 $.each(allocatedAxes, function (_, axis) {
                     // make the ticks
