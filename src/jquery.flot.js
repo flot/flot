@@ -2570,7 +2570,7 @@ Licensed under the MIT license.
                 yequal = yrange.from === yrange.to;
 
             if (xequal && yequal) {
-                continue;
+                return;
             }
 
             // then draw
@@ -2590,7 +2590,7 @@ Licensed under the MIT license.
                     ctx.lineTo(xrange.to + subPixel, yrange.to);
                 } else {
                     ctx.moveTo(xrange.from, yrange.to + subPixel);
-                    ctx.lineTo(xrange.to, yrange.to + subPixel);                            
+                    ctx.lineTo(xrange.to, yrange.to + subPixel);
                 }
                 ctx.stroke();
             } else {
