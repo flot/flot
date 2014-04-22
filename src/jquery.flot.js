@@ -1,6 +1,6 @@
 /* Javascript plotting library for jQuery, version 0.9.0-alpha.
 
-Copyright (c) 2007-2013 IOLA and Ole Laursen.
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
 */
@@ -1125,10 +1125,24 @@ Licensed under the MIT license.
             if (options.x2axis) {
                 options.xaxes[1] = $.extend(true, {}, options.xaxis, options.x2axis);
                 options.xaxes[1].position = "top";
+                // Override the inherit to allow the axis to auto-scale
+                if (options.x2axis.min == null) {
+                    options.xaxes[1].min = null;
+                }
+                if (options.x2axis.max == null) {
+                    options.xaxes[1].max = null;
+                }
             }
             if (options.y2axis) {
                 options.yaxes[1] = $.extend(true, {}, options.yaxis, options.y2axis);
                 options.yaxes[1].position = "right";
+                // Override the inherit to allow the axis to auto-scale
+                if (options.y2axis.min == null) {
+                    options.yaxes[1].min = null;
+                }
+                if (options.y2axis.max == null) {
+                    options.yaxes[1].max = null;
+                }
             }
             if (options.grid.coloredAreas) {
                 options.grid.markings = options.grid.coloredAreas;
@@ -1777,7 +1791,7 @@ Licensed under the MIT license.
 
             // Determine the axis's position in its direction and on its side
             $.each(isXAxis ? xaxes : yaxes, function(i, a) {
-                if (a && a.reserveSpace) {
+                if (a && (a.show || a.reserveSpace)) {
                     if (a === axis) {
                         found = true;
                     } else if (a.options.position === axisPosition) {
@@ -1886,17 +1900,12 @@ Licensed under the MIT license.
             // jump as much around with replots
             $.each(allAxes(), function(_, axis) {
                 if (axis.reserveSpace && axis.ticks && axis.ticks.length) {
-                    var lastTick = axis.ticks[axis.ticks.length - 1];
                     if (axis.direction === "x") {
                         margins.left = Math.max(margins.left, axis.tickWidth / 2);
-                        if (lastTick.v <= axis.max) {
-                            margins.right = Math.max(margins.right, axis.tickWidth / 2);
-                        }
+                        margins.right = Math.max(margins.right, axis.tickWidth / 2);
                     } else {
                         margins.bottom = Math.max(margins.bottom, axis.tickHeight / 2);
-                        if (lastTick.v <= axis.max) {
-                            margins.top = Math.max(margins.top, axis.tickHeight / 2);
-                        }
+                        margins.top = Math.max(margins.top, axis.tickHeight / 2);
                     }
                 }
             });
@@ -1931,26 +1940,20 @@ Licensed under the MIT license.
                 }
             }
 
-            // init axes
             $.each(axes, function(_, axis) {
-                axis.show = axis.options.show;
-                if (axis.show == null) {
-
-                    // by default an axis is visible if it's got data
-                    axis.show = axis.used;
-                }
-
-                axis.reserveSpace = axis.show || axis.options.reserveSpace;
-
+                var axisOpts = axis.options;
+                axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
+                axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setRange(axis);
             });
 
             if (showGrid) {
 
-                var allocatedAxes = $.grep(axes, function(axis) { return axis.reserveSpace; });
+                var allocatedAxes = $.grep(axes, function(axis) {
+                    return axis.show || axis.reserveSpace;
+                });
 
                 $.each(allocatedAxes, function(_, axis) {
-
                     // make the ticks
                     setupTickGeneration(axis);
                     setTicks(axis);
@@ -2563,35 +2566,44 @@ Licensed under the MIT license.
             yrange.from = Math.max(yrange.from, yrange.axis.min);
             yrange.to = Math.min(yrange.to, yrange.axis.max);
 
+            var xequal = xrange.from === xrange.to,
+                yequal = yrange.from === yrange.to;
+
+            if (xequal && yequal) {
+                continue;
+            }
+
             // then draw
-            xrange.from = xrange.axis.p2c(xrange.from);
-            xrange.to = xrange.axis.p2c(xrange.to);
-            yrange.from = yrange.axis.p2c(yrange.from);
-            yrange.to = yrange.axis.p2c(yrange.to);
+            xrange.from = Math.floor(xrange.axis.p2c(xrange.from));
+            xrange.to = Math.floor(xrange.axis.p2c(xrange.to));
+            yrange.from = Math.floor(yrange.axis.p2c(yrange.from));
+            yrange.to = Math.floor(yrange.axis.p2c(yrange.to));
 
-            if (xrange.from !== xrange.to || xrange.from !== yrange.to) {
-                if (xrange.from === xrange.to || yrange.from === yrange.to) {
-
-                    // draw line
-                    ctx.beginPath();
-                    ctx.strokeStyle = m.color || options.grid.markingsColor;
-                    ctx.lineWidth = m.lineWidth || options.grid.markingsLineWidth;
-                    ctx.moveTo(xrange.from, yrange.from);
-                    ctx.lineTo(xrange.to, yrange.to);
-                    ctx.stroke();
+            if (xequal || yequal) {
+                var lineWidth = m.lineWidth || options.grid.markingsLineWidth,
+                    subPixel = lineWidth % 2 ? 0.5 : 0;
+                ctx.beginPath();
+                ctx.strokeStyle = m.color || options.grid.markingsColor;
+                ctx.lineWidth = lineWidth;
+                if (xequal) {
+                    ctx.moveTo(xrange.to + subPixel, yrange.from);
+                    ctx.lineTo(xrange.to + subPixel, yrange.to);
                 } else {
-
-                    // fill area
-                    ctx.fillStyle = m.color || options.grid.markingsColor;
-
-                    if (!m.rounded) {
-                        ctx.fillRect(xrange.from, yrange.to,
-                            xrange.to - xrange.from,
-                            yrange.from - yrange.to);
-                    } else {
-                        roundRect(ctx, xrange.from, yrange.to, xrange.to - xrange.from, yrange.from - yrange.to, m.rounded);
-                        ctx.fill();
-                    }
+                    ctx.moveTo(xrange.from, yrange.to + subPixel);
+                    ctx.lineTo(xrange.to, yrange.to + subPixel);                            
+                }
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = m.color || options.grid.markingsColor;
+                if (m.rounded) {
+                    roundRect(
+                        ctx, xrange.from, yrange.to, xrange.to - xrange.from,
+                        yrange.from - yrange.to, m.rounded);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(
+                        xrange.from, yrange.to, xrange.to - xrange.from,
+                        yrange.from - yrange.to);
                 }
             }
 

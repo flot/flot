@@ -1,6 +1,6 @@
 /* Flot plugin for rendering pie charts.
 
-Copyright (c) 2007-2013 IOLA and Ole Laursen.
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
 The plugin assumes that each series has a single data value, and that each
@@ -225,13 +225,17 @@ More detail and specific examples can be found in the included HTML file.
             for (i = 0; i < data.length; ++i) {
                 value = data[i].data[0][1];
                 if (numCombined < 2 || value / total > options.series.pie.combine.threshold) {
-                    newdata.push({
-                        data: [[1, value]],
-                        color: data[i].color,
-                        label: data[i].label,
-                        angle: value * Math.PI * 2 / total,
-                        percent: value / (total / 100)
-                    });
+                    newdata.push(
+                        // Use extend rather than replacing, so other original
+                        // data values can be used, e.g. in labelFormatter.
+                        $.extend(data[i], {
+                            data: [[1, value]],
+                            color: data[i].color,
+                            label: data[i].label,
+                            angle: value * Math.PI * 2 / total,
+                            percent: value / (total / 100)
+                        })
+                    );
                 }
             }
 

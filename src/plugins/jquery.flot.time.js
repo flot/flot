@@ -1,6 +1,6 @@
 /* Pretty handling of time axes.
 
-Copyright (c) 2007-2013 IOLA and Ole Laursen.
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
 Set axis.mode to "time" to enable. See the section "Time series data" in
