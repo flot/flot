@@ -163,6 +163,10 @@ can set the default in the options.
                        dragEnded: true });
         }
 
+        function onContextMenu(e) {
+            e.preventDefault();
+        }
+
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
@@ -188,6 +192,9 @@ can set the default in the options.
                 eventHolder.bind("dragstart", { distance: 10, which: mouseButton }, onDragStart);
                 eventHolder.bind("drag", { which: mouseButton }, onDrag);
                 eventHolder.bind("dragend", { which: mouseButton }, onDragEnd);
+                if (o.pan.mouseButton === "right") {
+                    eventHolder.bind("contextmenu", onContextMenu);
+                }
             }
         }
 
@@ -337,6 +344,7 @@ can set the default in the options.
             eventHolder.unbind("dragstart", onDragStart);
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
+            eventHolder.unbind("contextmenu", onContextMenu);
             if (panTimeout) {
                 clearTimeout(panTimeout);
             }
