@@ -240,19 +240,53 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 				var lines = (text + "").replace(/<br ?\/?>|\r\n|\r/g, "\n").split("\n");
 
-				for (var i = 0; i < lines.length; ++i) {
+				var measureLines = function(context, info, font, lines) {
+					for (var i = 0; i < lines.length; ++i) {
+						var lineText = lines[i],
+							measured = context.measureText(lineText);
 
-					var lineText = lines[i],
-						measured = context.measureText(lineText);
+						info.width = Math.max(measured.width, info.width);
+						info.height += font.lineHeight;
 
-					info.width = Math.max(measured.width, info.width);
-					info.height += font.lineHeight;
+						info.lines.push({
+							text: lineText,
+							width: measured.width,
+							height: font.lineHeight
+						});
+					}
+				}
 
-					info.lines.push({
-						text: lineText,
-						width: measured.width,
-						height: font.lineHeight
-					});
+				measureLines(context, info, font, lines);
+				if (width && info.width > width) {
+					// wrap lines
+					var _lines = [];
+					for (var i=0; i<lines.length; i++) {
+						var line = lines[i];
+						var mid = Math.floor(line.length / 2);
+						for (var j=0; j<mid; j++) {
+							// look left
+							if (line[mid-j] == " ") {
+								_lines.push(line.substring(0, mid-j));
+								_lines.push(line.substring(mid-j+1));
+								line = "";
+								break;
+							}
+							// look right
+							else if (line[mid+j] == " ") {
+								_lines.push(line.substring(0, mid+j));
+								_lines.push(line.substring(mid+j+1));
+								line = "";
+								break;
+							}
+						}
+						// keep unwrappable lines
+						if (line.length)
+							_lines.push(line);
+					}
+
+					// reset
+					info.width = 0, info.height = 0, info.lines = [];
+					measureLines(context, info, font, _lines);
 				}
 
 				context.restore();
