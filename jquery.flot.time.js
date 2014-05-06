@@ -355,6 +355,24 @@ API.txt for details.
 						return ticks;
 					};
 
+					// prepare data format string options
+
+					// axis.timeFormat = [
+					//   // <min,       <day,
+					//      "%H:%M:%S", "%H:%M", "%b %d %H:%M",
+					//   // <month,     >month
+					//      "%b %d",    "%b", "%b %Y",
+					//   // <year & quarters
+					//      "Q%q", "Q%q %Y",
+					//   // >year | no quarters
+					//      "%Y"
+					// ];
+
+					var formatSpec = opts.timeFormat || new Array(8);
+					while (formatSpec.length < 8) {
+						formatSpec.push(null);
+					}
+
 					axis.tickFormatter = function (v, axis) {
 
 						var d = dateGenerator(v, axis.options);
@@ -380,30 +398,30 @@ API.txt for details.
 						var fmt;
 
 						if (t < timeUnitSize.minute) {
-							fmt = hourCode + ":%M:%S" + suffix;
+							fmt = formatSpec[0] || (hourCode + ":%M:%S" + suffix);
 						} else if (t < timeUnitSize.day) {
 							if (span < 2 * timeUnitSize.day) {
-								fmt = hourCode + ":%M" + suffix;
+								fmt = formatSpec[1] || (hourCode + ":%M" + suffix);
 							} else {
-								fmt = "%b %d " + hourCode + ":%M" + suffix;
+								fmt = formatSpec[2] || ("%b %d " + hourCode + ":%M" + suffix);
 							}
 						} else if (t < timeUnitSize.month) {
-							fmt = "%b %d";
+							fmt = formatSpec[3] || "%b %d";
 						} else if ((useQuarters && t < timeUnitSize.quarter) ||
 							(!useQuarters && t < timeUnitSize.year)) {
 							if (span < timeUnitSize.year) {
-								fmt = "%b";
+								fmt = formatSpec[4] || "%b";
 							} else {
-								fmt = "%b %Y";
+								fmt = formatSpec[5] || "%b %Y";
 							}
 						} else if (useQuarters && t < timeUnitSize.year) {
 							if (span < timeUnitSize.year) {
-								fmt = "Q%q";
+								fmt = formatSpec[6] || "Q%q";
 							} else {
-								fmt = "Q%q %Y";
+								fmt = formatSpec[7] || "Q%q %Y";
 							}
 						} else {
-							fmt = "%Y";
+							fmt = formatSpec[8] || "%Y";
 						}
 
 						var rt = formatDate(d, fmt, opts.monthNames, opts.dayNames);
