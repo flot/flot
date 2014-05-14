@@ -576,7 +576,24 @@ More detail and specific examples can be found in the included HTML file.
 			var slices = plot.getData(),
 				options = plot.getOptions(),
 				radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius,
-				x, y;
+				innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius,
+				x, y, innerPX, innerPY,
+				innerArrPoly = [],
+				arrPoint = [];
+
+			x = mouseX - centerLeft;
+			y = mouseY - centerTop;
+			arrPoint = [x, y];
+
+			for (var i = 1; i < 11; ++i) {
+				innerPX = innerRadius * Math.cos(i * 2 * Math.PI / 10);
+				innerPY = innerRadius * Math.sin(i * 2 * Math.PI / 10);
+				innerArrPoly.push([innerPX, innerPY]);
+			}
+
+			if (isPointInPoly(innerArrPoly, arrPoint)) {
+				return null;
+			}
 
 			for (var i = 0; i < slices.length; ++i) {
 
@@ -591,8 +608,6 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.arc(0, 0, radius, s.startAngle, s.startAngle + s.angle / 2, false);
 					ctx.arc(0, 0, radius, s.startAngle + s.angle / 2, s.startAngle + s.angle, false);
 					ctx.closePath();
-					x = mouseX - centerLeft;
-					y = mouseY - centerTop;
 
 					if (ctx.isPointInPath) {
 						if (ctx.isPointInPath(mouseX - centerLeft, mouseY - centerTop)) {
@@ -618,11 +633,9 @@ More detail and specific examples can be found in the included HTML file.
 							p4Y = radius * Math.sin(s.startAngle + s.angle / 1.5),
 							p5X = radius * Math.cos(s.startAngle + s.angle),
 							p5Y = radius * Math.sin(s.startAngle + s.angle),
-							arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]],
-							arrPoint = [x, y];
-
+							arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]];
+						
 						// TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?
-
 						if (isPointInPoly(arrPoly, arrPoint)) {
 							ctx.restore();
 							return {
