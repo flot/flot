@@ -1880,7 +1880,9 @@ Licensed under the MIT license.
 
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
-                drawSeries(series[i]);
+                if (typeof series[i].waterfall === 'undefined' || series[i].waterfall.on === false) { // ICHACK
+                    drawSeries(series[i]);
+                }
             }
 
             executeHooks(hooks.draw, [ctx]);

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Example: grouped bars</title>
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="..\excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="..\jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="..\jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="..\jquery.flot.navigate.js"></script>
+	<script type="text/javascript">
+
+	    $(function () {
+	        var barWidth = 0.5;
+
+	        var NR_TWRPerformanceChart_Month_Data = [[-0.0309, 0.023, 'Feb-12'], [0.0168, -0.0152, 'Mar-12'],
+                [0.0195, 0.03, 'Apr-12'], [0.0022, -0.0446, 'May-12'], [0.0526, 0.0235, 'Jun-12'], [-0.026, 0.042, 'Jul-12'],
+                [0.0304, 0.016, 'Aug-12'], [-0.0021, 0.0378, 'Sep-12'], [0.0883, 0.0315, 'Oct-12'], [-0.001, 0.0318, 'Nov-12'],
+                [0.0223, 0.0387, 'Dec-12']];
+
+	        var d1 = [];
+	        var d2 = [];
+	        var ticks = [];
+	        var MaxY = NR_TWRPerformanceChart_Month_Data[0][0];
+	        var MinY = NR_TWRPerformanceChart_Month_Data[0][0];
+	        for (var i = 0; i < NR_TWRPerformanceChart_Month_Data.length; ++i)
+	        {
+	            var x = i * 2;
+	            var y = NR_TWRPerformanceChart_Month_Data[i];
+	            d1.push([x, y[0]]);
+	            d2.push([x + barWidth, y[1]]);
+	            ticks.push([x + barWidth, y[2]]);
+	            if (y[0] > MaxY)
+	                MaxY = y[0];
+	            if (y[1] > MaxY)
+	                MaxY = y[1];
+	            if (y[0] < MinY)
+	                MinY = y[0];
+	            if (y[1] < MinY)
+	                MinY = y[1];
+            }
+	        var MaxX = (NR_TWRPerformanceChart_Month_Data.length - 1) * 2 + 1;
+	        var MinX = 0;
+	        var DimX = MaxX - MinX;
+	        var DimY = MaxY - MinY;
+
+	        var plot = $.plot("#placeholder",
+                /* data */
+                [{
+                    label: 'Portfolio',
+                    data: d1,
+                    bars: { show: true, fill: true, fillColor: "rgba(255, 0, 0, 1)", lineWidth: 0, barWidth: barWidth },
+                    color: "rgba(255, 0, 0, 1)"
+	            }, {
+	                label: 'Benchmark',
+	                data: d2,
+	                bars: { show: true, fill: true, fillColor: "rgba(0, 255, 0, 1)", lineWidth: 0, barWidth: barWidth },
+	                color: "rgba(0, 255, 0, 1)"
+	            }],
+                /* options */
+                {
+                    xaxis: {
+                        zoomRange: [DimX / 100, DimX],
+                        //panRange - added after plot has been created
+                        ticks: ticks
+                    },
+                    yaxis: {
+                        zoomRange: [DimY / 100, DimY]
+                        //panRange - added after plot has been created
+                    },
+                    zoom: {
+                        interactive: true
+                    },
+                    pan: {
+                        interactive: true
+                    },
+                    grid: {
+                        hoverable: true
+                    }
+                }
+	        );
+
+            // Prevent panning outside initial bounds
+	        plot.getAxes().xaxis.options.panRange = [plot.getAxes().xaxis.min - DimX / 20, plot.getAxes().xaxis.max + DimX / 20];
+	        plot.getAxes().yaxis.options.panRange = [plot.getAxes().yaxis.min - DimY / 20, plot.getAxes().yaxis.max + DimY / 20];
+	    });
+
+	</script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Grouped bars</h2>
+	</div>
+
+	<div id="content">
+		<div class="demo-container">
+			<div id="placeholder" style="width:800px;height:600px;"></div>
+		</div>
+	</div>
+
+</body>
+</html>
