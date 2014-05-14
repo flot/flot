@@ -69,7 +69,6 @@ More detail and specific examples can be found in the included HTML file.
 
 		var canvas = null,
 			target = null,
-			options = null,
 			maxRadius = null,
 			centerLeft = null,
 			centerTop = null,
@@ -155,14 +154,14 @@ More detail and specific examples can be found in the included HTML file.
 				processed = true;
 				canvas = plot.getCanvas();
 				target = $(canvas).parent();
-				options = plot.getOptions();
 				plot.setData(combine(plot.getData()));
 			}
 		}
 
 		function combine(data) {
 
-			var total = 0,
+			var options = plot.getOptions(),
+                total = 0,
 				combined = 0,
 				numCombined = 0,
 				color = options.series.pie.combine.color,
@@ -256,7 +255,8 @@ More detail and specific examples can be found in the included HTML file.
 				return; // if no series were passed
 			}
 
-			var canvasWidth = plot.getPlaceholder().width(),
+			var options = plot.getOptions(),
+                canvasWidth = plot.getPlaceholder().width(),
 				canvasHeight = plot.getPlaceholder().height(),
 				legendWidth = target.children().filter(".legend").children().width() || 0;
 
@@ -533,6 +533,8 @@ More detail and specific examples can be found in the included HTML file.
 		// Placed here because it needs to be accessed from multiple locations
 
 		function drawDonutHole(layer) {
+            var options = plot.getOptions();
+            
 			if (options.series.pie.innerRadius > 0) {
 
 				// subtract the center
@@ -652,8 +654,13 @@ More detail and specific examples can be found in the included HTML file.
 		// trigger click or hover event (they send the same parameters so we share their code)
 
 		function triggerClickHoverEvent(eventname, e) {
+            if (!target) {
+				return; // if no series were passed
+			}
+            
+			var options = plot.getOptions(),
+                offset = plot.offset();
 
-			var offset = plot.offset();
 			var canvasX = parseInt(e.pageX - offset.left);
 			var canvasY =  parseInt(e.pageY - offset.top);
 			var item = findNearbySlice(canvasX, canvasY);
