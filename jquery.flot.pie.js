@@ -325,7 +325,9 @@ More detail and specific examples can be found in the included HTML file.
 
 			if (attempts >= REDRAW_ATTEMPTS) {
 				clear();
-				target.prepend("<div class='error'>Could not draw pie with labels contained inside canvas</div>");
+				if ( typeof console === 'object' && typeof console.warn === 'function' ) {
+					console.warn("Could not draw pie with labels contained inside canvas");
+				}
 			}
 
 			if (plot.setSeries && plot.insertLegend) {
