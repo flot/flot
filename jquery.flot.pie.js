@@ -681,6 +681,21 @@ More detail and specific examples can be found in the included HTML file.
 			var pos = { pageX: e.pageX, pageY: e.pageY };
 			target.trigger(eventname, [pos, item]);
 		}
+		
+		plot.defHighlight = plot.highlight;
+	        plot.defUnhighlight = plot.unhighlight;
+	
+	        plot.highlight = function(s, point, auto) {
+	            if (s.pie && s.pie.show)
+	                highlight(s, auto);
+	            else
+	                plot.defHighlight(s, point, auto);
+	        };
+	
+	        plot.unhighlight = function(s, point) {
+	            unhighlight(s);
+	            plot.defUnhighlight(s, point);
+	        };
 
 		function highlight(s, auto) {
 			//if (typeof s == "number") {
