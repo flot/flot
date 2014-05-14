@@ -1,6 +1,6 @@
 /* Flot plugin for rendering pie charts.
 
-Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Copyright (c) 2007-2013 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
 The plugin assumes that each series has a single data value, and that each
@@ -69,7 +69,6 @@ More detail and specific examples can be found in the included HTML file.
 
 		var canvas = null,
 			target = null,
-			options = null,
 			maxRadius = null,
 			centerLeft = null,
 			centerTop = null,
@@ -224,16 +223,13 @@ More detail and specific examples can be found in the included HTML file.
 			for (var i = 0; i < data.length; ++i) {
 				var value = data[i].data[0][1];
 				if (numCombined < 2 || value / total > options.series.pie.combine.threshold) {
-					newdata.push(
-						$.extend(data[i], {     /* extend to allow keeping all other original data values
-						                           and using them e.g. in labelFormatter. */
-							data: [[1, value]],
-							color: data[i].color,
-							label: data[i].label,
-							angle: value * Math.PI * 2 / total,
-							percent: value / (total / 100)
-						})
-					);
+					newdata.push({
+						data: [[1, value]],
+						color: data[i].color,
+						label: data[i].label,
+						angle: value * Math.PI * 2 / total,
+						percent: value / (total / 100)
+					});
 				}
 			}
 
@@ -297,13 +293,14 @@ More detail and specific examples can be found in the included HTML file.
 				} else {
 					centerLeft -= legendWidth / 2;
 				}
-				if (centerLeft < maxRadius) {
-					centerLeft = maxRadius;
-				} else if (centerLeft > canvasWidth - maxRadius) {
-					centerLeft = canvasWidth - maxRadius;
-				}
 			} else {
 				centerLeft += options.series.pie.offset.left;
+			}
+
+			if (centerLeft < maxRadius) {
+				centerLeft = maxRadius;
+			} else if (centerLeft > canvasWidth - maxRadius) {
+				centerLeft = canvasWidth - maxRadius;
 			}
 
 			var slices = plot.getData(),
@@ -432,26 +429,6 @@ More detail and specific examples can be found in the included HTML file.
 						ctx.strokeStyle = color;
 						ctx.lineJoin = "round";
 					}
-
-					/*add for gradient*/
-					if (fill) {
-	                    if (typeof color === "object") {
-	                        var grad= ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
-	                        var i;
-	                        var numColors= color.colors.length;
-	                        for (i=0; i< numColors ; i++) {
-	                            grad.addColorStop(i/(numColors-1), color.colors[i]);
-	                        }
-	                        ctx.fillStyle = grad; 
-	                    } else {
-	                        ctx.fillStyle = color;
-	                    }
-	                    ctx.fillStyle = color;
-	                } else {
-	                    ctx.strokeStyle = color;
-	                    ctx.lineJoin = 'round';
-	                }
-	                /*end: add for gradient*/
 
 					ctx.beginPath();
 					if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
@@ -617,36 +594,6 @@ More detail and specific examples can be found in the included HTML file.
 					if (ctx.isPointInPath) {
 						if (ctx.isPointInPath(mouseX - centerLeft, mouseY - centerTop)) {
 							ctx.restore();
-
-							/* bug fix for hover event being falsely fired when hovering over innerradius of donut */
-							var offset = plot.offset();
-							var eventX = parseInt(mouseX + offset.left);
-							var eventY = parseInt(mouseY + offset.top);
-							var innerRadius = options.series.pie.innerRadius > 1 ? options.series.pie.innerRadius : maxRadius * options.series.pie.innerRadius;
-							if (innerRadius > 0) {
-								var elem = document.elementFromPoint(eventX, eventY);
-								if(elem != null){
-									var id = elem.parentNode.id;
-									if(('#'+id).indexOf(plot.getPlaceholder().selector) != -1){
-										var c = $('#' + id + ' > canvas[class$=overlay]');
-										var left =  parseInt(c.offset().left);
-										var top =  parseInt(c.offset().top);
-										var width = parseInt(c.width());
-										var height = parseInt(c.height());
-										var centerX = left + width / 2;
-										var centerY = top + height / 2;
-
-										var dx = eventX-centerX;
-					    				var dy = eventY-centerY;
-					    				if( dx*dx+dy*dy <= innerRadius*innerRadius){
-					    					// console.log('center')
-											return null;
-										}
-									}
-								}
-							}
-							/* end of bug fix */
-							
 							return {
 								datapoint: [s.percent, s.data],
 								dataIndex: 0,
