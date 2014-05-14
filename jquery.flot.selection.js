@@ -99,7 +99,7 @@ The plugin allso adds the following methods to the plot object:
             if (selection.active) {
                 updateSelection(e);
                 
-                plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
+                plot.getPlaceholder().trigger("plotselecting", [ getSelection(), e ]);
             }
         }
 
