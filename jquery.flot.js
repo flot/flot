@@ -2563,12 +2563,12 @@ Licensed under the MIT license.
             // instead of from the bottom so it appears to be
             // horizontal rather than vertical
             if (horizontal) {
-                drawBottom = drawRight = drawTop = true;
-                drawLeft = false;
                 left = b;
                 right = x;
                 top = y + barLeft;
                 bottom = y + barRight;
+                drawBottom = drawRight = drawTop = true;
+                drawLeft = (left != 0);
 
                 // account for negative bars
                 if (right < left) {
@@ -2576,16 +2576,16 @@ Licensed under the MIT license.
                     right = left;
                     left = tmp;
                     drawLeft = true;
-                    drawRight = false;
+                    drawRight = (right != 0);
                 }
             }
             else {
-                drawLeft = drawRight = drawTop = true;
-                drawBottom = false;
                 left = x + barLeft;
                 right = x + barRight;
                 bottom = b;
                 top = y;
+                drawLeft = drawRight = drawTop = true;
+                drawBottom = (bottom != 0);
 
                 // account for negative bars
                 if (top < bottom) {
@@ -2593,7 +2593,7 @@ Licensed under the MIT license.
                     top = bottom;
                     bottom = tmp;
                     drawBottom = true;
-                    drawTop = false;
+                    drawTop = (top != 0);
                 }
             }
 
