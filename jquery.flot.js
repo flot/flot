@@ -628,6 +628,8 @@ Licensed under the MIT license.
             processOffset: [],
             drawBackground: [],
             drawSeries: [],
+            seriesDrawn: [],
+            barDrawn: [],
             draw: [],
             bindEvents: [],
             drawOverlay: [],
@@ -1881,6 +1883,7 @@ Licensed under the MIT license.
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i]);
+                executeHooks(hooks.seriesDrawn, [ctx, series[i]]);
             }
 
             executeHooks(hooks.draw, [ctx]);
@@ -2657,6 +2660,9 @@ Licensed under the MIT license.
                     c.moveTo(left, bottom);
                 c.stroke();
             }
+
+            executeHooks(hooks.barDrawn, [c, top, right, bottom, left, offset]);
+
         }
 
         function drawSeriesBars(series) {
