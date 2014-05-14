@@ -2325,6 +2325,7 @@ Licensed under the MIT license.
                     i = 0, top, areaOpen = false,
                     ypos = 1, segmentStart = 0, segmentEnd = 0;
 
+                ctx.beginPath();
                 // we process each segment in two turns, first forward
                 // direction to sketch out top, then once we hit the
                 // end we go backwards to sketch the bottom
@@ -2349,7 +2350,6 @@ Licensed under the MIT license.
 
                         if (ps < 0 && i == segmentStart + ps) {
                             // done with the reverse sweep
-                            ctx.fill();
                             areaOpen = false;
                             ps = -ps;
                             ypos = 1;
@@ -2393,7 +2393,6 @@ Licensed under the MIT license.
 
                     if (!areaOpen) {
                         // open area
-                        ctx.beginPath();
                         ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
                         areaOpen = true;
                     }
@@ -2458,6 +2457,9 @@ Licensed under the MIT license.
                         ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
                     }
                 }
+
+                // do the actual fill
+                ctx.fill ();
             }
 
             ctx.save();
