@@ -58,6 +58,7 @@ You may need to check for this in hover events.
             thresholded.threshold = null;
             thresholded.originSeries = s;
             thresholded.data = [];
+	    thresholded.dynamic = true;
  
             var origpoints = datapoints.points,
                 addCrossingPoints = s.lines.show;
@@ -71,10 +72,19 @@ You may need to check for this in hover events.
                 y = origpoints[i + 1];
 
                 prevp = p;
-                if (y < below)
-                    p = threspoints;
-                else
-                    p = newpoints;
+		if (s.bars && s.bars.horizontal) {
+		    if (x < below) {
+			p = threspoints;
+		    } else {
+			p = newpoints;
+		    }
+                } else {
+		    if (y < below) {
+			p = threspoints;
+		    } else {
+			p = newpoints;
+		    }
+		}
 
                 if (addCrossingPoints && prevp != p && x != null
                     && i > 0 && origpoints[i - ps] != null) {
