@@ -421,12 +421,21 @@ More detail and specific examples can be found in the included HTML file.
 				} else return true;
 
 				function drawSlice(angle, color, fill) {
-
 					if (angle <= 0 || isNaN(angle)) {
 						return;
 					}
-
 					if (fill) {
+						if(typeof color === 'object'){
+							var tc = color,
+								pos = 0;
+
+							color = ctx.createRadialGradient(0, 0, radius, 0, 0, 0);
+
+							$(tc).each(function(i, cc){
+								pos = (i/(tc.length - 1)).toFixed(2);
+								color.addColorStop(pos, cc);
+							});
+						}
 						ctx.fillStyle = color;
 					} else {
 						ctx.strokeStyle = color;
