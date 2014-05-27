@@ -28,10 +28,11 @@
 				}
 			},
 			crosshair: {
-				mode: "x"
+				mode: "xy"
 			},
 			grid: {
 				hoverable: true,
+				clickable: true,
 				autoHighlight: false
 			},
 			yaxis: {
@@ -98,6 +99,8 @@
 			if (!updateLegendTimeout) {
 				updateLegendTimeout = setTimeout(updateLegend, 50);
 			}
+		}).bind("plotclick", function (event, pos, item) {
+		    plot.lockCrosshair(pos);
 		});
 
 		// Add the Flot version string to the footer
