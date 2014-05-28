@@ -5,7 +5,7 @@ Licensed under the MIT license.
 
 The plugin supports these options:
 
-	crosshairs: [
+	cursors: [
     {
 		mode: null or "x" or "y" or "xy"
 		color: color
@@ -26,7 +26,7 @@ the drawn lines (default is 1).
 
 The plugin also adds four public methods:
 
-  - setCrosshairs( index, pos )
+  - setCursor( index, pos )
 
     Set the position of the crosshair. Note that this is cleared if the user
     moves the mouse. "pos" is in coordinates of the plot and should be on the
@@ -38,7 +38,7 @@ The plugin also adds four public methods:
 
     Clear the crosshair.
 
-  - lockCrosshairs(index, pos)
+  - lockCursor(index, pos)
 
     Cause the crosshair to lock to the current location, no longer updating if
     the user moves the mouse. Optionally supply a position (passed on to
@@ -60,7 +60,7 @@ The plugin also adds four public methods:
 		}
 	});
 
-  - unlockCrosshair()
+  - unlockCursor()
 
     Free the crosshair to move again after locking it.
 */
@@ -80,6 +80,7 @@ The plugin also adds four public methods:
 
     function init(plot) {
         var cursors = [];
+        var update = [];
     
         plot.hooks.processOptions.push(function (plot) {
             plot.getOptions().cursors.forEach(function(cursor) {
@@ -88,6 +89,7 @@ The plugin also adds four public methods:
                 currentCursor.x = cursor.x;
                 currentCursor.y = cursor.y;
 
+                currentCursor.name = cursor.name || ('unnamed ' + cursors.length);
                 cursors.push(currentCursor);
             });
         });
@@ -128,10 +130,52 @@ The plugin also adds four public methods:
             */
         }
 
+        function onClick(e) {
+            var offset = plot.offset();
+            var mouseX = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
+            var mouseY = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+            var freeCursor = null;
+            var index = 0;
+
+            var i=0;
+            cursors.forEach(function(cursor) {
+                if (!cursor.locked) {
+                    if (!freeCursor) 
+                        freeCursor = cursor;
+                        index = i;
+                }
+                i++;
+            });
+
+            if (freeCursor) {
+                // lock the free cursor to current position
+                freeCursor.locked = true;
+                freeCursor.x = mouseX;
+                freeCursor.y = mouseY;
+                plot.triggerRedrawOverlay();  
+            } else {
+                // find nearby cursor and unlock it
+                cursors.forEach(function(cursor) {
+                    if (cursor.locked) {
+                        if ((mouseX > cursor.x-4) && (mouseX < cursor.x+4) && (mouseY > cursor.y-4) && (mouseY < cursor.y+4)) {
+                            if (!freeCursor) {
+                                freeCursor = cursor;
+                            }
+                        }
+                    }
+                });
+
+                if (freeCursor) {
+                    freeCursor.locked = false;
+                }
+            }
+        }
+
         function onMouseMove(e) {
             var offset = plot.offset();
             var mouseX = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
             var mouseY = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+            var freeCursor = null;
 
             cursors.forEach(function(cursor) {
                 if (cursor.locked) {
@@ -146,26 +190,75 @@ The plugin also adds four public methods:
                             plot.triggerRedrawOverlay();
                         }
                     }
+                } else {
+                    if (!freeCursor) 
+                        freeCursor = cursor;
                 }
             });
-
-            /**                
-            crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
-            crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
-            plot.triggerRedrawOverlay();
-            */
+    
+            if (freeCursor) {
+                freeCursor.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
+                freeCursor.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+                plot.triggerRedrawOverlay();
+            }    
         }
         
         plot.hooks.bindEvents.push(function (plot, eventHolder) {
             if (!plot.getOptions().cursors[0].mode)
                 return;
 
+            eventHolder.click(onClick);
             eventHolder.mouseout(onMouseOut);
             eventHolder.mousemove(onMouseMove);
         });
 
+        function drawIntersections (plot, ctx, cursor) {
+            var pos = plot.c2p({left: cursor.x, top: cursor.y});
+            var intersections = {cursor: cursor.name, points: []};
+
+            var axes = plot.getAxes();
+            if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
+                pos.y < axes.yaxis.min || pos.y > axes.yaxis.max) {
+                return;
+            }
+
+            var i, j, dataset = plot.getData();
+            for (i = 0; i < dataset.length; ++i) {
+
+                var series = dataset[i];
+
+                // Find the nearest points, x-wise
+                for (j = 0; j < series.data.length; ++j) {
+                    if (series.data[j][0] > pos.x) {
+                        break;
+                    }
+                }
+
+                // Now Interpolate
+                var y,
+                    p1 = series.data[j - 1],
+                    p2 = series.data[j];
+
+                if (p1 == null) {
+                    y = p2[1];
+                } else if (p2 == null) {
+                    y = p1[1];
+                } else {
+                    y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
+                }
+                pos.y = y, pos.y1 = y;
+                intersections.points.push({x: pos.x, y: pos.y});
+                var coord = plot.p2c(pos);
+                ctx.fillStyle = 'darkgray';
+                ctx.fillRect( Math.floor(coord.left) - 4,  Math.floor(coord.top) - 4, 8, 8);
+                ctx.fillText(y.toFixed(2), coord.left + 8, coord.top + 8);
+            }
+            update.push(intersections);
+        }
+
         plot.hooks.drawOverlay.push(function (plot, ctx) {
           var i = 0;
+          update = [];
           cursors.forEach(function(cursor) {
             var c =  plot.getOptions().cursors[i];
             if (!c.mode)
@@ -199,16 +292,20 @@ The plugin also adds four public methods:
                     else ctx.fillStyle = c.color;
                     ctx.fillRect( Math.floor(cursor.x) + adj - 4,  Math.floor(cursor.y) + adj - 4, 8, 8);
                 }
+                drawIntersections(plot, ctx, cursor);
                 ctx.stroke();
             }
             ctx.restore();
             i++;
           });
+          plot.getPlaceholder().trigger('cursorupdates', [update]);
         });
 
         plot.hooks.shutdown.push(function (plot, eventHolder) {
+            eventHolder.unbind("click", onClick);
             eventHolder.unbind("mouseout", onMouseOut);
             eventHolder.unbind("mousemove", onMouseMove);
+
         });
     }
     
