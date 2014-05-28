@@ -29,14 +29,14 @@
 			},
 			cursors: [
 			{
-				name: 'Cursor 1',
+				name: 'Blue cursor',
 				mode: 'xy',
 				color: 'blue',
 				x: 10,
 				y:20
 			},
 			{
-				name: 'Cursor 2',
+				name: 'Green cursor',
 				mode: 'xy',
 				color: 'green',
 				x: 100,
@@ -69,7 +69,6 @@
 		var latestPosition = null;
 
 		$("#placeholder").bind("cursorupdates",  function (event, cursordata) {
-			console.log(cursordata);
 			$('#hoverdata').empty();
 			var ul1 = $('#hoverdata').append('<UL style="padding-left: 30px;">').find("UL");
 			cursordata.forEach(function (cursor){
@@ -82,7 +81,6 @@
 		});
 
 		// Add the Flot version string to the footer
-
 		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
 	});
 
