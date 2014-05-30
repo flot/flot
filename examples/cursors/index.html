@@ -11,7 +11,6 @@
 	<script type="text/javascript">
 
 	$(function() {
-
 		var sin = [], cos = [];
 		for (var i = 0; i < 14; i += 0.1) {
 			sin.push([i, Math.sin(i)]);
@@ -51,22 +50,8 @@
 			yaxis: {
 				min: -1.2,
 				max: 1.2
-			},
-			legend: {
-			    show: true,
-			    container: '#legendplaceholder' 
 			}
 		});
-
-		var legends = $("#legendplaceholder .legendLabel");
-
-		legends.each(function () {
-			// fix the widths so they don't jump around
-			$(this).css('width', $(this).width());
-		});
-
-		var updateLegendTimeout = null;
-		var latestPosition = null;
 
 		$("#placeholder").bind("cursorupdates",  function (event, cursordata) {
 			$('#hoverdata').empty();
@@ -87,28 +72,19 @@
 	</script>
 </head>
 <body>
-
 	<div id="header">
 		<h2>Flot cursors</h2>
 	</div>
-
 	<div id="content">
 		<div class="demo-container">
 			<div id="placeholder" class="demo-placeholder"></div>
-			<div id="legendplaceholder" class="demo-placeholder"></div>
 		</div>
-
 		<p>You can add cursors that will track data.</p>
-
 		<p>If you combine it with listening cursor updates, you can use it to display the data.</p>
-
 		<p id="hoverdata"></p>
-
 	</div>
-
 	<div id="footer">
 		Copyright &copy; 2007 - 2014 IOLA and Ole Laursen
 	</div>
-
 </body>
 </html>

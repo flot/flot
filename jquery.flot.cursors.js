@@ -1,5 +1,6 @@
-/* Flot plugin for showing crosshairs when the mouse hovers over the plot.
+/* Flot plugin for adding cursors to the plot.
 
+Copyright (c) cipix2000@gmail.com.
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
@@ -24,29 +25,33 @@ horizontal crosshair and "xy" enables them both. "color" is the color of the
 crosshair (default is "rgba(170, 0, 0, 0.80)"), "lineWidth" is the width of
 the drawn lines (default is 1).
 
-The plugin also adds four public methods:
+The plugin also adds some public methods:
 
-  - setCursor( index, pos )
+    addCursor( name, pos, options )
 
-    Set the position of the crosshair. Note that this is cleared if the user
-    moves the mouse. "pos" is in coordinates of the plot and should be on the
-    form { x: xpos, y: ypos } (you can use x2/x3/... if you're using multiple
-    axes), which is coincidentally the same format as what you get from a
-    "plothover" event. If "pos" is null, the crosshair is cleared.
+        add a new cursor named 'name' at the position pos with default options 
+        specified in options. "pos" is in coordinates of the plot and should be 
+        on the form { x: xpos, y: ypos } (you can use  x2/x3/... if you're using 
+        multiple axes), which is coincidentally the same format as what you get 
+        from a "plothover" event.
 
-  - clearCrosshairs( index)
+    removeCursor( name )
 
-    Clear the crosshair.
+        remove the cursor named 'name'.
 
-  - lockCursor(index, pos)
+    moveCursor( name , pos)
 
-    Cause the crosshair to lock to the current location, no longer updating if
-    the user moves the mouse. Optionally supply a position (passed on to
-    setCrosshair()) to move it to.
+        Cause the cursor with the name 'name' to move to 'pos'
 
     Example usage:
 
-	var myFlot = $.plot( $("#graph"), ..., { crosshair: { mode: "x" } } };
+	var myFlot = $.plot( $("#graph"), ..., 
+    { 
+        cursors: [
+            { name: 'Green cursor', mode: "xy", color: 'green' },
+            { name: 'Red cursor', mode: "xy", color: 'red' }
+        ]
+    });
 	$("#graph").bind( "plothover", function ( evt, position, item ) {
 		if ( item ) {
 			// Lock the crosshair to the data point being hovered
