@@ -158,7 +158,53 @@ API.txt for details.
 			return makeUtcWrapper(new Date(ts));
 		}
 	}
-	
+
+	// Truncate time information in order to have the ticks start on the hour (depending on the unit)
+
+	function truncateDateTime(d, unit, tickSize, step, timeUnitSize)
+	{
+		if (unit == "second") {
+			d.setSeconds(floorInBase(d.getSeconds(), tickSize));
+		} else if (unit == "minute") {
+			d.setMinutes(floorInBase(d.getMinutes(), tickSize));
+		} else if (unit == "hour") {
+			d.setHours(floorInBase(d.getHours(), tickSize));
+		} else if (unit == "month") {
+			d.setMonth(floorInBase(d.getMonth(), tickSize));
+		} else if (unit == "quarter") {
+			d.setMonth(3 * floorInBase(d.getMonth() / 3,
+				tickSize));
+		} else if (unit == "year") {
+			d.setFullYear(floorInBase(d.getFullYear(), tickSize));
+		}
+
+		// reset smaller components
+
+		d.setMilliseconds(0);
+
+		if (step >= timeUnitSize.minute) {
+			d.setSeconds(0);
+		}
+		if (step >= timeUnitSize.hour) {
+			d.setMinutes(0);
+		}
+		if (step >= timeUnitSize.day) {
+			d.setHours(0);
+		}
+		if (step >= timeUnitSize.day * 4) {
+			d.setDate(1);
+		}
+		if (step >= timeUnitSize.month * 2) {
+			d.setMonth(floorInBase(d.getMonth(), 3));
+		}
+		if (step >= timeUnitSize.quarter * 2) {
+			d.setMonth(floorInBase(d.getMonth(), 6));
+		}
+		if (step >= timeUnitSize.year) {
+			d.setMonth(0);
+		}
+	}
+
 	// map of app. size of time units in milliseconds
 
 	var timeUnitSize = {
@@ -176,9 +222,9 @@ API.txt for details.
 
 	var baseSpec = [
 		[1, "second"], [2, "second"], [5, "second"], [10, "second"],
-		[30, "second"], 
+		[30, "second"],
 		[1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
-		[30, "minute"], 
+		[30, "minute"],
 		[1, "hour"], [2, "hour"], [4, "hour"],
 		[8, "hour"], [12, "hour"],
 		[1, "day"], [2, "day"], [3, "day"],
@@ -272,48 +318,15 @@ API.txt for details.
 						var tickSize = axis.tickSize[0];
 						unit = axis.tickSize[1];
 
+						// If the unit is day or more we might need an extra "daylight saving" margin when steping
+						var dstMargin = 0;
+						if (timeUnitSize[unit]>=timeUnitSize.day) {
+							dstMargin = timeUnitSize.hour;
+						}
+
 						var step = tickSize * timeUnitSize[unit];
 
-						if (unit == "second") {
-							d.setSeconds(floorInBase(d.getSeconds(), tickSize));
-						} else if (unit == "minute") {
-							d.setMinutes(floorInBase(d.getMinutes(), tickSize));
-						} else if (unit == "hour") {
-							d.setHours(floorInBase(d.getHours(), tickSize));
-						} else if (unit == "month") {
-							d.setMonth(floorInBase(d.getMonth(), tickSize));
-						} else if (unit == "quarter") {
-							d.setMonth(3 * floorInBase(d.getMonth() / 3,
-								tickSize));
-						} else if (unit == "year") {
-							d.setFullYear(floorInBase(d.getFullYear(), tickSize));
-						}
-
-						// reset smaller components
-
-						d.setMilliseconds(0);
-
-						if (step >= timeUnitSize.minute) {
-							d.setSeconds(0);
-						}
-						if (step >= timeUnitSize.hour) {
-							d.setMinutes(0);
-						}
-						if (step >= timeUnitSize.day) {
-							d.setHours(0);
-						}
-						if (step >= timeUnitSize.day * 4) {
-							d.setDate(1);
-						}
-						if (step >= timeUnitSize.month * 2) {
-							d.setMonth(floorInBase(d.getMonth(), 3));
-						}
-						if (step >= timeUnitSize.quarter * 2) {
-							d.setMonth(floorInBase(d.getMonth(), 6));
-						}
-						if (step >= timeUnitSize.year) {
-							d.setMonth(0);
-						}
+						truncateDateTime(d, unit, tickSize, step, timeUnitSize);
 
 						var carry = 0;
 						var v = Number.NaN;
@@ -348,7 +361,8 @@ API.txt for details.
 							} else if (unit == "year") {
 								d.setFullYear(d.getFullYear() + tickSize);
 							} else {
-								d.setTime(v + step);
+								d.setTime(v + step + dstMargin);
+								truncateDateTime(d, unit, tickSize, step, timeUnitSize);
 							}
 						} while (v < axis.max && v != prev);
 
