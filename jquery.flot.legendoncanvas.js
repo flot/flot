@@ -1,4 +1,4 @@
-﻿(function($) {
+(function($) {
 
 	function init(plot) {
 		plot.hooks.processOptions.push(addLastDrawHook);
@@ -12,6 +12,7 @@
 	function drawLegend(plot, ctx) {
 		var options = plot.getOptions();
 		if(!options.legend.show) return;
+		if(!options.legend.canvas) return;
 
 		var placeholder = plot.getPlaceholder();
 		var container = options.legend.container || placeholder.find('.legend');
@@ -56,7 +57,7 @@
 		legendWidth = legendWidth + LEGEND_BOX_WIDTH + PADDING_RIGHT;
 		legendHeight = num_labels * LEGEND_BOX_LINE_HEIGHT;
 		var x, y;
-		if(options.legend.container != null) {
+		if(options.legend.container != null && options.legend.usecontainer != null && options.legend.usecontainer != false) {
 			x = $(options.legend.container).offset().left;
 			y = $(options.legend.container).offset().top;
 		} else {
