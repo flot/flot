@@ -2569,43 +2569,42 @@ Licensed under the MIT license.
             var xequal = xrange.from === xrange.to,
                 yequal = yrange.from === yrange.to;
 
-            if (xequal && yequal) {
-                return;
-            }
+            if (!xequal || !yequal) {
 
-            // then draw
-            xrange.from = Math.floor(xrange.axis.p2c(xrange.from));
-            xrange.to = Math.floor(xrange.axis.p2c(xrange.to));
-            yrange.from = Math.floor(yrange.axis.p2c(yrange.from));
-            yrange.to = Math.floor(yrange.axis.p2c(yrange.to));
+                // then draw
+                xrange.from = Math.floor(xrange.axis.p2c(xrange.from));
+                xrange.to = Math.floor(xrange.axis.p2c(xrange.to));
+                yrange.from = Math.floor(yrange.axis.p2c(yrange.from));
+                yrange.to = Math.floor(yrange.axis.p2c(yrange.to));
 
-            if (xequal || yequal) {
-                var lineWidth = m.lineWidth || options.grid.markingsLineWidth,
-                    subPixel = lineWidth % 2 ? 0.5 : 0;
-                ctx.beginPath();
-                ctx.strokeStyle = m.color || options.grid.markingsColor;
-                ctx.lineWidth = lineWidth;
-                if (xequal) {
-                    ctx.moveTo(xrange.to + subPixel, yrange.from);
-                    ctx.lineTo(xrange.to + subPixel, yrange.to);
+                if (xequal || yequal) {
+                    var lineWidth = m.lineWidth || options.grid.markingsLineWidth,
+                        subPixel = lineWidth % 2 ? 0.5 : 0;
+                    ctx.beginPath();
+                    ctx.strokeStyle = m.color || options.grid.markingsColor;
+                    ctx.lineWidth = lineWidth;
+                    if (xequal) {
+                        ctx.moveTo(xrange.to + subPixel, yrange.from);
+                        ctx.lineTo(xrange.to + subPixel, yrange.to);
+                    } else {
+                        ctx.moveTo(xrange.from, yrange.to + subPixel);
+                        ctx.lineTo(xrange.to, yrange.to + subPixel);
+                    }
+                    ctx.stroke();
                 } else {
-                    ctx.moveTo(xrange.from, yrange.to + subPixel);
-                    ctx.lineTo(xrange.to, yrange.to + subPixel);
+                    ctx.fillStyle = m.color || options.grid.markingsColor;
+                    if (m.rounded) {
+                        roundRect(
+                            ctx, xrange.from, yrange.to, xrange.to - xrange.from,
+                            yrange.from - yrange.to, m.rounded);
+                        ctx.fill();
+                    } else {
+                        ctx.fillRect(
+                            xrange.from, yrange.to, xrange.to - xrange.from,
+                            yrange.from - yrange.to);
+                    }
                 }
-                ctx.stroke();
-            } else {
-                ctx.fillStyle = m.color || options.grid.markingsColor;
-                if (m.rounded) {
-                    roundRect(
-                        ctx, xrange.from, yrange.to, xrange.to - xrange.from,
-                        yrange.from - yrange.to, m.rounded);
-                    ctx.fill();
-                } else {
-                    ctx.fillRect(
-                        xrange.from, yrange.to, xrange.to - xrange.from,
-                        yrange.from - yrange.to);
-                }
-            }
+            } // else if xequal && yequal, then go to the text drawing
 
             if (m.text) {
 
