@@ -19,7 +19,8 @@ The plugin supports these options:
     pan: {
         interactive: false
         cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20
+        frameRate: 20,
+        mouseButton: "left" // mouse button used for panning ("left", "middle" or "right")
     }
 
     xaxis, yaxis, x2axis, y2axis: {
@@ -41,6 +42,10 @@ user when dragging.
 update itself while the user is panning around on it (set to null to disable
 intermediate pans, the plot will then not update until the mouse button is
 released).
+
+"mouseButton" specifies which mouse button should be used to drag the chart.
+Valid options are "left", "middle" and "right". By default the left mouse
+button will be used for dragging.
 
 "zoomRange" is the interval in which zooming can happen, e.g. with zoomRange:
 [1, 100] the zoom will never scale the axis so that the difference between min
@@ -93,7 +98,8 @@ can set the default in the options.
         pan: {
             interactive: false,
             cursor: "move",
-            frameRate: 20
+            frameRate: 20,
+            mouseButton: "left"
         }
     };
 
@@ -119,9 +125,6 @@ can set the default in the options.
             panTimeout = null;
 
         function onDragStart(e) {
-            if (e.which !== 1) { // only accept left-click
-                return false;
-            }
             var c = plot.getPlaceholder().css("cursor");
             if (c) {
                 prevCursor = c;
@@ -160,6 +163,10 @@ can set the default in the options.
                        dragEnded: true });
         }
 
+        function onContextMenu(e) {
+            e.preventDefault();
+        }
+
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
@@ -168,9 +175,26 @@ can set the default in the options.
             }
 
             if (o.pan.interactive) {
-                eventHolder.bind("dragstart", { distance: 10 }, onDragStart);
-                eventHolder.bind("drag", onDrag);
-                eventHolder.bind("dragend", onDragEnd);
+                var mouseButton;
+                switch (o.pan.mouseButton) {
+                    case "left":
+                        mouseButton = 1;
+                        break;
+                    case "middle":
+                        mouseButton = 2;
+                        break;
+                    case "right":
+                        mouseButton = 3;
+                        break;
+                    default:
+                        mouseButton = 1;
+                }
+                eventHolder.bind("dragstart", { distance: 10, which: mouseButton }, onDragStart);
+                eventHolder.bind("drag", { which: mouseButton }, onDrag);
+                eventHolder.bind("dragend", { which: mouseButton }, onDragEnd);
+                if (o.pan.mouseButton === "right") {
+                    eventHolder.bind("contextmenu", onContextMenu);
+                }
             }
         }
 
@@ -278,9 +302,9 @@ can set the default in the options.
             $.each(plot.getAxes(), function(_, axis) {
 
                 var opts = axis.options,
+                    d = delta[axis.direction],
                     min = axis.c2p(axis.p2c(axis.min) + d),
                     max = axis.c2p(axis.p2c(axis.max) + d),
-                    d = delta[axis.direction],
                     pr = opts.panRange;
 
                 if (pr === false) { // no panning on this axis
@@ -320,6 +344,7 @@ can set the default in the options.
             eventHolder.unbind("dragstart", onDragStart);
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
+            eventHolder.unbind("contextmenu", onContextMenu);
             if (panTimeout) {
                 clearTimeout(panTimeout);
             }
