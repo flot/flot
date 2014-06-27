@@ -147,7 +147,6 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
 
     $.plot.plugins.push({
         init: init,
-        options: options,
         name: 'log',
         version: '0.9'
     });
