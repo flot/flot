@@ -68,7 +68,7 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
     }
 
     function init(plot) {
-        plot.hooks.processOptions.push(function (plot, options) {
+        plot.hooks.processOptions.push(function (plot) {
             $.each(plot.getAxes(), function(axisName, axis) {
 
                 var opts = axis.options;
@@ -80,7 +80,8 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
                         var ticks = [],
                             end = ceilAsLog10(axis.max),
                             start = floorAsLog10(axis.datamin),
-                            tick = Number.NaN;
+                            tick = Number.NaN,
+                            i = 0;
 
                         if (axis.datamin === null || axis.datamin <= 0) {
                             // Bad minimum, make ticks from 1 (10**0) to max
@@ -97,18 +98,18 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
                         else if (log10(axis.max) - log10(axis.datamin) < 1) {
                             // Default flot generator incase no powers of 10
                             // are between start and end
-                            var i = 0,
-                                prev;
+                            var prev;
                             start = floorInBase(axis.min, axis.tickSize);
                             do {
                                 prev = tick;
                                 tick = start + i * axis.tickSize;
                                 ticks.push(tick);
                                 ++i;
-                            } while (tick < axis.max && tick !== prev);}
+                            } while (tick < axis.max && tick !== prev);
+                        }
                         else {
                             // Make ticks at each power of ten
-                            for (var i = 0; i <= (end - start); i++) {
+                            for (; i <= (end - start); i++) {
                                 tick = Math.pow(10, start + i);
                                 ticks.push(tick);
                             }
@@ -133,7 +134,7 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
                             // Default flot formatter
                             var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
                             formatted = "" + Math.round(value * factor) / factor;
-                            if (axis.tickDecimals != null) {
+                            if (axis.tickDecimals !== null) {
                                 var decimal = formatted.indexOf(".");
                                 var precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
                                 if (precision < axis.tickDecimals) {
