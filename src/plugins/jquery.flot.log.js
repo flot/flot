@@ -55,12 +55,15 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
             result = "",
             str_power = "" + power;
         for (var i = 0; i < str_power.length; i++) {
-            if (str_power[i] === '+') {
-                }
-            else if (str_power[i] === '-') {
-                result += "⁻";}
+            if (str_power[i] === "+") {
+            }
+            else if (str_power[i] === "-") {
+                result += "⁻";
+            }
             else {
-                result += superscripts[str_power[i]];}}
+                result += superscripts[str_power[i]];
+            }
+        }
         return result;
     }
 
@@ -70,7 +73,7 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
 
                 var opts = axis.options;
 
-                if (opts.mode == "log") {
+                if (opts.mode === "log") {
 
                     axis.tickGenerator = function (axis) {
 
@@ -82,30 +85,33 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
                         if (axis.datamin === null || axis.datamin <= 0) {
                             // Bad minimum, make ticks from 1 (10**0) to max
                             start = 0;
-                            axis.min = 0.6;}
+                            axis.min = 0.6;
+                        }
 
                         if (end <= start) {
                             // Start less than end?!
                             ticks = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1,
                                      1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6,
-                                     1e7, 1e8, 1e9];}
+                                     1e7, 1e8, 1e9];
+                        }
                         else if (log10(axis.max) - log10(axis.datamin) < 1) {
                             // Default flot generator incase no powers of 10
                             // are between start and end
-                            var start = floorInBase(axis.min, axis.tickSize),
-                                i = 0,
+                            var i = 0,
                                 prev;
+                            start = floorInBase(axis.min, axis.tickSize);
                             do {
                                 prev = tick;
                                 tick = start + i * axis.tickSize;
                                 ticks.push(tick);
                                 ++i;
-                            } while (tick < axis.max && tick != prev);}
+                            } while (tick < axis.max && tick !== prev);}
                         else {
                             // Make ticks at each power of ten
                             for (var i = 0; i <= (end - start); i++) {
                                 tick = Math.pow(10, start + i);
-                                ticks.push(tick);}
+                                ticks.push(tick);
+                            }
 
                             var length = ticks.length;
 
@@ -114,30 +120,36 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
                             if (end - start < 6) {
                                 for (var j = 1; j < length * 2 - 1; j += 2) {
                                     tick = ticks[j - 1] * 5;
-                                    ticks.splice(j, 0, tick);}}}
+                                    ticks.splice(j, 0, tick);
+                                }
+                            }
+                        }
                         return ticks;
                     };
 
                     axis.tickFormatter = function (value, axis) {
-                        var end = ceilAsLog10(axis.max),
-                            start = floorAsLog10(axis.min),
-                            formatted;
+                        var formatted;
                         if (log10(axis.max) - log10(axis.datamin) < 1) {
                             // Default flot formatter
                             var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
                             formatted = "" + Math.round(value * factor) / factor;
                             if (axis.tickDecimals != null) {
                                 var decimal = formatted.indexOf(".");
-                                var precision = decimal == -1 ? 0 : formatted.length - decimal - 1;
+                                var precision = decimal === -1 ? 0 : formatted.length - decimal - 1;
                                 if (precision < axis.tickDecimals) {
-                                    return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);}}}
+                                    return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
+                                }
+                            }
+                        }
                         else {
                             var multiplier = "",
                                 exponential = parseFloat(value).toExponential(0),
                                 power = getUnicodePower(exponential.slice(2));
                             if (exponential[0] !== "1") {
-                                multiplier = exponential[0] + 'x';}
-                            formatted = multiplier + "10" + power}
+                                multiplier = exponential[0] + "x";
+                            }
+                            formatted = multiplier + "10" + power;
+                        }
                         return formatted;
                     };
                 }
@@ -147,8 +159,8 @@ values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
 
     $.plot.plugins.push({
         init: init,
-        name: 'log',
-        version: '0.9'
+        name: "log",
+        version: "0.9"
     });
 
 })(jQuery);
