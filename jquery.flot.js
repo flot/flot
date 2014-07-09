@@ -517,6 +517,7 @@ Licensed under the MIT license.
                 colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
                 legend: {
                     show: true,
+                    showValues: true,
                     noColumns: 1, // number of colums in legend table
                     labelFormatter: null, // fn: string -> string
                     labelBoxBorderColor: "#ccc", // border color for the little label boxes
@@ -2733,7 +2734,8 @@ Licensed under the MIT license.
                     if (label) {
                         entries.push({
                             label: label,
-                            color: s.color
+                            color: s.color,
+                            value: s.percent
                         });
                     }
                 }
@@ -2769,10 +2771,12 @@ Licensed under the MIT license.
                     rowStarted = true;
                 }
 
-                fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + entry.label + '</td>'
-                );
+                fragments.push('<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>');
+                if(options.legend.showValues) {
+                	fragments.push('<td class="legendLabel">' + entry.label + ' (' + entry.value.toFixed(1) + '%)</td>');
+                } else {
+                    fragments.push('<td class="legendLabel">' + entry.label + '</td>');
+                }
             }
 
             if (rowStarted)
