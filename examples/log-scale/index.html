@@ -141,7 +141,7 @@
 
       var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
 
-      $.plot("#placeholder", [d1, d2, d3], {
+      $.plot("#placeholder", [d2, d3], {
         series: {
           lines: {
             show: true
@@ -180,10 +180,7 @@
       <div id="placeholder" class="demo-placeholder"></div>
     </div>
 
-    <p>You don't have to do much to get an attractive plot. Create a placeholder, make sure it has dimensions (so Flot knows at what size to draw the plot), then call the plot function with your data.</p>
-
-    <p>The axes are automatically scaled.</p>
-
+    <p>Custom tick formatting for axis scales. PI multiples on the X axis and logarithmic axis on Y axis.</p>
   </div>
 
   <div id="footer">
