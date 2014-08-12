@@ -37,12 +37,54 @@ Set axis.mode to "log" to enable.
     return Math.exp(v);
   };
 
-  var logTickGenerator = function (min, max) {
-    var nTicks = 12; //Math.floor(pixels / pixels_per_tick);
+  var linearTickGenerator = function (min, max, noTicks) {
 
+    var delta = (max - min) / noTicks,
+      dec = -Math.floor(Math.log(delta) / Math.LN10);
+
+    var magn = Math.pow(10, -dec),
+      norm = delta / magn, // norm is between 1.0 and 10.0
+      size;
+
+    if (norm < 1.5) {
+      size = 1;
+    } else if (norm < 3) {
+      size = 2;
+      // special case for 2.5, requires an extra decimal
+      if (norm > 2.25) {
+        size = 2.5;
+        ++dec;
+      }
+    } else if (norm < 7.5) {
+      size = 5;
+    } else {
+      size = 10;
+    }
+
+    size *= magn;
+    var ticks = [],
+      start = floorInBase(min, size),
+      i = 0,
+      v = Number.NaN,
+      prev;
+
+    do {
+      prev = v;
+      v = start + i * size;
+      ticks.push(v);
+      ++i;
+    } while (v < max && v != prev);
+    return ticks;
+  };
+
+  var logTickGenerator = function (min, max, noTicks) {
     var ticks = [];
     var minIdx = -1;
     var maxIdx = -1;
+
+    if (!noTicks) {
+      noTicks = 10;
+    }
 
     if (min <= 0) {
       min = PREFERRED_LOG_TICK_VALUES[0];
@@ -76,7 +118,7 @@ Set axis.mode to "log" to enable.
     // Count the number of tick values would appear, if we can get at least
     // nTicks / 4 accept them.
     var lastDisplayed = null;
-    if (maxIdx - minIdx >= nTicks / 4) {
+    if (maxIdx - minIdx >= noTicks / 4) {
       for (var idx = maxIdx; idx >= minIdx; idx--) {
         var tickValue = PREFERRED_LOG_TICK_VALUES[idx];
         var pixel_coord = Math.log(tickValue / min) / Math.log(max / min) * 10;
@@ -101,6 +143,8 @@ Set axis.mode to "log" to enable.
       }
       // Since we went in backwards order.
       ticks.reverse();
+    } else {
+      ticks = linearTickGenerator(min, max, noTicks);
     }
 
     return ticks;
@@ -117,13 +161,19 @@ Set axis.mode to "log" to enable.
     }
   };
 
+  // round to nearby lower multiple of base
+  function floorInBase(n, base) {
+    return base * Math.floor(n / base);
+  }
+
   function init(plot) {
     plot.hooks.processOptions.push(function (plot, options) {
       $.each(plot.getAxes(), function (axisName, axis) {
         var opts = axis.options;
         if (opts.mode == "log") {
           axis.tickGenerator = function (axis) {
-            return logTickGenerator(axis.datamin, axis.datamax);
+            var noTicks = 11;
+            return logTickGenerator(axis.datamin, axis.datamax, noTicks);
           };
           axis.tickFormatter = logTickFormatter;
           axis.options.transform = logTransform;
