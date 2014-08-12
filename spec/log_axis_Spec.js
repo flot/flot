@@ -22,6 +22,19 @@ describe("unit tests for the log scale functions", function () {
 
 
 describe("integration tests for log scale functions", function () {
+  var queryPlotForYTicks = function () {
+    var actualTicks = [];
+
+    var yAxisDivs = $('.yAxis');
+    expect(yAxisDivs.length).toBe(1);
+    var childDivs = yAxisDivs.find('.tickLabel');
+    childDivs.each(function (i, e) {
+      actualTicks.push(e.innerText);
+    });
+
+    return actualTicks.sort();
+  };
+
   afterEach(function () {
     $('#placeholder').empty();
   });
@@ -35,7 +48,7 @@ describe("integration tests for log scale functions", function () {
       }
     });
 
-    expect(true).toBe(true);
+    expect(queryPlotForYTicks()).toEqual(['1', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '2']);
   });
 
   it('should use log scales for high dynamic range intervals', function () {
@@ -46,6 +59,6 @@ describe("integration tests for log scale functions", function () {
       }
     });
 
-    expect(true).toBe(true);
+    expect(queryPlotForYTicks()).toEqual(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000', '10000']);
   });
 });
