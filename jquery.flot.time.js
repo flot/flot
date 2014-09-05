@@ -103,6 +103,49 @@ API.txt for details.
 		return r.join("");
 	}
 
+	function MomentDate(ts, tz) {
+		this.tz = tz;
+		this.mt = moment.tz(ts, tz);
+	}
+
+	MomentDate.prototype.getDate = function() { return this.mt.date(); };
+
+	MomentDate.prototype.setDate = function(date) { this.mt.date(date); };
+
+	MomentDate.prototype.getDay = function() { return this.mt.day(); };
+
+	MomentDate.prototype.setDay = function(day) { this.mt.day(date); };
+
+	MomentDate.prototype.getFullYear = function() { return this.mt.year(); };
+
+	MomentDate.prototype.setFullYear = function(year) { this.mt.year(year); };
+
+	MomentDate.prototype.getHours = function() { return this.mt.hour(); };
+
+	MomentDate.prototype.setHours = function(hours) { this.mt.hour(hours); };
+
+	MomentDate.prototype.getMilliseconds = function() { return this.mt.millisecond(); };
+
+	MomentDate.prototype.setMilliseconds = function(msec) { this.mt.millisecond(msec); };
+
+	MomentDate.prototype.getMinutes = function() { return this.mt.minute(); };
+
+	MomentDate.prototype.setMinutes = function(min) { this.mt.minute(min); };
+
+	MomentDate.prototype.getMonth = function() { return this.mt.month(); };
+
+	MomentDate.prototype.setMonth = function(month) { this.mt.month(month); };
+
+	MomentDate.prototype.getSeconds = function() { return this.mt.second(); };
+
+	MomentDate.prototype.setSeconds = function(sec) { this.mt.second(sec); };
+
+	MomentDate.prototype.getTime = function() { return this.mt.valueOf(); };
+
+	MomentDate.prototype.setTime = function(unixOffset) { this.mt = moment.tz(unixOffset, this.tz); };
+
+	MomentDate.prototype.strftime = null;
+
 	// To have a consistent view of time-based data independent of which time
 	// zone the client happens to be in we need a date-like object independent
 	// of time zones.  This is done through a wrapper that only calls the UTC
@@ -154,6 +197,8 @@ API.txt for details.
 			d.setTimezone(opts.timezone);
 			d.setTime(ts);
 			return d;
+		} else if (typeof moment != "undefined" && typeof moment.tz != "undefined") {
+			return new MomentDate(ts, opts.timezone);
 		} else {
 			return makeUtcWrapper(new Date(ts));
 		}
