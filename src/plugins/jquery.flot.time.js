@@ -60,52 +60,52 @@ API.txt for details.
         } else {
             hours12 = hours;
         }
-        
+
         // Get a week number [0-53] for weeks starting on Sunday.
-        // The week with the first Sunday in the year is Week 1. 
+        // The week with the first Sunday in the year is Week 1.
         // If a year starts with a non-Sunday, then all days until the first Sunday
         // are in Week 0. This is as per format sequence '%U' from strftime.
         // Calculation adjusts for timezones so this should work with standard Date,
         // UTC-wrapper Date or timezoneJS objects.
-        
+
         function sundayWeekNumber(d) {
             var firstJan = new Date(d.getFullYear(), 0, 1);
-            
+
             var zerothSunday = new Date(firstJan);
-            if (firstJan.getDay() == 0) {
+            if (firstJan.getDay() === 0) {
                 zerothSunday.setDate(firstJan.getDate() - 7);
             } else {
                 zerothSunday.setDate(firstJan.getDate() - firstJan.getDay());
             }
-            
-            var zerothSundayCorrectedTimestamp = zerothSunday.getTime() - 
+
+            var zerothSundayCorrectedTimestamp = zerothSunday.getTime() -
                 (zerothSunday.getTimezoneOffset() + d.getTimezoneOffset()) * timeUnitSize.minute;
-    
-            return Math.floor(((d.getTime() - 
+
+            return Math.floor(((d.getTime() -
                     zerothSundayCorrectedTimestamp)/timeUnitSize.day)/7);
         }
-        
+
         // Get a week number [0-53] for weeks starting on Monday.
-        // The week with the first Monday in the year is Week 1. 
+        // The week with the first Monday in the year is Week 1.
         // If a year starts with a non-Monday, then all days until the first Monday
         // are in Week 0. This is as per format sequence '%W' from strftime.
         // Calculation adjusts for timezones so this should work with standard Date,
         // UTC-wrapper Date or timezoneJS objects.
-        
+
         function mondayWeekNumber(d) {
             var firstJan = new Date(d.getFullYear(), 0, 1);
-            
+
             var zerothMonday = new Date(firstJan);
             if (firstJan.getDay() <= 1) {
                 zerothMonday.setDate(firstJan.getDate() - firstJan.getDay() - 6);
             } else {
                 zerothMonday.setDate(firstJan.getDate() - firstJan.getDay() + 1);
-            }        
-            
-            var zerothMondayCorrectedTimestamp = zerothMonday.getTime() - 
+            }
+
+            var zerothMondayCorrectedTimestamp = zerothMonday.getTime() -
                 (zerothMonday.getTimezoneOffset() + d.getTimezoneOffset()) * timeUnitSize.minute;
-            
-            return Math.floor(((d.getTime() - 
+
+            return Math.floor(((d.getTime() -
                     zerothMondayCorrectedTimestamp)/timeUnitSize.day)/7);
         }
 
@@ -218,8 +218,8 @@ API.txt for details.
             addProxyMethod(utc, "get" + props[p], d, "getUTC" + props[p]);
             addProxyMethod(utc, "set" + props[p], d, "setUTC" + props[p]);
         }
-        
-        utc.getTimezoneOffset = function() { return 0; }
+
+        utc.getTimezoneOffset = function() { return 0; };
 
         return utc;
     }
