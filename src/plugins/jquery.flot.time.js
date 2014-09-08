@@ -61,6 +61,54 @@ API.txt for details.
             hours12 = hours;
         }
 
+        // Get a week number [0-53] for weeks starting on Sunday.
+        // The week with the first Sunday in the year is Week 1.
+        // If a year starts with a non-Sunday, then all days until the first Sunday
+        // are in Week 0. This is as per format sequence '%U' from strftime.
+        // Calculation adjusts for timezones so this should work with standard Date,
+        // UTC-wrapper Date or timezoneJS objects.
+
+        function sundayWeekNumber(d) {
+            var firstJan = new Date(d.getFullYear(), 0, 1);
+
+            var zerothSunday = new Date(firstJan);
+            if (firstJan.getDay() === 0) {
+                zerothSunday.setDate(firstJan.getDate() - 7);
+            } else {
+                zerothSunday.setDate(firstJan.getDate() - firstJan.getDay());
+            }
+
+            var zerothSundayCorrectedTimestamp = zerothSunday.getTime() -
+                (zerothSunday.getTimezoneOffset() + d.getTimezoneOffset()) * timeUnitSize.minute;
+
+            return Math.floor(((d.getTime() -
+                    zerothSundayCorrectedTimestamp)/timeUnitSize.day)/7);
+        }
+
+        // Get a week number [0-53] for weeks starting on Monday.
+        // The week with the first Monday in the year is Week 1.
+        // If a year starts with a non-Monday, then all days until the first Monday
+        // are in Week 0. This is as per format sequence '%W' from strftime.
+        // Calculation adjusts for timezones so this should work with standard Date,
+        // UTC-wrapper Date or timezoneJS objects.
+
+        function mondayWeekNumber(d) {
+            var firstJan = new Date(d.getFullYear(), 0, 1);
+
+            var zerothMonday = new Date(firstJan);
+            if (firstJan.getDay() <= 1) {
+                zerothMonday.setDate(firstJan.getDate() - firstJan.getDay() - 6);
+            } else {
+                zerothMonday.setDate(firstJan.getDate() - firstJan.getDay() + 1);
+            }
+
+            var zerothMondayCorrectedTimestamp = zerothMonday.getTime() -
+                (zerothMonday.getTimezoneOffset() + d.getTimezoneOffset()) * timeUnitSize.minute;
+
+            return Math.floor(((d.getTime() -
+                    zerothMondayCorrectedTimestamp)/timeUnitSize.day)/7);
+        }
+
         for (var i = 0; i < fmt.length; ++i) {
 
             c = fmt.charAt(i);
@@ -117,6 +165,12 @@ API.txt for details.
                 case "w":
                     c = "" + d.getDay();
                     break;
+                case "U":
+                    c = leftPad(sundayWeekNumber(d));
+                    break;
+                case "W":
+                    c = leftPad(mondayWeekNumber(d));
+                    break;
                 }
                 r.push(c);
                 escape = false;
@@ -165,6 +219,8 @@ API.txt for details.
             addProxyMethod(utc, "set" + props[p], d, "setUTC" + props[p]);
         }
 
+        utc.getTimezoneOffset = function() { return 0; };
+
         return utc;
     }
 
@@ -195,6 +251,7 @@ API.txt for details.
             "minute": 60 * 1000,
             "hour": 60 * 60 * 1000,
             "day": 24 * 60 * 60 * 1000,
+            "week": 7 * 24 * 60 * 60 * 1000,
             "month": 30 * 24 * 60 * 60 * 1000,
             "quarter": 3 * 30 * 24 * 60 * 60 * 1000,
             "year": 365.2425 * 24 * 60 * 60 * 1000
@@ -211,8 +268,8 @@ API.txt for details.
             [1, "hour"], [2, "hour"], [4, "hour"],
             [8, "hour"], [12, "hour"],
             [1, "day"], [2, "day"], [3, "day"],
-            [0.25, "month"], [0.5, "month"], [1, "month"],
-            [2, "month"]
+            [1, "week"], [2, "week"],
+            [1, "month"],[2, "month"]
         ],
 
         // we don't know which variant(s) we'll need yet, but generating both is
@@ -337,7 +394,7 @@ API.txt for details.
                         if (step >= timeUnitSize.day) {
                             d.setHours(0);
                         }
-                        if (step >= timeUnitSize.day * 4) {
+                        if (step >= timeUnitSize.day * 15) {
                             d.setDate(1);
                         }
                         if (step >= timeUnitSize.month * 2) {
