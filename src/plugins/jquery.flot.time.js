@@ -268,8 +268,8 @@ API.txt for details.
             [1, "hour"], [2, "hour"], [4, "hour"],
             [8, "hour"], [12, "hour"],
             [1, "day"], [2, "day"], [3, "day"],
-            [0.25, "month"], [0.5, "month"], [1, "month"],
-            [2, "month"]
+            [1, "week"], [2, "week"],
+            [1, "month"],[2, "month"]
         ],
 
         // we don't know which variant(s) we'll need yet, but generating both is
@@ -394,7 +394,7 @@ API.txt for details.
                         if (step >= timeUnitSize.day) {
                             d.setHours(0);
                         }
-                        if (step >= timeUnitSize.day * 4) {
+                        if (step >= timeUnitSize.day * 15) {
                             d.setDate(1);
                         }
                         if (step >= timeUnitSize.month * 2) {
