@@ -978,7 +978,7 @@ the highlight/unhighlight plot methods described elsewhere.
 You can use "plotclick" and "plothover" events like this:
 
 ```js
-$.plot($("#placeholder"), [ d ], { grid: { clickable: true } });
+var plot = $.plot($("#placeholder"), [ d ], { grid: { clickable: true } });
 
 $("#placeholder").bind("plotclick", function (event, pos, item) {
     alert("You clicked at " + pos.x + ", " + pos.y);
@@ -986,7 +986,7 @@ $("#placeholder").bind("plotclick", function (event, pos, item) {
     // if you need global screen coordinates, they are pos.pageX, pos.pageY
 
     if (item) {
-        highlight(item.series, item.datapoint);
+        plot.highlight(item.series, item.datapoint);
         alert("You clicked a point!");
     }
 });
