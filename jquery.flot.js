@@ -2394,7 +2394,7 @@ Licensed under the MIT license.
                     if (!areaOpen) {
                         // open area
                         ctx.beginPath();
-                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
+                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(y1));
                         areaOpen = true;
                     }
 
