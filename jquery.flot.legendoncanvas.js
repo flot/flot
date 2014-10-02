@@ -27,7 +27,7 @@
 		ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
 		ctx.textAlign = "left";
 		ctx.textBaseline = "bottom";
-//                 ctx.fillStyle="#F00";
+                ctx.fillStyle="#F00";
 		function fontAscent() {
 			return 12;
 		}
@@ -88,7 +88,7 @@
 					ctx.globalAlpha = options.legend.backgroundOpacity;
 					ctx.fillStyle = c;
 					ctx.fillRect(x, y, legendWidth, legendHeight);
-// 					ctx.globalAlpha = 1.0;
+					ctx.globalAlpha = 1.0;
 				}
 			}
 		}
