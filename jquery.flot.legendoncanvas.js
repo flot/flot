@@ -23,11 +23,11 @@
 			weight: placeholder.css("font-weight"),
 			family: placeholder.css("font-family")
 		};
-
+                
 		ctx.font = f.style + " " + f.variant + " " + f.weight + " " + f.size + "px '" + f.family + "'";
 		ctx.textAlign = "left";
 		ctx.textBaseline = "bottom";
-
+//                 ctx.fillStyle="#F00";
 		function fontAscent() {
 			return 12;
 		}
@@ -48,13 +48,22 @@
 			num_labels++;
 			if(lf) label = lf(label, s);
 			labelWidth = ctx.measureText(label).width;
-			if(labelWidth > legendWidth) legendWidth = labelWidth
+                        if(options.legend.horizontal){
+                            legendWidth+=labelWidth;
+                        }else {
+                            if(labelWidth > legendWidth) legendWidth = labelWidth}
 		}
 		var LEGEND_BOX_WIDTH = 22; // color box
 		var PADDING_RIGHT = 5;
 		var LEGEND_BOX_LINE_HEIGHT = 18;
-		legendWidth = legendWidth + LEGEND_BOX_WIDTH + PADDING_RIGHT;
-		legendHeight = num_labels * LEGEND_BOX_LINE_HEIGHT;
+                if (options.legend.horizontal){
+                    legendWidth = legendWidth + num_labels*(LEGEND_BOX_WIDTH + PADDING_RIGHT);
+                    legendHeight = LEGEND_BOX_LINE_HEIGHT;
+                }else {
+                    legendWidth = legendWidth + LEGEND_BOX_WIDTH + PADDING_RIGHT;
+                    legendHeight = num_labels * LEGEND_BOX_LINE_HEIGHT;
+                }
+		
 		var x, y;
 		if(options.legend.container != null) {
 			x = $(options.legend.container).offset().left;
@@ -79,28 +88,37 @@
 					ctx.globalAlpha = options.legend.backgroundOpacity;
 					ctx.fillStyle = c;
 					ctx.fillRect(x, y, legendWidth, legendHeight);
-					ctx.globalAlpha = 1.0;
+// 					ctx.globalAlpha = 1.0;
 				}
 			}
 		}
-		var posx, posy;
+		var posx=x+2, posy;
 		for(var i = 0; i < series.length; ++i) {
 			s = series[i];
 			label = s.label;
 			if(!label) continue;
 			if(lf) label = lf(label, s);
-			posy = y + (i * 18);
+                        if (options.legend.horizontal){
+                             posy = y+2;
+                        }else{
+                            posx=x;
+                            posy = y + (i * 18);
+                        }
+			
 			ctx.fillStyle = options.legend.labelBoxBorderColor;
-			ctx.fillRect(x, posy, 18, 14);
+			ctx.fillRect(posx, posy, 18, 14);
 			ctx.fillStyle = "#FFF";
-			ctx.fillRect(x + 1, posy + 1, 16, 12);
+			ctx.fillRect(posx + 1, posy + 1, 16, 12);
 			ctx.fillStyle = s.color;
-			ctx.fillRect(x + 2, posy + 2, 14, 10);
-			posx = x + 22;
+			ctx.fillRect(posx + 2, posy + 2, 14, 10);
+			posx = posx + 22;
 			posy = posy + f.size + 2;
 
-			ctx.fillStyle = options.legend.color;//add the color option to the legend
+			ctx.fillStyle = options.legend.color;
 			ctx.fillText(label, posx, posy);
+                        if (options.legend.horizontal){
+                            posx = posx +  ctx.measureText(label).width+PADDING_RIGHT;
+                        }
 		}
 
 		container.hide(); // hide the HTML version
