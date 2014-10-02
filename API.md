@@ -2,20 +2,20 @@
 
 **Table of Contents**
 
-[Introduction](#introduction)
-| [Data Format](#data-format)
-| [Plot Options](#plot-options)
-| [Customizing the legend](#customizing-the-legend)
-| [Customizing the axes](#customizing-the-axes)
-| [Multiple axes](#multiple-axes)
-| [Time series data](#time-series-data)
-| [Customizing the data series](#customizing-the-data-series)
-| [Customizing the grid](#customizing-the-grid)
-| [Specifying gradients](#specifying-gradients)
-| [Plot Methods](#plot-methods)
-| [Hooks](#hooks)
-| [Plugins](#plugins)
-| [Version number](#version-number)
+* [Introduction](#introduction)
+* [Data Format](#data-format)
+* [Plot Options](#plot-options)
+* [Customizing the legend](#customizing-the-legend)
+* [Customizing the axes](#customizing-the-axes)
+* [Multiple axes](#multiple-axes)
+* [Time series data](#time-series-data)
+* [Customizing the data series](#customizing-the-data-series)
+* [Customizing the grid](#customizing-the-grid)
+* [Specifying gradients](#specifying-gradients)
+* [Plot Methods](#plot-methods)
+* [Hooks](#hooks)
+* [Plugins](#plugins)
+* [Version number](#version-number)
 
 ---
 
