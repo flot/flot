@@ -392,7 +392,7 @@ More detail and specific examples can be found in the included HTML file.
 				var currentAngle = startAngle;
 				for (var i = 0; i < slices.length; ++i) {
 					slices[i].startAngle = currentAngle;
-					drawSlice(slices[i].angle, slices[i].color, true);
+					drawSlice(slices[i].angle, slices[i].radius || radius, slices[i].color, true);
 				}
 				ctx.restore();
 
@@ -403,7 +403,7 @@ More detail and specific examples can be found in the included HTML file.
 					ctx.lineWidth = options.series.pie.stroke.width;
 					currentAngle = startAngle;
 					for (var i = 0; i < slices.length; ++i) {
-						drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
+						drawSlice(slices[i].angle, slices[i].radius || radius, options.series.pie.stroke.color, false);
 					}
 					ctx.restore();
 				}
@@ -420,7 +420,7 @@ More detail and specific examples can be found in the included HTML file.
 					return drawLabels();
 				} else return true;
 
-				function drawSlice(angle, color, fill) {
+				function drawSlice(angle, radius, color, fill) {
 
 					if (angle <= 0 || isNaN(angle)) {
 						return;
@@ -439,8 +439,8 @@ More detail and specific examples can be found in the included HTML file.
 					}
 
 					//ctx.arc(0, 0, radius, 0, angle, false); // This doesn't work properly in Opera
-					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
-					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle + angle, false);
+					ctx.arc(0, 0, radius, currentAngle, currentAngle + angle / 2, false);
+					ctx.arc(0, 0, radius, currentAngle + angle / 2, currentAngle + angle, false);
 					ctx.closePath();
 					//ctx.rotate(angle); // This doesn't work properly in Opera
 					currentAngle += angle;
