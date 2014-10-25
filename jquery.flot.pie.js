@@ -548,15 +548,15 @@ More detail and specific examples can be found in the included HTML file.
 				layer.restore();
 
 				// add inner stroke
-
-				layer.save();
-				layer.beginPath();
-				layer.strokeStyle = options.series.pie.stroke.color;
-				layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
-				layer.stroke();
-				layer.closePath();
-				layer.restore();
-
+				if(options.series.pie.stroke.width > 0) {
+					layer.save();
+					layer.beginPath();
+					layer.strokeStyle = options.series.pie.stroke.color;
+					layer.arc(0, 0, innerRadius, 0, Math.PI * 2, false);
+					layer.stroke();
+					layer.closePath();
+					layer.restore();
+				}
 				// TODO: add extra shadow inside hole (with a mask) if the pie is tilted.
 			}
 		}
