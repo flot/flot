@@ -500,11 +500,11 @@ More detail and specific examples can be found in the included HTML file.
                         var halfAngle = ((startAngle + slice.angle) + startAngle) / 2,
                             x = centerLeft + Math.round(Math.cos(halfAngle) * radius),
                             y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt,
-                            html = "<span class='pieLabel' id='pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
+                            html = "<span class='pieLabel pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
 
                         target.append(html);
 
-                        var label = target.children("#pieLabel" + index),
+                        var label = target.children(".pieLabel" + index),
                             labelTop = (y - label.height() / 2),
                             labelLeft = (x - label.width() / 2);
 
