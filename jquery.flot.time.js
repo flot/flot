@@ -373,7 +373,8 @@ API.txt for details.
 							(axis.options.minTickSize &&
 								axis.options.minTickSize[1] == "quarter");
 
-						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
+						var t = (axis.options.tickSize)? axis.options.tickSize[0] * timeUnitSize[axis.options.tickSize[1]]: axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
+
 						var span = axis.max - axis.min;
 						var suffix = (opts.twelveHourClock) ? " %p" : "";
 						var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
