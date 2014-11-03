@@ -7,8 +7,15 @@ describe("unit tests for the log scale functions", function () {
     expect(ticks).toEqual([10, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 11]);
   });
 
+  it('should use mixed scale for medium dynamic range intervals', function () {
+    var ticks = $.plot.logTicksGenerator(0.2, 8, 10);
+
+    expect(ticks).toEqual([10, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 11]);
+  });
+
+
   it('should use log scales for high dynamic range intervals', function () {
-    var ticks = $.plot.logTicksGenerator(0.0001, 10000);
+    var ticks = $.plot.logTicksGenerator(0.0001, 10000, 10);
 
     expect(ticks).toEqual([0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]);
   });
