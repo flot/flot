@@ -106,6 +106,22 @@ The plugin also adds some public methods:
             });
         });
 
+        plot.getCursors = function () {
+            return cursors;
+        };
+
+        plot.addCursor = function addCursor(x, y, mode, name, color) {
+            var currentCursor = {
+                x: x,
+                y: y,
+                locked: true,
+                highlighted: false
+            };
+
+            currentCursor.name = name || ('unnamed ' + cursors.length);
+            cursors.push(currentCursor);
+        };
+
         plot.setCursor = function setCursor(index, pos) {
             if (!pos)
                 cursors[index].x = -1;
