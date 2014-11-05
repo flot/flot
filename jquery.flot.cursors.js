@@ -6,18 +6,18 @@ Licensed under the MIT license.
 
 The plugin supports these options:
 
-	cursors: [
+cursors: [
     {
-		mode: null or "x" or "y" or "xy"
-		color: color
-		lineWidth: number
-	},
+        mode: null or "x" or "y" or "xy",
+        color: color,
+        lineWidth: number,
+    },
     {
-        mode: null or "x" or "y" or "xy"
-        color: color
-        lineWidth: number
+        mode: null or "x" or "y" or "xy",
+        color: color,
+        lineWidth: number,
     }
-    ]
+]
 
 Set the mode to one of "x", "y" or "xy". The "x" mode enables a vertical
 crosshair that lets you trace the values on the x axis, "y" enables a
@@ -41,47 +41,26 @@ The plugin also adds some public methods:
 
     moveCursor( name , pos)
 
-        Cause the cursor with the name 'name' to move to 'pos'
+        Causes the cursor with the name 'name' to move to 'pos'
 
     Example usage:
 
-	var myFlot = $.plot( $("#graph"), ..., 
+	var myFlot = $.plot( $("#graph"), ...,
     {
         cursors: [
             { name: 'Green cursor', mode: "xy", color: 'green' },
             { name: 'Red cursor', mode: "xy", color: 'red' }
         ]
     });
-	$("#graph").bind( "plothover", function ( evt, position, item ) {
-		if ( item ) {
-			// Lock the crosshair to the data point being hovered
-			myFlot.lockCrosshair({
-				x: item.datapoint[ 0 ],
-				y: item.datapoint[ 1 ]
-			});
-		} else {
-			// Return normal crosshair operation
-			myFlot.unlockCrosshair();
-		}
-	});
-
-  - unlockCursor()
-
-    Free the crosshair to move again after locking it.
 */
 
 /*global jQuery*/
 
 (function ($) {
+    'use strict';
+
     var options = {
         cursors: [
-            {
-                mode: null, // one of null, "x", "y" or "xy",
-                color: "rgba(170, 0, 0, 0.80)",
-                lineWidth: 1,
-                x: -1,
-                y: -1
-            }
         ]
     };
 
@@ -89,13 +68,20 @@ The plugin also adds some public methods:
         var cursors = [];
         var update = [];
 
+        var mixin = function (source, destination) {
+            Object.keys(source).forEach(function (key) {
+                destination[key] = source[key];
+            });
+        };
+
         plot.hooks.processOptions.push(function (plot) {
             plot.getOptions().cursors.forEach(function (cursor) {
                 var currentCursor = {
                     x: -1,
                     y: -1,
                     locked: true,
-                    highlighted: false
+                    highlighted: false,
+                    mode: 'xy'
                 };
 
                 currentCursor.x = cursor.x;
@@ -115,46 +101,49 @@ The plugin also adds some public methods:
                 x: x,
                 y: y,
                 locked: true,
-                highlighted: false
+                highlighted: false,
+                mode: mode,
+                color: color
             };
 
             currentCursor.name = name || ('unnamed ' + cursors.length);
             cursors.push(currentCursor);
+
+            plot.triggerRedrawOverlay();
         };
 
-        plot.setCursor = function setCursor(index, pos) {
-            if (!pos)
-                cursors[index].x = -1;
-            else {
-                var o = plot.p2c(pos);
-                cursors[index].x = Math.max(0, Math.min(o.left, plot.width()));
-                cursors[index].y = Math.max(0, Math.min(o.top, plot.height()));
+        plot.removeCursor = function removeCursor(cursor) {
+            var index = cursors.indexOf(cursor);
+
+            if (index !== -1) {
+                cursors.splice(index, 1);
             }
 
             plot.triggerRedrawOverlay();
         };
 
-        plot.clearCursor = plot.setCrosshair; // passes null for pos
+        plot.setCursor = function setCursor(cursor, options) {
+            var index = cursors.indexOf(cursor);
 
-        plot.lockCursor = function lockCursor(index, pos) {
-            if (pos)
-                plot.setCursor(index, pos);
-            cursors[index].locked = true;
+            if (index !== -1) {
+                mixin(options, cursors[index]);
+                plot.triggerRedrawOverlay();
+            }
         };
 
-        plot.unlockCursor = function unlockCursor(index) {
-            cursors[index].locked = false;
+        plot.getIntersections = function getIntersections(cursor) {
+            var index = cursors.indexOf(cursor);
+
+            if (index !== -1) {
+                return cursors[index].intersections;
+            }
+
+            return [];
         };
 
         function onMouseOut(e) {
             /*
-            if (crosshair.locked)
-                return;
-
-            if (crosshair.x != -1) {
-                crosshair.x = -1;
-                plot.triggerRedrawOverlay();
-            }
+                stop drag
             */
         }
 
@@ -250,9 +239,6 @@ The plugin also adds some public methods:
         }
 
         plot.hooks.bindEvents.push(function (plot, eventHolder) {
-            if (!plot.getOptions().cursors[0].mode)
-                return;
-
             eventHolder.mousedown(onMouseDown);
             eventHolder.mouseup(onMouseUp);
             eventHolder.mouseout(onMouseOut);
@@ -310,6 +296,7 @@ The plugin also adds some public methods:
                 ctx.fillRect(Math.floor(coord.left) - 4, Math.floor(coord.top) - 4, 8, 8);
                 ctx.fillText(y.toFixed(2), coord.left + 8, coord.top + 8);
             }
+            cursor.intersections = intersections;
             update.push(intersections);
         }
 
@@ -318,6 +305,11 @@ The plugin also adds some public methods:
             update = [];
             cursors.forEach(function (cursor) {
                 var c = plot.getOptions().cursors[i];
+
+                if (!c) {
+                    c = cursor;
+                }
+
                 if (!c.mode)
                     return;
 
@@ -327,7 +319,7 @@ The plugin also adds some public methods:
                 ctx.translate(plotOffset.left, plotOffset.top);
 
                 if (cursor.x != -1) {
-                    var adj = plot.getOptions().cursors[i].lineWidth % 2 ? 0.5 : 0;
+                    var adj = c.lineWidth % 2 ? 0.5 : 0;
 
                     ctx.strokeStyle = c.color;
                     ctx.lineWidth = c.lineWidth;
@@ -363,7 +355,6 @@ The plugin also adds some public methods:
             eventHolder.unbind("mouseup", onMouseUp);
             eventHolder.unbind("mouseout", onMouseOut);
             eventHolder.unbind("mousemove", onMouseMove);
-
         });
     }
 

@@ -1,90 +1,105 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
+
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Flot Examples: Tracking</title>
-	<link href="../examples.css" rel="stylesheet" type="text/css">
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
-	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.flot.cursors.js"></script>
-	<script type="text/javascript">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Examples: Tracking</title>
+    <link href="../examples.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.cursors.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var sin = [],
+                cos = [];
+            for (var i = 0; i < 14; i += 0.1) {
+                sin.push([i, Math.sin(i)]);
+                cos.push([i, Math.cos(i)]);
+            }
 
-	$(function() {
-		var sin = [], cos = [];
-		for (var i = 0; i < 14; i += 0.1) {
-			sin.push([i, Math.sin(i)]);
-			cos.push([i, Math.cos(i)]);
-		}
+            plot = $.plot("#placeholder", [
+                {
+                    data: sin,
+                    label: "sin(x) = -0.00"
+                },
+                {
+                    data: cos,
+                    label: "cos(x) = -0.00"
+                }
+  ], {
+                series: {
+                    lines: {
+                        show: true
+                    }
+                },
+                cursors: [
+                    {
+                        name: 'Red cursor',
+                        mode: 'x',
+                        color: 'red',
+                        x: 200,
+                        y: 300
+          },
+                    {
+                        name: 'Blue cursor',
+                        mode: 'xy',
+                        color: 'blue',
+                        x: 10,
+                        y: 20
+   },
+                    {
+                        name: 'Green cursor',
+                        mode: 'xy',
+                        color: 'green',
+                        x: 100,
+                        y: 200
+   }
+   ],
+                grid: {
+                    hoverable: true,
+                    clickable: true,
+                    autoHighlight: false
+                },
+                yaxis: {
+                    min: -1.2,
+                    max: 1.2
+                }
+            });
 
-		plot = $.plot("#placeholder", [
-			{ data: sin, label: "sin(x) = -0.00"},
-			{ data: cos, label: "cos(x) = -0.00" }
-		], {
-			series: {
-				lines: {
-					show: true
-				}
-			},
-			cursors: [
-			{
-				name: 'Blue cursor',
-				mode: 'xy',
-				color: 'blue',
-				x: 10,
-				y:20
-			},
-			{
-				name: 'Green cursor',
-				mode: 'xy',
-				color: 'green',
-				x: 100,
-				y:200
-			}
-			],
-			grid: {
-				hoverable: true,
-				clickable: true,
-				autoHighlight: false
-			},
-			yaxis: {
-				min: -1.2,
-				max: 1.2
-			}
-		});
+            $("#placeholder").bind("cursorupdates", function (event, cursordata) {
+                $('#hoverdata').empty();
+                var ul1 = $('#hoverdata').append('<UL style="padding-left: 30px;">').find("UL");
+                cursordata.forEach(function (cursor) {
+                    ul1.append("<LI>" + cursor.cursor + "</LI>");
+                    var ul2 = ul1.append('<UL style="padding-left: 30px;">').find("UL").last();
+                    cursor.points.forEach(function (point) {
+                        ul2.append("<LI> x:" + point.x.toFixed(2) + " y: " + point.y.toFixed(2) + "</LI>");
+                    });
+                });
+            });
 
-		$("#placeholder").bind("cursorupdates",  function (event, cursordata) {
-			$('#hoverdata').empty();
-			var ul1 = $('#hoverdata').append('<UL style="padding-left: 30px;">').find("UL");
-			cursordata.forEach(function (cursor){
-				ul1.append("<LI>" + cursor.cursor + "</LI>");
-				var ul2 = ul1.append('<UL style="padding-left: 30px;">').find("UL").last();
-				cursor.points.forEach(function (point){
-					ul2.append("<LI> x:" + point.x.toFixed(2) + " y: " + point.y.toFixed(2) + "</LI>");
-				});
-			});
-		});
-
-		// Add the Flot version string to the footer
-		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
-	});
-
-	</script>
+            // Add the Flot version string to the footer
+            $("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+        });
+    </script>
 </head>
+
 <body>
-	<div id="header">
-		<h2>Flot cursors</h2>
-	</div>
-	<div id="content">
-		<div class="demo-container">
-			<div id="placeholder" class="demo-placeholder"></div>
-		</div>
-		<p>You can add cursors that will track data.</p>
-		<p>If you combine it with listening cursor updates, you can use it to display the data.</p>
-		<p id="hoverdata"></p>
-	</div>
-	<div id="footer">
-		Copyright &copy; 2007 - 2014 IOLA and Ole Laursen
-	</div>
+    <div id="header">
+        <h2>Flot cursors</h2>
+    </div>
+    <div id="content">
+        <div class="demo-container">
+            <div id="placeholder" class="demo-placeholder"></div>
+        </div>
+        <p>You can add cursors that will track data.</p>
+        <p>If you combine it with listening cursor updates, you can use it to display the data.</p>
+        <p id="hoverdata"></p>
+    </div>
+    <div id="footer">
+        Copyright &copy; 2007 - 2014 IOLA and Ole Laursen
+    </div>
 </body>
+
 </html>
