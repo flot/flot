@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Flot Examples: Tracking</title>
+    <title>Flot Examples: Cursors</title>
     <link href="../examples.css" rel="stylesheet" type="text/css">
     <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
     <script language="javascript" type="text/javascript" src="../../jquery.js"></script>
@@ -74,7 +74,7 @@
                     ul1.append("<LI>" + cursor.cursor + "</LI>");
                     var ul2 = ul1.append('<UL style="padding-left: 30px;">').find("UL").last();
                     cursor.points.forEach(function (point) {
-                        ul2.append("<LI> x:" + point.x.toFixed(2) + " y: " + point.y.toFixed(2) + "</LI>");
+                        ul2.append("<LI> x:" + point.x.toFixed(4) + " y: " + point.y.toFixed(4) + "</LI>");
                     });
                 });
             });

@@ -29,10 +29,10 @@ The plugin also adds some public methods:
 
     addCursor( name, pos, options )
 
-        add a new cursor named 'name' at the position pos with default options 
-        specified in options. "pos" is in coordinates of the plot and should be 
-        on the form { x: xpos, y: ypos } (you can use  x2/x3/... if you're using 
-        multiple axes), which is coincidentally the same format as what you get 
+        add a new cursor named 'name' at the position pos with default options
+        specified in options. "pos" is in coordinates of the plot and should be
+        on the form { x: xpos, y: ypos } (you can use  x2/x3/... if you're using
+        multiple axes), which is coincidentally the same format as what you get
         from a "plothover" event.
 
     removeCursor( name )

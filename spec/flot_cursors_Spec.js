@@ -153,70 +153,79 @@ describe("Flot cursors", function () {
         expect(cursors[0].x).toBe(3);
     });
 
-    xit('should find intersections with a plot', function (done) {
-        plot = $.plot("#placeholder", [sampledata], {
-            cursors: [
-                {
-                    name: 'Blue cursor',
-                    mode: 'xy',
-                    color: 'blue',
-                    x: 1,
-                    y: 0
-                }
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
-        });
-
-        setTimeout(function () {
-            var cursors = plot.getCursors();
-            var intersections = plot.getIntersections(cursors[0]);
-
-            expect(intersections.points.length).toBe(1);
-            expect(intersections.points[0].x).toBe(1);
-            expect(intersections.points[0].y).toBe(sampledata[1]);
-            done();
-        }, 0);
-    });
-
-    xit('should find intersections with multiple plots', function (done) {
-        plot = $.plot("#placeholder", [sampledata], {
-            cursors: [
-                {
-                    name: 'Blue cursor',
-                    mode: 'xy',
-                    color: 'blue',
-                    x: 1,
-                    y: 0
-                }
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
-        });
-
-        setTimeout(function () {
-            var cursors = plot.getCursors();
-            var intersections = plot.getIntersections(cursors[0]);
-
-            expect(intersections.points.length).toBe(1);
-            expect(intersections.points[0].x).toBe(1);
-            expect(intersections.points[0].y).toBe(sampledata[1]);
-            done();
-        }, 0);
-    });
-
     it('should be possible to specify the cursor shape');
-
     it('should display the cursor label when told so');
-    it('should recompute intersections on data update');
     it('should be highlighted on mouse over');
     it('should change the mouse cursor on mouse over');
     it('should change the mouse cursor on drag');
-    it('should be possible to drag cursors with the mouse');
-    it('should be possible to drag cursors with the mouse while the chart updates');
-    it('should interpolate the values properly with linear scales');
-    it('should interpolate the values properly with log scales');
-    it('should interpolate the values properly with mixed scales');
+
+    describe('Intersections', function () {
+        xit('should find intersections with a plot', function (done) {
+            plot = $.plot("#placeholder", [sampledata], {
+                cursors: [
+                    {
+                        name: 'Blue cursor',
+                        mode: 'xy',
+                        color: 'blue',
+                        x: 1,
+                        y: 0
+                    }
+                ],
+                interaction: {
+                    redrawOverlayInterval: 0
+                }
+            });
+
+            setTimeout(function () {
+                var cursors = plot.getCursors();
+                var intersections = plot.getIntersections(cursors[0]);
+
+                expect(intersections.points.length).toBe(1);
+                expect(intersections.points[0].x).toBe(1);
+                expect(intersections.points[0].y).toBe(sampledata[1]);
+                done();
+            }, 0);
+        });
+
+        xit('should find intersections with multiple plots', function (done) {
+            plot = $.plot("#placeholder", [sampledata], {
+                cursors: [
+                    {
+                        name: 'Blue cursor',
+                        mode: 'xy',
+                        color: 'blue',
+                        x: 1,
+                        y: 0
+                    }
+                ],
+                interaction: {
+                    redrawOverlayInterval: 0
+                }
+            });
+
+            setTimeout(function () {
+                var cursors = plot.getCursors();
+                var intersections = plot.getIntersections(cursors[0]);
+
+                expect(intersections.points.length).toBe(1);
+                expect(intersections.points[0].x).toBe(1);
+                expect(intersections.points[0].y).toBe(sampledata[1]);
+                done();
+            }, 0);
+        });
+        it('should interpolate the intersections properly with linear scales');
+        it('should interpolate the intersections properly with log scales');
+        it('should interpolate the intersections properly with mixed scales');
+        it('should recompute intersections on data update');
+    });
+
+    describe('Positioning', function () {
+        it('should be possible to position the cursor relative to the canvas');
+        it('should be possible to position the cursor relative to the axes');
+        it('should be possible to position the cursor relative to any of the axes when having multiple ones');
+        it('should be possible to drag cursors with the mouse');
+        it('should be possible to drag cursors with the mouse while the chart updates');
+    });
+
+    describe('Snapping', function () {});
 });
