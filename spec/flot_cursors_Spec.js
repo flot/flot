@@ -8,8 +8,8 @@ describe("Flot cursors", function () {
     var plot;
 
     afterEach(function () {
-        $('#placeholder').empty();
         plot.shutdown();
+        $('#placeholder').empty();
     });
 
     it('should be possible to specify a cursor when creating the plot', function () {
@@ -19,8 +19,6 @@ describe("Flot cursors", function () {
                     name: 'Blue cursor',
                     mode: 'xy',
                     color: 'blue',
-                    x: 3,
-                    y: 1.5
                 }
             ],
             interaction: {
@@ -53,15 +51,11 @@ describe("Flot cursors", function () {
                     name: 'Blue cursor',
                     mode: 'xy',
                     color: 'blue',
-                    x: 3,
-                    y: 1.5
                 },
                 {
                     name: 'Red cursor',
                     mode: 'xy',
                     color: 'red',
-                    x: 150,
-                    y: 0
                 }
             ],
             interaction: {
@@ -87,7 +81,10 @@ describe("Flot cursors", function () {
         var cursors = plot.getCursors();
         expect(cursors.length).toBe(0);
 
-        plot.addCursor(7, 5, 'xy', 'Blue cursor', 'blue');
+        plot.addCursor('Blue cursor', 'xy', 'blue', {
+            relativeX: 7,
+            relativeY: 7
+        });
 
         cursors = plot.getCursors();
         expect(cursors.length).toBe(1);
@@ -127,8 +124,6 @@ describe("Flot cursors", function () {
                     name: 'Blue cursor',
                     mode: 'xy',
                     color: 'blue',
-                    x: 3,
-                    y: 1.5
                 }
             ],
             interaction: {
@@ -150,7 +145,6 @@ describe("Flot cursors", function () {
 
         expect(cursors[0].name).toBe('Red Cursor');
         expect(cursors[0].mode).toBe('x');
-        expect(cursors[0].x).toBe(3);
     });
 
     it('should be possible to specify the cursor shape');
@@ -160,15 +154,17 @@ describe("Flot cursors", function () {
     it('should change the mouse cursor on drag');
 
     describe('Intersections', function () {
-        xit('should find intersections with a plot', function (done) {
+        it('should find intersections with a plot', function (done) {
             plot = $.plot("#placeholder", [sampledata], {
                 cursors: [
                     {
                         name: 'Blue cursor',
                         mode: 'xy',
                         color: 'blue',
-                        x: 1,
-                        y: 0
+                        position: {
+                            x: 1,
+                            y: 0
+                        }
                     }
                 ],
                 interaction: {
@@ -182,20 +178,22 @@ describe("Flot cursors", function () {
 
                 expect(intersections.points.length).toBe(1);
                 expect(intersections.points[0].x).toBe(1);
-                expect(intersections.points[0].y).toBe(sampledata[1]);
+                expect(intersections.points[0].y).toBe(sampledata[1][1]);
                 done();
             }, 0);
         });
 
-        xit('should find intersections with multiple plots', function (done) {
-            plot = $.plot("#placeholder", [sampledata], {
+        it('should find intersections with multiple plots', function (done) {
+            plot = $.plot("#placeholder", [sampledata, sampledata2], {
                 cursors: [
                     {
                         name: 'Blue cursor',
                         mode: 'xy',
                         color: 'blue',
-                        x: 1,
-                        y: 0
+                        position: {
+                            x: 1,
+                            y: 0
+                        }
                     }
                 ],
                 interaction: {
@@ -207,9 +205,11 @@ describe("Flot cursors", function () {
                 var cursors = plot.getCursors();
                 var intersections = plot.getIntersections(cursors[0]);
 
-                expect(intersections.points.length).toBe(1);
+                expect(intersections.points.length).toBe(2);
                 expect(intersections.points[0].x).toBe(1);
-                expect(intersections.points[0].y).toBe(sampledata[1]);
+                expect(intersections.points[0].y).toBe(sampledata[1][1]);
+                expect(intersections.points[1].x).toBe(1);
+                expect(intersections.points[1].y).toBe(sampledata2[1][1]);
                 done();
             }, 0);
         });
@@ -220,7 +220,61 @@ describe("Flot cursors", function () {
     });
 
     describe('Positioning', function () {
-        it('should be possible to position the cursor relative to the canvas');
+        it('should be possible to position the cursor relative to the canvas', function (done) {
+            plot = $.plot("#placeholder", [sampledata2], {
+                cursors: [
+                    {
+                        name: 'Blue cursor',
+                        mode: 'xy',
+                        color: 'blue',
+                        position: {
+                            relativeX: 3,
+                            relativeY: 1.5
+                        }
+                    }
+                ],
+                interaction: {
+                    redrawOverlayInterval: 0
+                }
+            });
+
+            setTimeout(function () {
+                var cursors = plot.getCursors();
+                expect(cursors.length).toBe(1);
+                expect(cursors[0].x).toBe(3);
+                expect(cursors[0].y).toBe(1.5);
+                done();
+            }, 0);
+        });
+
+        it('Cursors positioned relative to the canvas should be constrained by the canvas size', function (done) {
+            plot = $.plot("#placeholder", [sampledata2], {
+                cursors: [
+                    {
+                        name: 'Blue cursor',
+                        mode: 'xy',
+                        color: 'blue',
+                        position: {
+                            relativeX: -30,
+                            relativeY: -40
+                        }
+                    }
+
+                ],
+                interaction: {
+                    redrawOverlayInterval: 0
+                }
+            });
+
+            setTimeout(function () {
+                var cursors = plot.getCursors();
+                expect(cursors.length).toBe(1);
+                expect(cursors[0].x).toBe(0);
+                expect(cursors[0].y).toBe(0);
+                done();
+            }, 0);
+        });
+
         it('should be possible to position the cursor relative to the axes');
         it('should be possible to position the cursor relative to any of the axes when having multiple ones');
         it('should be possible to drag cursors with the mouse');

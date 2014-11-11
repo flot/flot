@@ -11,11 +11,13 @@ cursors: [
         mode: null or "x" or "y" or "xy",
         color: color,
         lineWidth: number,
+        position: {...}
     },
     {
         mode: null or "x" or "y" or "xy",
         color: color,
         lineWidth: number,
+        position: {...}
     }
 ]
 
@@ -74,18 +76,32 @@ The plugin also adds some public methods:
             });
         };
 
+        var setPosition = function (cursor, pos) {
+            if (!pos)
+                return;
+
+            if (pos.relativeX && pos.relativeY) {
+                cursor.x = Math.max(0, Math.min(pos.relativeX, plot.width()));
+                cursor.y = Math.max(0, Math.min(pos.relativeY, plot.height()));
+            } else {
+                var o = plot.p2c(pos);
+                cursor.x = Math.max(0, Math.min(o.left, plot.width()));
+                cursor.y = Math.max(0, Math.min(o.top, plot.height()));
+            }
+        };
+
         plot.hooks.processOptions.push(function (plot) {
             plot.getOptions().cursors.forEach(function (cursor) {
                 var currentCursor = {
-                    x: -1,
-                    y: -1,
+                    x: 0,
+                    y: 0,
                     locked: true,
                     highlighted: false,
-                    mode: 'xy'
+                    mode: 'xy',
+                    position: cursor.position
                 };
 
-                currentCursor.x = cursor.x;
-                currentCursor.y = cursor.y;
+                setPosition(currentCursor, cursor.position);
 
                 currentCursor.name = cursor.name || ('unnamed ' + cursors.length);
                 cursors.push(currentCursor);
@@ -96,17 +112,19 @@ The plugin also adds some public methods:
             return cursors;
         };
 
-        plot.addCursor = function addCursor(x, y, mode, name, color) {
+        plot.addCursor = function addCursor(name, mode, color, pos) {
             var currentCursor = {
-                x: x,
-                y: y,
+                x: 0,
+                y: 0,
                 locked: true,
                 highlighted: false,
                 mode: mode,
-                color: color
+                color: color,
+                position: pos
             };
 
             currentCursor.name = name || ('unnamed ' + cursors.length);
+            setPosition(currentCursor, pos);
             cursors.push(currentCursor);
 
             plot.triggerRedrawOverlay();
@@ -127,6 +145,7 @@ The plugin also adds some public methods:
 
             if (index !== -1) {
                 mixin(options, cursors[index]);
+                setPosition(cursors[index], cursors[index].position);
                 plot.triggerRedrawOverlay();
             }
         };
@@ -232,8 +251,9 @@ The plugin also adds some public methods:
             });
 
             if (freeCursor) {
-                freeCursor.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
-                freeCursor.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+                freeCursor.x = freeCursor.position.relativeX = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
+                freeCursor.y = freeCursor.position.relativeY = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+
                 plot.triggerRedrawOverlay();
             }
         }
@@ -318,6 +338,8 @@ The plugin also adds some public methods:
                 ctx.save();
                 ctx.translate(plotOffset.left, plotOffset.top);
 
+                setPosition(cursor, cursor.position);
+
                 if (cursor.x != -1) {
                     var adj = c.lineWidth % 2 ? 0.5 : 0;
 
@@ -355,6 +377,7 @@ The plugin also adds some public methods:
             eventHolder.unbind("mouseup", onMouseUp);
             eventHolder.unbind("mouseout", onMouseOut);
             eventHolder.unbind("mousemove", onMouseMove);
+            eventHolder.unbind("cursorupdates");
         });
     }
 
