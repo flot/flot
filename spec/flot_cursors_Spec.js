@@ -1,4 +1,4 @@
-/* global $, describe, it, xit, after, afterEach, expect */
+/* global $, describe, it, xit, after, beforeEach, afterEach, expect, jasmine */
 /* jshint browser: true*/
 
 describe("Flot cursors", function () {
@@ -8,9 +8,13 @@ describe("Flot cursors", function () {
 
     var plot;
 
+    beforeEach(function () {
+        jasmine.clock().install();
+    });
     afterEach(function () {
         plot.shutdown();
         $('#placeholder').empty();
+        jasmine.clock().uninstall();
     });
 
     it('should be possible to specify a cursor when creating the plot', function () {
@@ -21,10 +25,7 @@ describe("Flot cursors", function () {
                     mode: 'xy',
                     color: 'blue',
                 }
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
+            ]
         });
 
         var cursors = plot.getCursors();
@@ -35,10 +36,7 @@ describe("Flot cursors", function () {
     it('should be possible to specify zero cursors when creating the plot', function () {
         plot = $.plot("#placeholder", [sampledata], {
             cursors: [
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
+            ]
         });
 
         var cursors = plot.getCursors();
@@ -58,10 +56,7 @@ describe("Flot cursors", function () {
                     mode: 'xy',
                     color: 'red',
                 }
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
+            ]
         });
 
         var cursors = plot.getCursors();
@@ -72,11 +67,7 @@ describe("Flot cursors", function () {
 
     it('should be possible to create a cursor programatically', function () {
         plot = $.plot("#placeholder", [sampledata], {
-            cursors: [
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
+            cursors: []
         });
 
         var cursors = plot.getCursors();
@@ -103,10 +94,7 @@ describe("Flot cursors", function () {
                     x: 3,
                     y: 1.5
                 }
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
+            ]
         });
 
         var cursors = plot.getCursors();
@@ -126,10 +114,7 @@ describe("Flot cursors", function () {
                     mode: 'xy',
                     color: 'blue',
                 }
-            ],
-            interaction: {
-                redrawOverlayInterval: 0
-            }
+            ]
         });
 
         var cursors = plot.getCursors();
@@ -150,15 +135,40 @@ describe("Flot cursors", function () {
 
     it('should be possible to specify the cursor shape');
     it('should display the cursor label when told so');
-    xit('should be highlighted on mouse over', function () {
+    it('should be highlighted on mouse over', function () {
+        plot = $.plot("#placeholder", [sampledata], {
+            cursors: [
+                {
+                    name: 'Blue cursor',
+                    mode: 'xy',
+                    color: 'blue',
+                    position: {
+                        relativeX: 50,
+                        relativeY: 60
+                    }
+                }
+            ]
+        });
 
+        var cursorX = plot.offset().left + 50;
+        var cursorY = plot.offset().top + 60;
+
+        jasmine.clock().tick(20);
+
+        $('#placeholder').find('.flot-overlay').trigger(new $.Event('mousemove', {
+            pageX: cursorX,
+            pageY: cursorY
+        }));
+
+        var cursor = plot.getCursors()[0];
+        expect(cursor.highlighted).toBe(true);
     });
 
     it('should change the mouse cursor on mouse over');
     it('should change the mouse cursor on drag');
 
     describe('Intersections', function () {
-        it('should find intersections with a plot', function (done) {
+        it('should find intersections with a plot', function () {
             plot = $.plot("#placeholder", [sampledata], {
                 cursors: [
                     {
@@ -170,24 +180,21 @@ describe("Flot cursors", function () {
                             y: 0
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
-            setTimeout(function () {
-                var cursors = plot.getCursors();
-                var intersections = plot.getIntersections(cursors[0]);
+            jasmine.clock().tick(20);
 
-                expect(intersections.points.length).toBe(1);
-                expect(intersections.points[0].x).toBe(1);
-                expect(intersections.points[0].y).toBe(sampledata[1][1]);
-                done();
-            }, 0);
+            var cursors = plot.getCursors();
+            var intersections = plot.getIntersections(cursors[0]);
+
+            expect(intersections.points.length).toBe(1);
+            expect(intersections.points[0].x).toBe(1);
+            expect(intersections.points[0].y).toBe(sampledata[1][1]);
+
         });
 
-        it('should find intersections with multiple plots', function (done) {
+        it('should find intersections with multiple plots', function () {
             plot = $.plot("#placeholder", [sampledata, sampledata2], {
                 cursors: [
                     {
@@ -199,26 +206,22 @@ describe("Flot cursors", function () {
                             y: 0
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
-            setTimeout(function () {
-                var cursors = plot.getCursors();
-                var intersections = plot.getIntersections(cursors[0]);
+            jasmine.clock().tick(20);
 
-                expect(intersections.points.length).toBe(2);
-                expect(intersections.points[0].x).toBe(1);
-                expect(intersections.points[0].y).toBe(sampledata[1][1]);
-                expect(intersections.points[1].x).toBe(1);
-                expect(intersections.points[1].y).toBe(sampledata2[1][1]);
-                done();
-            }, 0);
+            var cursors = plot.getCursors();
+            var intersections = plot.getIntersections(cursors[0]);
+
+            expect(intersections.points.length).toBe(2);
+            expect(intersections.points[0].x).toBe(1);
+            expect(intersections.points[0].y).toBe(sampledata[1][1]);
+            expect(intersections.points[1].x).toBe(1);
+            expect(intersections.points[1].y).toBe(sampledata2[1][1]);
         });
 
-        it('should interpolate the intersections properly with linear scales', function (done) {
+        it('should interpolate the intersections properly with linear scales', function () {
             plot = $.plot("#placeholder", [sampledata], {
                 cursors: [
                     {
@@ -230,27 +233,23 @@ describe("Flot cursors", function () {
                             y: 0
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
-            setTimeout(function () {
-                var cursors = plot.getCursors();
-                var intersections = plot.getIntersections(cursors[0]);
-                var expectedY = sampledata[0][1] + (sampledata[1][1] - sampledata[0][1]) / 2;
+            jasmine.clock().tick(20);
 
-                expect(intersections.points[0].x).toBe(0.5);
-                expect(intersections.points[0].y).toBe(expectedY);
-                done();
-            }, 0);
+            var cursors = plot.getCursors();
+            var intersections = plot.getIntersections(cursors[0]);
+            var expectedY = sampledata[0][1] + (sampledata[1][1] - sampledata[0][1]) / 2;
+
+            expect(intersections.points[0].x).toBe(0.5);
+            expect(intersections.points[0].y).toBe(expectedY);
         });
 
         it('should interpolate the intersections properly with log scales');
         it('should interpolate the intersections properly with mixed scales');
 
-        it('should recompute intersections on data update', function (done) {
+        it('should recompute intersections on data update', function () {
             plot = $.plot("#placeholder", [[[0, 1], [1, 5]]], {
                 cursors: [
                     {
@@ -262,10 +261,7 @@ describe("Flot cursors", function () {
                             y: 0
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
             var updateChart = function () {
@@ -274,31 +270,26 @@ describe("Flot cursors", function () {
                 plot.draw();
             };
 
-            var verifyIntersections = function () {
-                var cursors = plot.getCursors();
-                var intersections = plot.getIntersections(cursors[0]);
+            jasmine.clock().tick(20);
 
-                expect(intersections.points[0].x).toBe(0.5);
-                expect(intersections.points[0].y).toBe(4);
-                done();
-            };
+            var cursors = plot.getCursors();
+            var intersections = plot.getIntersections(cursors[0]);
 
-            setTimeout(function () {
-                var cursors = plot.getCursors();
-                var intersections = plot.getIntersections(cursors[0]);
+            expect(intersections.points[0].x).toBe(0.5);
+            expect(intersections.points[0].y).toBe(3);
+            updateChart();
 
-                expect(intersections.points[0].x).toBe(0.5);
-                expect(intersections.points[0].y).toBe(3);
-                updateChart();
-                setTimeout(function () {
-                    verifyIntersections();
-                }, 0);
-            }, 0);
+            jasmine.clock().tick(20);
+
+            intersections = plot.getIntersections(cursors[0]);
+
+            expect(intersections.points[0].x).toBe(0.5);
+            expect(intersections.points[0].y).toBe(4);
         });
     });
 
     describe('Positioning', function () {
-        it('should be possible to position the cursor relative to the canvas', function (done) {
+        it('should be possible to position the cursor relative to the canvas', function () {
             plot = $.plot("#placeholder", [sampledata2], {
                 cursors: [
                     {
@@ -310,22 +301,18 @@ describe("Flot cursors", function () {
                             relativeY: 1.5
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
-            setTimeout(function () {
-                var cursors = plot.getCursors();
-                expect(cursors.length).toBe(1);
-                expect(cursors[0].x).toBe(3);
-                expect(cursors[0].y).toBe(1.5);
-                done();
-            }, 0);
+            jasmine.clock().tick(20);
+
+            var cursors = plot.getCursors();
+            expect(cursors.length).toBe(1);
+            expect(cursors[0].x).toBe(3);
+            expect(cursors[0].y).toBe(1.5);
         });
 
-        it('Cursors positioned relative to the canvas should be constrained by the canvas size', function (done) {
+        it('Cursors positioned relative to the canvas should be constrained by the canvas size', function () {
             plot = $.plot("#placeholder", [sampledata2], {
                 cursors: [
                     {
@@ -337,22 +324,17 @@ describe("Flot cursors", function () {
                             relativeY: -40
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
-            setTimeout(function () {
-                var cursors = plot.getCursors();
-                expect(cursors.length).toBe(1);
-                expect(cursors[0].x).toBe(0);
-                expect(cursors[0].y).toBe(0);
-                done();
-            }, 0);
+            jasmine.clock().tick(20);
+            var cursors = plot.getCursors();
+            expect(cursors.length).toBe(1);
+            expect(cursors[0].x).toBe(0);
+            expect(cursors[0].y).toBe(0);
         });
 
-        it('should be possible to position the cursor relative to the axes', function (done) {
+        it('should be possible to position the cursor relative to the axes', function () {
             plot = $.plot("#placeholder", [sampledata2], {
                 cursors: [
                     {
@@ -364,28 +346,24 @@ describe("Flot cursors", function () {
                             y: 2
                         }
                     }
-                ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                }
+                ]
             });
 
-            setTimeout(function () {
-                var pos = plot.p2c({
-                    x: 1,
-                    y: 2
-                });
-                var expectedX = pos.left;
-                var expectedY = pos.top;
-                var cursors = plot.getCursors();
-                expect(cursors.length).toBe(1);
-                expect(cursors[0].x).toBe(expectedX);
-                expect(cursors[0].y).toBe(expectedY);
-                done();
-            }, 0);
+            jasmine.clock().tick(20);
+
+            var pos = plot.p2c({
+                x: 1,
+                y: 2
+            });
+            var expectedX = pos.left;
+            var expectedY = pos.top;
+            var cursors = plot.getCursors();
+            expect(cursors.length).toBe(1);
+            expect(cursors[0].x).toBe(expectedX);
+            expect(cursors[0].y).toBe(expectedY);
         });
 
-        it('should be possible to position the cursor relative to any of the axes when having multiple ones', function (done) {
+        it('should be possible to position the cursor relative to any of the axes when having multiple ones', function () {
             plot = $.plot("#placeholder", [{
                 data: sampledata,
                 xaxis: 1,
@@ -415,9 +393,6 @@ describe("Flot cursors", function () {
                         }
                     }
                 ],
-                interaction: {
-                    redrawOverlayInterval: 0
-                },
                 xaxes: [
                     {
                         position: 'bottom'
@@ -436,30 +411,32 @@ describe("Flot cursors", function () {
                 ]
             });
 
-            setTimeout(function () {
-                var pos1 = plot.p2c({
-                    x: 1,
-                    y: 2
-                });
+            jasmine.clock().tick(20);
 
-                var pos2 = plot.p2c({
-                    x2: 40,
-                    y2: 12
-                });
+            var pos1 = plot.p2c({
+                x: 1,
+                y: 2
+            });
 
-                var expectedX1 = pos1.left;
-                var expectedY1 = pos1.top;
-                var expectedX2 = pos2.left;
-                var expectedY2 = pos2.top;
-                var cursors = plot.getCursors();
-                expect(cursors.length).toBe(2);
-                expect(cursors[0].x).toBe(expectedX1);
-                expect(cursors[0].y).toBe(expectedY1);
-                expect(cursors[1].x).toBe(expectedX2);
-                expect(cursors[1].y).toBe(expectedY2);
-                done();
-            }, 0);
+            var pos2 = plot.p2c({
+                x2: 40,
+                y2: 12
+            });
+
+            var expectedX1 = pos1.left;
+            var expectedY1 = pos1.top;
+            var expectedX2 = pos2.left;
+            var expectedY2 = pos2.top;
+            var cursors = plot.getCursors();
+            expect(cursors.length).toBe(2);
+            expect(cursors[0].x).toBe(expectedX1);
+            expect(cursors[0].y).toBe(expectedY1);
+            expect(cursors[1].x).toBe(expectedX2);
+            expect(cursors[1].y).toBe(expectedY2);
         });
+
+        it('should be become floating on mouse down');
+        it('should be become nonfloating on mouse up when floating');
 
         it('should be possible to drag cursors with the mouse');
         it('should be possible to drag cursors with the mouse while the chart updates');
