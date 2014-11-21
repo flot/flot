@@ -476,6 +476,7 @@ Licensed under the MIT license.
 
 	Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
 		if (text == null) {
+		var positions;
 			var layerCache = this._textCache[layer];
 			if (layerCache != null) {
 				for (var styleKey in layerCache) {
@@ -483,7 +484,7 @@ Licensed under the MIT license.
 						var styleCache = layerCache[styleKey];
 						for (var key in styleCache) {
 							if (hasOwnProperty.call(styleCache, key)) {
-								var positions = styleCache[key].positions;
+								positions = styleCache[key].positions;
 								for (var i = 0, position; position = positions[i]; i++) {
 									position.active = false;
 								}
@@ -493,7 +494,7 @@ Licensed under the MIT license.
 				}
 			}
 		} else {
-			var positions = this.getTextInfo(layer, text, font, angle).positions;
+			positions = this.getTextInfo(layer, text, font, angle).positions;
 			for (var i = 0, position; position = positions[i]; i++) {
 				if (position.x == x && position.y == y) {
 					position.active = false;
