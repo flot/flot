@@ -693,8 +693,8 @@ Licensed under the MIT license.
             plot = null;
         };
         plot.resize = function () {
-        	var width = placeholder.width(),
-        		height = placeholder.height();
+					var width = placeholder.width(),
+						height = placeholder.height();
             surface.resize(width, height);
             overlay.resize(width, height);
         };
@@ -744,7 +744,7 @@ Licensed under the MIT license.
             // not expected behavior; avoid it by replacing them here.
 
             if (opts && opts.colors) {
-            	options.colors = opts.colors;
+							options.colors = opts.colors;
             }
 
             if (options.xaxis.color == null)
