@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Flot Examples: Toggle Legend</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.togglelegend.js"></script>
+	<script type="text/javascript">
+
+	$(function() {
+
+		var d1 = { label: "Series 1", data: [ ]},
+			d2 = { label: "Series 2", data: [ ]},
+			d3 = { label: "Series 3", data: [ ]};
+
+		for ( var i = 0; i <= 10; i++ )
+			d1.data.push( [i, parseInt(Math.random() * 30)] );
+
+		for ( var i = 0; i <= 10; i++ )
+			d2.data.push( [i, parseInt(Math.random() * 30)] );
+
+		for ( var i = 0; i <= 10; i++ )
+			d3.data.push( [i, parseInt(Math.random() * 30)] );
+
+		$.plot("#placeholder", [ d1, d2, d3 ]);
+
+		// Add the Flot version string to the footer
+
+		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+	});
+
+	</script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Toggling series from the legend</h2>
+	</div>
+
+	<div id="content">
+
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+
+		<p>The toggleLegend plugin allows you to toggle the visibility of series on the chart from the legend. It also provides a mechanism for showing which series are visible in the legend.</p>
+
+		<p>Click on a series in the legend to toggle it on or off.</p>
+
+		<p>The axes always retain their original scale when series are hidden, so as not to make the display of data more confusing.</p>
+
+	</div>
+
+	<div id="footer">
+		Copyright &copy; 2007 - 2014 IOLA and Ole Laursen
+	</div>
+
+</body>
+</html>
