@@ -1,3 +1,51 @@
+## Flot 0.8.3 ##
+
+### Changes ###
+
+- Updated example code to avoid encouraging unnecessary re-plots.
+  (patch by soenter, pull request #1221)
+
+### Bug fixes ###
+
+ - Added a work-around to disable the allocation of extra space for first and
+   last axis ticks, allowing plots to span the full width of their container.
+   A proper solution for this bug will be implemented in the 0.9 release.
+   (reported by Josh Pigford and andig, issue #1212, pull request #1290)
+
+ - Fixed a regression introduced in 0.8.1, where the last tick label would
+   sometimes wrap rather than extending the plot's offset to create space.
+   (reported by Elite Gamer, issue #1283)
+
+ - Fixed a regression introduced in 0.8.2, where the resize plugin would use
+   unexpectedly high amounts of CPU even when idle.
+   (reported by tommie, issue #1277, pull request #1289)
+
+ - Fixed the selection example to work with jQuery 1.9.x and later.
+   (reported by EGLadona and dmfalke, issue #1250, pull request #1285)
+
+ - Added a detach shim to fix support for jQuery versions earlier than 1.4.x.
+   (reported by ngavard, issue #1240, pull request #1286)
+
+ - Fixed a rare 'Uncaught TypeError' when using the resize plugin in IE 7/8.
+   (reported by tleish, issue #1265, pull request #1289)
+
+ - Fixed zoom constraints to apply only in the direction of the zoom.
+   (patch by Neil Katin, issue #1204, pull request #1205)
+
+ - Markings lines are no longer blurry when drawn on pixel boundaries.
+   (reported by btccointicker and Rouillard, issue #1210)
+
+ - Don't discard original pie data-series values when combining slices.
+   (patch by Phil Tsarik, pull request #1238)
+
+ - Fixed broken auto-scale behavior when using deprecated [x|y]2axis options.
+   (reported by jorese, issue #1228, pull request #1284)
+
+ - Exposed the dateGenerator function on the plot object, as it used to be
+   before time-mode was moved into a separate plugin.
+   (patch by Paolo Valleri, pull request #1028)
+
+
 ## Flot 0.8.2 ##
 
 ### Changes ###
