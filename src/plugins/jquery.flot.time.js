@@ -183,6 +183,8 @@ API.txt for details.
             d.setTimezone(opts.timezone);
             d.setTime(ts);
             return d;
+        } else if (typeof moment != "undefined" && typeof moment.tz != "undefined") {
+        		return moment.utc(ts).tz(opts.timezone).toDate();
         } else {
             return makeUtcWrapper(new Date(ts));
         }
