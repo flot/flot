@@ -1837,18 +1837,21 @@ Licensed under the MIT license.
             axis.ticks = [];
             for (i = 0; i < ticks.length; ++i) {
                 var label = null;
+                var showGrid = true;
                 var t = ticks[i];
                 if (typeof t == "object") {
                     v = +t[0];
                     if (t.length > 1)
                         label = t[1];
+                    if (t.length > 2)
+                        showGrid = t[2];
                 }
                 else
                     v = +t;
                 if (label == null)
                     label = axis.tickFormatter(v, axis);
                 if (!isNaN(v))
-                    axis.ticks.push({ v: v, label: label });
+                    axis.ticks.push({ v: v, label: label, showGrid: showGrid });
             }
         }
 
@@ -2079,6 +2082,11 @@ Licensed under the MIT license.
 
                 ctx.beginPath();
                 for (i = 0; i < axis.ticks.length; ++i) {
+                    // Skip entries where showGrid is false
+                    var showGrid = axis.ticks[i].showGrid;
+                    if (showGrid === false)
+                        continue;
+
                     var v = axis.ticks[i].v;
 
                     xoff = yoff = 0;
