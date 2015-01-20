@@ -9,7 +9,8 @@ selection: {
 	mode: null or "x" or "y" or "xy",
 	color: color,
 	shape: "round" or "miter" or "bevel",
-	minSize: number of pixels
+	minSize: number of pixels,
+    borderWidth: number of pixels for width of selection border
 }
 
 Selection support is enabled by setting the mode to one of "x", "y" or "xy".
@@ -318,7 +319,7 @@ The plugin allso adds the following methods to the plot object:
                 var c = $.color.parse(o.selection.color);
 
                 ctx.strokeStyle = c.scale('a', 0.8).toString();
-                ctx.lineWidth = 1;
+                ctx.lineWidth = o.selection.borderWidth;
                 ctx.lineJoin = o.selection.shape;
                 ctx.fillStyle = c.scale('a', 0.4).toString();
 
@@ -328,7 +329,9 @@ The plugin allso adds the following methods to the plot object:
                     h = Math.abs(selection.second.y - selection.first.y) - 1;
 
                 ctx.fillRect(x, y, w, h);
-                ctx.strokeRect(x, y, w, h);
+                if (o.selection.borderWidth) {
+                    ctx.strokeRect(x, y, w, h);
+                }
 
                 ctx.restore();
             }
@@ -351,7 +354,8 @@ The plugin allso adds the following methods to the plot object:
                 mode: null, // one of null, "x", "y" or "xy"
                 color: "#e8cfac",
                 shape: "round", // one of "round", "miter", or "bevel"
-                minSize: 5 // minimum number of pixels
+                minSize: 5, // minimum number of pixels
+                borderWidth: 1, // selection border width
             }
         },
         name: 'selection',
