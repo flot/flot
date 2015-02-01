@@ -121,11 +121,11 @@ The plugin allso adds the following methods to the plot object:
             document.body.focus();
 
             // prevent text selection and drag in old-school browsers
-            if (document.onselectstart !== undefined && savedhandlers.onselectstart === null) {
+            if (document.onselectstart !== undefined && savedhandlers.onselectstart == null) {
                 savedhandlers.onselectstart = document.onselectstart;
                 document.onselectstart = function() { return false; };
             }
-            if (document.ondrag !== undefined && savedhandlers.ondrag === null) {
+            if (document.ondrag !== undefined && savedhandlers.ondrag == null) {
                 savedhandlers.ondrag = document.ondrag;
                 document.ondrag = function() { return false; };
             }
