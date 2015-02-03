@@ -633,6 +633,7 @@ Licensed under the MIT license.
             drawOverlay: [],
             shutdown: []
         },
+        redrawTimeout = null,
         plot = this;
 
         // public functions
@@ -2822,8 +2823,7 @@ Licensed under the MIT license.
 
         // interactive features
 
-        var highlights = [],
-            redrawTimeout = null;
+        var highlights = [];
 
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
