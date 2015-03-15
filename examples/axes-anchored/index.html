@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Flot Examples: Anchored Axes</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="../../lib/jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../lib/jquery.colorhelpers.js"></script>
+	<script language="javascript" type="text/javascript" src="../../src/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../src/plugins/jquery.flot.time.js"></script>
+	<script type="text/javascript">
+
+	$(function() {
+		var oilprices = [[1167692400000,61.05777], [1167778800000,58.32], [1167865200000,57.35], [1167951600000,56.31], [1168210800000,55.55], [1168297200000,55.64], [1168383600000,54.02], [1168470000000,51.88], [1168556400000,52.99], [1168815600000,52.99], [1168902000000,51.21], [1168988400000,52.24], [1169074800000,50.48], [1169161200000,51.99], [1169420400000,51.13], [1169506800000,55.04], [1169593200000,55.37], [1169679600000,54.23], [1169766000000,55.42], [1170025200000,54.01], [1170111600000,56.97], [1170198000000,58.14], [1170284400000,58.14], [1170370800000,59.02], [1170630000000,58.74]];
+		var exchangerates = [[1167606000000,0.7580], [1167692400000,0.7580], [1167778800000,0.75470], [1167865200000,0.75490], [1167951600000,0.76130], [1168038000000,0.76550], [1168124400000,0.76930], [1168210800000,0.76940], [1168297200000,0.76880], [1168383600000,0.76780], [1168470000000,0.77080], [1168556400000,0.77270], [1168642800000,0.77490], [1168729200000,0.77410], [1168815600000,0.77410], [1168902000000,0.77320], [1168988400000,0.77270], [1169074800000,0.77370], [1169161200000,0.77240], [1169247600000,0.77120], [1169334000000,0.7720], [1169420400000,0.77210], [1169506800000,0.77170], [1169593200000,0.77040], [1169679600000,0.7690], [1169766000000,0.77110], [1169852400000,0.7740], [1169938800000,0.77450], [1170025200000,0.77450], [1170111600000,0.7740], [1170198000000,0.77160], [1170284400000,0.77130], [1170370800000,0.76780], [1170457200000,0.76880]];
+
+		$("#checkbox").click(function () {
+			var checked = $(this).prop("checked");
+			doPlot(checked);
+		});
+
+		function doPlot(anchored) {
+			$.plot("#placeholder", [
+				{ data: oilprices, label: "Price" },
+				{ data: exchangerates, label: "Rate", yaxis: 2 }
+			], {
+				grid: {anchorAxes: anchored},
+				xaxes: [ { mode: "time" } ],
+				yaxes: [ { anchorStart: 0, anchorEnd: 45 }, { anchorStart: 55, anchorEnd: 100 } ]
+			});
+		}
+
+		doPlot(true);
+	});
+
+	</script>
+</head>
+<body>
+	<div id="header">
+		<h2>Anchored axes</h2>
+	</div>
+
+	<div id="content">	
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+
+		<p>Multiple axes can be anchored to the grid edge. You can e.g. create a chart with multiple Y axes where one axis is above each other. Series line (or area) will never cross the other one. The start/end positions of axis can be specified in % as options.</p>
+
+		<p><input id="checkbox" type="checkbox" checked="checked">Anchored</input></p>
+
+	</div>
+</body>
+</html>
