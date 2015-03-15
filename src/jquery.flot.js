@@ -2134,6 +2134,11 @@ Licensed under the MIT license.
                 // heuristic based on the model a*sqrt(x) fitted to
                 // some data points that seemed reasonable
                 noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
+
+                // reduce tick count when anchored axes
+                if (options.grid.anchorAxes) {
+                    noTicks *= (opts.anchorEnd - opts.anchorStart) / 100;
+                }
             }
 
             var delta = (axis.max - axis.min) / noTicks,
