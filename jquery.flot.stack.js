@@ -47,7 +47,7 @@ charts or filled areas).
                 if (s == allseries[i])
                     break;
                 
-                if (allseries[i].stack == s.stack)
+                if (allseries[i].stack == s.stack && (allseries[i].points.show || allseries[i].lines.show || allseries[i].bars.show))
                     res = allseries[i];
             }
             
@@ -61,6 +61,10 @@ charts or filled areas).
             var other = findMatchingSeries(s, plot.getData());
             if (!other)
                 return;
+
+            if (!s.points.show && !s.lines.show && !s.bars.show) {
+                return;
+            }
 
             var ps = datapoints.pointsize,
                 points = datapoints.points,
