@@ -581,7 +581,7 @@ Licensed under the MIT license.
                         barWidth: 1, // in units of the x axis
                         fill: true,
                         fillColor: null,
-                        align: "left", // "left", "right", or "center"
+                        align: -0.5, // "left", "right", or "center", in units of the x axis
                         horizontal: false,
                         zero: true
                     },
@@ -1077,6 +1077,11 @@ Licensed under the MIT license.
                 // setup axes
                 s.xaxis = getOrCreateAxis(xaxes, axisNumber(s, "x"));
                 s.yaxis = getOrCreateAxis(yaxes, axisNumber(s, "y"));
+                
+                // count available bars
+                if (s.bars.show) {
+					availableBars.push(s);
+				}
             }
         }
 
@@ -1086,7 +1091,7 @@ Licensed under the MIT license.
                 fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m, length,
                 s, points, ps, x, y, axis, val, f, p,
-                data, format;
+                data, format, bwDelta = 0, curDelta = 0;
 
             function updateAxis(axis, min, max) {
                 if (min < axis.datamin && min != -fakeInfinity)
@@ -1109,7 +1114,7 @@ Licensed under the MIT license.
                 executeHooks(hooks.processRawData, [ s, s.data, s.datapoints ]);
             }
 
-            // first pass: clean and copy data
+            // first pass: clean and copy data, count available bars' width
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
 
@@ -1216,6 +1221,10 @@ Licensed under the MIT license.
                         }
                     }
                 }
+                
+                if (s.bars.show) {
+					bwDelta += s.bars.barWidth;
+				}
             }
 
             // give the hooks a chance to run
@@ -1264,16 +1273,17 @@ Licensed under the MIT license.
                     // make sure we got room for the bar on the dancing floor
                     var delta;
 
-                    switch (s.bars.align) {
-                        case "left":
-                            delta = 0;
-                            break;
-                        case "right":
-                            delta = -s.bars.barWidth;
-                            break;
-                        default:
-                            delta = -s.bars.barWidth / 2;
-                    }
+                    //switch (s.bars.align) {
+                    //    case "left":
+                    //        delta = 0;
+                    //       break;
+                    //    case "right":
+                    //        delta = -s.bars.barWidth;
+                    //        break;
+                    //    default:
+                    //        delta = -s.bars.barWidth / 2;
+                    //}
+                    s.bars.align = delta = curDelta - bwDelta / 2;
 
                     if (s.bars.horizontal) {
                         ymin += delta;
@@ -1283,6 +1293,7 @@ Licensed under the MIT license.
                         xmin += delta;
                         xmax += delta + s.bars.barWidth;
                     }
+                    curDelta += s.bars.barWidth;
                 }
 
                 updateAxis(s.xaxis, xmin, xmax);
@@ -2677,18 +2688,18 @@ Licensed under the MIT license.
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
 
-            var barLeft;
+            var barLeft = series.bars.align;
 
-            switch (series.bars.align) {
-                case "left":
-                    barLeft = 0;
-                    break;
-                case "right":
-                    barLeft = -series.bars.barWidth;
-                    break;
-                default:
-                    barLeft = -series.bars.barWidth / 2;
-            }
+            //switch (series.bars.align) {
+			//    case "left":
+			//        barLeft = 0;
+			//        break;
+			//    case "right":
+			//        barLeft = -series.bars.barWidth;
+			//        break;
+			//    default:
+			//        barLeft = -series.bars.barWidth / 2;
+			//}
 
             var fillStyleCallback = series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null;
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
@@ -2881,18 +2892,18 @@ Licensed under the MIT license.
 
                 if (s.bars.show && !item) { // no other point can be nearby
 
-                    var barLeft, barRight;
+                    var barLeft = s.bars.align, barRight;
 
-                    switch (s.bars.align) {
-                        case "left":
-                            barLeft = 0;
-                            break;
-                        case "right":
-                            barLeft = -s.bars.barWidth;
-                            break;
-                        default:
-                            barLeft = -s.bars.barWidth / 2;
-                    }
+					//switch (s.bars.align) {
+					//    case "left":
+					//        barLeft = 0;
+					//        break;
+					//    case "right":
+					//        barLeft = -s.bars.barWidth;
+					//        break;
+					//    default:
+					//        barLeft = -s.bars.barWidth / 2;
+					//}
 
                     barRight = barLeft + s.bars.barWidth;
 
@@ -3092,18 +3103,18 @@ Licensed under the MIT license.
         function drawBarHighlight(series, point) {
             var highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor : $.color.parse(series.color).scale('a', 0.5).toString(),
                 fillStyle = highlightColor,
-                barLeft;
+                barLeft = series.bars.align;
 
-            switch (series.bars.align) {
-                case "left":
-                    barLeft = 0;
-                    break;
-                case "right":
-                    barLeft = -series.bars.barWidth;
-                    break;
-                default:
-                    barLeft = -series.bars.barWidth / 2;
-            }
+			//switch (series.bars.align) {
+			//    case "left":
+			//        barLeft = 0;
+			//        break;
+			//    case "right":
+			//        barLeft = -series.bars.barWidth;
+			//        break;
+			//    default:
+			//        barLeft = -series.bars.barWidth / 2;
+			//}
 
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = highlightColor;
