@@ -2582,6 +2582,9 @@ Licensed under the MIT license.
             if (xequal || yequal) {
                 var lineWidth = m.lineWidth || options.grid.markingsLineWidth,
                     subPixel = lineWidth % 2 ? 0.5 : 0;
+                if (m.dash) {
+                    ctx.setLineDash(m.dash===true ? [3,3] : m.dash);
+                }
                 ctx.beginPath();
                 ctx.strokeStyle = m.color || options.grid.markingsColor;
                 ctx.lineWidth = lineWidth;
@@ -2593,6 +2596,9 @@ Licensed under the MIT license.
                     ctx.lineTo(xrange.to, yrange.to + subPixel);
                 }
                 ctx.stroke();
+                if (m.dash) {
+                    ctx.setLineDash([]);
+                }
             } else {
                 ctx.fillStyle = m.color || options.grid.markingsColor;
                 if (m.rounded) {
