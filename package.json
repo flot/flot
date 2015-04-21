@@ -1,11 +1,52 @@
 {
-	"name": "Flot",
-	"version": "0.8.3",
-	"main": "jquery.flot.js",
-	"scripts": {
-		"test": "make test"
-	},
-	"devDependencies": {
-		"jshint": "0.9.1"
-	}
+  "name": "flot",
+  "version": "0.9.0-alpha",
+  "main": "jquery.flot.js",
+  "scripts": {
+    "test": "grunt jshint"
+  },
+  "description": "Flot is a pure JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks and interactive features.",
+  "directories": {
+    "example": "examples"
+  },
+  "homepage": "http://www.flotcharts.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flot/flot.git"
+  },
+  "keywords": [
+    "chart",
+    "plot",
+    "graph",
+    "visualization",
+    "canvas",
+    "graphics"
+  ],
+  "author": {
+    "name": "Ole Laursen",
+    "url": "https://github.com/OleLaursen"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/flot/flot/blob/master/LICENSE.txt"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/flot/flot/issues"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-jscs-checker": "~0.4.1"
+  },
+  "maintainers": [
+    {
+      "name": "David Schnur",
+      "email": "dnschnur@gmail.com",
+      "url": "http://github.com/dnschnur"
+    }
+  ]
 }

@@ -245,60 +245,63 @@ xaxis, yaxis: {
     show: null or true/false
     position: "bottom" or "top" or "left" or "right"
     mode: null or "time" ("time" requires jquery.flot.time.js plugin)
-    timezone: null, "browser" or timezone (only makes sense for mode: "time")
+    timezone: null or "browser" or timezone (only used with mode: "time")
 
     color: null or color spec
-    tickColor: null or color spec
-    font: null or font spec object
+    font: null or font-options object
 
     min: null or number
     max: null or number
     autoscaleMargin: null or number
-    
+
     transform: null or fn: number -> number
     inverseTransform: null or fn: number -> number
-    
+
     ticks: null or number or ticks array or (fn: axis -> ticks array)
     tickSize: number or array
     minTickSize: number or array
-    tickFormatter: (fn: number, object -> string) or string
     tickDecimals: null or number
+    tickFormatter: (fn: number, object -> string) or string
 
-    labelWidth: null or number
-    labelHeight: null or number
-    reserveSpace: null or true
-    
+    tickColor: null or color spec
     tickLength: null or number
 
+    tickWidth: null or number
+    tickHeight: null or number
+    tickFont: null or font-options object
+
+    label: null or string
+    labelFont: null or font spec object
+    labelPadding: null or number
+
     alignTicksWithAxis: null or number
+    reserveSpace: null or true
 }
 ```
 
-All axes have the same kind of options. The following describes how to
-configure one axis, see below for what to do if you've got more than
-one x axis or y axis.
+All axes share the same set of options. The following descriptions are for a
+single axis; read further down for how to create multiple x-axes or y-axes.
 
 If you don't set the "show" option (i.e. it is null), visibility is
-auto-detected, i.e. the axis will show up if there's data associated
-with it. You can override this by setting the "show" option to true or
-false.
+auto-detected, i.e. the axis will show up only if there's data associated
+with it. You can override this by setting "show" to true or false.
 
-The "position" option specifies where the axis is placed, bottom or
-top for x axes, left or right for y axes. The "mode" option determines
-how the data is interpreted, the default of null means as decimal
-numbers. Use "time" for time series data; see the time series data
-section. The time plugin (jquery.flot.time.js) is required for time
-series support.
+The "position" option specifies where the axis is placed; bottom or top for x
+axes, and left or right for y axes.
 
-The "color" option determines the color of the line and ticks for the axis, and
-defaults to the grid color with transparency. For more fine-grained control you
-can also set the color of the ticks separately with "tickColor".
+The "mode" option determines how the data is interpreted, the default of null
+interprets it as decimal numbers, while "time" interprets it as time series
+data. See the time series data section for more information, and note that
+the time plugin (jquery.flot.time.js) is required for time series support.
 
-You can customize the font and color used to draw the axis tick labels with CSS
-or directly via the "font" option. When "font" is null - the default - each
-tick label is given the 'flot-tick-label' class. For compatibility with Flot
-0.7 and earlier the labels are also given the 'tickLabel' class, but this is
-deprecated and scheduled to be removed with the release of version 1.0.0.
+The "color" option determines the color of the axis line and defaults for the
+tick markers and label text. It defaults to the grid color with transparency.
+
+You can customize the font and color used to draw axis text with CSS or via
+the "font" option. When "font" is null (the default) tick labels are assigned
+the 'flot-tick-label' class. For compatibility with Flot 0.7 and earlier the
+labels are also assigned the 'tickLabel' class, but this is deprecated and
+scheduled to be removed with the release of version 1.0.0.
 
 To enable more granular control over styles, labels are divided between a set
 of text containers, with each holding the labels for one axis. These containers
@@ -313,7 +316,7 @@ labels for a simple plot with only a single x-axis might look like this:
 </div>
 ```
 
-For direct control over label styles you can also provide "font" as an object
+For direct control over text styles you can also provide "font" as an object
 with this format:
 
 ```js
@@ -331,28 +334,25 @@ with this format:
 The size and lineHeight must be expressed in pixels; CSS units such as 'em'
 or 'smaller' are not allowed.
 
-The options "min"/"max" are the precise minimum/maximum value on the
-scale. If you don't specify either of them, a value will automatically
-be chosen based on the minimum/maximum data values. Note that Flot
-always examines all the data values you feed to it, even if a
-restriction on another axis may make some of them invisible (this
-makes interactive use more stable).
+The "min" and "max" options specify the precise minimum/maximum value on the
+scale. If you don't specify either of them, Flot will automatically choose a
+value based on the min/max values in the data. Note that Flot always examines
+all the data values you feed to it, even if a restriction on another axis may
+make some of them invisible (this makes interactive use more stable).
 
-The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
-that the scaling algorithm will add to avoid that the outermost points
-ends up on the grid border. Note that this margin is only applied when
-a min or max value is not explicitly set. If a margin is specified,
-the plot will furthermore extend the axis end-point to the nearest
-whole tick. The default value is "null" for the x axes and 0.02 for y
-axes which seems appropriate for most cases.
+The "autoscaleMargin" option is a bit esoteric: it's the fraction of margin
+that the scaling algorithm will add to avoid having the outermost points end
+up on the grid border. Note that this margin is only applied when a min or
+max value is not explicitly set. If a margin is specified, the plot will also
+extend the axis end-point to the nearest whole tick. The default value is null
+for the x-axes and 0.02 for y-axes; this seems appropriate for most cases.
 
-"transform" and "inverseTransform" are callbacks you can put in to
-change the way the data is drawn. You can design a function to
-compress or expand certain parts of the axis non-linearly, e.g.
-suppress weekends or compress far away points with a logarithm or some
-other means. When Flot draws the plot, each value is first put through
-the transform function. Here's an example, the x axis can be turned
-into a natural logarithm axis with the following code:
+"transform" and "inverseTransform" are callbacks that you can use to change
+how the data is drawn. You can design a function to compress or expand parts
+of the axis non-linearly, e.g. suppress weekends or compress far-away points
+with a logarithm or some other means. When Flot draws the plot, each value is
+first put through the transform function. For example, this is how one would
+implement a log scale on the x-axis:
 
 ```js
 xaxis: {
@@ -361,8 +361,7 @@ xaxis: {
 }
 ```
 
-Similarly, for reversing the y axis so the values appear in inverse
-order:
+Similarly, for reversing the y axis so the values appear in inverse order:
 
 ```js
 yaxis: {
@@ -371,38 +370,34 @@ yaxis: {
 }
 ```
 
-Note that for finding extrema, Flot assumes that the transform
-function does not reorder values (it should be monotone).
+Note that for finding extrema, Flot assumes that the transform function does
+not reorder values (it should be monotone).
 
-The inverseTransform is simply the inverse of the transform function
-(so v == inverseTransform(transform(v)) for all relevant v). It is
-required for converting from canvas coordinates to data coordinates,
-e.g. for a mouse interaction where a certain pixel is clicked. If you
-don't use any interactive features of Flot, you may not need it.
+The inverseTransform is simply the inverse of the transform function, so 
+v == inverseTransform(transform(v)) for all relevant v. It is required for
+converting from canvas coordinates to data coordinates, i.e. for a mouse
+interaction where a certain pixel is clicked. If you don't use any
+interactive features of Flot, you may not need it.
 
+If you don't specify any ticks options, a tick generator algorithm will make
+some for you. The algorithm has two passes. It first estimates how many ticks
+would be reasonable, uses this to compute a nice round tick interval size,
+then generates the ticks.
 
-The rest of the options deal with the ticks.
+You can specify how many ticks the algorithm aims for by setting "ticks" to a
+number. The algorithm always tries to generate reasonably round tick values
+so even if you ask for three ticks, you might get five if that fits better
+with the rounding. If you don't want any ticks at all, set "ticks" to 0 or an
+empty array.
 
-If you don't specify any ticks, a tick generator algorithm will make
-some for you. The algorithm has two passes. It first estimates how
-many ticks would be reasonable and uses this number to compute a nice
-round tick interval size. Then it generates the ticks.
+Another option is to skip the rounding and directly set the tick interval
+with "tickSize". Setting it to 2 gives you ticks at 2, 4, 6, etc. You can
+also specify that you just don't want ticks at a size less than a specific
+tick size with "minTickSize". Note that for time series, the format is an
+array like [2, "month"]; see the time series data section for more info.
 
-You can specify how many ticks the algorithm aims for by setting
-"ticks" to a number. The algorithm always tries to generate reasonably
-round tick values so even if you ask for three ticks, you might get
-five if that fits better with the rounding. If you don't want any
-ticks at all, set "ticks" to 0 or an empty array.
-
-Another option is to skip the rounding part and directly set the tick
-interval size with "tickSize". If you set it to 2, you'll get ticks at
-2, 4, 6, etc. Alternatively, you can specify that you just don't want
-ticks at a size less than a specific tick size with "minTickSize".
-Note that for time series, the format is an array like [2, "month"],
-see the next section.
-
-If you want to completely override the tick algorithm, you can specify
-an array for "ticks", either like this:
+If you want to completely override the tick algorithm, you can specify an
+array for "ticks", either like this:
 
 ```js
 ticks: [0, 1.2, 2.4]
@@ -416,11 +411,10 @@ ticks: [[0, "zero"], [1.2, "one mark"], [2.4, "two marks"]]
 
 You can mix the two if you like.
   
-For extra flexibility you can specify a function as the "ticks"
-parameter. The function will be called with an object with the axis
-min and max and should return a ticks array. Here's a simplistic tick
-generator that spits out intervals of pi, suitable for use on the x
-axis for trigonometric functions:
+For extra flexibility you can specify a function as the "ticks" parameter.
+The function will be called with an object with the axis min and max, and
+should return a ticks array. Here's a simple tick generator that produces
+intervals of pi, suitable for use on the x-axis for trigonometric functions:
 
 ```js
 function piTickGenerator(axis) {
@@ -434,13 +428,13 @@ function piTickGenerator(axis) {
 }
 ```
 
-You can control how the ticks look like with "tickDecimals", the
+You can control how the ticks look with "tickDecimals", which specifies the
 number of decimals to display (default is auto-detected).
 
 Alternatively, for ultimate control over how ticks are formatted you can
-provide a function to "tickFormatter". The function is passed two
-parameters, the tick value and an axis object with information, and
-should return a string. The default formatter looks like this:
+provide a function to "tickFormatter". The function is passed two parameters,
+the tick value and an axis object with information, and should return a
+string. The default formatter looks like this:
 
 ```js
 function formatter(val, axis) {
@@ -448,11 +442,10 @@ function formatter(val, axis) {
 }
 ```
 
-The axis object has "min" and "max" with the range of the axis,
-"tickDecimals" with the number of decimals to round the value to and
-"tickSize" with the size of the interval between ticks as calculated
-by the automatic axis scaling algorithm (or specified by you). Here's
-an example of a custom formatter:
+The axis object has "min" and "max" with the axis range, "tickDecimals" with
+the number of decimals to round the value to and "tickSize" with the size of
+the interval between ticks as calculated by the automatic axis scaling
+algorithm (or specified by you). Here's an example of a custom formatter:
 
 ```js
 function suffixFormatter(val, axis) {
@@ -465,25 +458,30 @@ function suffixFormatter(val, axis) {
 }
 ```
 
-"labelWidth" and "labelHeight" specifies a fixed size of the tick
-labels in pixels. They're useful in case you need to align several
-plots. "reserveSpace" means that even if an axis isn't shown, Flot
-should reserve space for it - it is useful in combination with
-labelWidth and labelHeight for aligning multi-axis charts.
+"tickLength" is the length of the tick marks in pixels. By default the
+innermost axes have ticks that extend across the plot, while any extra axes
+use small ticks. A value of null means to use the default, while a number
+means to use ticks of that length, where zero hides the marks completely.
 
-"tickLength" is the length of the tick lines in pixels. By default, the
-innermost axes will have ticks that extend all across the plot, while
-any extra axes use small ticks. A value of null means use the default,
-while a number means small ticks of that length - set it to 0 to hide
-the lines completely.
+You can use "tickColor" to override the "color" option and give the tick
+marks a different color from the axis line itself.
 
-If you set "alignTicksWithAxis" to the number of another axis, e.g.
-alignTicksWithAxis: 1, Flot will ensure that the autogenerated ticks
-of this axis are aligned with the ticks of the other axis. This may
-improve the looks, e.g. if you have one y axis to the left and one to
-the right, because the grid lines will then match the ticks in both
-ends. The trade-off is that the forced ticks won't necessarily be at
-natural places.
+"tickWidth" and "tickHeight" specify a fixed size for the tick labels, in
+pixels. They're useful in case you need to assign several plots.
+
+You can use "tickFont" to give tick labels a different font style from the
+axis default. It accepts exactly the same font-options object as "font" does.
+
+When using multiple axes, if you set "alignTicksWithAxis" to the number of
+another axis, e.g. alignTicksWithAxis: 1, Flot will ensure that the generated
+ticks of this axis are aligned with the ticks of the other axis. This may
+improve the looks, e.g. if you have one y axis to the left and one to the
+right, because the grid lines will then match the ticks on both ends. The
+trade-off is that the forced ticks won't necessarily be at natural places.
+
+"reserveSpace" indicates that Flot should reserve space for the axis even if
+it isn't visible. This is useful in combination with labelWidth/labelHeight
+for aligning multi-axis charts.
 
 
 ## Multiple axes ##
@@ -742,6 +740,7 @@ series: {
     points: {
         radius: number
         symbol: "circle" or function
+        strokeColor: color
     }
 
     bars: {
@@ -819,8 +818,8 @@ connected with a straight (possibly diagonal) line or with first a
 horizontal and then a vertical line. Note that this transforms the
 data by adding extra points.
 
-For points, you can specify the radius and the symbol. The only
-built-in symbol type is circles, for other types you can use a plugin
+For points, you can specify the radius, symbol, and symbol stroke color. The
+only built-in symbol type is circles, for other types you can use a plugin
 or define them yourself by specifying a callback:
 
 ```js
@@ -961,6 +960,50 @@ markings: function (axes) {
     return markings;
 }
 ```
+
+By default, the markings will be drawn under the grid ticks, if you 
+need to draw a marking above the grid ticks, you can specifiy a 
+"aboveGrid" attribute and set it to true, e.g.
+
+```js
+markings: [ { xaxis: { from: 1, to: 2 }, yaxis: { from: 1, to: 2 }, aboveGrid: true }, ... ]
+```
+Usually a marking is a regular rectangle, when you want it to have a rounded
+corner, you can specify a "rounded" value to it, e.g.
+
+```js
+markings: [ { xaxis: { from: 1, to: 2 }, yaxis: { from: 1, to: 2 }, aboveGrid: true, rounded: 3 }, ... ]
+```
+
+In case you want to put some texts attaching to markings, you can specifiy
+an "text" object to the marking object, along with a font object as well as 
+other 2 attributes (textAlign and textBaseline) to align texts well in the 
+marking if you want to give the texts a customized look, e.g.
+
+```js
+markings: [ 
+	{ 
+		xaxis: { from: 1, to: 2 }, 
+		yaxis: { from: 1, to: 2 }, 
+		aboveGrid: true, 
+		color: "#000",
+		rounded: 3,
+		text: "<strong style='margin: 0 0 0 1px;'>The 1st line.</strong><br />The 2nd line.",
+		textAlign: "center",
+		textBaseline: "middle",
+		font: {
+			color: "#fff",
+			size: "12"
+		}
+	}, 
+	... 
+]
+```
+
+As you see from the above code example, you can control the look and feel
+of the texts by inline css style, besides this approach, you can also 
+customize the look and feel of these texts by defining css rules to the 
+class *flot-marking*, which class the texts has.
 
 If you set "clickable" to true, the plot will listen for click events
 on the plot area and fire a "plotclick" event on the placeholder with
