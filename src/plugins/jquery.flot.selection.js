@@ -158,6 +158,7 @@ The plugin allso adds the following methods to the plot object:
 
             if (selectionIsSane()) {
                 triggerSelectedEvent();
+                processAutoZoom();
             } else {
                 // this counts as a clear
                 plot.getPlaceholder().trigger("plotunselected", []);
@@ -309,6 +310,7 @@ The plugin allso adds the following methods to the plot object:
             plot.triggerRedrawOverlay();
             if (!preventEvent && selectionIsSane()) {
                 triggerSelectedEvent();
+                processAutoZoom();
             }
         }
 
@@ -316,6 +318,42 @@ The plugin allso adds the following methods to the plot object:
             var minSize = plot.getOptions().selection.minSize;
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
                 Math.abs(selection.second.y - selection.first.y) >= minSize;
+        }
+
+        function zoomTo(min, max) {
+            var axes = plot.getXAxes();
+            for (var i=0; i<axes.length; i++) {
+                var axis = axes[i];
+                axis.options.min = min;
+                axis.options.max = max;
+            }
+            plot.setupGrid();
+            plot.draw();
+        }
+
+        function processAutoZoom() {
+            if (plot.getOptions().selection.autoZoom!==true) return;
+
+            var ranges = getSelection();
+            if (!ranges) return;
+
+            zoomTo(ranges.xaxis.from, ranges.xaxis.to);
+            plot.clearSelection();
+
+            var p = plot.getPlotOffset();
+            var parent = plot.getPlaceholder();
+            if (parent.find('.resetzoom').length==0) {
+                var legend = plot.getOptions().legend, pos;
+                if (legend.show && !legend.container && (!legend.position || legend.position=='ne'))
+                    pos = 'left:' + (p.left + 8) + 'px;top:' + (p.top + 5) + 'px';
+                else
+                    pos = 'right:' + (p.right + 8) + 'px;top:' + (p.top + 5) + 'px';
+                parent.append('<div class="resetzoom" style="position:absolute;' + pos + ';cursor:pointer;display:inline-block">Reset zoom</div>');
+                parent.find('.resetzoom').click(function () {
+                    zoomTo(undefined, undefined);
+                    $(this).remove();
+                });
+            }
         }
 
         plot.clearSelection = clearSelection;
@@ -383,7 +421,8 @@ The plugin allso adds the following methods to the plot object:
                 mode: null, // one of null, "x", "y" or "xy"
                 color: "#e8cfac",
                 shape: "round", // one of "round", "miter", or "bevel"
-                minSize: 5 // minimum number of pixels
+                minSize: 5, // minimum number of pixels
+                autoZoom: false
             }
         },
         name: "selection",
