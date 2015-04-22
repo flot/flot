@@ -8,7 +8,6 @@ Package.describe({
 
 Package.onUse(function(api) {
     api.versionsFrom('METEOR@0.9.0.1');
-    api.use('urigo:angular@0.8.4', 'client');
     api.use('jquery', 'client');
 
     api.add_files(['jquery.flot.js'], 'client');
