@@ -1,3 +1,15 @@
+## Flot 0.9.0 ##
+
+### Changes ###
+
+ - Added a strokeColor option to control the outline around point symbols.
+   (patch by djamshed, pull request #1003)
+
+ - Added an 'above' operator to the threshold plugin.
+   (patch by Karl Quinsland, pull request #1058, issue #1059, earlier patches
+   by Jason Swank, issue #331, and Rene Pieter Kok, issue #344)
+
+
 ## Flot 0.8.3 ##
 
 ### Changes ###
