@@ -1833,23 +1833,41 @@ Licensed under the MIT license.
             }
 
             // Compute the axis bounding box and update the plot bounds
-            if (isXAxis) {
-                contentHeight += padding;
-                if (axisPosition === "top") {
-                    axis.box = { top: plotOffset.top + axisMargin, height: contentHeight };
-                    plotOffset.top += contentHeight + axisMargin;
+            if (axis.options.ticks){
+                if (isXAxis) {
+                    contentHeight += padding;
+                    if (axisPosition === "top") {
+                        axis.box = { top: plotOffset.top + axisMargin, height: contentHeight };
+                        plotOffset.top += contentHeight + axisMargin;
+                    } else {
+                        plotOffset.bottom += contentHeight + axisMargin;
+                        axis.box = { top: surface.height - plotOffset.bottom, height: contentHeight };
+                    }
                 } else {
-                    plotOffset.bottom += contentHeight + axisMargin;
-                    axis.box = { top: surface.height - plotOffset.bottom, height: contentHeight };
+                    contentWidth += padding;
+                    if (axisPosition === "right") {
+                        plotOffset.right += contentWidth + axisMargin;
+                        axis.box = { left: surface.width - plotOffset.right, width: contentWidth };
+                    } else {
+                        axis.box = { left: plotOffset.left + axisMargin, width: contentWidth };
+                        plotOffset.left += contentWidth + axisMargin;
+                    }
                 }
-            } else {
-                contentWidth += padding;
-                if (axisPosition === "right") {
-                    plotOffset.right += contentWidth + axisMargin;
-                    axis.box = { left: surface.width - plotOffset.right, width: contentWidth };
+            }else{
+                if (isXAxis) {
+                    contentHeight += padding;
+                    if (axisPosition === "top") {
+                        axis.box = { top: plotOffset.top + axisMargin, height: contentHeight };
+                    } else {
+                        axis.box = { top: surface.height - plotOffset.bottom, height: contentHeight };
+                    }
                 } else {
-                    axis.box = { left: plotOffset.left + axisMargin, width: contentWidth };
-                    plotOffset.left += contentWidth + axisMargin;
+                    contentWidth += padding;
+                    if (axisPosition === "right") {
+                        axis.box = { left: surface.width - plotOffset.right, width: contentWidth };
+                    } else {
+                        axis.box = { left: plotOffset.left + axisMargin, width: contentWidth };
+                    }
                 }
             }
 
