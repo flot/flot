@@ -1,0 +1,14 @@
+{
+	"name": "Flot",
+	"version": "0.8.3",
+	"authors": [
+		"Nick Schonning <nschonni@gmail.com>"
+	],
+	"description": "Flot is a Javascript plotting library for jQuery. Read more at the website: http://www.flotcharts.org/",
+	"main": "jquery.flot.js",
+	"license": "https://github.com/flot/flot/blob/master/LICENSE.txt",
+	"homepage": "http://www.flotcharts.org/",
+	"dependencies": {
+		"jquery": ">= 1.2.6"
+	}
+}
