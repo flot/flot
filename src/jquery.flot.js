@@ -558,8 +558,10 @@ Licensed under the MIT license.
                                 for (var key in angleCache) {
                                     if (Object.prototype.hasOwnProperty.call(angleCache, key)) {
                                         positions = angleCache[key].positions;
-                                        for (i = 0; position = positions[i]; i++) {
-                                            position.active = false;
+                                        if (positions != null) {
+                                            for (i = 0; position = positions[i]; i++) {
+                                                position.active = false;
+                                            }
                                         }
                                     }
                                 }
