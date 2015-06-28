@@ -607,7 +607,8 @@ Licensed under the MIT license.
                     clickable: false,
                     hoverable: false,
                     autoHighlight: true, // highlight in case mouse is near
-                    mouseActiveRadius: 10 // how far the mouse can be away to activate an item
+                    mouseActiveRadius: 10, // how far the mouse can be away to activate an item
+                    ignoreZeroValuePoints: false
                 },
                 interaction: {
                     redrawOverlayInterval: 1000/60 // time between updates, -1 means in same flow
@@ -2873,8 +2874,11 @@ Licensed under the MIT license.
                         // use <= to ensure last point takes precedence
                         // (last generally means on top of)
                         if (dist < smallestDistance) {
-                            smallestDistance = dist;
-                            item = [i, j / ps];
+                            jps = j / ps;
+                            if(!options.grid.ignoreZeroValuePoints || series[i].data[series[i].datapoints.points.slice(jps * series[i].datapoints.pointsize, (jps + 1) * series[i].datapoints.pointsize)[0]][1] != 0){
+	                        smallestDistance = dist;
+	                        item = [i, jps];
+                            }
                         }
                     }
                 }
