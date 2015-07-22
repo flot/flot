@@ -1573,6 +1573,10 @@ Licensed under the MIT license.
                             }
                         }
                         if (f.y) {
+                            if (s.xaxis.options.min !== undefined && points[j] < s.xaxis.options.min ||
+                                    s.xaxis.options.max !== undefined && points[j] > s.xaxis.options.max) {
+                                continue;
+                            }
                             if (val < ymin) {
                                 ymin = val;
                             }
