@@ -6,7 +6,7 @@ Licensed under the MIT license.
 The plugin supports these options:
 
 selection: {
-    mode: null or "x" or "y" or "xy",
+    mode: null or "x" or "y" or "xy" or "locked",
     color: color,
     shape: "round" or "miter" or "bevel",
     minSize: number of pixels
@@ -15,7 +15,10 @@ selection: {
 Selection support is enabled by setting the mode to one of "x", "y" or "xy".
 In "x" mode, the user will only be able to specify the x range, similarly for
 "y" mode. For "xy", the selection becomes a rectangle where both ranges can be
-specified. "color" is color of the selection (if you need to change the color
+specified. In "locked" mode the selection acts like in "x" or "y" mode based on
+distance cursor passes in corresponding direction:
+if x-distance is greater than y-distance - "x" mode, else "y" mode.
+"color" is color of the selection (if you need to change the color
 later on, you can get to it with plot.getOptions().selection.color). "shape"
 is the shape of the corners of the selection.
 
@@ -212,11 +215,13 @@ The plugin allso adds the following methods to the plot object:
             pos.x = clamp(0, coordHolder.pageX - offset.left - plotOffset.left, plot.width());
             pos.y = clamp(0, coordHolder.pageY - offset.top - plotOffset.top, plot.height());
 
-            if (o.selection.mode === "y") {
+            var x_wins = Math.abs(pos.x - start_pos.x) >= Math.abs(pos.y - start_pos.y);
+
+            if (o.selection.mode === "y" || (o.selection.mode == "locked" && !x_wins)) {
                 pos.x = pos === selection.first ? 0 : plot.width();
             }
 
-            if (o.selection.mode === "x") {
+            if (o.selection.mode === "x" || (o.selection.mode == "locked" && x_wins)) {
                 pos.y = pos === selection.first ? 0 : plot.height();
             }
         }
