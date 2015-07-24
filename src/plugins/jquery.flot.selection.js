@@ -87,6 +87,7 @@ The plugin allso adds the following methods to the plot object:
         var selection = {
                 first: { x: -1, y: -1 },
                 second: { x: -1, y: -1 },
+                start: { x: -1, y: -1 },
                 show: false,
                 active: false,
                 touch: false
@@ -214,15 +215,27 @@ The plugin allso adds the following methods to the plot object:
 
             pos.x = clamp(0, coordHolder.pageX - offset.left - plotOffset.left, plot.width());
             pos.y = clamp(0, coordHolder.pageY - offset.top - plotOffset.top, plot.height());
-
-            var x_wins = Math.abs(pos.x - start_pos.x) >= Math.abs(pos.y - start_pos.y);
-
-            if (o.selection.mode === "y" || (o.selection.mode == "locked" && !x_wins)) {
-                pos.x = pos === selection.first ? 0 : plot.width();
+            if (pos === selection.first) {
+                selection.start.x = pos.x;
+                selection.start.y = pos.y;
             }
 
-            if (o.selection.mode === "x" || (o.selection.mode == "locked" && x_wins)) {
-                pos.y = pos === selection.first ? 0 : plot.height();
+            var x_wins = Math.abs(pos.x - selection.start.x) >= Math.abs(pos.y - selection.start.y);
+
+            if (o.selection.mode === "y" || (o.selection.mode === "locked" && !x_wins)) {
+                selection.first.x = 0;
+                selection.second.x = plot.width();
+
+                selection.first.y = selection.start.y;
+                selection.second.y = pos.y;
+            }
+
+            if (o.selection.mode === "x" || (o.selection.mode === "locked" && x_wins)) {
+                selection.first.y = 0;
+                selection.second.y = plot.height();
+
+                selection.first.x = selection.start.x;
+                selection.second.x = pos.x;
             }
         }
 
