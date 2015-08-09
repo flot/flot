@@ -114,7 +114,18 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         zoom: {
             interactive: false,
             trigger: "dblclick", // or "click" for single click
-            amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+            amount: 1.5, // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+        	oldAxis: {
+                x: {
+                    min: 0,
+                    max: 1
+                },
+                y: {
+                    min: 0,
+                    max: 1
+                }
+            },
+            firstzoom: true
         },
         pan: {
             interactive: false,
@@ -205,9 +216,38 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.zoom(args);
         };
         
+         // Reset axes min and max to first value
+         plot.resetZoom = function(){
+            var tmpOpt = plot.getOptions();
+
+            $.each(plot.getAxes(), function(_, axis) {
+                var opts = axis.options;
+                opts.min = tmpOpt.zoom.oldAxis[axis.direction].min;
+                opts.max = tmpOpt.zoom.oldAxis[axis.direction].man;
+            });
+
+            plot.setupGrid();
+            plot.draw();
+        };
+		
+		// Save current axes min and max values
+        plot.saveZoomState = function(){
+            var tmpOpt = plot.getOptions();
+
+            $.each(plot.getAxes(), function(_, axis) {
+                var opts = axis.options;
+                tmpOpt.zoom.oldAxis[axis.direction].min = opts.min;
+                tmpOpt.zoom.oldAxis[axis.direction].man = opts.max;
+            });
+
+            tmpOpt.zoom.firstzoom = false;            
+        };
+        
         plot.zoom = function (args) {
             if (!args)
                 args = {};
+                
+            var tmpOpt = plot.getOptions();
             
             var c = args.center,
                 amount = args.amount || plot.getOptions().zoom.amount,
@@ -263,10 +303,18 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     ((zr[0] != null && range < zr[0] && amount >1) ||
                      (zr[1] != null && range > zr[1] && amount <1)))
                     return;
-            
+            	
+            	// save current axes min and max values after first zooming
+            	if(tmpOpt.zoom.firstzoom){         
+                    tmpOpt.zoom.oldAxis[axis.direction].min = opts.min;
+                    tmpOpt.zoom.oldAxis[axis.direction].man = opts.max;
+                }
+                
                 opts.min = min;
                 opts.max = max;
             });
+            // Save once
+            tmpOpt.zoom.firstzoom = false;
             
             plot.setupGrid();
             plot.draw();
