@@ -4,7 +4,7 @@ Allows to use touch for pan / zoom and simulate tap, double tap as mouse clicks 
 
 https://github.com/chaveiro/flot.touch
 
-Copyright (c) 2015 Entropi Software LLC - Licensed under the MIT license.
+Copyright (c) 2015 Chaveiro - Licensed under the MIT license.
 
 Plugin triggers this events : touchstarted, touchended, tap and dbltap
 
@@ -345,8 +345,8 @@ Use as follow:
             var options = plot.getOptions();
             updateAxesMinMax();
 
-            if (typeof options.callback == 'function') {
-                options.callback();
+            if (typeof options.touch.callback == 'function') {
+                options.touch.callback();
             }
             else {
                 plot.setupGrid();
@@ -354,10 +354,10 @@ Use as follow:
             }
         }
 
-        
+
         function updateAxesMinMax() {
             var options = plot.getOptions();
-            
+
             // Apply the pan.
             if (relativeOffset.x !== 0 || relativeOffset.y !== 0) {
                 $.each(plot.getAxes(), function(index, axis) {
