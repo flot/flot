@@ -259,6 +259,12 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 var range = max - min;
+
+                // Convert range to transformed coordinates
+                if (opts.transform) {
+                    range = opts.transform(max) - opts.transform(min);
+                }
+
                 if (zr &&
                     ((zr[0] != null && range < zr[0] && amount >1) ||
                      (zr[1] != null && range > zr[1] && amount <1)))
