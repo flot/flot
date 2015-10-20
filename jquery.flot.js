@@ -2052,7 +2052,10 @@ Licensed under the MIT license.
 
                 // draw tick bar
                 if (!axis.innermost) {
+                	var savedWidth = ctx.lineWidth;
+                	ctx.lineWidth = axis.options.lineWidth || savedWidth;
                     ctx.strokeStyle = axis.options.color;
+
                     ctx.beginPath();
                     xoff = yoff = 0;
                     if (axis.direction == "x")
@@ -2071,6 +2074,7 @@ Licensed under the MIT license.
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
                     ctx.stroke();
+                    ctx.lineWidth = savedWidth;
                 }
 
                 // draw ticks
