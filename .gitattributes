@@ -1,0 +1,10 @@
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/API.md export-ignore
+/CONTRIBUTING.md export-ignore
+/FAQ.md export-ignore
+/Makefile export-ignore
+/NEWS.md export-ignore
+/PLUGINS.md export-ignore
+/README.md export-ignore
+/examples export-ignore
