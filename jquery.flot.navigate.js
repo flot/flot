@@ -259,6 +259,12 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 var range = max - min;
+
+                // Convert range to transformed coordinates
+                if (opts.transform) {
+                    range = opts.transform(max) - opts.transform(min);
+                }
+
                 if (zr &&
                     ((zr[0] != null && range < zr[0] && amount >1) ||
                      (zr[1] != null && range > zr[1] && amount <1)))
@@ -290,26 +296,33 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var opts = axis.options,
                     min, max, d = delta[axis.direction];
 
-                min = axis.c2p(axis.p2c(axis.min) + d),
-                max = axis.c2p(axis.p2c(axis.max) + d);
+                // Figure out the max left and right amounts we travel in canvas coordinates
+                var minLimit;
+                var maxLimit;
 
                 var pr = opts.panRange;
-                if (pr === false) // no panning on this axis
-                    return;
-                
                 if (pr) {
-                    // check whether we hit the wall
-                    if (pr[0] != null && pr[0] > min) {
-                        d = pr[0] - min;
-                        min += d;
-                        max += d;
+                    if (pr[0] !== null) {
+                        minLimit = axis.p2c(pr[0]) - axis.p2c(axis.min);
+                        if (d < minLimit) {
+                            d = minLimit;
+                        }
                     }
-                    
-                    if (pr[1] != null && pr[1] < max) {
-                        d = pr[1] - max;
-                        min += d;
-                        max += d;
+
+                    if (pr[1] !== null) {
+                        maxLimit = axis.p2c(pr[1]) - axis.p2c(axis.max);
+
+                        if (d > maxLimit) {
+                            d = maxLimit;
+                        }
                     }
+                }
+
+                min = axis.c2p(axis.p2c(axis.min) + d);
+                max = axis.c2p(axis.p2c(axis.max) + d);
+
+                if (pr === false) { // no panning
+                    return;
                 }
                 
                 opts.min = min;
