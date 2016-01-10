@@ -284,11 +284,12 @@ with it. You can override this by setting the "show" option to true or
 false.
 
 The "position" option specifies where the axis is placed, bottom or
-top for x axes, left or right for y axes. The "mode" option determines
-how the data is interpreted, the default of null means as decimal
-numbers. Use "time" for time series data; see the time series data
-section. The time plugin (jquery.flot.time.js) is required for time
-series support.
+top for x axes, left or right for y axes. 
+
+The "mode" option determines how the data is interpreted, the default of null 
+means as decimal numbers. Use "time" for time series data; see the time series 
+data section. The time plugin (jquery.flot.time.js) is required for time series 
+support.
 
 The "color" option determines the color of the line and ticks for the axis, and
 defaults to the grid color with transparency. For more fine-grained control you
