@@ -1204,10 +1204,10 @@ Licensed under the MIT license.
                     $.extend(true, s, d[i]);
 
                     d[i].data = s.data;
-                } 
+                }
                 else {
                     s.data = getSeriesDataFromArgs(d[i]);
-                }   
+                }
                 res.push(s);
             }
 
@@ -1215,29 +1215,32 @@ Licensed under the MIT license.
         }
 
         function getSeriesDataFromArgs(seriesData) {
+
             // seriesData is either the raw series array, or if series is an object, 
-            // the value of the 'data' property
+            // seriesData is the value of the 'data' property
+
             if (seriesData.length === 2 && typeof seriesData[1] === "function") {
-                var xVar = seriesData[0],
-                    yfunc = seriesData[1];
-                return computeFunctionSeriesData(xVar, yfunc);
-            } else if (seriesData.length === 3 && typeof seriesData[1] === "function" && typeof seriesData[2] === "function") {
-                var tVar = seriesData[0],
-                    xfunc = seriesData[1],
-                    yfunc = seriesData[2];
-                return computeFunctionSeriesData(tVar, xfunc, yfunc);
+                return computeFunctionSeriesData(seriesData[0], seriesData[1]);
+            } else if (seriesData.length === 3 && typeof seriesData[1] === "function" &&
+                typeof seriesData[2] === "function") {
+                return computeFunctionSeriesData(seriesData[0], seriesData[1], seriesData[2]);
             } else {
                 return seriesData;
             }
         }
 
         function computeFunctionSeriesData(indVar, depFunc1, depFunc2) {
+
             // Compute [x,y(x)] or [x(t),y(t)] given independent variable 
             // and dependent variable functions
+            
             var seriesData = [],
                 indArray = [];
-            if (hasOwnProperty.call(indVar,"min") && hasOwnProperty.call(indVar,"max") && hasOwnProperty.call(indVar,"n")) {
+            if (hasOwnProperty.call(indVar,"min") && hasOwnProperty.call(indVar,"max") &&
+                hasOwnProperty.call(indVar,"n")) {
+                
                 // independent variable specified as a range
+                
                 var min     = indVar.min,
                     max     = indVar.max,
                     n       = indVar.n,
@@ -1246,19 +1249,25 @@ Licensed under the MIT license.
                     indArray.push(min + delta*j);
                 }
             } else if (indVar.length) {
+                
                 // independent variable specified as an array
+                
                 indArray = indVar;
             } else {
                 throw new Error("Invalid specification of independent variable.");
             }
             
-            for (var j = 0; j < indArray.length; j++) {
-                var indVal = indArray[j];
+            for (var k = 0; k < indArray.length; k++) {
+                var indVal = indArray[k];
                 if (depFunc2) {
+                    
                     // t, x(t), y(t)
+                    
                     seriesData.push([depFunc1(indVal), depFunc2(indVal)]);
                 } else {
+                    
                     // x, y(x)
+                    
                     seriesData.push([indVal, depFunc1(indVal)]);
                 }
             }
