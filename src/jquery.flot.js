@@ -1197,20 +1197,72 @@ Licensed under the MIT license.
 
                 if (d[i].data != null) {
 
-                    // move the data instead of deep-copy
-                    s.data = d[i].data;
+                    // move the data instead of deep-copy            
+                    s.data = getSeriesDataFromArgs(d[i].data);
                     delete d[i].data;
 
                     $.extend(true, s, d[i]);
 
                     d[i].data = s.data;
-                } else {
-                    s.data = d[i];
-                }
+                } 
+                else {
+                    s.data = getSeriesDataFromArgs(d[i]);
+                }   
                 res.push(s);
             }
 
             return res;
+        }
+
+        function getSeriesDataFromArgs(seriesData) {
+            // seriesData is either the raw series array, or if series is an object, 
+            // the value of the 'data' property
+            if (seriesData.length === 2 && typeof seriesData[1] === "function") {
+                var xVar = seriesData[0],
+                    yfunc = seriesData[1];
+                return computeFunctionSeriesData(xVar, yfunc);
+            } else if (seriesData.length === 3 && typeof seriesData[1] === "function" && typeof seriesData[2] === "function") {
+                var tVar = seriesData[0],
+                    xfunc = seriesData[1],
+                    yfunc = seriesData[2];
+                return computeFunctionSeriesData(tVar, xfunc, yfunc);
+            } else {
+                return seriesData;
+            }
+        }
+
+        function computeFunctionSeriesData(indVar, depFunc1, depFunc2) {
+            // Compute [x,y(x)] or [x(t),y(t)] given independent variable 
+            // and dependent variable functions
+            var seriesData = [],
+                indArray = [];
+            if (hasOwnProperty.call(indVar,"min") && hasOwnProperty.call(indVar,"max") && hasOwnProperty.call(indVar,"n")) {
+                // independent variable specified as a range
+                var min     = indVar.min,
+                    max     = indVar.max,
+                    n       = indVar.n,
+                    delta   = (max-min)/(n-1);
+                for (var j = 0; j < n; j++) {
+                    indArray.push(min + delta*j);
+                }
+            } else if (indVar.length) {
+                // independent variable specified as an array
+                indArray = indVar;
+            } else {
+                throw new Error("Invalid specification of independent variable.");
+            }
+            
+            for (var j = 0; j < indArray.length; j++) {
+                var indVal = indArray[j];
+                if (depFunc2) {
+                    // t, x(t), y(t)
+                    seriesData.push([depFunc1(indVal), depFunc2(indVal)]);
+                } else {
+                    // x, y(x)
+                    seriesData.push([indVal, depFunc1(indVal)]);
+                }
+            }
+            return seriesData;
         }
 
         function axisNumber(obj, coord) {
