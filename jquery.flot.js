@@ -2394,7 +2394,7 @@ Licensed under the MIT license.
                     if (!areaOpen) {
                         // open area
                         ctx.beginPath();
-                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
+                        ctx.moveTo(axisx.p2c(x1), axisy.p2c(y1));
                         areaOpen = true;
                     }
 
@@ -3142,10 +3142,7 @@ Licensed under the MIT license.
     // Add the plot function to the top level of the jQuery object
 
     $.plot = function(placeholder, data, options) {
-        //var t0 = new Date();
-        var plot = new Plot($(placeholder), data, options, $.plot.plugins);
-        //(window.console ? console.log : alert)("time used (msecs): " + ((new Date()).getTime() - t0.getTime()));
-        return plot;
+        return new Plot($(placeholder), data, options, $.plot.plugins);
     };
 
     $.plot.version = "0.8.3";
