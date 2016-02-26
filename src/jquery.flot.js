@@ -677,6 +677,9 @@ Licensed under the MIT license.
                     // size in pixels of ticks, or "full" for whole line
                     tickLength: null,
 
+                    // size in pixels of tick line width
+                    tickLineWidth: null,
+
                     // width of tick labels in pixels
                     tickWidth: null,
 
@@ -2369,12 +2372,17 @@ Licensed under the MIT license.
 
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j], box = axis.box,
-                    t = axis.tickLength, x, y, xoff, yoff;
+                    t = axis.tickLength, x, y, xoff, yoff,
+                    lineWidth = axis.options.tickLineWidth;
                 if (!axis.show || axis.ticks.length === 0) {
                     continue;
                 }
 
-                ctx.lineWidth = 1;
+                if (lineWidth == null) {
+                    lineWidth = 1;
+                }
+
+                ctx.lineWidth = lineWidth;
 
                 // find the edges
                 if (axis.direction === "x") {
@@ -2400,16 +2408,10 @@ Licensed under the MIT license.
                     xoff = yoff = 0;
                     if (axis.direction === "x") {
                         xoff = plotWidth + 1;
+                        y = Math.floor(y) + ((lineWidth%2)/2);
                     } else {
                         yoff = plotHeight + 1;
-                    }
-
-                    if (ctx.lineWidth === 1) {
-                        if (axis.direction === "x") {
-                            y = Math.floor(y) + 0.5;
-                        } else {
-                            x = Math.floor(x) + 0.5;
-                        }
+                        x = Math.floor(x) + ((lineWidth%2)/2);
                     }
 
                     ctx.moveTo(x, y);
@@ -2436,26 +2438,18 @@ Licensed under the MIT license.
                     }
 
                     if (axis.direction === "x") {
-                        x = axis.p2c(v);
+                        x = Math.floor(axis.p2c(v)) + ((lineWidth%2)/2);
                         yoff = t === "full" ? -plotHeight : t;
 
                         if (axis.position === "top") {
                             yoff = -yoff;
                         }
                     } else {
-                        y = axis.p2c(v);
+                        y = Math.floor(axis.p2c(v)) + ((lineWidth%2)/2);
                         xoff = t === "full" ? -plotWidth : t;
 
                         if (axis.position === "left") {
                             xoff = -xoff;
-                        }
-                    }
-
-                    if (ctx.lineWidth === 1) {
-                        if (axis.direction === "x") {
-                            x = Math.floor(x) + 0.5;
-                        } else {
-                            y = Math.floor(y) + 0.5;
                         }
                     }
 
