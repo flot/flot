@@ -5,6 +5,10 @@
 	"scripts": {
 		"test": "make test"
 	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:flot/flot.git"
+	},
 	"devDependencies": {
 		"jshint": "0.9.1"
 	}
