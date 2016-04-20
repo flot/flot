@@ -74,6 +74,7 @@ More detail and specific examples can be found in the included HTML file.
 			centerLeft = null,
 			centerTop = null,
 			processed = false,
+			zoomLevel = null,
 			ctx = null;
 
 		// interactive variables
@@ -288,6 +289,7 @@ More detail and specific examples can be found in the included HTML file.
 			// calculate maximum radius and center point
 
 			maxRadius =  Math.min(canvasWidth, canvasHeight / options.series.pie.tilt) / 2;
+			zoomLevel = plot.getPlaceholder().width() / plot.getCanvas().width;
 			centerTop = canvasHeight / 2 + options.series.pie.offset.top;
 			centerLeft = canvasWidth / 2;
 
@@ -575,7 +577,7 @@ More detail and specific examples can be found in the included HTML file.
 
 			var slices = plot.getData(),
 				options = plot.getOptions(),
-				radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius,
+				radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * zoomLevel * options.series.pie.radius,
 				x, y;
 
 			for (var i = 0; i < slices.length; ++i) {
@@ -656,6 +658,7 @@ More detail and specific examples can be found in the included HTML file.
 			var offset = plot.offset();
 			var canvasX = parseInt(e.pageX - offset.left);
 			var canvasY =  parseInt(e.pageY - offset.top);
+
 			var item = findNearbySlice(canvasX, canvasY);
 
 			if (options.grid.autoHighlight) {
