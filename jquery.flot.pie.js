@@ -51,6 +51,19 @@ The plugin supports these options:
 		}
 	}
 
+The plugin adds these methods to plot objects:
+
+	pieHighlight(series)
+		Highlight a pie slice.
+		Pie charts do not support the standard flot highlight/unhighlight functions.
+		Use this method instead of highlight() when working with a pie chart.
+
+	pieUnhighlight(series)
+		Remove highlighting from a pie slice.
+		If series is omitted, all highlights are removed.
+		Pie charts do not support the standard flot highlight/unhighlight functions.
+		Use this method instead of unhighlight() when working with a pie chart.
+
 More detail and specific examples can be found in the included HTML file.
 
 */
@@ -84,6 +97,9 @@ More detail and specific examples can be found in the included HTML file.
 
 		plot.hooks.processOptions.push(function(plot, options) {
 			if (options.series.pie.show) {
+				// export highlight/unhighlight
+				plot.pieHighlight = highlight;
+				plot.pieUnhighlight = unhighlight;
 
 				options.grid.show = false;
 
