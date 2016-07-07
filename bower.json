@@ -1,6 +1,6 @@
 {
 	"name": "flot",
-	"version": "0.8.3",
+	"version": "0.8.4",
 	"main": "jquery.flot.js",
 	"dependencies": {
 		"jquery": ">= 1.2.6"
