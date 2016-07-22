@@ -321,9 +321,11 @@ More detail and specific examples can be found in the included HTML file.
 				if (options.series.pie.tilt <= 0.8) {
 					drawShadow();
 				}
-			} while (!drawPie() && attempts < REDRAW_ATTEMPTS)
+				var createEllipsisIfNeeded = options.series.pie.label.createEllipsisIfNeeded && attempts == REDRAW_ATTEMPTS;
+			} while (!drawPie(createEllipsisIfNeeded) && attempts < REDRAW_ATTEMPTS)
+			
 
-			if (attempts >= REDRAW_ATTEMPTS) {
+			if (attempts >= REDRAW_ATTEMPTS && !options.series.pie.label.createEllipsisIfNeeded) {
 				clear();
 				target.prepend("<div class='error'>Could not draw pie with labels contained inside canvas</div>");
 			}
@@ -374,7 +376,7 @@ More detail and specific examples can be found in the included HTML file.
 				ctx.restore();
 			}
 
-			function drawPie() {
+			function drawPie(createEllipsisIfNeeded) {
 
 				var startAngle = Math.PI * options.series.pie.startAngle;
 				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
@@ -417,7 +419,7 @@ More detail and specific examples can be found in the included HTML file.
 				// Draw the labels, returning true if they fit within the plot
 
 				if (options.series.pie.label.show) {
-					return drawLabels();
+				    return drawLabels(createEllipsisIfNeeded);
 				} else return true;
 
 				function drawSlice(angle, color, fill) {
@@ -452,14 +454,14 @@ More detail and specific examples can be found in the included HTML file.
 					}
 				}
 
-				function drawLabels() {
+				function drawLabels(createEllipsisIfNeeded) {
 
 					var currentAngle = startAngle;
 					var radius = options.series.pie.label.radius > 1 ? options.series.pie.label.radius : maxRadius * options.series.pie.label.radius;
 
 					for (var i = 0; i < slices.length; ++i) {
 						if (slices[i].percent >= options.series.pie.label.threshold * 100) {
-							if (!drawLabel(slices[i], currentAngle, i)) {
+						    if (!drawLabel(slices[i], currentAngle, i, createEllipsisIfNeeded)) {
 								return false;
 							}
 						}
@@ -468,7 +470,7 @@ More detail and specific examples can be found in the included HTML file.
 
 					return true;
 
-					function drawLabel(slice, startAngle, index) {
+					function drawLabel(slice, startAngle, index, createEllipsisIfNeeded) {
 
 						if (slice.data[0][1] == 0) {
 							return true;
@@ -477,34 +479,42 @@ More detail and specific examples can be found in the included HTML file.
 						// format label text
 
 						var lf = options.legend.labelFormatter, text, plf = options.series.pie.label.formatter;
+						var cut=0;
 
-						if (lf) {
-							text = lf(slice.label, slice);
-						} else {
-							text = slice.label;
-						}
+						do {						
+						    if (lf) {
+						        text = lf(slice.label, slice);
+						    } else {
+						        text = slice.label;
+						    }
+						    if (cut > text.length) break;
+						    text = text.substring(0, text.length - cut);
+						    if (cut != text.length && cut > 0) text += "...";
 
-						if (plf) {
-							text = plf(text, slice);
-						}
+						    if (plf) {
+						        text = plf(text, slice);
+						    }                            
+						    var halfAngle = ((startAngle + slice.angle) + startAngle) / 2;
+						    var x = centerLeft + Math.round(Math.cos(halfAngle) * radius);
+						    var y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt;
 
-						var halfAngle = ((startAngle + slice.angle) + startAngle) / 2;
-						var x = centerLeft + Math.round(Math.cos(halfAngle) * radius);
-						var y = centerTop + Math.round(Math.sin(halfAngle) * radius) * options.series.pie.tilt;
+						    var html = "<span class='pieLabel' id='pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
+						    target.children("#pieLabel" + index).detach();
+						    target.append(html);
 
-						var html = "<span class='pieLabel' id='pieLabel" + index + "' style='position:absolute;top:" + y + "px;left:" + x + "px;'>" + text + "</span>";
-						target.append(html);
+						    var label = target.children("#pieLabel" + index);
+						    var labelTop = (y - label.height() / 2);
+						    var labelLeft = (x - label.width() / 2);
 
-						var label = target.children("#pieLabel" + index);
-						var labelTop = (y - label.height() / 2);
-						var labelLeft = (x - label.width() / 2);
-
-						label.css("top", labelTop);
-						label.css("left", labelLeft);
-
-						// check to make sure that the label is not outside the canvas
-
-						if (0 - labelTop > 0 || 0 - labelLeft > 0 || canvasHeight - (labelTop + label.height()) < 0 || canvasWidth - (labelLeft + label.width()) < 0) {
+						    label.css("top", labelTop);
+						    label.css("left", labelLeft);
+						    						    
+						    cut++;
+						    
+						} while (createEllipsisIfNeeded && (0 - labelTop > 0 || 0 - labelLeft > 0 || canvasHeight - (labelTop + label.height()) < 0 || canvasWidth - (labelLeft + label.width()) < 0))
+                        
+					    // check to make sure that the label is not outside the canvas
+						if (!createEllipsisIfNeeded && (0 - labelTop > 0 || 0 - labelLeft > 0 || canvasHeight - (labelTop + label.height()) < 0 || canvasWidth - (labelLeft + label.width()) < 0)) {
 							return false;
 						}
 
