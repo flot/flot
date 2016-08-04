@@ -22,6 +22,7 @@ The plugin supports these options:
 			innerRadius: 0-1 for percentage of fullsize or a specified pixel length, for creating a donut effect
 			startAngle: 0-2 factor of PI used for starting angle (in radians) i.e 3/2 starts at the top, 0 and 2 have the same result
 			tilt: 0-1 for percentage to tilt the pie, where 1 is no tilt, and 0 is completely flat (nothing will show)
+			depth : 0-1 for pie depth to simulate height
 			offset: {
 				top: integer value to move the pie up or down
 				left: integer value to move the pie left or right, or 'auto'
@@ -66,6 +67,8 @@ More detail and specific examples can be found in the included HTML file.
 	var REDRAW_SHRINK = 0.95;
 
 	function init(plot) {
+
+		console.log(plot);
 
 		var canvas = null,
 			target = null,
@@ -114,6 +117,14 @@ More detail and specific examples can be found in the included HTML file.
 				} else if (options.series.pie.tilt < 0) {
 					options.series.pie.tilt = 0;
 				}
+
+				// ensure sane depth
+				if (options.series.pie.depth > 1) {
+					options.series.pie.depth = 1;
+				} else if (options.series.pie.depth < 0) {
+					options.series.pie.depth = 0;
+				}
+
 			}
 		});
 
@@ -378,7 +389,7 @@ More detail and specific examples can be found in the included HTML file.
 
 				var startAngle = Math.PI * options.series.pie.startAngle;
 				var radius = options.series.pie.radius > 1 ? options.series.pie.radius : maxRadius * options.series.pie.radius;
-
+				var MaxDepthValue=options.series.pie.depth*100;
 				// center and rotate to starting position
 
 				ctx.save();
@@ -389,21 +400,30 @@ More detail and specific examples can be found in the included HTML file.
 				// draw slices
 
 				ctx.save();
+
 				var currentAngle = startAngle;
-				for (var i = 0; i < slices.length; ++i) {
-					slices[i].startAngle = currentAngle;
-					drawSlice(slices[i].angle, slices[i].color, true);
+				for(var YDepth=MaxDepthValue;YDepth>0;YDepth-=1)
+				{
+					for (var i = 0; i < slices.length; ++i) {
+						slices[i].startAngle = currentAngle;
+						drawSlice(slices[i].angle,YDepth, slices[i].color, true);
+					}
 				}
+
 				ctx.restore();
 
 				// draw slice outlines
 
-				if (options.series.pie.stroke.width > 0) {
+				if (options.series.pie.stroke.width > 0 && 1==2) {
 					ctx.save();
 					ctx.lineWidth = options.series.pie.stroke.width;
 					currentAngle = startAngle;
-					for (var i = 0; i < slices.length; ++i) {
-						drawSlice(slices[i].angle, options.series.pie.stroke.color, false);
+
+					for(var YDepth=MaxDepthValue;YDepth>0;YDepth-=1)
+					{
+						for (var i = 0; i < slices.length; ++i) {
+							drawSlice(slices[i].angle,YDepth, options.series.pie.stroke.color, false);
+						}
 					}
 					ctx.restore();
 				}
@@ -420,7 +440,7 @@ More detail and specific examples can be found in the included HTML file.
 					return drawLabels();
 				} else return true;
 
-				function drawSlice(angle, color, fill) {
+				function drawSlice(angle,depth, color, fill) {
 
 					if (angle <= 0 || isNaN(angle)) {
 						return;
@@ -435,12 +455,12 @@ More detail and specific examples can be found in the included HTML file.
 
 					ctx.beginPath();
 					if (Math.abs(angle - Math.PI * 2) > 0.000000001) {
-						ctx.moveTo(0, 0); // Center of the pie
+						ctx.moveTo(0, depth); // Center of the pie
 					}
 
 					//ctx.arc(0, 0, radius, 0, angle, false); // This doesn't work properly in Opera
-					ctx.arc(0, 0, radius,currentAngle, currentAngle + angle / 2, false);
-					ctx.arc(0, 0, radius,currentAngle + angle / 2, currentAngle + angle, false);
+					ctx.arc(0, depth, radius,currentAngle, currentAngle + angle / 2, false);
+					ctx.arc(0, depth, radius,currentAngle + angle / 2, currentAngle + angle, false);
 					ctx.closePath();
 					//ctx.rotate(angle); // This doesn't work properly in Opera
 					currentAngle += angle;
@@ -772,6 +792,7 @@ More detail and specific examples can be found in the included HTML file.
 				innerRadius: 0, /* for donut */
 				startAngle: 3/2,
 				tilt: 1,
+				depth:0, /* no depth at all */
 				shadow: {
 					left: 5,	// shadow left offset
 					top: 15,	// shadow top offset
