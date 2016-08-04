@@ -1239,7 +1239,10 @@ Licensed under the MIT license.
                     if (points[j] == null)
                         continue;
 
-                    for (m = 0; m < ps; ++m) {
+                    var temp_ps = ps;
+                    if ( s.lines.fill)
+                        temp_ps = ps -1;
+                    for (m = 0; m < temp_ps; ++m) {
                         val = points[j + m];
                         f = format[m];
                         if (!f || f.autoscale === false || val == fakeInfinity || val == -fakeInfinity)
