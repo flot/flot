@@ -1123,8 +1123,9 @@ Licensed under the MIT license.
                     format.push({ y: true, number: true, required: true });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
+                        var defaultValue = s.bars.show ? 0 : null;
                         var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
-                        format.push({ y: true, number: true, required: false, defaultValue: 0, autoscale: autoscale });
+                        format.push({ y: true, number: true, required: false, defaultValue: defaultValue, autoscale: autoscale });
                         if (s.bars.horizontal) {
                             delete format[format.length - 1].y;
                             format[format.length - 1].x = true;
