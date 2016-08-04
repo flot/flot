@@ -577,7 +577,7 @@ Licensed under the MIT license.
                     },
                     bars: {
                         show: false,
-                        lineWidth: 2, // in pixels
+                        lineWidth: 1, // in pixels
                         barWidth: 1, // in units of the x axis
                         fill: true,
                         fillColor: null,
