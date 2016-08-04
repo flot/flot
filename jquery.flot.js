@@ -1228,6 +1228,9 @@ Licensed under the MIT license.
             // second pass: find datamax/datamin for auto-scaling
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
+                if (!s.lines.show && !s.bars.show && !s.points.show)
+                    continue;
+
                 points = s.datapoints.points;
                 ps = s.datapoints.pointsize;
                 format = s.datapoints.format;
