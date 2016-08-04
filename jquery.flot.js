@@ -591,6 +591,7 @@ Licensed under the MIT license.
                 grid: {
                     show: true,
                     aboveData: false,
+                    alwaysBelowColours: [],
                     color: "#545454", // primary color used for outline and labels
                     backgroundColor: null, // null for transparent, else color
                     borderColor: null, // set if different from the grid color
@@ -1874,8 +1875,8 @@ Licensed under the MIT license.
             if (grid.show && grid.backgroundColor)
                 drawBackground();
 
-            if (grid.show && !grid.aboveData) {
-                drawGrid();
+            if (grid.show) {
+                drawGrid(true, grid.aboveData);
             }
 
             for (var i = 0; i < series.length; ++i) {
@@ -1885,8 +1886,8 @@ Licensed under the MIT license.
 
             executeHooks(hooks.draw, [ctx]);
 
-            if (grid.show && grid.aboveData) {
-                drawGrid();
+            if (grid.show) {
+                drawGrid(false, grid.aboveData);
             }
 
             surface.render();
@@ -1940,7 +1941,13 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
-        function drawGrid() {
+        function drawGrid(preDraw, aboveData) {
+        	
+        	// Don't draw any markings if it's not pre-draw and options.grid.aboveData is not true
+        	if(!preDraw && !aboveData){
+        		return;
+        	}
+        	
             var i, axes, bw, bc;
 
             ctx.save();
@@ -1948,6 +1955,8 @@ Licensed under the MIT license.
 
             // draw markings
             var markings = options.grid.markings;
+            var alwaysBelowColours = options.grid.alwaysBelowColours;
+
             if (markings) {
                 if ($.isFunction(markings)) {
                     axes = plot.getAxes();
@@ -1965,6 +1974,47 @@ Licensed under the MIT license.
                     var m = markings[i],
                         xrange = extractRange(m, "x"),
                         yrange = extractRange(m, "y");
+                    
+                    /*
+                     * If PreDraw, we only draw the marking if it matches an alwaysBelowColour
+                     * 
+                     * If PostDraw, we only draw the marking if it does not match an alwaysBelowColour
+                     * 
+                     * @param: preCheckState: is the initial state for whether we should draw or not
+                     * 
+                     * @param: postCheckState: is the draw state if we match an alwaysBelowColor
+                     */
+                    function isDrawableNow(preCheckState, postCheckState)
+                    {
+                    	var doDraw = preCheckState;
+                    	
+                    	for(var j = 0; j < alwaysBelowColours.length; j++)
+                    	{
+                    		if(m.color === alwaysBelowColours[j]){
+                    			doDraw = postCheckState;
+                    			break;
+                    		}
+                    	}
+                    	
+                    	return doDraw;
+                    }
+                    
+                    // If pre-draw and markings are above data, draw the special markings below data
+                    if(preDraw && aboveData)
+                    {
+                    	if(!isDrawableNow(false, true))
+                    	{
+                    		continue;
+                    	}
+                    }
+                    // If post-draw and markings are above data, dont draw the special markings as they've already been drawn
+                    else if(!preDraw && aboveData)
+                    {
+                    	if(!isDrawableNow(true, false))
+                    	{
+                    		continue;
+                    	}
+                    }
 
                     // fill in missing
                     if (xrange.from == null)
