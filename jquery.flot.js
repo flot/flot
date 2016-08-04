@@ -1676,6 +1676,10 @@ Licensed under the MIT license.
                     }
                 }
             }
+
+            if ( opts.maxFloor && max < opts.maxFloor ) 
+              max = opts.maxFloor;
+
             axis.min = min;
             axis.max = max;
         }
