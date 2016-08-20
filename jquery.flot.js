@@ -2690,7 +2690,7 @@ Licensed under the MIT license.
                     barLeft = -series.bars.barWidth / 2;
             }
 
-            var fillStyleCallback = $.isFunction(series.bars.fill) ? series.bar.fill : ( series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null );
+            var fillStyleCallback = $.isFunction(series.bars.fill) ? series.bars.fill : ( series.bars.fill ? function (bottom, top) { return getFillStyle(series.bars, series.color, bottom, top); } : null );
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
