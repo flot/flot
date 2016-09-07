@@ -543,7 +543,7 @@ Licensed under the MIT license.
                     lines: {
                         // we don't put in show: false so we can see
                         // whether lines were actively disabled
-                        lineWidth: 2, // in pixels
+                        lineWidth: 1, // in pixels
                         fill: false,
                         fillColor: null,
                         steps: false
@@ -617,6 +617,11 @@ Licensed under the MIT license.
                 shutdown: []
             },
             plot = this;
+
+        // interactive features
+
+        var highlights = [],
+            redrawTimeout = null;
 
         // public functions
         plot.setData = setData;
@@ -2524,6 +2529,10 @@ Licensed under the MIT license.
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
 
+            if (series.lines.dashes && ctx.setLineDash) {
+                ctx.setLineDash(series.lines.dashes);
+            }
+
             var lw = series.lines.lineWidth,
                 sw = series.shadowSize;
             // FIXME: consider another form of shadow when filling is turned on
@@ -2886,12 +2895,6 @@ Licensed under the MIT license.
             }
         }
 
-
-        // interactive features
-
-        var highlights = [],
-            redrawTimeout = null;
-
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter) {
             var maxDistance = options.grid.mouseActiveRadius,
@@ -3144,7 +3147,8 @@ Licensed under the MIT license.
         function indexOfHighlight(s, p) {
             for (var i = 0; i < highlights.length; ++i) {
                 var h = highlights[i];
-                if (h.series == s && h.point[0] == p[0] &&
+                if (h.series == s &&
+                    h.point[0] == p[0] &&
                     h.point[1] == p[1])
                     return i;
             }
