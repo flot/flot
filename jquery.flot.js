@@ -10,7 +10,6 @@ Licensed under the MIT license.
 
     // Cache the prototype hasOwnProperty for faster access
     var hasOwnProperty = Object.prototype.hasOwnProperty;
-
     var Canvas = window.Flot.Canvas;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -253,7 +252,6 @@ Licensed under the MIT license.
         draw();
         bindEvents();
 
-
         function executeHooks(hook, args) {
             args = [plot].concat(args);
             for (var i = 0; i < hook.length; ++i)
@@ -261,7 +259,6 @@ Licensed under the MIT license.
         }
 
         function initPlugins() {
-
             // References to key classes, allowing plugins to modify them
 
             var classes = {
@@ -364,48 +361,6 @@ Licensed under the MIT license.
                     }
                 }
             }
-
-            // backwards compatibility, to be removed in future
-            if (options.xaxis.noTicks && options.xaxis.ticks == null)
-                options.xaxis.ticks = options.xaxis.noTicks;
-            if (options.yaxis.noTicks && options.yaxis.ticks == null)
-                options.yaxis.ticks = options.yaxis.noTicks;
-            if (options.x2axis) {
-                options.xaxes[1] = $.extend(true, {}, options.xaxis, options.x2axis);
-                options.xaxes[1].position = "top";
-                // Override the inherit to allow the axis to auto-scale
-                if (options.x2axis.min == null) {
-                    options.xaxes[1].min = null;
-                }
-                if (options.x2axis.max == null) {
-                    options.xaxes[1].max = null;
-                }
-            }
-            if (options.y2axis) {
-                options.yaxes[1] = $.extend(true, {}, options.yaxis, options.y2axis);
-                options.yaxes[1].position = "right";
-                // Override the inherit to allow the axis to auto-scale
-                if (options.y2axis.min == null) {
-                    options.yaxes[1].min = null;
-                }
-                if (options.y2axis.max == null) {
-                    options.yaxes[1].max = null;
-                }
-            }
-            if (options.grid.coloredAreas)
-                options.grid.markings = options.grid.coloredAreas;
-            if (options.grid.coloredAreasColor)
-                options.grid.markingsColor = options.grid.coloredAreasColor;
-            if (options.lines)
-                $.extend(true, options.series.lines, options.lines);
-            if (options.points)
-                $.extend(true, options.series.points, options.points);
-            if (options.bars)
-                $.extend(true, options.series.bars, options.bars);
-            if (options.shadowSize != null)
-                options.series.shadowSize = options.shadowSize;
-            if (options.highlightColor != null)
-                options.series.highlightColor = options.highlightColor;
 
             // save options on axes for future reference
             for (i = 0; i < options.xaxes.length; ++i)
