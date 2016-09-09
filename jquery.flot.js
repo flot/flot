@@ -201,8 +201,8 @@ Licensed under the MIT license.
         plot.getYAxes = function() {
             return yaxes;
         };
-        plot.c2p = canvasToAxisCoords;
-        plot.p2c = axisToCanvasCoords;
+        plot.c2p = canvasToCartesianAxisCoords;
+        plot.p2c = cartesianAxisToCanvasCoords;
         plot.getOptions = function() {
             return options;
         };
@@ -413,12 +413,13 @@ Licensed under the MIT license.
 
         function allAxes() {
             // return flat array without annoying null entries
-            return $.grep(xaxes.concat(yaxes), function(a) {
+            return xaxes.concat(yaxes).filter(function(a) {
                 return a;
             });
         }
 
-        function canvasToAxisCoords(pos) {
+        // canvas to axis for cartesian axes
+        function canvasToCartesianAxisCoords(pos) {
             // return an object with x/y corresponding to all used axes
             var res = {},
                 i, axis;
@@ -442,7 +443,8 @@ Licensed under the MIT license.
             return res;
         }
 
-        function axisToCanvasCoords(pos) {
+        // axis to canvas for cartesian axes
+        function cartesianAxisToCanvasCoords(pos) {
             // get canvas coords from the first pair of x/y found in pos
             var res = {},
                 i, axis, key;
@@ -490,7 +492,6 @@ Licensed under the MIT license.
         }
 
         function fillInSeriesOptions() {
-
             var neededColors = series.length,
                 maxIndex = -1,
                 i;
@@ -524,7 +525,6 @@ Licensed under the MIT license.
                 variation = 0;
 
             for (i = 0; i < neededColors; i++) {
-
                 c = $.color.parse(colorPool[i % colorPoolSize] || "#666");
 
                 // Each time we exhaust the colors in the pool we adjust
@@ -2523,7 +2523,7 @@ Licensed under the MIT license.
             var offset = eventHolder.offset(),
                 canvasX = event.pageX - offset.left - plotOffset.left,
                 canvasY = event.pageY - offset.top - plotOffset.top,
-                pos = canvasToAxisCoords({
+                pos = canvasToCartesianAxisCoords({
                     left: canvasX,
                     top: canvasY
                 });
