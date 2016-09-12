@@ -146,7 +146,9 @@ Licensed under the MIT license.
                 processOffset: [],
                 drawBackground: [],
                 drawSeries: [],
+                drawAxis: [],
                 draw: [],
+                axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
                 shutdown: []
@@ -960,6 +962,9 @@ Licensed under the MIT license.
             // plotOffset; this first phase only looks at one
             // dimension per axis, the other dimension depends on the
             // other axes so will have to wait
+
+            // here reserve additional space
+            executeHooks(hooks.axisReserveSpace, [axis]);
 
             var lw = axis.labelWidth,
                 lh = axis.labelHeight,
@@ -1782,6 +1787,9 @@ Licensed under the MIT license.
 
                     surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
                 }
+
+                executeHooks(hooks.drawAxis, [axis, ctx]);
+
             });
         }
 

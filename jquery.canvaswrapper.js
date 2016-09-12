@@ -62,7 +62,9 @@
         // Collection of HTML div layers for text overlaid onto the canvas
 
         this.textContainer = null;
+        this.SVGContainer = null;
         this.text = {};
+        this.SVG = {};
 
         // Cache of text fragments and metrics, so we can avoid expensively
         // re-calculating them when the plot is re-rendered in a loop.
@@ -220,6 +222,52 @@
 
         return layer;
     };
+
+    // Creates (if necessary) and returns the text overlay container.
+    //
+    // @param {string} classes String of space-separated CSS classes used to
+    //     uniquely identify the text layer.
+    // @return {object} The jQuery-wrapped text-layer div.
+
+    Canvas.prototype.getSVGLayer = function(classes) {
+
+        var layer = this.SVG[classes];
+
+        // Create the SVG layer if it doesn't exist
+
+        if (layer == null) {
+
+            // Create the text layer container, if it doesn't exist
+
+            if (this.SVGContainer == null) {
+                this.SVGContainer = $("<div class='flot-svg'></div>")
+                    .css({
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        'font-size': "smaller",
+                        color: "#545454"
+                    })
+                    .insertAfter(this.element);
+            }
+
+            layer = this.SVG[classes] = $("<div></div>")
+                .addClass(classes)
+                .css({
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0
+                })
+                .appendTo(this.textContainer);
+        }
+
+        return layer;
+    };
+
 
     // Creates (if necessary) and returns a text info object.
     //
