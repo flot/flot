@@ -239,6 +239,8 @@
 
             // Create the text layer container, if it doesn't exist
 
+            var svgElement;
+
             if (this.SVGContainer == null) {
                 this.SVGContainer = $("<div class='flot-svg'></div>")
                     .css({
@@ -251,18 +253,24 @@
                         color: "#545454"
                     })
                     .insertAfter(this.element);
+                svgElement = $(document.createElementNS("http://www.w3.org/2000/svg", "svg")).css({
+                  width: '100%',
+                  height: '100%'
+                });
+                svgElement.appendTo(this.SVGContainer);
             }
 
-            layer = this.SVG[classes] = $("<div></div>")
+            layer = this.SVG[classes] = $(document.createElementNS("http://www.w3.org/2000/svg", "g"))
                 .addClass(classes)
                 .css({
                     position: "absolute",
                     top: 0,
                     left: 0,
                     bottom: 0,
-                    right: 0
+                    right: 0,
+                    'fill': '#aaaaaa'
                 })
-                .appendTo(this.textContainer);
+                .appendTo(svgElement);
         }
 
         return layer;
