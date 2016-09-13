@@ -223,7 +223,7 @@
         return layer;
     };
 
-    // Creates (if necessary) and returns the text overlay container.
+    // Creates (if necessary) and returns the SVG overlay container.
     //
     // @param {string} classes String of space-separated CSS classes used to
     //     uniquely identify the text layer.
@@ -248,7 +248,8 @@
                         top: 0,
                         left: 0,
                         bottom: 0,
-                        right: 0
+                        right: 0,
+                        'pointer-events': 'none'
                     })
                     .insertAfter(this.element);
                 svgElement = $(document.createElementNS("http://www.w3.org/2000/svg", "svg")).css({

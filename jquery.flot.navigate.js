@@ -209,7 +209,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         pan: {
             interactive: false,
             cursor: "move",
-            frameRate: 30
+            frameRate: 60
         }
     };
 

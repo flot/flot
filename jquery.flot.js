@@ -940,13 +940,17 @@ Licensed under the MIT license.
                 font = opts.font || "flot-tick-label tickLabel";
 
             for (var i = 0; i < ticks.length; ++i) {
-
                 var t = ticks[i];
+                var label = t.label;
 
                 if (!t.label)
                     continue;
 
-                var info = surface.getTextInfo(layer, t.label, font, null, maxWidth);
+                if (typeof t.label === 'object') {
+                  label = t.label.name;
+                }
+
+                var info = surface.getTextInfo(layer, label, font, null, maxWidth);
 
                 labelWidth = Math.max(labelWidth, info.width);
                 labelHeight = Math.max(labelHeight, info.height);
@@ -2593,7 +2597,7 @@ Licensed under the MIT license.
             }
             octx.restore();
 
-            executeHooks(hooks.drawOverlay, [octx]);
+            executeHooks(hooks.drawOverlay, [octx, overlay]);
         }
 
         function highlight(s, point, auto) {
