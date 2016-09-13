@@ -248,9 +248,7 @@
                         top: 0,
                         left: 0,
                         bottom: 0,
-                        right: 0,
-                        'font-size': "smaller",
-                        color: "#545454"
+                        right: 0
                     })
                     .insertAfter(this.element);
                 svgElement = $(document.createElementNS("http://www.w3.org/2000/svg", "svg")).css({

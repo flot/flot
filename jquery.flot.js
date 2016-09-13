@@ -1756,11 +1756,12 @@ Licensed under the MIT license.
 
                 surface.removeText(layer);
 
+                executeHooks(hooks.drawAxis, [axis, surface]);
+
                 if (!axis.show || axis.ticks.length == 0)
                     return;
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
-
                     tick = axis.ticks[i];
                     if (!tick.label || tick.v < axis.min || tick.v > axis.max)
                         continue;
@@ -1787,9 +1788,6 @@ Licensed under the MIT license.
 
                     surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
                 }
-
-                executeHooks(hooks.drawAxis, [axis, surface]);
-
             });
         }
 
