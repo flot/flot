@@ -443,7 +443,9 @@ parameters, the tick value and an axis object with information, and
 should return a string. The default formatter looks like this:
 
 ```js
-function formatter(val, axis) {
+// index is current tick being sent to formatter
+// numberOfTicks is the total number of ticks
+function formatter(val, axis, index, numberOfTicks) {
     return val.toFixed(axis.tickDecimals);
 }
 ```
@@ -455,7 +457,7 @@ by the automatic axis scaling algorithm (or specified by you). Here's
 an example of a custom formatter:
 
 ```js
-function suffixFormatter(val, axis) {
+function suffixFormatter(val, axis, index, numberOfTicks) {
     if (val > 1000000)
         return (val / 1000000).toFixed(axis.tickDecimals) + " MB";
     else if (val > 1000)
