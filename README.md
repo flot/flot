@@ -108,3 +108,9 @@ examples/axes-time-zones/index.html.
 [flashcanvas]: http://code.google.com/p/flashcanvas/
 [timezone-js]: https://github.com/mde/timezone-js
 [olson]: http://ftp.iana.org/time-zones
+
+## Why using forked project ##
+It seems that original flot repository is not active anymore and none of my pull requests go through, so I'll use this one for new features/fixes.
+
+### What's new ###
+- tickFormmater is able to receive index of tick for which is being called and total number of ticks (e.g. so you can hide/show last/first tick, or every second one)
