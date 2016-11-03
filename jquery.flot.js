@@ -1758,7 +1758,7 @@ Licensed under the MIT license.
                     return ticks;
                 };
 
-				axis.tickFormatter = function (value, axis) {
+				axis.tickFormatter = function (value, axis, index, numberOfTicks) {
 
 					var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
 					var formatted = "" + Math.round(value * factor) / factor;
@@ -1779,7 +1779,7 @@ Licensed under the MIT license.
             }
 
             if ($.isFunction(opts.tickFormatter))
-                axis.tickFormatter = function (v, axis) { return "" + opts.tickFormatter(v, axis); };
+                axis.tickFormatter = function (v, axis, index, numberOfTicks) { return "" + opts.tickFormatter(v, axis, index, numberOfTicks); };
 
             if (opts.alignTicksWithAxis != null) {
                 var otherAxis = (axis.direction == "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
@@ -1846,9 +1846,9 @@ Licensed under the MIT license.
                 else
                     v = +t;
                 if (label == null)
-                    label = axis.tickFormatter(v, axis);
+                    label = axis.tickFormatter(v, axis, i, ticks.length);
                 if (!isNaN(v))
-                    axis.ticks.push({ v: v, label: label });
+                    axis.ticks.push({ v: v, label: label, index : i, numberOfTicks : ticks.length });
             }
         }
 
@@ -2010,7 +2010,7 @@ Licensed under the MIT license.
                             ctx.lineTo(xrange.to + subPixel, yrange.to);
                         } else {
                             ctx.moveTo(xrange.from, yrange.to + subPixel);
-                            ctx.lineTo(xrange.to, yrange.to + subPixel);                            
+                            ctx.lineTo(xrange.to, yrange.to + subPixel);
                         }
                         ctx.stroke();
                     } else {
@@ -2525,9 +2525,9 @@ Licensed under the MIT license.
                 radius = series.points.radius,
                 symbol = series.points.symbol;
 
-            // If the user sets the line width to 0, we change it to a very 
+            // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
-            // Doing the conditional here allows the shadow setting to still be 
+            // Doing the conditional here allows the shadow setting to still be
             // optional even with a lineWidth of 0.
 
             if( lw == 0 )
