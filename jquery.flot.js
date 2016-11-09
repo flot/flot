@@ -7,6 +7,7 @@ Licensed under the MIT license.
 
 // the actual Flot code
 (function($) {
+    "use strict";
 
     // Cache the prototype hasOwnProperty for faster access
     var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -1834,12 +1835,10 @@ Licensed under the MIT license.
                 y1 = points[i - ps + 1];
                 x2 = points[i];
                 y2 = points[i + 1];
-/*
+
                 if (x1 === null || x2 === null)
                     continue;
-*/
 
-/*
                 // clip with ymin
                 if (y1 <= y2 && y1 < axisy.min) {
                     if (y2 < axisy.min)
@@ -1866,7 +1865,6 @@ Licensed under the MIT license.
                     x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                     y2 = axisy.max;
                 }
-/*
                 // clip with xmin
                 if (x1 <= x2 && x1 < axisx.min) {
                     if (x2 < axisx.min)
@@ -1892,14 +1890,13 @@ Licensed under the MIT license.
                     y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x2 = axisx.max;
                 }
-*/
 
-//                if (x1 != prevx || y1 != prevy)
-//                    ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
+                if (x1 != prevx || y1 != prevy)
+                    ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
 
                 prevx = x2;
                 prevy = y2;
-//                ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
+                ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
             }
             ctx.stroke();
         }
