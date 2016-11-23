@@ -4,9 +4,6 @@
 
 (function($) {
 
-
-
-
     if (!window.Flot) {
         window.Flot = {};
     }

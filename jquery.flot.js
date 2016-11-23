@@ -644,26 +644,34 @@ Licensed under the MIT license.
                     // find out how to copy
                     format.push({
                         x: true,
+                        y:false,
                         number: true,
-                        required: true
+                        required: true,
+                        autoscale: null,
+                        defaultValue: null
                     });
                     format.push({
+                        x: false,
                         y: true,
                         number: true,
-                        required: true
+                        required: true,
+                        autoscale: null,
+                        defaultValue: null
                     });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
                         var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
                         format.push({
+                            x: false,
                             y: true,
                             number: true,
                             required: false,
-                            defaultValue: 0,
-                            autoscale: autoscale
+                            autoscale: autoscale,
+                            defaultValue: 0
                         });
+
                         if (s.bars.horizontal) {
-                            delete format[format.length - 1].y;
+                            format[format.length - 1].y = false;
                             format[format.length - 1].x = true;
                         }
                     }
@@ -789,6 +797,7 @@ Licensed under the MIT license.
                             if (val > xmax)
                                 xmax = val;
                         }
+
                         if (f.y) {
                             if (val < ymin)
                                 ymin = val;
@@ -2052,6 +2061,14 @@ Licensed under the MIT license.
                 ctx.setLineDash(series.lines.dashes);
             }
 
+            var datapoints = {format: series.datapoints.format,
+                             points: series.datapoints.points,
+                             pointsize: series.datapoints.pointsize};
+
+           if (series.decimate) {
+               datapoints.points = series.decimate(datapoints.points, 0, datapoints.points.length/2, plotWidth);
+           }
+
             var lw = series.lines.lineWidth,
                 sw = series.shadowSize;
             // FIXME: consider another form of shadow when filling is turned on
@@ -2061,9 +2078,9 @@ Licensed under the MIT license.
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
                 // position shadow at angle from the mid of line
                 var angle = Math.PI / 18;
-                plotLine(series.datapoints, Math.sin(angle) * (lw / 2 + sw / 2), Math.cos(angle) * (lw / 2 + sw / 2), series.xaxis, series.yaxis);
+                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 2), Math.cos(angle) * (lw / 2 + sw / 2), series.xaxis, series.yaxis);
                 ctx.lineWidth = sw / 2;
-                plotLine(series.datapoints, Math.sin(angle) * (lw / 2 + sw / 4), Math.cos(angle) * (lw / 2 + sw / 4), series.xaxis, series.yaxis);
+                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 4), Math.cos(angle) * (lw / 2 + sw / 4), series.xaxis, series.yaxis);
             }
 
             ctx.lineWidth = lw;
@@ -2071,11 +2088,11 @@ Licensed under the MIT license.
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(series.datapoints, series.xaxis, series.yaxis);
+                plotLineArea(datapoints, series.xaxis, series.yaxis);
             }
 
             if (lw > 0)
-                plotLine(series.datapoints, 0, 0, series.xaxis, series.yaxis);
+                plotLine(datapoints, 0, 0, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
