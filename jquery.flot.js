@@ -782,23 +782,26 @@ Licensed under the MIT license.
                     ymax = bottomSentry;
 
                 for (j = 0; j < points.length; j += ps) {
-                    if (points[j] == null)
+                    if (points[j] === null)
                         continue;
 
                     for (m = 0; m < ps; ++m) {
                         val = points[j + m];
                         f = format[m];
-                        if (!f || f.autoscale === false || val == fakeInfinity || val == -fakeInfinity)
+                        if (f === null || f === undefined)
+                            continue
+
+                        if ( f.autoscale === false || val === fakeInfinity || val === -fakeInfinity)
                             continue;
 
-                        if (f.x) {
+                        if (f.x === true) {
                             if (val < xmin)
                                 xmin = val;
                             if (val > xmax)
                                 xmax = val;
                         }
 
-                        if (f.y) {
+                        if (f.y === true) {
                             if (val < ymin)
                                 ymin = val;
                             if (val > ymax)
