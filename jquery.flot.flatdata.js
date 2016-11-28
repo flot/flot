@@ -9,11 +9,11 @@ Set series.flatdata to true to enable.
     function process1DRawData(plot, series, data, datapoints) {
         if (series.flatdata === true) {
             datapoints.pointsize = 2;
-            datapoints.points.length = data.length * 2;
-            for (var i = 0 ; i < data.length; i++) {
-                datapoints.points[i*2] = i;
-                datapoints.points[i*2 + 1] = data[i];
+            for (var i = 0, j=0; i < data.length; i++, j+=2) {
+                datapoints.points[j] = i;
+                datapoints.points[j + 1] = data[i];
             }
+            datapoints.points.length = data.length * 2;
         }
     }
 
