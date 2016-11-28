@@ -919,6 +919,14 @@ Licensed under the MIT license.
             return $.grep(xaxes.concat(yaxes), function (a) { return a; });
         }
 
+        function xAxes() {
+            return $.grep(xaxes, function (a) { return a; });
+        }
+
+        function yAxes() {
+            return $.grep(yaxes, function (a) { return a; });
+        }
+
         function canvasToAxisCoords(pos) {
             // return an object with x/y corresponding to all used axes
             var res = {}, i, axis;
@@ -1285,8 +1293,8 @@ Licensed under the MIT license.
                     }
                 }
 
-                updateAxis(s.xaxis, xmin, xmax);
-                updateAxis(s.yaxis, ymin, ymax);
+                $.each(xAxes(), function (_, axis) { updateAxis(axis, xmin, xmax); })
+                $.each(yAxes(), function (_, axis) { updateAxis(axis, ymin, ymax); })
             }
 
             $.each(allAxes(), function (_, axis) {
