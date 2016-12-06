@@ -2069,7 +2069,7 @@ Licensed under the MIT license.
                              pointsize: series.datapoints.pointsize};
 
            if (series.decimate) {
-               datapoints.points = series.decimate(datapoints.points, series.xaxis.min, series.xaxis.max, plotWidth);
+               datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
            }
 
             var lw = series.lines.lineWidth,
