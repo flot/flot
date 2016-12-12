@@ -3,12 +3,14 @@
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
 
-Set axis.mode to "time" to enable. See the section "Time series data" in
+Set axis.format to "time" to enable. See the section "Time series data" in
 API.txt for details.
-
 */
 
+/* global timezoneJS */
+
 (function($) {
+	'use strict';
 
 	var options = {
 		xaxis: {
@@ -28,28 +30,98 @@ API.txt for details.
 	// Returns a string with the date d formatted according to fmt.
 	// A subset of the Open Group's strftime format is supported.
 
-	function formatDate(d, fmt, monthNames, dayNames) {
+	function formatDate(d, fmt, monthNames, dayNames, showMilliseconds) {
 
-		if (typeof d.strftime == "function") {
+		if (typeof d.strftime === "function") {
 			return d.strftime(fmt);
 		}
 
 		var leftPad = function(n, pad) {
 			n = "" + n;
-			pad = "" + (pad == null ? "0" : pad);
-			return n.length == 1 ? pad + n : n;
+			pad = "" + (pad ? pad : "0");
+			return n.length === 1 ? pad + n : n;
 		};
+
+		var leftPadNTimes = function(n, pad, nTimes) {
+			n = "" + n;
+			pad = "" + (pad ? pad : "0");
+
+			while (n.length < nTimes) {
+				n = pad + n;
+			}
+			return n;
+		};
+
+		function addMilliseconds(date, ms) {
+			var parts = date.split(' ');
+			if (parts.length > 1) {
+				var sufix = parts[parts.length -1];
+				parts.splice(parts.length - 1, 1);
+
+				return parts.join(' ') + ms + ' ' + sufix;
+			} else {
+				return date + ms;
+			}
+		}
+
+		function toAbsoluteTimeStr(date, showMilliseconds) {
+			var unixToAbsoluteEpochDiff = 62135596800000;
+			var d = date.valueOf();
+			var ms = Math.floor(d % 1000);
+			if (ms < 0) {
+				ms = 1000 + ms;
+			}
+
+			var gregorianDate = makeUtcWrapper(new Date(date - unixToAbsoluteEpochDiff)).date;
+
+			var msString = showMilliseconds ? '.'+ leftPadNTimes(ms, '0', 3) : '';
+			var time = Globalize.format(gregorianDate, "T", window.NIEmbeddedBrowser.formatLanguage);
+			var absTimeString = addMilliseconds(time, msString) + '<br>' +  Globalize.format(gregorianDate, "d", window.NIEmbeddedBrowser.formatLanguage);
+			absTimeString = absTimeString.replace(/\s/g, '&nbsp;');
+			return absTimeString;
+		}
+
+		function toRelativeTimeStr(date, showMilliseconds) {
+			var result = '';
+
+			var d = date.valueOf();
+
+			if (d < 0) {
+				d = -d;
+				result += '-';
+			}
+			var dateInSeconds = Math.floor(d/1000);
+			var milliseconds = Math.floor(d % 1000);
+			var seconds = dateInSeconds % 60;
+			var dateInMinutes = Math.floor(dateInSeconds/60);
+			var minutes = dateInMinutes % 60;
+			var dateInHours = Math.floor(dateInMinutes/60);
+			var hours = dateInHours % 24;
+			var days = Math.floor(dateInHours/24);
+
+			if (days) {
+				result += days + '.';
+			}
+			result += leftPad(hours) + ':';
+			result += leftPad(minutes) + ':';
+			result += leftPad(seconds);
+			if (showMilliseconds) {
+				result += '.' + leftPadNTimes(milliseconds, "0", 3);
+			}
+
+			return result;
+		}
 
 		var r = [];
 		var escape = false;
 		var hours = d.getHours();
 		var isAM = hours < 12;
 
-		if (monthNames == null) {
+		if (!monthNames) {
 			monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 		}
 
-		if (dayNames == null) {
+		if (!dayNames) {
 			dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 		}
 
@@ -57,7 +129,7 @@ API.txt for details.
 
 		if (hours > 12) {
 			hours12 = hours - 12;
-		} else if (hours == 0) {
+		} else if (hours === 0) {
 			hours12 = 12;
 		} else {
 			hours12 = hours;
@@ -84,15 +156,18 @@ API.txt for details.
 						c = "" + (Math.floor(d.getMonth() / 3) + 1); break;
 					case 'S': c = leftPad(d.getSeconds()); break;
 					case 'y': c = leftPad(d.getFullYear() % 100); break;
-					case 'Y': c = "" + d.getFullYear(); break;
+					case 'Y': c = "" + leftPadNTimes(d.getFullYear(), '0', 4); break;
 					case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
 					case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
 					case 'w': c = "" + d.getDay(); break;
+					case 'f': c = "" + leftPadNTimes(d.getMilliseconds(), null, 3); break;
+					case 'r': c = toRelativeTimeStr(d.date, showMilliseconds); break;
+					case 'A': c = toAbsoluteTimeStr(d.date, showMilliseconds); break;
 				}
 				r.push(c);
 				escape = false;
 			} else {
-				if (c == "%") {
+				if (c === "%") {
 					escape = true;
 				} else {
 					r.push(c);
@@ -114,15 +189,14 @@ API.txt for details.
 			sourceObj[sourceMethod] = function() {
 				return targetObj[targetMethod].apply(targetObj, arguments);
 			};
-		};
+		}
 
 		var utc = {
 			date: d
 		};
 
 		// support strftime, if found
-
-		if (d.strftime != undefined) {
+		if (d.strftime !== undefined) {
 			addProxyMethod(utc, "strftime", d, "strftime");
 		}
 
@@ -137,17 +211,17 @@ API.txt for details.
 		}
 
 		return utc;
-	};
+	}
 
 	// select time zone strategy.  This returns a date-like object tied to the
 	// desired timezone
-
 	function dateGenerator(ts, opts) {
-		if (opts.timezone == "browser") {
+	    ts *= 1000;
+		if (opts.timezone === "browser") {
 			return new Date(ts);
-		} else if (!opts.timezone || opts.timezone == "utc") {
+		} else if (!opts.timezone || opts.timezone === "utc") {
 			return makeUtcWrapper(new Date(ts));
-		} else if (typeof timezoneJS != "undefined" && typeof timezoneJS.Date != "undefined") {
+		} else if (typeof timezoneJS !== "undefined" && typeof timezoneJS.Date !== "undefined") {
 			var d = new timezoneJS.Date();
 			// timezone-js is fickle, so be sure to set the time zone before
 			// setting the time.
@@ -158,27 +232,29 @@ API.txt for details.
 			return makeUtcWrapper(new Date(ts));
 		}
 	}
-	
-	// map of app. size of time units in milliseconds
 
+    // map of app. size of time units in milliseconds
 	var timeUnitSize = {
-		"second": 1000,
-		"minute": 60 * 1000,
-		"hour": 60 * 60 * 1000,
-		"day": 24 * 60 * 60 * 1000,
-		"month": 30 * 24 * 60 * 60 * 1000,
-		"quarter": 3 * 30 * 24 * 60 * 60 * 1000,
-		"year": 365.2425 * 24 * 60 * 60 * 1000
+		"millisecond": 0.001,
+		"second": 1,
+		"minute": 60 ,
+		"hour": 60 * 60,
+		"day": 24 * 60 * 60,
+		"month": 30 * 24 * 60 * 60,
+		"quarter": 3 * 30 * 24 * 60 * 60,
+		"year": 365.2425 * 24 * 60 * 60
 	};
 
 	// the allowed tick sizes, after 1 year we use
 	// an integer algorithm
 
 	var baseSpec = [
+		[1, "millisecond"], [2, "millisecond"], [5, "millisecond"], [10, "millisecond"],
+		[25, "millisecond"], [50, "millisecond"], [100, "millisecond"], [250, "millisecond"], [500, "millisecond"],
 		[1, "second"], [2, "second"], [5, "second"], [10, "second"],
-		[30, "second"], 
+		[30, "second"],
 		[1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
-		[30, "minute"], 
+		[30, "minute"],
 		[1, "hour"], [2, "hour"], [4, "hour"],
 		[8, "hour"], [12, "hour"],
 		[1, "day"], [2, "day"], [3, "day"],
@@ -195,12 +271,12 @@ API.txt for details.
 		[1, "year"]]);
 
 	function init(plot) {
-		plot.hooks.processOptions.push(function (plot, options) {
+		plot.hooks.processOptions.push(function (plot) {
 			$.each(plot.getAxes(), function(axisName, axis) {
 
 				var opts = axis.options;
 
-				if (opts.mode == "time") {
+				if (opts.format === "time") {
 					axis.tickGenerator = function(axis) {
 
 						var ticks = [];
@@ -215,18 +291,20 @@ API.txt for details.
 							(opts.minTickSize && opts.minTickSize[1] ===
 							"quarter") ? specQuarters : specMonths;
 
-						if (opts.minTickSize != null) {
-							if (typeof opts.tickSize == "number") {
+						if (opts.minTickSize !== null && opts.minTickSize !== undefined) {
+							if (typeof opts.tickSize === "number") {
 								minSize = opts.tickSize;
 							} else {
 								minSize = opts.minTickSize[0] * timeUnitSize[opts.minTickSize[1]];
 							}
 						}
 
+						var delta = axis.delta * 2;
+
 						for (var i = 0; i < spec.length - 1; ++i) {
-							if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]]
-											  + spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2
-								&& spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
+							if (delta < (spec[i][0] * timeUnitSize[spec[i][1]] +
+								spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2 &&
+								spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
 								break;
 							}
 						}
@@ -236,12 +314,12 @@ API.txt for details.
 
 						// special-case the possibility of several years
 
-						if (unit == "year") {
+						if (unit === "year") {
 
 							// if given a minTickSize in years, just use it,
 							// ensuring that it's an integer
 
-							if (opts.minTickSize != null && opts.minTickSize[1] == "year") {
+						    if (opts.minTickSize !== null && opts.minTickSize !== undefined && opts.minTickSize[1] === "year") {
 								size = Math.floor(opts.minTickSize[0]);
 							} else {
 
@@ -274,24 +352,28 @@ API.txt for details.
 
 						var step = tickSize * timeUnitSize[unit];
 
-						if (unit == "second") {
+						if (unit === "millisecond") {
+							d.setMilliseconds(floorInBase(d.getMilliseconds(), tickSize));
+						} else if (unit === "second") {
 							d.setSeconds(floorInBase(d.getSeconds(), tickSize));
-						} else if (unit == "minute") {
+						} else if (unit === "minute") {
 							d.setMinutes(floorInBase(d.getMinutes(), tickSize));
-						} else if (unit == "hour") {
+						} else if (unit === "hour") {
 							d.setHours(floorInBase(d.getHours(), tickSize));
-						} else if (unit == "month") {
+						} else if (unit === "month") {
 							d.setMonth(floorInBase(d.getMonth(), tickSize));
-						} else if (unit == "quarter") {
+						} else if (unit === "quarter") {
 							d.setMonth(3 * floorInBase(d.getMonth() / 3,
 								tickSize));
-						} else if (unit == "year") {
+						} else if (unit === "year") {
 							d.setFullYear(floorInBase(d.getFullYear(), tickSize));
 						}
 
 						// reset smaller components
 
-						d.setMilliseconds(0);
+						if (step >= timeUnitSize.second) {
+							d.setMilliseconds(0);
+						}
 
 						if (step >= timeUnitSize.minute) {
 							d.setSeconds(0);
@@ -317,15 +399,17 @@ API.txt for details.
 
 						var carry = 0;
 						var v = Number.NaN;
+					    var v1000;
 						var prev;
 
 						do {
 
 							prev = v;
-							v = d.getTime();
+							v1000 = d.getTime();
+						    v = v1000 / 1000;
 							ticks.push(v);
 
-							if (unit == "month" || unit == "quarter") {
+							if (unit === "month" || unit === "quarter") {
 								if (tickSize < 1) {
 
 									// a bit complicated - we'll divide the
@@ -336,21 +420,21 @@ API.txt for details.
 									d.setDate(1);
 									var start = d.getTime();
 									d.setMonth(d.getMonth() +
-										(unit == "quarter" ? 3 : 1));
+										(unit === "quarter" ? 3 : 1));
 									var end = d.getTime();
-									d.setTime(v + carry * timeUnitSize.hour + (end - start) * tickSize);
+									d.setTime((v + carry * timeUnitSize.hour + (end - start) * tickSize));
 									carry = d.getHours();
 									d.setHours(0);
 								} else {
 									d.setMonth(d.getMonth() +
-										tickSize * (unit == "quarter" ? 3 : 1));
+										tickSize * (unit === "quarter" ? 3 : 1));
 								}
-							} else if (unit == "year") {
+							} else if (unit === "year") {
 								d.setFullYear(d.getFullYear() + tickSize);
 							} else {
-								d.setTime(v + step);
+								d.setTime((v + step) *1000);
 							}
-						} while (v < axis.max && v != prev);
+						} while (v < axis.max && v !== prev);
 
 						return ticks;
 					};
@@ -361,17 +445,17 @@ API.txt for details.
 
 						// first check global format
 
-						if (opts.timeformat != null) {
-							return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames);
+					    if (opts.timeformat !== null && opts.timeformat !== undefined) {
+							return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond');
 						}
 
 						// possibly use quarters if quarters are mentioned in
 						// any of these places
 
 						var useQuarters = (axis.options.tickSize &&
-								axis.options.tickSize[1] == "quarter") ||
+								axis.options.tickSize[1] === "quarter") ||
 							(axis.options.minTickSize &&
-								axis.options.minTickSize[1] == "quarter");
+								axis.options.minTickSize[1] === "quarter");
 
 						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
 						var span = axis.max - axis.min;
