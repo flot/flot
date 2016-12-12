@@ -4,7 +4,6 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Flot Examples: Tracking</title>
 	<link href="../examples.css" rel="stylesheet" type="text/css">
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.crosshair.js"></script>
@@ -28,10 +27,11 @@
 				}
 			},
 			crosshair: {
-				mode: "x"
+				mode: "xy"
 			},
 			grid: {
 				hoverable: true,
+				clickable: true,
 				autoHighlight: false
 			},
 			yaxis: {
@@ -98,6 +98,8 @@
 			if (!updateLegendTimeout) {
 				updateLegendTimeout = setTimeout(updateLegend, 50);
 			}
+		}).bind("plotclick", function (event, pos, item) {
+		    plot.lockCrosshair(pos);
 		});
 
 		// Add the Flot version string to the footer
