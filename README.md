@@ -2,22 +2,21 @@
 
 ## About ##
 
-Flot is a Javascript plotting library for jQuery.  
-Read more at the website: <http://www.flotcharts.org/>
+engineering-flot is a Javascript plotting library for engineering and scientific
+applications derived from Flot: <http://www.flotcharts.org/>
 
 Take a look at the the examples in examples/index.html; they should give a good
-impression of what Flot can do, and the source code of the examples is probably
-the fastest way to learn how to use Flot.
+impression of what engineering-flot can do, and the source code of the examples is probably
+the fastest way to learn how to use engineering-flot.
 
 
 ## Installation ##
 
 Just include the Javascript file after you've included jQuery.
 
-Generally, all browsers that support the HTML5 canvas tag are
-supported.
+Generally, all modern browsers are supported.
 
-Internet Explorer < 9 is not supported, it doesn't have HTML canvas support.
+Internet Explorer < 9 is not supported.
 
 You need at least jQuery 1.2.6, but try at least 1.3.2 for interactive
 charts because of performance improvements in event handling.
@@ -65,26 +64,6 @@ $.plot($("#placeholder"), [ [[0, 0], [1, 1]] ], { yaxis: { max: 1 } });
 The plot function immediately draws the chart and then returns a plot
 object with a couple of methods.
 
+## Internationalization
 
-## What's with the name? ##
-
-First: it's pronounced with a short o, like "plot". Not like "flawed".
-
-So "Flot" rhymes with "plot".
-
-And if you look up "flot" in a Danish-to-English dictionary, some of
-the words that come up are "good-looking", "attractive", "stylish",
-"smart", "impressive", "extravagant". One of the main goals with Flot
-is pretty looks.
-
-
-## Notes about the examples ##
-
-In order to have a useful, functional example of time-series plots using time
-zones, date.js from [timezone-js][timezone-js] (released under the Apache 2.0
-license) and the [Olson][olson] time zone database (released to the public
-domain) have been included in the examples directory.  They are used in
-examples/axes-time-zones/index.html.
-
-[timezone-js]: https://github.com/mde/timezone-js
-[olson]: http://ftp.iana.org/time-zones
+ToDo
