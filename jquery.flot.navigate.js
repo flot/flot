@@ -227,6 +227,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     center: c
                 });
         }
+																				 
+        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+        var XMARK_LENGTH_CONSTANT = $.plot.uiConstants.XMARK_LENGTH_CONSTANT;
+        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
             e.preventDefault();
@@ -417,24 +421,28 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
         };
 
+        var getSnap = function(delta) {
+            var snap;
+
+            if (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) < SNAPPING_CONSTANT) {
+                snap = false;
+            } else if (Math.abs(delta.x) < SNAPPING_CONSTANT) {
+                delta.x = 0;
+                snap = true;
+            } else if (Math.abs(delta.y) < SNAPPING_CONSTANT) {
+                delta.y = 0;
+                snap = true;
+            }
+
+            return snap;
+        }
+
         plot.absPan = function(args) {
             var delta = {
                     x: +args.left,
                     y: +args.top
                 },
-                panDistance = Math.sqrt(delta.x * delta.x + delta.y * delta.y),
-                snap = false;
-
-            // constrain delta and set the pan hints
-            if (Math.abs(delta.x) < panDistance * 0.1) {
-                delta.x = 0;
-                snap = true;
-            }
-
-            if (Math.abs(delta.y) < panDistance * 0.1) {
-                delta.y = 0;
-                snap = true;
-            }
+                snap = getSnap(delta);
 
             if (snap) {
                 panHint = {
@@ -448,7 +456,13 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     }
                 }
             } else {
-                panHint = null;
+                panHint = {
+                    start: {
+                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: startPageY - plot.offset().top + plot.getPlotOffset().top,
+                    },
+                    end: false
+                }
             }
 
             if (isNaN(delta.x))
@@ -493,18 +507,30 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 ctx.strokeStyle = '#60a0d0';
                 ctx.lineWidth = 1;
                 ctx.lineJoin = "round";
-                var dirX = panHint.start.y === panHint.end.y;
 
                 ctx.beginPath();
 
-                ctx.moveTo(panHint.start.x - (dirX ? 0 : 10), panHint.start.y - (dirX ? 10 : 0));
-                ctx.lineTo(panHint.start.x + (dirX ? 0 : 10), panHint.start.y + (dirX ? 10 : 0));
+                if (panHint.end === false) {
 
-                ctx.moveTo(panHint.start.x, panHint.start.y);
-                ctx.lineTo(panHint.end.x, panHint.end.y);
+                    ctx.moveTo(panHint.start.x - XMARK_LENGTH_CONSTANT, panHint.start.y - XMARK_LENGTH_CONSTANT);
+                    ctx.lineTo(panHint.start.x + XMARK_LENGTH_CONSTANT, panHint.start.y + XMARK_LENGTH_CONSTANT);
 
-                ctx.moveTo(panHint.end.x - (dirX ? 0 : 10), panHint.end.y - (dirX ? 10 : 0));
-                ctx.lineTo(panHint.end.x + (dirX ? 0 : 10), panHint.end.y + (dirX ? 10 : 0));
+                    ctx.moveTo(panHint.start.x + XMARK_LENGTH_CONSTANT, panHint.start.y - XMARK_LENGTH_CONSTANT);
+                    ctx.lineTo(panHint.start.x - XMARK_LENGTH_CONSTANT, panHint.start.y + XMARK_LENGTH_CONSTANT);
+                } else {
+
+                    var dirX = panHint.start.y === panHint.end.y;
+
+                    ctx.moveTo(panHint.start.x - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.start.y - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.lineTo(panHint.start.x + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.start.y + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+
+                    ctx.moveTo(panHint.start.x, panHint.start.y);
+                    ctx.lineTo(panHint.end.x, panHint.end.y);
+
+                    ctx.moveTo(panHint.end.x - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.end.y - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.lineTo(panHint.end.x + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.end.y + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+
+                }
 
                 ctx.stroke();
             }

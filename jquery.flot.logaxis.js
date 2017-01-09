@@ -1,14 +1,16 @@
 /* Pretty handling of log axes.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Copyright (c) 2015 Ciprian Ceteras cipix2000@gmail.com.
 Licensed under the MIT license.
 
-Set axis.mode to "log" to enable. 
+Set axis.mode to "log" to enable.
 */
 
 /* global jQuery*/
 
 (function ($) {
+    'use strict';
 
     var options = {
         xaxis: {}
@@ -23,6 +25,7 @@ Set axis.mode to "log" to enable.
                 vals.push(val);
             }
         }
+
         return vals;
     }();
 
@@ -30,6 +33,7 @@ Set axis.mode to "log" to enable.
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
             v = PREFERRED_LOG_TICK_VALUES[0];
         }
+
         return Math.log(v);
     };
 
@@ -73,7 +77,7 @@ Set axis.mode to "log" to enable.
             v = start + i * size;
             ticks.push(v);
             ++i;
-        } while (v < max && v != prev);
+        } while (v < max && v !== prev);
         return ticks;
     };
 
@@ -108,10 +112,11 @@ Set axis.mode to "log" to enable.
             }
         });
 
-        if (minIdx == -1) {
+        if (minIdx === -1) {
             minIdx = 0;
         }
-        if (maxIdx == -1) {
+
+        if (maxIdx === -1) {
             maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
         }
 
@@ -143,6 +148,7 @@ Set axis.mode to "log" to enable.
                         tick = null;
                     }
                 }
+
                 if (tick) ticks.push(tick);
             }
             // Since we went in backwards order.
@@ -159,9 +165,10 @@ Set axis.mode to "log" to enable.
         var round_with = Math.pow(10, tenExponent);
         var x = Math.round(value / round_with);
         if ((tenExponent >= -4) && (tenExponent <= 4)) {
-            return value.toString();
+            //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
+            return tenExponent <= 0 ? value.toFixed(-tenExponent) : value.toString();
         } else {
-            return x.toFixed(0) + "e" + tenExponent;
+            return x.toFixed(0) + 'e' + tenExponent;
         }
     };
 
@@ -171,14 +178,15 @@ Set axis.mode to "log" to enable.
     }
 
     function init(plot) {
-        plot.hooks.processOptions.push(function (plot, options) {
+        plot.hooks.processOptions.push(function (plot) {
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
-                if (opts.mode == "log") {
+                if (opts.mode === 'log') {
                     axis.tickGenerator = function (axis) {
                         var noTicks = 11;
-                        return logTickGenerator(axis.datamin, axis.datamax, noTicks);
+                        return logTickGenerator(axis.min, axis.max, noTicks);
                     };
+
                     axis.tickFormatter = logTickFormatter;
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
