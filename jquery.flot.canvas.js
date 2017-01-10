@@ -333,26 +333,8 @@ browser, but needs to redraw with canvas text when exporting as an image.
 				y += line.height;
 			}
 		};
-	
-		// Clears the the cache used to speed up the text size measurements.
-		// As an (unfortunate) side effect all text within the text Layer is removed.
-		// Use this function before plot.setupGrid() and plot.draw() in one of these
-		// cases:
-		// 1. The plot just became visible.
-		// 2. The styles changed.
-		Canvas.prototype.clearCache = function() {
-			var cache = this._textCache;
-			for (var layerKey in cache) {
-				if (hasOwnProperty.call(cache, layerKey)) {
-					var layer = this.getTextLayer(layerKey);
-					layer.empty();
-				}
-			};
 
-			this._textCache = {};
-		};
-	
-	
+
 	}
 
 	$.plot.plugins.push({
