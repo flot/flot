@@ -685,6 +685,8 @@ Licensed under the MIT license.
                     s.datapoints.format = format;
                 }
 
+                s.xaxis.used = s.yaxis.used = true;
+
                 if (s.datapoints.pointsize != null)
                     continue; // already filled in
 
@@ -694,7 +696,6 @@ Licensed under the MIT license.
                 points = s.datapoints.points;
 
                 var insertSteps = s.lines.show && s.lines.steps;
-                s.xaxis.used = s.yaxis.used = true;
 
                 for (j = k = 0; j < data.length; ++j, k += ps) {
                     p = data[j];
