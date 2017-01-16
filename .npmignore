@@ -8,6 +8,7 @@
 !jquery.flot.js
 !jquery.flot.logaxis.js
 !jquery.flot.navigate.js
+!jquery.flot.selection.js
 !jquery.flot.symbol.js
 !jquery.flot.time.js
 !jquery.flot.uiConstants.js

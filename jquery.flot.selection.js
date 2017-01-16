@@ -87,6 +87,8 @@ The plugin allso adds the following methods to the plot object:
                 active: false
             };
 
+        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+
         // FIXME: The drag handling implemented here should be
         // abstracted out, there's some similar code from a library in
         // the navigation plugin, this should be massaged a bit to fit
@@ -124,7 +126,6 @@ The plugin allso adds the following methods to the plot object:
             setSelectionPos(selection.first, e);
 
             selection.active = true;
-            selection.currentMode = 'xy';
 
             // this is a bit silly, but we have to use a closure to be
             // able to whack the same handler again
@@ -215,12 +216,11 @@ The plugin allso adds the following methods to the plot object:
                 var delta = {
                     x: pos.x - selection.first.x,
                     y: pos.y - selection.first.y
-                },
-                distance = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+                };
 
-                if (Math.abs(delta.x) < distance * 0.1) {
+                if (Math.abs(delta.x) < SNAPPING_CONSTANT) {
                     selection.currentMode = 'y';
-                } else if (Math.abs(delta.y) < distance * 0.1) {
+                } else if (Math.abs(delta.y) < SNAPPING_CONSTANT) {
                     selection.currentMode = 'x';
                 } else {
                     selection.currentMode = 'xy';
@@ -259,6 +259,7 @@ The plugin allso adds the following methods to the plot object:
         function clearSelection(preventEvent) {
             if (selection.show) {
                 selection.show = false;
+                selection.currentMode = '';
                 plot.triggerRedrawOverlay();
                 if (!preventEvent)
                     plot.getPlaceholder().trigger("plotunselected", [ ]);
