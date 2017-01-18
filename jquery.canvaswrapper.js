@@ -166,7 +166,11 @@
                                 }
 
                                 if (positions.length == 0) {
-                                    delete styleCache[key];
+                                    if (styleCache[key].measured) {
+                                        styleCache[key].measured = false;
+                                    } else {
+                                        delete styleCache[key];
+                                    }
                                 }
                             }
                         }
@@ -372,6 +376,7 @@
             info = styleCache[text] = {
                 width: element.outerWidth(true),
                 height: element.outerHeight(true),
+                measured: true,
                 element: element,
                 positions: []
             };
@@ -379,6 +384,7 @@
             element.detach();
         }
 
+        info.measured = true;
         return info;
     };
 
