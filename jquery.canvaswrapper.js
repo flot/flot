@@ -206,8 +206,7 @@
                         left: 0,
                         bottom: 0,
                         right: 0,
-                        'font-size': "smaller",
-                        color: "#545454"
+                        color: "inherit"
                     })
                     .insertAfter(this.element);
             }

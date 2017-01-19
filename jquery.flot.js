@@ -50,6 +50,7 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
+                    growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
@@ -112,7 +113,7 @@ Licensed under the MIT license.
                     margin: 0, // distance from the canvas edge to the grid
                     labelMargin: 5, // in pixels
                     axisMargin: 8, // in pixels
-                    borderWidth: 2, // in pixels
+                    borderWidth: 1, // in pixels
                     minBorderMargin: null, // in pixels, null means taken from points radius
                     markings: null, // array of ranges or fn: axes -> array of ranges
                     markingsColor: "#f4f4f4",
@@ -625,8 +626,17 @@ Licensed under the MIT license.
 
             $.each(allAxes(), function(_, axis) {
                 // init axis
-                axis.datamin = topSentry;
-                axis.datamax = bottomSentry;
+                if (axis.options.growOnly !== true) {
+                    axis.datamin = topSentry;
+                    axis.datamax = bottomSentry;
+                } else {
+                    if (axis.datamin === undefined) {
+                        axis.datamin = topSentry;
+                    }
+                    if (axis.datamax === undefined) {
+                        axis.datamax = bottomSentry;
+                    }
+                }
                 axis.used = false;
             });
 
@@ -1060,11 +1070,15 @@ Licensed under the MIT license.
 
             // By default, grid lines are visible
             if (gridLines == null) {
-                gridLines = true;
+                if (innermost) {
+                    gridLines = true;
+                } else {
+                    gridLines = false;
+                }
             }
 
             if (!isNaN(+tickLength))
-                padding += +tickLength;
+                padding += showTicks ? +tickLength : 0;
 
             if (isXAxis) {
                 lh += padding;
@@ -1647,11 +1661,11 @@ Licensed under the MIT license.
                 y : y
                 };
         };
-		
+
 		function alignPosition(lineWidth, pos) {
 				return ((lineWidth % 2) !== 0) ? Math.floor(pos) + 0.5 : pos;
 		};
-			
+
         function drawTickBar(axis) {
             ctx.lineWidth = 1;
             var box = axis.box,
@@ -1670,13 +1684,13 @@ Licensed under the MIT license.
                     xoff = plotWidth + 1;
                 else
                     yoff = plotHeight + 1;
-            
+
                 if (axis.direction == "x") {
                     y = alignPosition(ctx.lineWidth, y);
                 } else {
                     x = alignPosition(ctx.lineWidth, x);
                 }
-                
+
                 ctx.moveTo(x, y);
                 ctx.lineTo(x + xoff, y + yoff);
                 ctx.stroke();
@@ -1702,13 +1716,13 @@ Licensed under the MIT license.
                     yoff = 0,
                     xminor = 0,
                     yminor = 0,
-					j;					
+					j;
 
-                if (!isNaN(v) && v >= axis.min && v <= axis.max) {       
+                if (!isNaN(v) && v >= axis.min && v <= axis.max) {
                     if (axis.direction === "x") {
                         x = axis.p2c(v);
                         yoff = t;
-                        
+
                         if (axis.position === "top") {
                             yoff = -yoff;
                         }
@@ -1720,12 +1734,12 @@ Licensed under the MIT license.
                             xoff = -xoff;
                         }
                     }
-               
+
                     if (axis.direction === "x")
                         x = alignPosition(ctx.lineWidth, x);
                     else
                         y = alignPosition(ctx.lineWidth, y);
-                    
+
 
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
@@ -1765,9 +1779,9 @@ Licensed under the MIT license.
                             if((y < 0) || (y > plotHeight))
                                 continue;
                         }
-						
+
                         ctx.moveTo(x, y);
-                        ctx.lineTo(x + xminor, y + yminor);  
+                        ctx.lineTo(x + xminor, y + yminor);
                     }
                 }
             }
@@ -1813,7 +1827,7 @@ Licensed under the MIT license.
                     x = alignPosition(ctx.lineWidth, x);
                 else
                     y = alignPosition(ctx.lineWidth, y);
-                
+
 
                 ctx.moveTo(x, y);
                 ctx.lineTo(x + xoff, y + yoff);
