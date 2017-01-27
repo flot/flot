@@ -668,7 +668,7 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
-                        autoscale: null,
+                        autoscale: s.xaxis.options.min == null && s.xaxis.options.max == null,
                         defaultValue: null
                     });
                     format.push({
@@ -676,7 +676,7 @@ Licensed under the MIT license.
                         y: true,
                         number: true,
                         required: true,
-                        autoscale: null,
+                        autoscale: s.yaxis.options.min == null && s.yaxis.options.max == null,
                         defaultValue: null
                     });
 
@@ -802,6 +802,12 @@ Licensed under the MIT license.
                     ymin = topSentry,
                     xmax = bottomSentry,
                     ymax = bottomSentry;
+
+                if (format.every(function (f) {
+                    return f.autoscale === false;
+                })) {
+                    continue;
+                }
 
                 for (j = 0; j < points.length; j += ps) {
                     if (points[j] === null)
