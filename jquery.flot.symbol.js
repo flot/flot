@@ -50,6 +50,12 @@ The symbols are accessed as strings through the standard symbol options:
             ctx.lineTo(x + size, y + size);
             ctx.moveTo(x - size, y + size);
             ctx.lineTo(x + size, y - size);
+        },
+        ellipse: function(ctx, x, y, radius, shadow) {
+            if (!shadow) {
+                ctx.moveTo(x + radius, y);
+                ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+            }
         }
     };
 

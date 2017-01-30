@@ -227,9 +227,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     center: c
                 });
         }
-																				 
+
         var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
-        var XMARK_LENGTH_CONSTANT = $.plot.uiConstants.XMARK_LENGTH_CONSTANT;
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
@@ -504,31 +503,35 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
         function drawOverlay(plot, ctx) {
             if (panHint) {
-                ctx.strokeStyle = '#60a0d0';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(96, 160, 208, 0.7)';
+                ctx.lineWidth = 2;
                 ctx.lineJoin = "round";
+                var startx = Math.round(panHint.start.x),
+                    starty = Math.round(panHint.start.y),
+                    endx = Math.round(panHint.end.x),
+                    endy = Math.round(panHint.end.y);
 
                 ctx.beginPath();
 
                 if (panHint.end === false) {
 
-                    ctx.moveTo(panHint.start.x - XMARK_LENGTH_CONSTANT, panHint.start.y - XMARK_LENGTH_CONSTANT);
-                    ctx.lineTo(panHint.start.x + XMARK_LENGTH_CONSTANT, panHint.start.y + XMARK_LENGTH_CONSTANT);
+                    ctx.moveTo(startx, starty - PANHINT_LENGTH_CONSTANT);
+                    ctx.lineTo(startx, starty + PANHINT_LENGTH_CONSTANT);
 
-                    ctx.moveTo(panHint.start.x + XMARK_LENGTH_CONSTANT, panHint.start.y - XMARK_LENGTH_CONSTANT);
-                    ctx.lineTo(panHint.start.x - XMARK_LENGTH_CONSTANT, panHint.start.y + XMARK_LENGTH_CONSTANT);
+                    ctx.moveTo(startx + PANHINT_LENGTH_CONSTANT, starty);
+                    ctx.lineTo(startx - PANHINT_LENGTH_CONSTANT, starty);
                 } else {
 
-                    var dirX = panHint.start.y === panHint.end.y;
+                    var dirX = starty === endy;
 
-                    ctx.moveTo(panHint.start.x - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.start.y - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
-                    ctx.lineTo(panHint.start.x + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.start.y + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.moveTo(startx - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), starty - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.lineTo(startx + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), starty + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
 
-                    ctx.moveTo(panHint.start.x, panHint.start.y);
-                    ctx.lineTo(panHint.end.x, panHint.end.y);
+                    ctx.moveTo(startx, starty);
+                    ctx.lineTo(endx, endy);
 
-                    ctx.moveTo(panHint.end.x - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.end.y - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
-                    ctx.lineTo(panHint.end.x + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), panHint.end.y + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.moveTo(endx - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), endy - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.lineTo(endx + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), endy + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
 
                 }
 
