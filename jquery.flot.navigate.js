@@ -405,6 +405,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var opts = axis.options,
                     min, max, d = delta[axis.direction];
 
+                if (opts.disablePan === true) {
+                    return;
+                }
+
                 if (d !== 0) {
                     min = axis.c2p(axis.p2c(axis.min) + d);
                     max = axis.c2p(axis.p2c(axis.max) + d);
@@ -472,6 +476,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
                     min, max, d = delta[axis.direction];
+
+                if (opts.disablePan === true) {
+                    return;
+                }
 
                 if (d !== 0) {
                     min = axis.c2p(axis.p2c(axis.savedMin) + d);
