@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Flot Examples: Axes autoscaling options</title>
+	<link href="../examples.css" rel="stylesheet" type="text/css">
+	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.colorhelpers.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.canvaswrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.uiConstants.js"></script>
+    <style>
+    fieldset {
+        display: block;
+        -webkit-margin-start: 2px;
+        -webkit-margin-end: 2px;
+        -webkit-padding-before: 0.35em;
+        -webkit-padding-start: 0.75em;
+        -webkit-padding-end: 0.75em;
+        -webkit-padding-after: 0.625em;
+        min-width: -webkit-min-content;
+        border-width: 2px;
+        border-style: groove;
+        border-color: threedface;
+        border-image: initial;
+    }
+
+    legend {
+        display: block;
+        -webkit-padding-start: 2px;
+        -webkit-padding-end: 2px;
+        border-width: initial;
+        border-style: none;
+        border-color: initial;
+        border-image: initial;
+    }
+
+    input[type="radio"] {
+        margin-top: -1px;
+        vertical-align: middle;
+    }
+    </style>
+
+	<script type="text/javascript">
+
+	$(function() {
+        var index = 0;
+		function generate(start, end, fn) {
+			var res = [];
+			for (var i = 0; i <= 40; ++i) {
+				var x = start + i / 40 * (end - start);
+				res.push([x, fn(x)]);
+			}
+			return res;
+		}
+
+		var data = [
+			{ data: generate(index, 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+		];
+
+		var plot = $.plot("#placeholder", data, {
+			xaxes: [
+				{ position: 'bottom' }
+			],
+			yaxes: [
+				{ position: 'left' }
+			]
+		});
+
+        function update () {
+            index += 0.01;
+            data = [
+    			{ data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+    		];
+            plot.setData(data);
+            plot.setupGrid();
+            plot.draw();
+            window.requestAnimationFrame(update);
+        }
+
+        window.requestAnimationFrame(update);
+
+        $('#myForm input').on('change', function() {
+            var val = $('input[name="myRadio"]:checked', '#myForm').val()
+            var y = plot.getAxes().yaxis;
+            y.options.min = undefined;
+            y.options.max = undefined;
+            y.options.autoscaleMargin = null;
+            y.options.growOnly = false;
+
+            switch (val) {
+                case '1':
+                    y.options.min = -1.5;
+                    y.options.max = 1.5;
+                    break;
+                case '2':
+                    y.options.autoscaleMargin = 0.02;
+                    break;
+                case '3':
+                    break;
+                case '4':
+                    y.options.growOnly = true;
+                    break;
+            }
+        });
+	});
+
+	</script>
+</head>
+<body>
+
+	<div id="header">
+		<h2>Axes autoscaling options</h2>
+	</div>
+
+	<div id="content">
+
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+        <fieldset id="myForm">
+            <legend>Vertical axis autoscaling options</legend>
+            <input type="radio" name="myRadio" value="1" /> None (min = -1.5, max = 1.5) <br />
+            <input type="radio" name="myRadio" value="2" checked="checked"/> fit loosely <br />
+            <input type="radio" name="myRadio" value="3" /> fit exactly <br />
+            <input type="radio" name="myRadio" value="4" /> grow only <br />
+        </fieldset>
+	</div>
+</body>
+</html>

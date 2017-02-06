@@ -23,9 +23,11 @@
 	}
 
 	</style>
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.colorhelpers.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.canvaswrapper.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.uiConstants.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.navigate.js"></script>
 	<script type="text/javascript">
 
@@ -58,11 +60,13 @@
 			},
 			xaxis: {
 				zoomRange: [0.1, 10],
-				panRange: [-10, 10]
+				panRange: [-10, 10],
+				gridLines: true
 			},
 			yaxis: {
 				zoomRange: [0.1, 10],
-				panRange: [-10, 10]
+				panRange: [-10, 10],
+				gridLines: true
 			},
 			zoom: {
 				interactive: true
@@ -72,7 +76,7 @@
 			}
 		});
 
-		// show pan/zoom messages to illustrate events 
+		// show pan/zoom messages to illustrate events
 
 		placeholder.bind("plotpan", function (event, plot) {
 			var axes = plot.getAxes();
@@ -90,7 +94,7 @@
 			+ " &ndash; " + axes.yaxis.max.toFixed(2));
 		});
 
-		// add zoom out button 
+		// add zoom out button
 
 		$("<div class='button' style='right:20px;top:20px'>zoom out</div>")
 			.appendTo(placeholder)
