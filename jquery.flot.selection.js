@@ -107,7 +107,7 @@ The plugin allso adds the following methods to the plot object:
             }
         }
 
-		function mouseOverCursor(mouseX, mouseY) {
+        function mouseOverCursor(mouseX, mouseY) {
             var cursors = plot.getOptions().cursors,
                 grabMargin = 9,
                 isMouseOverCursor = false;
@@ -154,11 +154,11 @@ The plugin allso adds the following methods to the plot object:
 
             setSelectionPos(selection.first, e);
 			
-			var offset = plot.offset(),
-			    mouseX = Math.max(0, Math.min(e.pageX - offset.left, plot.width())),
-	            mouseY = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+            var offset = plot.offset(),
+                mouseX = Math.max(0, Math.min(e.pageX - offset.left, plot.width())),
+                mouseY = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
           
-            if(mouseOverCursor(mouseX, mouseY)){
+            if(mouseOverCursor(mouseX, mouseY)) {
                 selection.active = false;
                 selection.cursorIsMoving = true;
             }
