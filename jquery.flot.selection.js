@@ -84,7 +84,8 @@ The plugin allso adds the following methods to the plot object:
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
                 show: false,
                 currentMode: 'xy',
-                active: false
+                active: false,
+                cursorIsMoving: false
             };
 
         var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
@@ -106,6 +107,34 @@ The plugin allso adds the following methods to the plot object:
             }
         }
 
+		function mouseOverCursor(mouseX, mouseY) {
+            var cursors = plot.getOptions().cursors,
+                grabMargin = 9,
+                isMouseOverCursor = false;
+            
+            if(cursors !== undefined) {
+                cursors.forEach(function (cursor) {
+                    var cursorX = cursor.position.relativeX * plot.width() || cursor.x,
+                        cursorY = cursor.position.relativeY * plot.height() || cursor.y;
+                    
+                    if ((mouseX > cursorX - grabMargin) && (mouseX < cursorX + grabMargin) && 
+                        (mouseY > cursorY - grabMargin) &&  (mouseY < cursorY + grabMargin)) {
+                        isMouseOverCursor=true;
+                    }
+                    if((cursor.mode.indexOf('x') !== -1) && (mouseX > cursorX - grabMargin) && 
+                        (mouseX < cursorX + grabMargin) && (mouseY > 0) && (mouseY < plot.height())) {
+                        isMouseOverCursor=true;
+                    }
+                    if (cursor.mode.indexOf('y') !== -1 && (mouseY > cursorY - grabMargin) && 
+                        (mouseY < cursorY + grabMargin) && (mouseX > 0) && (mouseX < plot.width())) {
+                        isMouseOverCursor=true;
+                    }
+                });
+            }
+            
+            return isMouseOverCursor;
+        }
+        
         function onMouseDown(e) {
             if (e.which != 1)  // only accept left-click
                 return;
@@ -124,8 +153,19 @@ The plugin allso adds the following methods to the plot object:
             }
 
             setSelectionPos(selection.first, e);
-
-            selection.active = true;
+			
+			var offset = plot.offset(),
+			    mouseX = Math.max(0, Math.min(e.pageX - offset.left, plot.width())),
+	            mouseY = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+          
+            if(mouseOverCursor(mouseX, mouseY)){
+                selection.active = false;
+                selection.cursorIsMoving = true;
+            }
+            else {
+                selection.active = true;
+                selection.cursorIsMoving = false;
+            }
 
             // this is a bit silly, but we have to use a closure to be
             // able to whack the same handler again
@@ -335,7 +375,7 @@ The plugin allso adds the following methods to the plot object:
         function selectionIsSane() {
             var minSize = plot.getOptions().selection.minSize;
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
-                Math.abs(selection.second.y - selection.first.y) >= minSize;
+                Math.abs(selection.second.y - selection.first.y) >= minSize && !selection.cursorIsMoving;
         }
 
         plot.clearSelection = clearSelection;
