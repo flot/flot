@@ -673,6 +673,7 @@ Licensed under the MIT license.
                         autoscale: s.xaxis.options.min == null && s.xaxis.options.max == null,
                         defaultValue: null
                     });
+
                     format.push({
                         x: false,
                         y: true,
@@ -683,19 +684,17 @@ Licensed under the MIT license.
                     });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
-                        var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
-                        format.push({
-                            x: false,
-                            y: true,
-                            number: true,
-                            required: false,
-                            autoscale: autoscale,
-                            defaultValue: 0
-                        });
-
-                        if (s.bars.horizontal) {
-                            format[format.length - 1].y = false;
-                            format[format.length - 1].x = true;
+                        var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0].length ? s.data[0].length : 3);
+                        if (expectedPs > 2) {
+                            var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
+                            format.push({
+                                x: false,
+                                y: true,
+                                number: true,
+                                required: false,
+                                autoscale: autoscale,
+                                defaultValue: 0
+                            });
                         }
                     }
 
@@ -861,6 +860,15 @@ Licensed under the MIT license.
                     } else {
                         xmin += delta;
                         xmax += delta + s.bars.barWidth;
+                    }
+                }
+
+                if ((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero)) {
+                    // make sure the 0 point is included in the computed y range when requested
+                    if (ps <= 2) {
+                        /*if ps > 0 the points were already taken into account for autoscale */
+                        ymin = Math.min(0, ymin);
+                        ymax = Math.max(0, ymax);
                     }
                 }
 
@@ -2132,13 +2140,14 @@ Licensed under the MIT license.
             ctx.stroke();
         }
 
-        function plotLineArea(datapoints, axisx, axisy) {
+        function plotLineArea(datapoints, axisx, axisy, fillTowards) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
-                bottom = Math.min(Math.max(0, axisy.min), axisy.max),
+                bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
+                //bottom = axisy.min,
                 i = 0,
-                top, areaOpen = false,
                 ypos = 1,
+                top, areaOpen = false,
                 segmentStart = 0,
                 segmentEnd = 0;
 
@@ -2156,6 +2165,11 @@ Licensed under the MIT license.
                     x2 = points[i],
                     y2 = points[i + ypos];
 
+                    if (ps === -2) {
+                        /* going backwards and no value for the bottom provided in the series*/
+                        y1 = y2 = bottom;
+                    }
+
                 if (areaOpen) {
                     if (ps > 0 && x1 != null && x2 == null) {
                         // at turning point
@@ -2170,7 +2184,6 @@ Licensed under the MIT license.
                         ctx.fill();
                         areaOpen = false;
                         ps = -ps;
-                        ypos = 1;
                         i = segmentStart = segmentEnd + ps;
                         continue;
                     }
@@ -2310,7 +2323,7 @@ Licensed under the MIT license.
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(datapoints, series.xaxis, series.yaxis);
+                plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0);
             }
 
             if (lw > 0)
@@ -2495,7 +2508,7 @@ Licensed under the MIT license.
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 
@@ -2997,9 +3010,7 @@ Licensed under the MIT license.
     // Add the plot function to the top level of the jQuery object
 
     $.plot = function(placeholder, data, options) {
-        //var t0 = new Date();
         var plot = new Plot($(placeholder), data, options, $.plot.plugins);
-        //(window.console ? console.log : alert)("time used (msecs): " + ((new Date()).getTime() - t0.getTime()));
         return plot;
     };
 
