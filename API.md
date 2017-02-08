@@ -264,6 +264,7 @@ xaxis, yaxis: {
     tickFormatter: (fn: number, object -> string) or string
     tickDecimals: null or number
 
+    showTickLabels: "major", "none", "endpoints", or "all"
     labelWidth: null or number
     labelHeight: null or number
     reserveSpace: null or true
@@ -472,6 +473,9 @@ function suffixFormatter(val, axis) {
         return val.toFixed(axis.tickDecimals) + " B";
 }
 ```
+
+"showTickLabels" can be used to specify which ticks labels are visible:
+"none", "endpoints", "major" or "all". The default is "major".
 
 "labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several

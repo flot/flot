@@ -53,6 +53,7 @@ Licensed under the MIT license.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
+                    showTickLabels: "major", // "none", "endpoints", "major", "all"
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
@@ -67,7 +68,8 @@ Licensed under the MIT license.
                 },
                 yaxis: {
                     autoscaleMargin: 0.02,
-                    position: "left" // or "right"
+                    position: "left", // or "right"
+                    showTickLabels: "major" // "none", "endpoints", "major", "all"
                 },
                 xaxes: [],
                 yaxes: [],
@@ -985,7 +987,9 @@ Licensed under the MIT license.
         function measureTickLabels(axis) {
 
             var opts = axis.options,
-                ticks = axis.ticks || [],
+                ticks = opts.showTickLabels != 'none' && axis.ticks ? axis.ticks : [],
+                showMajorTickLabels = opts.showTickLabels == 'major' || opts.showTickLabels == 'all',
+                showEndpointsTickLabels = opts.showTickLabels == 'endpoints' || opts.showTickLabels == 'all',
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
                 maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null),
@@ -997,8 +1001,11 @@ Licensed under the MIT license.
                 var t = ticks[i];
                 var label = t.label;
 
-                if (!t.label)
+                if (!t.label ||
+                    (showMajorTickLabels == false && i > 0 && i < ticks.length - 1) ||
+                    (showEndpointsTickLabels == false && (i == 0 || i == ticks.length - 1))) {
                     continue;
+                }
 
                 if (typeof t.label === 'object') {
                   label = t.label.name;
@@ -1368,12 +1375,17 @@ Licensed under the MIT license.
                         v = Number.NaN,
                         prev;
 
+                    ticks.push(axis.min);
+
                     do {
                         prev = v;
                         v = start + i * axis.tickSize;
                         ticks.push(v);
                         ++i;
                     } while (v < axis.max && v != prev);
+
+                    ticks.push(axis.max);
+
                     return ticks;
                 };
 
@@ -1722,7 +1734,7 @@ Licensed under the MIT license.
                     yoff = 0,
                     xminor = 0,
                     yminor = 0,
-					j;
+                    j;
 
                 if (!isNaN(v) && v >= axis.min && v <= axis.max) {
                     if (axis.direction === "x") {
@@ -1922,7 +1934,8 @@ Licensed under the MIT license.
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j];
 
-                if (!axis.show || axis.ticks.length == 0)
+                //if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show)
                     continue;
 
                 drawTickBar(axis);
@@ -1949,7 +1962,62 @@ Licensed under the MIT license.
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
-                    tick, x, y, halign, valign;
+                    tick, x, y, halign, valign, info,
+                    nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, firstLabelBox, lastLabelBox, previousLabelBox = nullBox,
+                    labelWidth = axis.options.labelWidth || 0,
+                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks.length || 1)) : null),
+                    overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
+                        return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
+                               ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
+                    },
+                    overlapsOtherLabels = function(newLabelBox, previousLabelBoxes) {
+                        return previousLabelBoxes.some(function(labelBox) {
+                            return overlapping(
+                                newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height,
+                                labelBox.x, labelBox.y, labelBox.x + labelBox.width, labelBox.y + labelBox.height);
+                        });
+                    },
+                    drawAxisLabel = function (index, labelBoxes) {
+                        tick = axis.ticks[index];
+                        if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
+                            (axis.options.showTickLabels == 'none') ||
+                            (axis.options.showTickLabels == 'endpoints' && !(index == 0 || index == axis.ticks.length - 1)) ||
+                            (axis.options.showTickLabels == 'major' && (index == 0 || index == axis.ticks.length - 1))) {
+                            return nullBox;
+                        }
+
+                        info = surface.getTextInfo(layer, tick.label, font, null, maxWidth);
+
+                        if (axis.direction == "x") {
+                            halign = "center";
+                            x = plotOffset.left + axis.p2c(tick.v);
+                            if (axis.position == "bottom") {
+                                y = box.top + box.padding;
+                            } else {
+                                y = box.top + box.height - box.padding;
+                                valign = "bottom";
+                            }
+                            newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
+                        } else {
+                            valign = "middle";
+                            y = plotOffset.top + axis.p2c(tick.v);
+                            if (axis.position == "left") {
+                                x = box.left + box.width - box.padding;
+                                halign = "right";
+                            } else {
+                                x = box.left + box.padding;
+                            }
+                            newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
+                        }
+
+                        if (overlapsOtherLabels(newLabelBox, labelBoxes)) {
+                            return nullBox;
+                        }
+
+                        surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+
+                        return newLabelBox;
+                    };
 
                 // Remove text before checking for axis.show and ticks.length;
                 // otherwise plugins, like flot-tickrotor, that draw their own
@@ -1959,36 +2027,14 @@ Licensed under the MIT license.
 
                 executeHooks(hooks.drawAxis, [axis, surface]);
 
-                if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show) {
                     return;
+                }
 
-                for (var i = 0; i < axis.ticks.length; ++i) {
-
-                    tick = axis.ticks[i];
-                    if (!tick.label || tick.v < axis.min || tick.v > axis.max)
-                        continue;
-
-                    if (axis.direction == "x") {
-                        halign = "center";
-                        x = plotOffset.left + axis.p2c(tick.v);
-                        if (axis.position == "bottom") {
-                            y = box.top + box.padding;
-                        } else {
-                            y = box.top + box.height - box.padding;
-                            valign = "bottom";
-                        }
-                    } else {
-                        valign = "middle";
-                        y = plotOffset.top + axis.p2c(tick.v);
-                        if (axis.position == "left") {
-                            x = box.left + box.width - box.padding;
-                            halign = "right";
-                        } else {
-                            x = box.left + box.padding;
-                        }
-                    }
-
-                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                firstLabelBox = drawAxisLabel(0, []);
+                lastLabelBox = drawAxisLabel(axis.ticks.length - 1, [firstLabelBox]);
+                for (var i = 1; i < axis.ticks.length - 1; ++i) {
+                    previousLabelBox = drawAxisLabel(i, [firstLabelBox, previousLabelBox, lastLabelBox]);
                 }
             });
         }
