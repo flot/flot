@@ -1240,8 +1240,10 @@ Licensed under the MIT license.
                 $.each(allocatedAxes, function(_, axis) {
                     // make the ticks
                     setupTickGeneration(axis);
-                    setTicks(axis);
+                    setMajorTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
+                    setEndpointTicks(axis);
+
                     // find labelWidth/Height for axis
                     measureTickLabels(axis);
                 });
@@ -1383,16 +1385,12 @@ Licensed under the MIT license.
                         v = Number.NaN,
                         prev;
 
-                    ticks.push(axis.min);
-
                     do {
                         prev = v;
                         v = start + i * axis.tickSize;
                         ticks.push(v);
                         ++i;
                     } while (v < axis.max && v != prev);
-
-                    ticks.push(axis.max);
 
                     return ticks;
                 };
@@ -1462,7 +1460,7 @@ Licensed under the MIT license.
             }
         }
 
-        function setTicks(axis) {
+        function setMajorTicks(axis) {
             var oticks = axis.options.ticks,
                 ticks = [];
             if (oticks == null || (typeof oticks == "number" && oticks > 0))
@@ -1487,14 +1485,32 @@ Licensed under the MIT license.
                         label = t[1];
                 } else
                     v = +t;
-                if (label == null)
-                    label = axis.tickFormatter(v, axis);
                 if (!isNaN(v))
-                    axis.ticks.push({
-                        v: v,
-                        label: label
-                    });
+                    axis.ticks.push(
+                        newTick(v, label, axis, 'major'));
             }
+        }
+
+        function newTick(v, label, axis, type) {
+            if (!label) {
+                switch(type) {
+                    case 'min':
+                    case 'max':
+                        // this is a workaround to display the endpoints with a higher
+                        //precision without changing the API and all the tickFormatters
+                        //axis.tickDecimals = (axis.tickDecimals != null ? axis.tickDecimals + 1 : null);
+                        label = axis.tickFormatter(v, axis);
+                        //axis.tickDecimals = (axis.tickDecimals != null ? axis.tickDecimals - 1 : null);
+                        break;
+                    case 'major':
+                        label = axis.tickFormatter(v, axis)
+                }
+            }
+            return {
+                v: v,
+                label: label,
+                type: type
+            };
         }
 
         function snapRangeToTicks(axis, ticks) {
@@ -1505,6 +1521,11 @@ Licensed under the MIT license.
                 if (axis.options.max == null && ticks.length > 1)
                     axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
+        }
+
+        function setEndpointTicks(axis) {
+            axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
+            axis.ticks.push(newTick(axis.max, null, axis, 'max'));
         }
 
         function draw() {
