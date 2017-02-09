@@ -684,7 +684,7 @@ Licensed under the MIT license.
                     });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
-                        var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0].length ? s.data[0].length : 3);
+                        var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0] && s.data[0].length ? s.data[0].length : 3);
                         if (expectedPs > 2) {
                             var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
                             format.push({
@@ -1508,8 +1508,7 @@ Licensed under the MIT license.
             }
             return {
                 v: v,
-                label: label,
-                type: type
+                label: label
             };
         }
 
