@@ -256,7 +256,8 @@ xaxis, yaxis: {
     min: null or number
     max: null or number
     autoscaleMargin: null or number
-
+    autoScale: "none" or "loose" or "exact"
+    
     transform: null or fn: number -> number
     inverseTransform: null or fn: number -> number
 
@@ -348,14 +349,20 @@ makes interactive use more stable).
 The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
 that the scaling algorithm will add to avoid that the outermost points
 ends up on the grid border. Note that this margin is only applied when
-a min or max value is not explicitly set. If a margin is specified,
+autoScale option is set to "loose". If a margin is specified,
 the plot will furthermore extend the axis end-point to the nearest
 whole tick. The default value is "null" for the x axes and 0.02 for y
 axes which seems appropriate for most cases.
 
+The "autoscale" option is used to automatically set the end-points of the axis. There 
+are three options available: "none" will set the end-points to the "min"/"max" values, 
+"exact" will set the end-points to minimum/maximum values in the visible area of the plot, and
+"loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value. 
+The default value is "none" for the x axes, and "loose" for y axes.
+
 The "growOnly" option is useful when you want to have a smoother auto-scaling
 behavior. If true the scale range will grow to adapt to the data range but won't
-shrink back. The default value is false.
+shrink back. This will be ignored if autoscale value is "none". The default value is false.
 
 "transform" and "inverseTransform" are callbacks you can put in to
 change the way the data is drawn. You can design a function to

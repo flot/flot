@@ -49,7 +49,8 @@ Licensed under the MIT license.
                     inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if auto-setting min/max
+                    autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
+                    autoscale: "none", // Available modes: "none", "loose", "exact",
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -67,9 +68,12 @@ Licensed under the MIT license.
                     minTickSize: null // number or [number, "unit"]
                 },
                 yaxis: {
-                    autoscaleMargin: 0.02,
-                    position: "left", // or "right"
+                    autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
+                    autoscale: "loose", // Available modes: "none", "loose", "exact"
+                    growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
+                    position: "left" // or "right"
                     showTickLabels: "major" // "none", "endpoints", "major", "all"
+
                 },
                 xaxes: [],
                 yaxes: [],
@@ -259,7 +263,7 @@ Licensed under the MIT license.
         plot.hooks = hooks;
 
         // initialize
-		var MINOR_TICKS_COUNT_CONSTANT = $.plot.uiConstants.MINOR_TICKS_COUNT_CONSTANT;
+        var MINOR_TICKS_COUNT_CONSTANT = $.plot.uiConstants.MINOR_TICKS_COUNT_CONSTANT;
         var TICK_LENGTH_CONSTANT = $.plot.uiConstants.TICK_LENGTH_CONSTANT;
         initPlugins(plot);
         parseOptions(options_);
@@ -692,7 +696,7 @@ Licensed under the MIT license.
                                 y: true,
                                 number: true,
                                 required: false,
-                                autoscale: autoscale,
+                                autoscale: "loose",
                                 defaultValue: 0
                             });
                         }
@@ -820,7 +824,7 @@ Licensed under the MIT license.
                         if (f === null || f === undefined)
                             continue
 
-                        if ( f.autoscale === false || val === fakeInfinity || val === -fakeInfinity)
+                        if ( f.autoscale === "none" || val === fakeInfinity || val === -fakeInfinity)
                             continue;
 
                         if (f.x === true) {
@@ -1280,10 +1284,31 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                min = +(opts.min != null ? opts.min : axis.datamin),
-                max = +(opts.max != null ? opts.max : axis.datamax),
-                delta = max - min;
+                min,
+                max,
+                delta;
 
+            switch (opts.autoscale) {
+                case "none":
+                    min = +(opts.min != null ? opts.min : axis.datamin);
+                    max = +(opts.max != null ? opts.max : axis.datamax);
+                    break;
+                case "loose":
+                    min = +(axis.datamin);
+                    max = +(axis.datamax);
+                    delta = max - min;
+                    var margin = opts.autoscaleMargin;
+                    min -= delta * margin;
+                    max += delta * margin;
+
+                    break;
+                case "exact":
+                    min = axis.datamin;
+                    max = axis.datamax;
+                    break;
+            }
+
+            delta = max - min;
             if (delta == 0.0) {
                 // degenerate case
                 var widen = max == 0 ? 1 : 0.01;
@@ -1294,24 +1319,14 @@ Licensed under the MIT license.
                 // don't fall into min == max which doesn't work
                 if (opts.max == null || opts.min != null)
                     max += widen;
-            } else {
-                // consider autoscaling
-                var margin = opts.autoscaleMargin;
-                if (margin != null) {
-                    if (opts.min == null) {
-                        min -= delta * margin;
-                        // make sure we don't go below zero if all values
-                        // are positive
-                        if (min < 0 && axis.datamin != null && axis.datamin >= 0)
-                            min = 0;
-                    }
-                    if (opts.max == null) {
-                        max += delta * margin;
-                        if (max > 0 && axis.datamax != null && axis.datamax <= 0)
-                            max = 0;
-                    }
-                }
             }
+
+            // grow loose or grow exact
+            if(opts.autoscale !== "none" && opts.growOnly === true) {
+                min = (min < axis.datamin) ? min : axis.datamin;
+                max = (max > axis.datamax) ? max : axis.datamax;
+            }
+
             axis.min = min;
             axis.max = max;
         }
@@ -1513,7 +1528,7 @@ Licensed under the MIT license.
         }
 
         function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoscaleMargin && ticks.length > 0) {
+            if (axis.options.autoscale === "loose" && ticks.length > 0) {
                 // snap to ticks
                 if (axis.options.min == null)
                     axis.min = Math.min(axis.min, ticks[0].v);
@@ -1708,9 +1723,9 @@ Licensed under the MIT license.
                 };
         };
 
-		function alignPosition(lineWidth, pos) {
-				return ((lineWidth % 2) !== 0) ? Math.floor(pos) + 0.5 : pos;
-		};
+        function alignPosition(lineWidth, pos) {
+            return ((lineWidth % 2) !== 0) ? Math.floor(pos) + 0.5 : pos;
+        };
 
         function drawTickBar(axis) {
             ctx.lineWidth = 1;

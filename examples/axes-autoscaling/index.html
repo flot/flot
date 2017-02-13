@@ -9,38 +9,38 @@
 	<script language="javascript" type="text/javascript" src="../../jquery.canvaswrapper.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.uiConstants.js"></script>
-
-	<script type="text/javascript">
-
-	$(function() {
+  
+  <script type="text/javascript">
+  
+    $(function() {
         var index = 0;
-		function generate(start, end, fn) {
-			var res = [];
-			for (var i = 0; i <= 40; ++i) {
-				var x = start + i / 40 * (end - start);
-				res.push([x, fn(x)]);
-			}
-			return res;
-		}
+        function generate(start, end, fn) {
+            var res = [];
+            for (var i = 0; i <= 40; ++i) {
+                var x = start + i / 40 * (end - start);
+                res.push([x, fn(x)]);
+            }
+            return res;
+        }
 
-		var data = [
-			{ data: generate(index, 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
-		];
+        var data = [
+            { data: generate(index, 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+        ];
 
-		var plot = $.plot("#placeholder", data, {
-			xaxes: [
-				{ position: 'bottom' }
-			],
-			yaxes: [
-				{ position: 'left' }
-			]
-		});
+        var plot = $.plot("#placeholder", data, {
+            xaxes: [
+                { position: 'bottom' }
+            ],
+            yaxes: [
+                { position: 'left', autoscale: 'none', min: -2.0, max: 2.0 }
+            ]
+        });
 
         function update () {
             index += 0.01;
             data = [
-    			{ data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
-    		];
+                { data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+            ];
             plot.setData(data);
             plot.setupGrid();
             plot.draw();
@@ -52,48 +52,57 @@
         $('#myForm input').on('change', function() {
             var val = $('input[name="myRadio"]:checked', '#myForm').val()
             var y = plot.getAxes().yaxis;
-            y.options.min = undefined;
-            y.options.max = undefined;
+            y.options.min = -2.0;
+            y.options.max = 2.0;
             y.options.autoscaleMargin = null;
+            y.options.autoscale = "loose";
             y.options.growOnly = false;
 
             switch (val) {
                 case '1':
-                    y.options.min = -1.5;
-                    y.options.max = 1.5;
+                    y.options.autoscale = "none";
                     break;
                 case '2':
-                    y.options.autoscaleMargin = 0.02;
+                    y.options.autoscaleMargin = 0.1;
+                    y.options.autoscale = "loose";
                     break;
                 case '3':
+                    y.options.autoscale = "exact";
                     break;
                 case '4':
+                    y.options.autoscaleMargin = 0.1;
+                    y.options.autoscale = "loose";
+                    y.options.growOnly = true;
+                    break;
+                case '5':
+                    y.options.autoscale = "exact";
                     y.options.growOnly = true;
                     break;
             }
         });
-	});
+    });
 
-	</script>
+    </script>
 </head>
 <body>
 
-	<div id="header">
-		<h2>Axes autoscaling options</h2>
-	</div>
+    <div id="header">
+        <h2>Axes autoscaling options</h2>
+    </div>
 
-	<div id="content">
+    <div id="content">
 
-		<div class="demo-container">
-			<div id="placeholder" class="demo-placeholder"></div>
-		</div>
+        <div class="demo-container">
+            <div id="placeholder" class="demo-placeholder"></div>
+        </div>
         <fieldset id="myForm">
             <legend>Vertical axis autoscaling options</legend>
-            <input type="radio" name="myRadio" value="1" /> None (min = -1.5, max = 1.5) <br />
-            <input type="radio" name="myRadio" value="2" checked="checked"/> fit loosely <br />
+            <input type="radio" name="myRadio" value="1" checked="checked" /> None (min = -2.0, max = 2.0) <br />
+            <input type="radio" name="myRadio" value="2" /> fit loosely <br />
             <input type="radio" name="myRadio" value="3" /> fit exactly <br />
-            <input type="radio" name="myRadio" value="4" /> grow only <br />
+            <input type="radio" name="myRadio" value="4" /> grow loosely <br />
+            <input type="radio" name="myRadio" value="5" /> grow exactly <br />
         </fieldset>
-	</div>
+    </div>
 </body>
 </html>
