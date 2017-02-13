@@ -258,6 +258,9 @@ Licensed under the MIT license.
             surface.clearCache();
             overlay.clearCache();
         };
+		
+        plot.findNearbyItem = findNearbyItem;
+    
 
         // public attributes
         plot.hooks = hooks;
@@ -2702,15 +2705,15 @@ Licensed under the MIT license.
         }
 
         // returns the data item the mouse is over, or null if none is found
-        function findNearbyItem(mouseX, mouseY, seriesFilter) {
-            var maxDistance = options.grid.mouseActiveRadius,
+        function findNearbyItem(mouseX, mouseY, seriesFilter, distance) {
+            var maxDistance = distance,
                 smallestDistance = maxDistance * maxDistance + 1,
                 item = null,
                 foundPoint = false,
                 i, j, ps;
 
             for (i = series.length - 1; i >= 0; --i) {
-                if (!seriesFilter(series[i]))
+                if (!seriesFilter(i))
                     continue;
 
                 var s = series[i],
@@ -2812,23 +2815,23 @@ Licensed under the MIT license.
         function onMouseMove(e) {
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", e,
-                    function(s) {
-                        return s["hoverable"] != false;
+                    function(i) {
+                        return series[i]["hoverable"] != false;
                     });
         }
 
         function onMouseLeave(e) {
             if (options.grid.hoverable)
                 triggerClickHoverEvent("plothover", e,
-                    function(s) {
+                    function(i) {
                         return false;
                     });
         }
 
         function onClick(e) {
             triggerClickHoverEvent("plotclick", e,
-                function(s) {
-                    return s["clickable"] != false;
+                function(i) {
+                    return series[i]["clickable"] != false;
                 });
         }
 
@@ -2846,7 +2849,7 @@ Licensed under the MIT license.
             pos.pageX = event.pageX;
             pos.pageY = event.pageY;
 
-            var item = findNearbyItem(canvasX, canvasY, seriesFilter);
+            var item = findNearbyItem(canvasX, canvasY, seriesFilter, options.grid.mouseActiveRadius);
 
             if (item) {
                 // fill in mouse pos for any listeners out there
