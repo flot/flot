@@ -166,7 +166,7 @@ Set axis.mode to "log" to enable.
         var x = Math.round(value / round_with);
         if ((tenExponent >= -4) && (tenExponent <= 4)) {
             //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
-            return tenExponent <= 0 ? value.toFixed(-tenExponent) : value.toString();
+            return tenExponent <= 0 ? value.toFixed(-(tenExponent)) : value.toString();
         } else {
             return x.toFixed(0) + 'e' + tenExponent;
         }

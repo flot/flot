@@ -30,6 +30,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 (function($) {
+    "use strict";
+    
     var options = {
         axisLabels: {
             show: true
