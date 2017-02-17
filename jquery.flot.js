@@ -1528,16 +1528,16 @@ Licensed under the MIT license.
         function snapRangeToTicks(axis, ticks) {
             if (axis.options.autoscale === "loose" && ticks.length > 0) {
                 // snap to ticks
-                if (axis.options.min == null)
-                    axis.min = Math.min(axis.min, ticks[0].v);
-                if (axis.options.max == null && ticks.length > 1)
-                    axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
+                axis.min = Math.min(axis.min, ticks[0].v);
+                axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
         }
 
         function setEndpointTicks(axis) {
-            axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
-            axis.ticks.push(newTick(axis.max, null, axis, 'max'));
+            if (axis.options.showTickLabels == 'all' || axis.options.showTickLabels == 'endpoints') {
+                axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
+                axis.ticks.push(newTick(axis.max, null, axis, 'max'));
+            }
         }
 
         function draw() {
@@ -2018,12 +2018,8 @@ Licensed under the MIT license.
                                 labelBox.x, labelBox.y, labelBox.x + labelBox.width, labelBox.y + labelBox.height);
                         });
                     },
-                    drawAxisLabel = function (index, labelBoxes) {
-                        tick = axis.ticks[index];
-                        if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
-                            (axis.options.showTickLabels == 'none') ||
-                            (axis.options.showTickLabels == 'endpoints' && !(index == 0 || index == axis.ticks.length - 1)) ||
-                            (axis.options.showTickLabels == 'major' && (index == 0 || index == axis.ticks.length - 1))) {
+                    drawAxisLabel = function (tick, labelBoxes) {
+                        if (!tick.label || tick.v < axis.min || tick.v > axis.max) {
                             return nullBox;
                         }
 
@@ -2072,10 +2068,23 @@ Licensed under the MIT license.
                     return;
                 }
 
-                firstLabelBox = drawAxisLabel(0, []);
-                lastLabelBox = drawAxisLabel(axis.ticks.length - 1, [firstLabelBox]);
-                for (var i = 1; i < axis.ticks.length - 1; ++i) {
-                    previousLabelBox = drawAxisLabel(i, [firstLabelBox, previousLabelBox, lastLabelBox]);
+                switch(axis.options.showTickLabels) {
+                    case 'none':
+                        break;
+                    case 'endpoints':
+                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
+                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        break;
+                    case 'major':
+                        // no endpoint tick is being generated when showTickLabels=
+                        //'major' so it's safe to merge these two cases here
+                    case 'all':
+                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
+                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        for (var i = 1; i < axis.ticks.length - 1; ++i) {
+                            previousLabelBox = drawAxisLabel(axis.ticks[i], [firstLabelBox, previousLabelBox, lastLabelBox]);
+                        }
+                        break;
                 }
             });
         }

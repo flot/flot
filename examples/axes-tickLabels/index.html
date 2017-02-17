@@ -32,12 +32,12 @@
                 { position: 'bottom' }
             ],
             yaxes: [
-                { position: 'left' }
+                { position: 'left', autoscale: 'none', min: -3, max: 3 }
             ]
         });
 
         function update () {
-            index += 0.001;
+            index += 0.01;
             data = [
                 { data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
             ];
@@ -53,10 +53,6 @@
             var val = $('input[name="tickLabels"]:checked', '#tickLabels').val()
             var axes = plot.getXAxes().concat(plot.getYAxes());
             axes.forEach(function(axis) {
-                axis.options.min = undefined;
-                axis.options.max = undefined;
-                axis.options.autoscaleMargin = null;
-                axis.options.growOnly = false;
                 axis.options.showTickLabels = val;
             });
         });
@@ -79,6 +75,49 @@
                         break;
                 }
             });
+        });
+
+        $('#scaling input').on('change', function() {
+            var val = $('input[name="scaling"]:checked', '#scaling').val()
+            var y = plot.getAxes().yaxis;
+
+            switch (val) {
+                case 'none':
+                    y.options.autoscale = 'none';
+                    y.options.min = -3;
+                    y.options.max = 3;
+                    y.options.autoscaleMargin = null;
+                    y.options.growOnly = null;
+                    break;
+                case 'fitLoosely':
+                    y.options.autoscale = 'loose';
+                    y.options.min = undefined;
+                    y.options.max = undefined;
+                    y.options.autoscaleMargin = 0.1;
+                    y.options.growOnly = false;
+                    break;
+                case 'fitExactly':
+                    y.options.autoscale = 'exact';
+                    y.options.min = undefined;
+                    y.options.max = undefined;
+                    y.options.autoscaleMargin = null;
+                    y.options.growOnly = false;
+                    break;
+                case 'growLoosely':
+                    y.options.autoscale = 'loose';
+                    y.options.min = -2.0;
+                    y.options.max = 2.0;
+                    y.options.autoscaleMargin = 0.1;
+                    y.options.growOnly = true;
+                    break;
+                case 'growExactly':
+                    y.options.autoscale = 'exact';
+                    y.options.min = undefined;
+                    y.options.max = undefined;
+                    y.options.autoscaleMargin = null;
+                    y.options.growOnly = true;
+                    break;
+            }
         });
 
         $('#verticalPosition input').on('change', function() {
@@ -118,22 +157,30 @@
             <input type="radio" name="tickLabels" value="major" checked="checked"/> major <br />
             <input type="radio" name="tickLabels" value="all" /> all <br />
         </fieldset>
-                <fieldset id="tickMarks">
-                        <legend>Axis tick marks options</legend>
-                        <input type="radio" name="tickMarks" value="none" /> none <br />
-                        <input type="radio" name="tickMarks" value="major" /> major <br />
-                        <input type="radio" name="tickMarks" value="all" checked="checked"/> all <br />
-                </fieldset>
-                <fieldset id="verticalPosition">
-                        <legend>Vertical axis position options</legend>
-                        <input type="radio" name="verticalPosition" value="right" /> right <br />
-                        <input type="radio" name="verticalPosition" value="left" checked="checked"/> left <br />
-                </fieldset>
-                <fieldset id="horizontalPosition">
-                        <legend>Horizontal axis position options</legend>
-                        <input type="radio" name="horizontalPosition" value="top" /> top <br />
-                        <input type="radio" name="horizontalPosition" value="bottom" checked="bottom"/> bottom <br />
-                </fieldset>
+        <fieldset id="tickMarks">
+            <legend>Axis tick marks options</legend>
+            <input type="radio" name="tickMarks" value="none" /> none <br />
+            <input type="radio" name="tickMarks" value="major" /> major <br />
+            <input type="radio" name="tickMarks" value="all" checked="checked"/> all <br />
+        </fieldset>
+        <fieldset id="scaling">
+            <legend>Vertical axis autoscaling options</legend>
+            <input type="radio" name="scaling" value="none" checked="checked" /> None (min = -3, max = 3) <br />
+            <input type="radio" name="scaling" value="fitLoosely"/> fit loosely <br />
+            <input type="radio" name="scaling" value="fitExactly" /> fit exactly <br />
+            <input type="radio" name="scaling" value="growLoosely" /> grow loosely <br />
+            <input type="radio" name="scaling" value="growExactly" /> grow exactly <br />
+        </fieldset>
+        <fieldset id="verticalPosition">
+            <legend>Vertical axis position options</legend>
+            <input type="radio" name="verticalPosition" value="right" /> right <br />
+            <input type="radio" name="verticalPosition" value="left" checked="checked"/> left <br />
+        </fieldset>
+        <fieldset id="horizontalPosition">
+            <legend>Horizontal axis position options</legend>
+            <input type="radio" name="horizontalPosition" value="top" /> top <br />
+            <input type="radio" name="horizontalPosition" value="bottom" checked="bottom"/> left <br />
+        </fieldset>
     </div>
 </body>
 </html>
