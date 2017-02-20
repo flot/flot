@@ -7,7 +7,7 @@ The symbols are accessed as strings through the standard symbol options:
 
 	series: {
 		points: {
-			symbol: "square" // or "diamond", "triangle", "cross"
+			symbol: "square" // or "diamond", "triangle", "cross", "plus", "ellipse", "rectangle"
 		}
 	}
 
@@ -19,6 +19,11 @@ The symbols are accessed as strings through the standard symbol options:
 
     var handlers = {
         square: function (ctx, x, y, radius, shadow) {
+            // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
+            var size = radius * Math.sqrt(Math.PI) / 2;
+            ctx.rect(x - size, y - size, size + size, size + size);
+        },
+        rectangle: function (ctx, x, y, radius, shadow) {
             // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
             var size = radius * Math.sqrt(Math.PI) / 2;
             ctx.rect(x - size, y - size, size + size, size + size);
@@ -53,20 +58,19 @@ The symbols are accessed as strings through the standard symbol options:
         },
         ellipse: function(ctx, x, y, radius, shadow) {
             if (!shadow) {
-                ctx.moveTo(x + radius, y);
                 ctx.arc(x, y, radius, 0, Math.PI * 2, false);
             }
-        }
+        },
+        plus: function (ctx, x, y, radius, shadow) {
+            var size = radius  * Math.sqrt(Math.PI/2);
+            ctx.moveTo(x - size, y);
+            ctx.lineTo(x + size, y);
+            ctx.moveTo(x, y + size);
+            ctx.lineTo(x, y - size);
+        },
     };
 
-    function processRawData(plot, series, datapoints) {
-        var s = series.points.symbol;
-        if (handlers[s])
-            series.points.symbol = handlers[s];
-    }
-
     function init(plot) {
-        plot.hooks.processDatapoints.push(processRawData);
         plot.drawSymbol = handlers;
     }
 

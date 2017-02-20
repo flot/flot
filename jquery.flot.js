@@ -84,7 +84,7 @@ Licensed under the MIT license.
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
-                        symbol: "circle" // or callback
+                        symbol: 'circle' // or callback
                     },
                     lines: {
                         // we don't put in show: false so we can see
@@ -258,9 +258,9 @@ Licensed under the MIT license.
             surface.clearCache();
             overlay.clearCache();
         };
-		
+
         plot.findNearbyItem = findNearbyItem;
-    
+
 
         // public attributes
         plot.hooks = hooks;
@@ -2387,10 +2387,12 @@ Licensed under the MIT license.
                     ctx.beginPath();
                     x = axisx.p2c(x);
                     y = axisy.p2c(y) + offset;
-                    if (symbol == "circle")
+
+                    if (symbol === 'circle') {
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    else
-                        symbol(ctx, x, y, radius, shadow);
+                    } else if  (typeof symbol === 'string' && plot.drawSymbol && plot.drawSymbol[symbol]) {
+                        plot.drawSymbol[symbol](ctx, x, y, radius, shadow);
+                    }
                     ctx.closePath();
 
                     if (fillStyle) {
@@ -2989,10 +2991,13 @@ Licensed under the MIT license.
             y = axisy.p2c(y);
 
             octx.beginPath();
-            if (series.points.symbol == "circle")
+            var symbol = series.points.symbol;
+            if (symbol === 'circle')
                 octx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            else
-                series.points.symbol(octx, x, y, radius, false);
+            else if  (typeof symbol === 'string' && plot.drawSymbol && plot.drawSymbol[symbol]) {
+                plot.drawSymbol[symbol](octx, x, y, radius, false);
+            }
+
             octx.closePath();
             octx.stroke();
         }

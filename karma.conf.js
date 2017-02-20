@@ -12,7 +12,8 @@ module.exports = function (config) {
             'jquery.colorhelpers.js',
             'jquery.flot.js',
             'jquery.flot.uiConstants.js',
-            'jquery.flot.logaxis.js'
+            'jquery.flot.logaxis.js',
+            'jquery.flot.symbol.js'
         ];
 
     var sources = [
