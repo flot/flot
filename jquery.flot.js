@@ -1003,7 +1003,7 @@ Licensed under the MIT license.
                 showEndpointsTickLabels = opts.showTickLabels == 'endpoints' || opts.showTickLabels == 'all',
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
-                maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null),
+                maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks ? axis.ticks.length : 1)) : null),
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
@@ -2006,7 +2006,7 @@ Licensed under the MIT license.
                     tick, x, y, halign, valign, info,
                     nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, firstLabelBox, lastLabelBox, previousLabelBox = nullBox,
                     labelWidth = axis.options.labelWidth || 0,
-                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks.length || 1)) : null),
+                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks ? axis.ticks.length : 1)) : null),
                     overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
                                ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
