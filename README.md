@@ -1,4 +1,5 @@
 # engineering-flot [![Build Status](https://travis-ci.org/cipix2000/engineering-flot.svg?branch=master)](https://travis-ci.org/cipix2000/engineering-flot)
+[![Coverage Status](https://coveralls.io/repos/github/cipix2000/engineering-flot/badge.svg?branch=master)](https://coveralls.io/github/cipix2000/engineering-flot?branch=master)
 
 ## About ##
 

@@ -3,9 +3,23 @@
 
 var module;
 
+
 module.exports = function (config) {
     'use strict';
-    config.set({
+
+    var coverage_sources = [
+            'jquery.canvaswrapper.js',
+            'jquery.colorhelpers.js',
+            'jquery.flot.js',
+            'jquery.flot.uiConstants.js',
+            'jquery.flot.logaxis.js'
+        ];
+
+    var sources = [
+        'jquery.js'
+    ].concat(coverage_sources);
+
+    var settings = {
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
@@ -15,29 +29,28 @@ module.exports = function (config) {
         frameworks: ['jasmine-jquery', 'jasmine'],
 
         // list of files / patterns to load in the browser
-        files: [
-            'jquery.js',
-            'jquery.canvaswrapper.js',
-            'jquery.colorhelpers.js',
-            'jquery.flot.js',
-            'jquery.flot.uiConstants.js',
-            'jquery.flot.logaxis.js',
+        files: sources.concat([
             'tests/*.Test.js',
-        ],
+        ]),
 
         // list of files to exclude
-        exclude: [
-        ],
+        exclude: [],
 
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
+
         },
 
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['kjhtml', 'progress'],
+        reporters: ['kjhtml', 'spec'],
+
+        coverageReporter: {
+            type: 'lcov', // lcov or lcovonly are required for generating lcov.info files
+            dir: 'coverage/'
+        },
 
         // web server port
         port: 9876,
@@ -63,5 +76,20 @@ module.exports = function (config) {
         // Concurrency level
         // how many browser should be started simultaneous
         concurrency: Infinity
-    });
+    };
+
+    if (config.coverage) {
+        coverage_sources.forEach(function (pattern) {
+            if (!settings.preprocessors[pattern]) {
+                settings.preprocessors[pattern] = ['coverage'];
+            } else {
+                settings.preprocessors[pattern].push('coverage');
+            }
+        });
+
+        settings.reporters.push('coverage');
+        settings.reporters.push('coveralls');
+    }
+
+    config.set(settings);
 };
