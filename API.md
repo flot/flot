@@ -257,7 +257,7 @@ xaxis, yaxis: {
     max: null or number
     autoscaleMargin: null or number
     autoScale: "none" or "loose" or "exact"
-    
+
     transform: null or fn: number -> number
     inverseTransform: null or fn: number -> number
 
@@ -354,10 +354,10 @@ the plot will furthermore extend the axis end-point to the nearest
 whole tick. The default value is "null" for the x axes and 0.02 for y
 axes which seems appropriate for most cases.
 
-The "autoscale" option is used to automatically set the end-points of the axis. There 
-are three options available: "none" will set the end-points to the "min"/"max" values, 
+The "autoscale" option is used to automatically set the end-points of the axis. There
+are three options available: "none" will set the end-points to the "min"/"max" values,
 "exact" will set the end-points to minimum/maximum values in the visible area of the plot, and
-"loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value. 
+"loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value.
 The default value is "none" for the x axes, and "loose" for y axes.
 
 The "growOnly" option is useful when you want to have a smoother auto-scaling
@@ -1204,14 +1204,14 @@ can call:
 
     Cleans up any event handlers Flot has currently registered. This
     is used internally.
-	
-	
+
+
  - findNearbyItem(mouseX, mouseY, seriesFilter, distance)
-    
+
 	Returns the closest item to the position determined by mouseX and
     mouseY. The series on which the search is realised can be specified
     using seriesFilter function.
- 
+
 
 There are also some members that let you peek inside the internal
 workings of Flot which is useful in some cases. Note that if you change
@@ -1281,6 +1281,22 @@ Flot to keep track of its state, so be careful.
     if you modify the values in here, Flot will use the new values.
     If you change something, you probably have to call draw() or
     setupGrid() or triggerRedrawOverlay() to see the change.
+
+  - computeRangeForDataSeries(series, force)
+
+    Computes the minimum and the maximum values of the specified series.
+    If the autoscale of the x axis is set to 'none' then the corresponding
+    minimum and maximum will be Infinity and -Infinity respectively.
+    The computation will be skiped for the y axis as well when autoscale
+    of this axis is set to 'none'. Pass true to the force argument
+    to force the computation regardless the autoscale value of the axis.
+
+  - adjustSeriesDataRange(series, range)
+
+    Adjusts the minimum and the maximum values based on the options of
+    the series. For example if bars are being drawn then this function
+    will decrease the minimum and increase the maximum to make sure the
+    first and the last bar will have enough space.
 
 
 ## Hooks ##
@@ -1423,6 +1439,13 @@ hooks in the plugins bundled with Flot.
     the margins between the grid and the edge of the canvas. "offset" is
     an object with attributes "top", "bottom", "left" and "right",
     corresponding to the margins on the four sides of the plot.
+
+ - adjustSeriesDataRange [phase 4]
+
+   ```function(series, range)```
+
+   Called after the minimum and the maximum of a series were computed and
+   adjusted. This is an extra oportunity to do further adjustmets.
 
  - drawBackground [phase 5]
 

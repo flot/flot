@@ -13,7 +13,8 @@ module.exports = function (config) {
             'jquery.flot.js',
             'jquery.flot.uiConstants.js',
             'jquery.flot.logaxis.js',
-            'jquery.flot.symbol.js'
+            'jquery.flot.symbol.js',
+            'jquery.flot.flatdata.js'
         ];
 
     var sources = [

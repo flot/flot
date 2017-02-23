@@ -155,6 +155,7 @@ Licensed under the MIT license.
                 processRawData: [],
                 processDatapoints: [],
                 processOffset: [],
+                adjustSeriesDataRange: [],
                 drawBackground: [],
                 drawSeries: [],
                 drawAxis: [],
@@ -259,8 +260,11 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 
-        plot.findNearbyItem = findNearbyItem;
+        plot.computeRangeForDataSeries = computeRangeForDataSeries;
 
+        plot.adjustSeriesDataRange = adjustSeriesDataRange;
+
+        plot.findNearbyItem = findNearbyItem;
 
         // public attributes
         plot.hooks = hooks;
@@ -677,6 +681,7 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
+                        computeRange: s.xaxis.options.autoscale !== 'none',
                         defaultValue: null
                     });
 
@@ -685,6 +690,7 @@ Licensed under the MIT license.
                         y: true,
                         number: true,
                         required: true,
+                        computeRange: s.yaxis.options.autoscale !== 'none',
                         defaultValue: null
                     });
 
@@ -696,6 +702,7 @@ Licensed under the MIT license.
                                 y: true,
                                 number: true,
                                 required: false,
+                                computeRange: s.yaxis.options.autoscale !== 'none',
                                 defaultValue: 0
                             });
                         }
@@ -755,7 +762,7 @@ Licensed under the MIT license.
                             if (val != null) {
                                 f = format[m];
                                 // extract min/max info
-                                if (f.autoscale !== "none") {
+                                if (f.computeRange) {
                                     if (f.x) {
                                         updateAxis(s.xaxis, val, val);
                                     }
@@ -798,85 +805,19 @@ Licensed under the MIT license.
             // second pass: find datamax/datamin for auto-scaling
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
-                points = s.datapoints.points;
-                ps = s.datapoints.pointsize;
                 format = s.datapoints.format;
 
-                var xmin = topSentry,
-                    ymin = topSentry,
-                    xmax = bottomSentry,
-                    ymax = bottomSentry;
-
-                if (format.every(function (f) {
-                    return f.autoscale === "none";
-                })) {
+                if (format.every(function (f) { return !f.computeRange; })) {
                     continue;
                 }
 
-                for (j = 0; j < points.length; j += ps) {
-                    if (points[j] === null)
-                        continue;
+                var range = plot.adjustSeriesDataRange(s,
+                    plot.computeRangeForDataSeries(s));
 
-                    for (m = 0; m < ps; ++m) {
-                        val = points[j + m];
-                        f = format[m];
-                        if (f === null || f === undefined)
-                            continue
+                executeHooks(hooks.adjustSeriesDataRange, [s, range]);
 
-                        if ( f.autoscale === "none" || val === fakeInfinity || val === -fakeInfinity)
-                            continue;
-
-                        if (f.x === true) {
-                            if (val < xmin)
-                                xmin = val;
-                            if (val > xmax)
-                                xmax = val;
-                        }
-
-                        if (f.y === true) {
-                            if (val < ymin)
-                                ymin = val;
-                            if (val > ymax)
-                                ymax = val;
-                        }
-                    }
-                }
-
-                if (s.bars.show) {
-                    // make sure we got room for the bar on the dancing floor
-                    var delta;
-
-                    switch (s.bars.align) {
-                        case "left":
-                            delta = 0;
-                            break;
-                        case "right":
-                            delta = -s.bars.barWidth;
-                            break;
-                        default:
-                            delta = -s.bars.barWidth / 2;
-                    }
-
-                    if (s.bars.horizontal) {
-                        ymin += delta;
-                        ymax += delta + s.bars.barWidth;
-                    } else {
-                        xmin += delta;
-                        xmax += delta + s.bars.barWidth;
-                    }
-                }
-
-                if ((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero)) {
-                    // make sure the 0 point is included in the computed y range when requested
-                    if (ps <= 2) {
-                        /*if ps > 0 the points were already taken into account for autoscale */
-                        ymin = Math.min(0, ymin);
-                        ymax = Math.max(0, ymax);
-                    }
-                }
-
-                updateAxis(s.xaxis, xmin, xmax);
-                updateAxis(s.yaxis, ymin, ymax);
+                updateAxis(s.xaxis, range.xmin, range.xmax);
+                updateAxis(s.yaxis, range.ymin, range.ymax);
             }
 
             $.each(allAxes(), function(_, axis) {
@@ -2709,6 +2650,92 @@ Licensed under the MIT license.
                 }
             }
         }
+
+        function computeRangeForDataSeries(series, force) {
+            var points = series.datapoints.points,
+                ps = series.datapoints.pointsize,
+                format = series.datapoints.format,
+                topSentry = Number.POSITIVE_INFINITY,
+                bottomSentry = Number.NEGATIVE_INFINITY,
+                fakeInfinity = Number.MAX_VALUE,
+                range = {
+                    xmin: topSentry,
+                    ymin: topSentry,
+                    xmax: bottomSentry,
+                    ymax: bottomSentry
+                };
+
+            for (var j = 0; j < points.length; j += ps) {
+                if (points[j] === null)
+                    continue;
+
+                for (var m = 0; m < ps; ++m) {
+                    var val = points[j + m],
+                        f = format[m];
+                    if (f === null || f === undefined)
+                        continue
+
+                    if ((!force && !f.computeRange) || val === fakeInfinity || val === -fakeInfinity)
+                        continue;
+
+                    if (f.x === true) {
+                        if (val < range.xmin)
+                            range.xmin = val;
+                        if (val > range.xmax)
+                            range.xmax = val;
+                    }
+
+                    if (f.y === true) {
+                        if (val < range.ymin)
+                            range.ymin = val;
+                        if (val > range.ymax)
+                            range.ymax = val;
+                    }
+                }
+            }
+
+            return range;
+        };
+
+        function adjustSeriesDataRange(series, range) {
+            if (series.bars.show) {
+                // make sure we got room for the bar on the dancing floor
+                var delta;
+
+                switch (series.bars.align) {
+                    case "left":
+                        delta = 0;
+                        break;
+                    case "right":
+                        delta = -series.bars.barWidth;
+                        break;
+                    default:
+                        delta = -series.bars.barWidth / 2;
+                }
+
+                if (series.bars.horizontal) {
+                    range.ymin += delta;
+                    range.ymax += delta + series.bars.barWidth;
+                } else {
+                    range.xmin += delta;
+                    range.xmax += delta + series.bars.barWidth;
+                }
+            }
+
+            if ((series.bars.show && series.bars.zero) || (series.lines.show && series.lines.zero)) {
+                var ps = series.datapoints.pointsize;
+
+                // make sure the 0 point is included in the computed y range when requested
+                if (ps <= 2) {
+                    /*if ps > 0 the points were already taken into account for autoscale */
+                    range.ymin = Math.min(0, range.ymin);
+                    range.ymax = Math.max(0, range.ymax);
+                }
+            }
+
+            return range;
+        };
+
 
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter, distance) {
