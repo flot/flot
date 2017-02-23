@@ -1,6 +1,6 @@
 {
   "name": "engineering-flot",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "main": "jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run",
