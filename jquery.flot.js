@@ -1041,7 +1041,7 @@ Licensed under the MIT license.
                     gridLines = false;
                 }
             }
-
+            
             if (!isNaN(+tickLength))
                 padding += showTicks ? +tickLength : 0;
 
@@ -1234,30 +1234,39 @@ Licensed under the MIT license.
                     max = +(opts.max != null ? opts.max : axis.datamax);
                     break;
                 case "loose":
-                    min = +(axis.datamin);
-                    max = +(axis.datamax);
-                    delta = max - min;
-                    var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                    min -= delta * margin;
-                    max += delta * margin;
+                    if(axis.datamin != null && axis.datamax != null) {
+                        min = axis.datamin;
+                        max = axis.datamax;
+                        delta = max - min;
+                        var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+                        min -= delta * margin;
+                        max += delta * margin;
+                    } else {
+                        min = opts.min;
+                        max = opts.max;
+                    }
                     break;
                 case "exact":
-                    min = axis.datamin;
-                    max = axis.datamax;
+                    min = (axis.datamin != null ? axis.datamin : opts.min);
+                    max = (axis.datamax != null ? axis.datamax : opts.max);
                     break;
             }
 
+            min = (min == undefined ? null : min);
+            max = (max == undefined ? null : max);
             delta = max - min;
             if (delta == 0.0) {
                 // degenerate case
                 var widen = max == 0 ? 1 : 0.01;
-
-                if (opts.min == null)
-                    min -= widen;
+                var wmin = null;
+                if (min == null)
+                    wmin -= widen;
                 // always widen max if we couldn't widen min to ensure we
                 // don't fall into min == max which doesn't work
-                if (opts.max == null || opts.min != null)
+                if (max == null || min != null)
                     max += widen;
+                if(wmin != null)
+                    min = wmin;
             }
 
             // grow loose or grow exact
@@ -1266,8 +1275,8 @@ Licensed under the MIT license.
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
 
-            axis.min = min;
-            axis.max = max;
+            axis.min = min != null ? min : -1;
+            axis.max = max != null ? max : 1;
         }
 
         function setupTickGeneration(axis) {
