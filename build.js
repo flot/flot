@@ -9,11 +9,12 @@ if (!fs.existsSync(distDir)) {
 }
 
 concat([
-            './jquery.colorhelpers.js',
-            './jquery.canvaswrapper.js',
-            './jquery.flot.js',
-            './jquery.flot.uiConstants.js'
-        ], distDir + '/' + distFile, function(err) {
+        './jquery.colorhelpers.js',
+        './jquery.canvaswrapper.js',
+        './jquery.flot.js',
+        './jquery.flot.drawSeries.js',
+        './jquery.flot.uiConstants.js'
+    ], distDir + '/' + distFile, function(err) {
         if (err) {
             throw err;
         }

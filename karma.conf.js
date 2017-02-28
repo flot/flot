@@ -14,7 +14,8 @@ module.exports = function (config) {
             'jquery.flot.uiConstants.js',
             'jquery.flot.logaxis.js',
             'jquery.flot.symbol.js',
-            'jquery.flot.flatdata.js'
+            'jquery.flot.flatdata.js',
+            'jquery.flot.drawSeries.js'
         ];
 
     var sources = [
@@ -32,6 +33,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
+            './node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'tests/*.Test.js',
         ]),
 
