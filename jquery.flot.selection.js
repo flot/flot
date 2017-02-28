@@ -6,7 +6,7 @@ Licensed under the MIT license.
 The plugin supports these options:
 
 selection: {
-	mode: null or "x" or "y" or "xy",
+	mode: null or "x" or "y" or "xy" or "smart",
 	color: color,
 	shape: "round" or "miter" or "bevel",
 	minSize: number of pixels
@@ -83,8 +83,11 @@ The plugin allso adds the following methods to the plot object:
         var selection = {
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
                 show: false,
+                currentMode: 'xy',
                 active: false
             };
+
+        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
 
         // FIXME: The drag handling implemented here should be
         // abstracted out, there's some similar code from a library in
@@ -94,11 +97,11 @@ The plugin allso adds the following methods to the plot object:
         var savedhandlers = {};
 
         var mouseUpHandler = null;
-        
+
         function onMouseMove(e) {
             if (selection.active) {
                 updateSelection(e);
-                
+
                 plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
             }
         }
@@ -106,7 +109,7 @@ The plugin allso adds the following methods to the plot object:
         function onMouseDown(e) {
             if (e.which != 1)  // only accept left-click
                 return;
-            
+
             // cancel out any text selections
             document.body.focus();
 
@@ -127,13 +130,13 @@ The plugin allso adds the following methods to the plot object:
             // this is a bit silly, but we have to use a closure to be
             // able to whack the same handler again
             mouseUpHandler = function (e) { onMouseUp(e); };
-            
+
             $(document).one("mouseup", mouseUpHandler);
         }
 
         function onMouseUp(e) {
             mouseUpHandler = null;
-            
+
             // revert drag stuff for old-school browsers
             if (document.onselectstart !== undefined)
                 document.onselectstart = savedhandlers.onselectstart;
@@ -158,13 +161,26 @@ The plugin allso adds the following methods to the plot object:
         function getSelection() {
             if (!selectionIsSane())
                 return null;
-            
+
             if (!selection.show) return null;
 
-            var r = {}, c1 = selection.first, c2 = selection.second;
+            var r = {},
+            c1 = {x: selection.first.x, y: selection.first.y},
+            c2 = {x: selection.second.x, y: selection.second.y};
+
+            if (selectionDirection(plot) === 'x') {
+                c1.y = 0;
+                c2.y = plot.height();
+            }
+
+            if (selectionDirection(plot) === 'y') {
+                c1.x = 0;
+                c2.x = plot.width();
+            }
+
             $.each(plot.getAxes(), function (name, axis) {
                 if (axis.used) {
-                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]); 
+                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]);
                     r[name] = { from: Math.min(p1, p2), to: Math.max(p1, p2) };
                 }
             });
@@ -185,17 +201,45 @@ The plugin allso adds the following methods to the plot object:
             return value < min ? min: (value > max ? max: value);
         }
 
-        function setSelectionPos(pos, e) {
+        function selectionDirection(plot) {
             var o = plot.getOptions();
+
+            if (o.selection.mode === 'smart') {
+                return selection.currentMode;
+            } else {
+                return o.selection.mode;
+            }
+        }
+
+        function updateMode(pos) {
+            if (selection.first) {
+                var delta = {
+                    x: pos.x - selection.first.x,
+                    y: pos.y - selection.first.y
+                };
+
+                if (Math.abs(delta.x) < SNAPPING_CONSTANT) {
+                    selection.currentMode = 'y';
+                } else if (Math.abs(delta.y) < SNAPPING_CONSTANT) {
+                    selection.currentMode = 'x';
+                } else {
+                    selection.currentMode = 'xy';
+                }
+            }
+        }
+
+        function setSelectionPos(pos, e) {
             var offset = plot.getPlaceholder().offset();
             var plotOffset = plot.getPlotOffset();
             pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plot.width());
             pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plot.height());
 
-            if (o.selection.mode == "y")
+            if (pos !== selection.first) updateMode(pos);
+
+            if (selectionDirection(plot) == "y")
                 pos.x = pos == selection.first ? 0 : plot.width();
 
-            if (o.selection.mode == "x")
+            if (selectionDirection(plot) == "x")
                 pos.y = pos == selection.first ? 0 : plot.height();
         }
 
@@ -215,6 +259,7 @@ The plugin allso adds the following methods to the plot object:
         function clearSelection(preventEvent) {
             if (selection.show) {
                 selection.show = false;
+                selection.currentMode = '';
                 plot.triggerRedrawOverlay();
                 if (!preventEvent)
                     plot.getPlaceholder().trigger("plotunselected", [ ]);
@@ -252,14 +297,14 @@ The plugin allso adds the following methods to the plot object:
                 from = to;
                 to = tmp;
             }
-            
+
             return { from: from, to: to, axis: axis };
         }
-        
+
         function setSelection(ranges, preventEvent) {
             var axis, range, o = plot.getOptions();
 
-            if (o.selection.mode == "y") {
+            if (selectionDirection(plot) === "y") {
                 selection.first.x = 0;
                 selection.second.x = plot.width();
             }
@@ -270,7 +315,7 @@ The plugin allso adds the following methods to the plot object:
                 selection.second.x = range.axis.p2c(range.to);
             }
 
-            if (o.selection.mode == "x") {
+            if (selectionDirection(plot) === "x") {
                 selection.first.y = 0;
                 selection.second.y = plot.height();
             }
@@ -305,6 +350,90 @@ The plugin allso adds the following methods to the plot object:
             }
         });
 
+        function drawSelectionDecorations(ctx, x, y, w, h, oX, oY, mode) {
+            var spacing = 3;
+            var fullEarWidth = 15;
+            var earWidth = Math.max(0, Math.min(fullEarWidth, w/2 -2 , h/2 - 2));
+            ctx.fillStyle = '#ffffff';
+
+            if (mode === 'xy') {
+                ctx.beginPath();
+                ctx.moveTo(x, y + earWidth);
+                ctx.lineTo(x - 3, y + earWidth);
+                ctx.lineTo(x - 3, y - 3);
+                ctx.lineTo(x + earWidth, y - 3);
+                ctx.lineTo(x + earWidth, y);
+                ctx.lineTo(x, y);
+                ctx.closePath();
+
+                ctx.moveTo(x , y + h - earWidth);
+                ctx.lineTo(x  - 3, y + h - earWidth);
+                ctx.lineTo(x  - 3, y + h + 3 );
+                ctx.lineTo(x  + earWidth, y + h + 3);
+                ctx.lineTo(x  + earWidth, y + h);
+                ctx.lineTo(x , y + h);
+                ctx.closePath();
+
+                ctx.moveTo(x + w, y + earWidth);
+                ctx.lineTo(x + w + 3, y + earWidth);
+                ctx.lineTo(x + w + 3, y - 3);
+                ctx.lineTo(x + w - earWidth, y - 3);
+                ctx.lineTo(x + w - earWidth, y);
+                ctx.lineTo(x + w, y);
+                ctx.closePath();
+
+                ctx.moveTo(x + w ,  y + h  - earWidth);
+                ctx.lineTo(x + w  + 3,  y + h  - earWidth);
+                ctx.lineTo(x + w  + 3, y + h  + 3);
+                ctx.lineTo(x + w  - earWidth, y + h + 3);
+                ctx.lineTo(x + w  - earWidth, y + h );
+                ctx.lineTo(x + w , y + h );
+                ctx.closePath();
+
+                ctx.stroke();
+                ctx.fill();
+            }
+
+            x = oX;
+            y = oY;
+
+            if (mode === 'x') {
+                ctx.beginPath();
+                ctx.moveTo(x,  y + fullEarWidth);
+                ctx.lineTo(x,  y - fullEarWidth);
+                ctx.lineTo(x - spacing ,  y - fullEarWidth);
+                ctx.lineTo(x - spacing ,  y + fullEarWidth);
+                ctx.closePath();
+
+                ctx.moveTo(x + w,  y + fullEarWidth);
+                ctx.lineTo(x + w,  y - fullEarWidth);
+                ctx.lineTo(x + w + spacing ,  y - fullEarWidth);
+                ctx.lineTo(x + w + spacing ,  y + fullEarWidth);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            }
+
+            if (mode === 'y') {
+                ctx.beginPath();
+
+                ctx.moveTo(x - fullEarWidth,  y);
+                ctx.lineTo(x + fullEarWidth,  y);
+                ctx.lineTo(x + fullEarWidth,  y - spacing);
+                ctx.lineTo(x - fullEarWidth,  y - spacing);
+                ctx.closePath();
+
+
+                ctx.moveTo(x - fullEarWidth,  y + h);
+                ctx.lineTo(x + fullEarWidth,  y + h);
+                ctx.lineTo(x + fullEarWidth,  y + h + spacing);
+                ctx.lineTo(x - fullEarWidth,  y + h + spacing);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            }
+
+        }
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
             // draw selection
@@ -317,27 +446,41 @@ The plugin allso adds the following methods to the plot object:
 
                 var c = $.color.parse(o.selection.color);
 
-                ctx.strokeStyle = c.scale('a', 0.8).toString();
+                ctx.strokeStyle = c.scale('a', 1).toString();
                 ctx.lineWidth = 1;
                 ctx.lineJoin = o.selection.shape;
                 ctx.fillStyle = c.scale('a', 0.4).toString();
 
                 var x = Math.min(selection.first.x, selection.second.x) + 0.5,
+                    oX = x,
                     y = Math.min(selection.first.y, selection.second.y) + 0.5,
+                    oY = y,
                     w = Math.abs(selection.second.x - selection.first.x) - 1,
                     h = Math.abs(selection.second.y - selection.first.y) - 1;
 
-                ctx.fillRect(x, y, w, h);
-                ctx.strokeRect(x, y, w, h);
+
+                if (selectionDirection(plot) === 'x') {
+                    h += y;
+                    y = 0;
+                }
+
+                if (selectionDirection(plot) === 'y') {
+                    w += x;
+                    x = 0;
+                }
+
+                ctx.fillRect(0, 0, plot.width(), plot.height());
+                ctx.clearRect(x, y, w, h);
+                drawSelectionDecorations(ctx, x, y, w, h, oX, oY, selectionDirection(plot));
 
                 ctx.restore();
             }
         });
-        
+
         plot.hooks.shutdown.push(function (plot, eventHolder) {
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mousedown", onMouseDown);
-            
+
             if (mouseUpHandler)
                 $(document).unbind("mouseup", mouseUpHandler);
         });
@@ -349,7 +492,7 @@ The plugin allso adds the following methods to the plot object:
         options: {
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
-                color: "#e8cfac",
+                color: "#888888",
                 shape: "round", // one of "round", "miter", or "bevel"
                 minSize: 5 // minimum number of pixels
             }

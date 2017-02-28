@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Flot Examples: Log Scale</title>
+  <link href="../examples.css" rel="stylesheet" type="text/css">
+  <script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+  <script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
+  <script type="text/javascript">
+    $(function () {
+
+      function piTickGenerator(axis) {
+        var res = [],
+          i = Math.floor(axis.min / Math.PI);
+        do {
+          var v = i * Math.PI;
+          res.push([v, i + "\u03c0"]);
+          ++i;
+        } while (v < axis.max);
+        return res;
+      }
+
+      var PREFERRED_LOG_TICK_VALUES = function () {
+        var vals = [];
+        for (var power = -39; power <= 39; power++) {
+          var range = Math.pow(10, power);
+          for (var mult = 1; mult <= 9; mult++) {
+            var val = range * mult;
+            vals.push(val);
+          }
+        }
+        return vals;
+      }();
+
+      var logTransform = function (v) {
+        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
+          v = PREFERRED_LOG_TICK_VALUES[0];
+        }
+        return Math.log(v);
+      };
+
+      var logInverseTransform = function (v) {
+        return Math.exp(v);
+      }
+
+      function logTickGenerator(axis) {
+        var nTicks = 12; //Math.floor(pixels / pixels_per_tick);
+
+        var ticks = [];
+        var minIdx = -1;
+        var maxIdex = -1;
+
+        if (axis.min <= 0) {
+          axis.min = PREFERRED_LOG_TICK_VALUES[0];
+        }
+
+        PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
+          if (val >= axis.min) {
+            minIdx = i;
+            return true;
+          } else {
+            return false
+          }
+        });
+
+        PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
+          if (val >= axis.max) {
+            maxIdx = i;
+            return true;
+          } else {
+            return false
+          }
+        });
+
+        if (minIdx == -1) {
+          minIdx = 0;
+        }
+        if (maxIdx == -1) {
+          maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
+        }
+
+        // Count the number of tick values would appear, if we can get at least
+        // nTicks / 4 accept them.
+        var lastDisplayed = null;
+        if (maxIdx - minIdx >= nTicks / 4) {
+          for (var idx = maxIdx; idx >= minIdx; idx--) {
+            var tickValue = PREFERRED_LOG_TICK_VALUES[idx];
+            var pixel_coord = Math.log(tickValue / axis.min) / Math.log(axis.max / axis.min) * 10;
+            var tick = tickValue;
+
+            if (lastDisplayed === null) {
+              lastDisplayed = {
+                tickValue: tickValue,
+                pixel_coord: pixel_coord
+              };
+            } else {
+              if (Math.abs(pixel_coord - lastDisplayed.pixel_coord) >= 1) {
+                lastDisplayed = {
+                  tickValue: tickValue,
+                  pixel_coord: pixel_coord
+                };
+              } else {
+                tick = null;
+              }
+            }
+            if (tick) ticks.push(tick);
+          }
+          // Since we went in backwards order.
+          ticks.reverse();
+        }
+
+        return ticks;
+      };
+
+      logTickFormatter = function (value) {
+        var tenExponent = Math.floor(Math.log(value) / Math.LN10);
+        round_with = Math.pow(10, tenExponent);
+        var x = Math.round(value / round_with);
+        if ((tenExponent >= -3) && (tenExponent <= 3)) {
+          return value.toString();
+        } else {
+          return x.toFixed(0) + "e" + tenExponent;
+        }
+      }
+
+      var d1 = [];
+      for (var i = 0; i < 14; i += 0.5) {
+        d1.push([i, Math.sin(i)]);
+      }
+
+      var d1 = [];
+      for (var i = 0; i < 14; i += 0.5) {
+        d1.push([i, Math.sin(i)]);
+      }
+
+      var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
+
+      // A null signifies separate line segments
+
+      var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
+
+      $.plot("#placeholder", [d2, d3], {
+        series: {
+          lines: {
+            show: true
+          },
+          points: {
+            show: true
+          }
+        },
+        xaxis: {
+          ticks: piTickGenerator
+        },
+        yaxis: {
+          ticks: logTickGenerator,
+          transform: logTransform,
+          inverseTransform: logInverseTransform,
+          tickFormatter: logTickFormatter
+        }
+      });
+
+      // Add the Flot version string to the footer
+
+      $("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+    });
+  </script>
+</head>
+
+<body>
+
+  <div id="header">
+    <h2>Log scale</h2>
+  </div>
+
+  <div id="content">
+
+    <div class="demo-container">
+      <div id="placeholder" class="demo-placeholder"></div>
+    </div>
+
+    <p>Custom tick formatting for axis scales. PI multiples on the X axis and logarithmic axis on Y axis.</p>
+  </div>
+
+  <div id="footer">
+    Copyright &copy; 2007 - 2014 IOLA and Ole Laursen
+  </div>
+
+</body>
+
+</html>
