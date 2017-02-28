@@ -4,9 +4,11 @@
   "main": "jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run",
-    "coverage": "node node_modules/karma/bin/karma start --single-run --coverage"
+    "coverage": "node node_modules/karma/bin/karma start --single-run --coverage",
+    "build": "node build"
   },
   "devDependencies": {
+    "concat-files": "^0.1.1",
     "jasmine-core": "^2.5.2",
     "karma": "^1.3.0",
     "karma-chrome-launcher": "^2.0.0",
