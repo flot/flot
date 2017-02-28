@@ -20,9 +20,45 @@ describe("unit tests for the log scale functions", function() {
         expect(ticks).toEqual([0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]);
     });
 
-    xit('should format numbers according to their natural precision', function() {
+    it('should format numbers according to their natural precision', function() {
         var logFormatter = $.plot.logTickFormatter;
-        expect(logFormatter(1.7000000000000002)).toEqual('1.7');
+        var testVector = [
+            [1.7000000000000002, '1.7'],
+            [17.000000000000002, '17'],
+            [172, '172'],
+            [1.000, '1'],
+            [0.0004, '0.0004'],
+            [0.00004, '4e-5'],
+            [3.1623E-21, '3e-21']
+            ];
+        
+        testVector.forEach(function (t) {
+            var inputValue = t[0],
+                expectedValue = t[1];
+                
+            expect(logFormatter(inputValue)).toBe(expectedValue);
+        });
+    });
+	
+    it('should use a desired precision when specified', function(){
+        var logFormatter = $.plot.logTickFormatter,
+            axis = [],
+            precision = 3,
+            testVector = [
+            [1.7000000000000002, '1.700'],
+            [17.000000000000002, '17.000'],
+            [172, '172.000'],
+            [1.000, '1.000'],
+            [0.00004, '4.000e-5'],
+            [3.1623E-21, '3.162e-21']
+            ];		
+
+        testVector.forEach(function (t) {
+            var inputValue = t[0],
+                expectedValue = t[1];
+                
+            expect(logFormatter(inputValue, axis, precision)).toBe(expectedValue);
+        });
     });
 
 });
@@ -48,7 +84,7 @@ describe("integration tests for log scale functions", function() {
             .find('#test-container');
     });
 
-    xit('should use linear scale for low dynamic range intervals', function() {
+    it('should use linear scale for low dynamic range intervals', function() {
         var lineardata1 = [
             [0, 1],
             [1, 1.1],
@@ -70,7 +106,7 @@ describe("integration tests for log scale functions", function() {
             }
         });
 
-        expect(queryPlotForYTicks()).toEqual(['1.0', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '2.0']);
+        expect(queryPlotForYTicks()).toEqual(['1', '1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '2']);
     });
 
     it('should use log scales for high dynamic range intervals', function() {

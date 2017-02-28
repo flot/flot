@@ -160,13 +160,36 @@ Set axis.mode to "log" to enable.
         return ticks;
     };
 
-    var logTickFormatter = function (value) {
-        var tenExponent = Math.floor(Math.log(value) / Math.LN10);
-        var round_with = Math.pow(10, tenExponent);
-        var x = Math.round(value / round_with);
+    var logTickFormatter = function (value, axis, precision) {
+        var tenExponent = Math.floor(Math.log(value) / Math.LN10),
+            round_with = Math.pow(10, tenExponent),
+            x = Math.round(value / round_with);
+
+        if (precision){
+            if ((tenExponent >= -4) && (tenExponent <= 4)) {
+                return value.toFixed(precision);
+            }
+            else {
+                return (value / round_with).toFixed(precision) + 'e' + tenExponent;
+            }
+        }
         if ((tenExponent >= -4) && (tenExponent <= 4)) {
             //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
-            return tenExponent <= 0 ? value.toFixed(-(tenExponent)) : value.toString();
+            var formattedValue = tenExponent < 0 ? value.toFixed(-tenExponent) : value.toFixed(tenExponent + 2);
+            if(formattedValue.indexOf('.') !== -1) {
+                var lastZero = formattedValue.lastIndexOf('0');
+
+                while (lastZero === formattedValue.length - 1) {
+                    formattedValue = formattedValue.slice(0, -1);
+                    lastZero = formattedValue.lastIndexOf('0');
+                }
+
+                //delete the dot if is last
+                if (formattedValue.indexOf('.') === formattedValue.length - 1) {
+                    formattedValue = formattedValue.slice(0, -1);
+                }
+            }
+            return formattedValue;
         } else {
             return x.toFixed(0) + 'e' + tenExponent;
         }
@@ -187,7 +210,7 @@ Set axis.mode to "log" to enable.
                         return logTickGenerator(axis.min, axis.max, noTicks);
                     };
 
-                    axis.tickFormatter = logTickFormatter;
+                    axis.options.tickFormatter = logTickFormatter;
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
                     axis.options.autoscaleMargin = 0;
