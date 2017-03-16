@@ -727,7 +727,7 @@
       return res;
     }
 
-    this.zoneFileBasePath;
+    this.zoneFileBasePath = undefined;
     this.zoneFiles = ['africa', 'antarctica', 'asia', 'australasia', 'backward', 'etcetera', 'europe', 'northamerica', 'pacificnew', 'southamerica'];
     this.loadingSchemes = {
       PRELOAD_ALL: 'preloadAll',
