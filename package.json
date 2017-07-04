@@ -1,0 +1,22 @@
+{
+  "name": "flot",
+  "version": "1.0.0",
+  "description": "Flot is a Javascript plotting library for jQuery.   Read more at the website: <http://www.flotcharts.org/>",
+  "main": "excanvas.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Currency-One/flot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Currency-One/flot/issues"
+  },
+  "homepage": "https://github.com/Currency-One/flot#readme"
+}
