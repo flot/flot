@@ -677,7 +677,7 @@ Licensed under the MIT license.
         plot.destroy = function () {
             shutdown();
             placeholder.removeData("plot").empty();
-
+            placeholder = null;
             series = [];
             options = null;
             surface = null;
