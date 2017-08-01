@@ -533,6 +533,7 @@ More detail and specific examples can be found in the included HTML file.
 		// Placed here because it needs to be accessed from multiple locations
 
 		function drawDonutHole(layer) {
+			var options = plot.getOptions();
 			if (options.series.pie.innerRadius > 0) {
 
 				// subtract the center
@@ -652,7 +653,7 @@ More detail and specific examples can be found in the included HTML file.
 		// trigger click or hover event (they send the same parameters so we share their code)
 
 		function triggerClickHoverEvent(eventname, e) {
-
+			var options = plot.getOptions();
 			var offset = plot.offset();
 			var canvasX = parseInt(e.pageX - offset.left);
 			var canvasY =  parseInt(e.pageY - offset.top);
