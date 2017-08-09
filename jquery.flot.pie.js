@@ -182,7 +182,7 @@ More detail and specific examples can be found in the included HTML file.
 				// that the user may have stored in higher indexes.
 
 				if ($.isArray(value) && value.length == 1) {
-    				value = value[0];
+					value = value[0];
 				}
 
 				if ($.isArray(value)) {
@@ -225,8 +225,8 @@ More detail and specific examples can be found in the included HTML file.
 				var value = data[i].data[0][1];
 				if (numCombined < 2 || value / total > options.series.pie.combine.threshold) {
 					newdata.push(
-						$.extend(data[i], {     /* extend to allow keeping all other original data values
-						                           and using them e.g. in labelFormatter. */
+						$.extend(data[i], {	 /* extend to allow keeping all other original data values
+												   and using them e.g. in labelFormatter. */
 							data: [[1, value]],
 							color: data[i].color,
 							label: data[i].label,
@@ -453,6 +453,7 @@ More detail and specific examples can be found in the included HTML file.
 				}
 
 				function drawLabels() {
+					var labels = [];
 
 					var currentAngle = startAngle;
 					var radius = options.series.pie.label.radius > 1 ? options.series.pie.label.radius : maxRadius * options.series.pie.label.radius;
@@ -502,6 +503,37 @@ More detail and specific examples can be found in the included HTML file.
 						label.css("top", labelTop);
 						label.css("left", labelLeft);
 
+						// check to make sure that the label doesn't overlap one of the other labels
+						var label_pos = getPositions(label);
+						for(var j=0; j<labels.length; j++)
+						{
+							var tmpPos = getPositions(labels[j]);
+							var horizontalMatch = comparePositions(label_pos[0], tmpPos[0]);
+							var verticalMatch = comparePositions(label_pos[1], tmpPos[1]);
+							var match = horizontalMatch && verticalMatch;
+							if(match)
+							{
+								var newTop = tmpPos[1][0] - (label.height() +1 );
+								label.css('top', newTop);
+								labelTop = newTop;
+							}
+						}
+
+						function getPositions(box) {
+							var $box = $(box);
+							var pos = $box.position();
+							var width = $box.width();
+							var height = $box.height();
+							return [ [ pos.left, pos.left + width ], [ pos.top, pos.top + height ] ];
+						}
+
+						function comparePositions(p1, p2) {
+							var x1 = p1[0] < p2[0] ? p1 : p2;
+							var x2 = p1[0] < p2[0] ? p2 : p1;
+							return x1[1] > x2[0] || x1[0] === x2[0] ? true : false;
+						}
+
+						labels.push(label);
 						// check to make sure that the label is not outside the canvas
 
 						if (0 - labelTop > 0 || 0 - labelLeft > 0 || canvasHeight - (labelTop + label.height()) < 0 || canvasWidth - (labelLeft + label.width()) < 0) {
