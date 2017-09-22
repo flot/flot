@@ -571,7 +571,8 @@ Licensed under the MIT license.
                         lineWidth: 2, // in pixels
                         fill: false,
                         fillColor: null,
-                        steps: false
+                        steps: false,
+			stepsDirection: "rightup" // rightup or upright
                         // Omit 'zero', so we can later default its value to
                         // match that of the 'fill' option.
                     },
@@ -1143,6 +1144,7 @@ Licensed under the MIT license.
                 points = s.datapoints.points;
 
                 var insertSteps = s.lines.show && s.lines.steps;
+		var stepsDir = insertSteps && s.lines.stepsDirection;
                 s.xaxis.used = s.yaxis.used = true;
 
                 for (j = k = 0; j < data.length; ++j, k += ps) {
@@ -1207,9 +1209,15 @@ Licensed under the MIT license.
                             // copy the point to make room for a middle point
                             for (m = 0; m < ps; ++m)
                                 points[k + ps + m] = points[k + m];
-
-                            // middle point has same y
-                            points[k + 1] = points[k - ps + 1];
+							
+                            if(stepsDir == 'rightup') {
+                                // middle point has same y
+                            	points[k + 1] = points[k - ps + 1];
+                            }
+                            else {
+                                //middle point has same x
+                            	points[k] = points[k - ps];
+                            }
 
                             // we've added a point, better reflect that
                             k += ps;
