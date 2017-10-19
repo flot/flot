@@ -814,6 +814,10 @@ Licensed under the MIT license.
                 hooks: {}
             },
 
+            // interactive features
+            highlights = [],
+            redrawTimeout = null,
+
             // the canvas for the plot itself
             surface = null,
 
@@ -3377,10 +3381,6 @@ Licensed under the MIT license.
                 }
             }
         }
-
-        // interactive features
-        var highlights = [],
-            redrawTimeout = null;
 
         /**
          * returns the data item the mouse is over, or null if none is found
