@@ -2722,7 +2722,8 @@ Licensed under the MIT license.
             }
 
             var fragments = [], entries = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+                lf = options.legend.labelFormatter, s, label,
+                colors = options.legend.colors;
 
             // Build a list of legend entries, with each having a label and a color
 
@@ -2733,7 +2734,7 @@ Licensed under the MIT license.
                     if (label) {
                         entries.push({
                             label: label,
-                            color: s.color
+                            color: colors && colors[i] ? colors[i] : s.color
                         });
                     }
                 }
