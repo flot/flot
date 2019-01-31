@@ -4,11 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Flot Examples: Visitors</title>
 	<link href="../examples.css" rel="stylesheet" type="text/css">
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
-	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.flot.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.flot.time.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.flot.selection.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../lib/globalize.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dist/es5/jquery.flot.js"></script>
 	<script type="text/javascript">
 
 	$(function() {
@@ -53,7 +51,9 @@
 		var options = {
 			xaxis: {
 				mode: "time",
-				tickLength: 5
+				timeBase: "milliseconds",
+				tickLength: 5,
+				gridLines: false
 			},
 			selection: {
 				mode: "x"
@@ -80,7 +80,7 @@
 			yaxis: {
 				ticks: [],
 				min: 0,
-				autoscaleMargin: 0.1
+				autoScaleMargin: 0.1
 			},
 			selection: {
 				mode: "x"
