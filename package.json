@@ -1,11 +1,44 @@
 {
-	"name": "Flot",
-	"version": "0.8.3",
-	"main": "jquery.flot.js",
-	"scripts": {
-		"test": "make test"
-	},
-	"devDependencies": {
-		"jshint": "0.9.1"
-	}
+  "name": "flot",
+  "version": "2.1.0",
+  "main": "dist/es5/jquery.flot.js",
+  "scripts": {
+    "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError",
+    "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurrency=1",
+    "build": "node ./node_modules/gulp/bin/gulp.js build",
+    "dont-break": "dont-break --timeout 300",
+    "docs": "node ./update_docs.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flot/flot.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flot/flot/issues"
+  },
+  "homepage": "https://github.com/flot/flot#readme",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-plugin-external-helpers-2": "^6.3.13",
+    "babel-preset-es2015": "^6.14.0",
+    "concat": "^1.0.3",
+    "gulp-notify": "^0.0.8",
+    "jasmine-core": "~2.7.0",
+    "karma": "^1.3.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-coverage": "^1.1.2",
+    "karma-coveralls": "^1.1.2",
+    "karma-edge-launcher": "^0.4.2",
+    "karma-eslint": "^2.2.0",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-jasmine": "^1.0.2",
+    "karma-jasmine-html-reporter": "^0.2.2",
+    "karma-jasmine-jquery": "^0.1.1",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-spec-reporter": "0.0.32",
+    "ljs": "^0.3.2",
+    "tmp": "0.0.33",
+    "webcharts-development-settings": "^1.0.9"
+  }
 }

@@ -1,3 +1,38 @@
+dist: trusty
 language: node_js
 node_js:
-  - 0.8
+- '8'
+addons:
+  firefox: latest
+  chrome: stable
+cache:
+  directories:
+  - node_modules
+before_install:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- npm install -g greenkeeper-lockfile@1
+- npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+before_script:
+- greenkeeper-lockfile-update
+- sudo chown root /opt/google/chrome/chrome-sandbox
+- sudo chmod 4755 /opt/google/chrome/chrome-sandbox
+- tar -tf $(npm pack)
+after_script: greenkeeper-lockfile-upload
+install:
+- npm install
+script:
+- npm test
+- npm run build
+- npm run coverage
+# deploy:
+#   provider: npm
+#   email: webapps.ops@ni.com
+#   api_key:
+#     secure: VJTenM/7Mof2gtbPtaQ6xMlJxMOHhdzhqbwjhhfE/ydkDAjNWZ/c2RBmP56rD7rxeaVYaRPR19KbhgunXMp++PxOUDj+n2EzsJVdqboJdJ5c3A5qa6OlPrWVupmuR5nmRNRCIzcuvkC1m7wKL8gtrBfcaY9pYewi0kYpu7VXZmiVCjO7ySOwSyPBQy0wmlFwiB2YIcsMIfQRaYgo0Goh7Aqy47UmYVxE8xcIWQdMv8xAbUbz/66oCzvSRcNxcTT00vStV8lg4adm3peqkpKyj6xv10SF93u5u5Hk9XkIjGJ8dpotHFFpC6aeN4f/olWgKPWjJFxBwLa6kmj+JvwKBO+rRjiGbks2nKcJXK6+5rRjsY/bJ54/jlqQfJYSgx1I4DPBEloBPKdo5ogOFuAz0Tv+1qYazS1kJm7oMPnOI7uVYiZ/15NqD6JlMi+7kEcq565Xx1t2eLxWAh86a0c9k+PkS7Gf+74YVixJnwMpGfRXbKdjsk4x86KIJRGeZXuIGMp5N/3Vo+yKPRMMQuIV1MsGgCc8f2jQ9qlkkmNbc+3+sJ3GaWVC3R6QHYxMu6OtAGDAFJpj5VgQ3n4L1RevI4LMqZaa0Xk7tV3//Vd32tbqFjWLWZv1z/SfrZjfZh6Yhhw8xobo3DHgNbVWppoMIqDE5YHLkCUweZamboPM5Is=
+#   on:
+#     tags: true
+#     repo: flot/flot
+#   skip_cleanup: true
+env:
+   secure: mkyiKGXQ8wkx4kSi/x7kProXE76E2Ix5xP+xHAcTpMhsFJYsyFE8LR8wC7UWxg80nbww6P1mWpJkMPm2QnWW8OSuKh9pF2bluTU7VAf68JHROA55FZauO0NgLWxF1tog/RLaTXBzoqXBx5+Zlcp2jl4UdsDSIr/1TogSEC7hV3dMiqzTsiC09RnAgtGsUfzDjCGVgyz2yDBMCoi+kfzJiRz7f1dW5GxhUypuV4jjEXTt1V6XrIA0C/uD27LP+kswHadMT6HURPiWEJteKNFz6hnfXttF1XmTwW++kzahDoap607oLszz+g8ss/9F0ILyO3tffyKnoEOImJLogvLUm3slxfHvh9PYh7x8oyPHFtfs7QAJ5Q2Cr23VvwJNslkuNCphEsQJS/HQ70VuSF6MlGrhbsLGp8kEFZrXADqojkGQ/duPk3QykiXUaUxr0uPEllptOLh5TTKYarRM/IVv4kE5iC4egJXouKxwwL5LIglnyCTycEdTLv/IUfYap8ABqi20eBm+AJGk44Z72fl+G/xoPrzbtVosQfPbuLurVJHHDDExHM3bFqfUNnB9xIEwWTihSc6ycI7IhuMQlg1G1t5rRY5YyVQN/4oP4k6qNgYbJs9PrxfyMw7Z+dSg/L2SyJbc/ReNiFkvpTNDYGY/dULvx1uGM1NGdmC+z+nljfk=
