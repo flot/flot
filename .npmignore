@@ -1,6 +1,6 @@
 *
 
-!dist/*
+!dist/**
 !lib/*
 !docs/*
 !source/*
