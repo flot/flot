@@ -17,8 +17,9 @@ before_script:
 - greenkeeper-lockfile-update
 - sudo chown root /opt/google/chrome/chrome-sandbox
 - sudo chmod 4755 /opt/google/chrome/chrome-sandbox
+after_script:
+- greenkeeper-lockfile-upload
 - tar -tf $(npm pack)
-after_script: greenkeeper-lockfile-upload
 install:
 - npm install
 script:
