@@ -6,7 +6,28 @@
 	<link href="../examples.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../lib/globalize.js"></script>
 	<script language="javascript" type="text/javascript" src="../../source/jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../../dist/es5/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.canvaswrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.colorhelpers.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.saturated.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.browser.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.drawSeries.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.errorbars.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.uiConstants.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.logaxis.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.symbol.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.flatdata.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.navigate.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.fillbetween.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.stack.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.touchNavigate.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.hover.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.touch.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.time.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.axislabels.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.selection.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.composeImages.js"></script>
+	<script language="javascript" type="text/javascript" src="../../source/jquery.flot.legend.js"></script>
 	<script type="text/javascript">
 
 	$(function() {
@@ -28,8 +49,8 @@
 				xaxis: {
 					mode: "time",
 					min: (new Date(1990, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime(), 
-					timeBase: "milliseconds", 
+					max: (new Date(2000, 0, 1)).getTime(),
+					timeBase: "milliseconds",
 					autoScale: "none"
 				}
 			});
@@ -42,7 +63,7 @@
 					minTickSize: [1, "year"],
 					autoScale: "none",
 					min: (new Date(1996, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime(), 
+					max: (new Date(2000, 0, 1)).getTime(),
 					timeBase: "milliseconds"
 				}
 			});
@@ -55,7 +76,7 @@
 					minTickSize: [1, "quarter"],
 					autoScale: "none",
 					min: (new Date(1999, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime(), 
+					max: (new Date(2000, 0, 1)).getTime(),
 					timeBase: "milliseconds"
 				}
 			});
@@ -68,7 +89,7 @@
 					mode: "time",
 					minTickSize: [1, "month"],
 					min: (new Date(1999, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime(), 
+					max: (new Date(2000, 0, 1)).getTime(),
 					timeBase: "milliseconds"
 				}
 			});
@@ -82,7 +103,7 @@
 					minTickSize: [1, "day"],
 					min: (new Date(1999, 11, 25)).getTime(),
 					max: (new Date(2000, 0, 1)).getTime(),
-					timeformat: "%a", 
+					timeformat: "%a",
 					timeBase: "milliseconds"
 				}
 			});
@@ -96,7 +117,7 @@
 					minTickSize: [1, "hour"],
 					min: (new Date(1999, 11, 31)).getTime(),
 					max: (new Date(2000, 0, 1)).getTime(),
-					twelveHourClock: true, 
+					twelveHourClock: true,
 					timeBase: "milliseconds"
 				}
 			});
