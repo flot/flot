@@ -820,7 +820,7 @@ Licensed under the MIT license.
                         defaultValue: null
                     });
 
-                    if (s.bars.show || (s.lines.show && s.lines.fill)) {
+                    if (s.stack || s.bars.show || (s.lines.show && s.lines.fill)) {
                         var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0] && s.data[0].length ? s.data[0].length : 3);
                         if (expectedPs > 2) {
                             format.push({
