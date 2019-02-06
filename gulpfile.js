@@ -21,7 +21,6 @@ gulp.task('build_engineering_flot', function() {
         './source/jquery.flot.symbol.js',
         './source/jquery.flot.flatdata.js',
         './source/jquery.flot.navigate.js',
-        './source/jquery.flot.errorbars.js',
         './source/jquery.flot.fillbetween.js',
         './source/jquery.flot.stack.js',
         './source/jquery.flot.touchNavigate.js',
