@@ -167,9 +167,25 @@ the tooltip from webcharts).
 
             pos.pageX = page.X;
             pos.pageY = page.Y;
-
-            var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
-
+            
+            var items = [];
+            var found = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
+            if(found){
+                items.push(found);
+            }
+            
+            for (var i = 0; i < plot.hooks.clickHoverFindNearby.length; ++i){
+                found = plot.hooks.clickHoverFindNearby[i](canvasX, canvasY, seriesFilter, distance);
+                if(found){
+                    items.push(found);
+                }
+            }
+            
+            // This is a simplistic assumption. 
+            // What should really be treated as "item"?
+            
+            var item = items[0]; 
+            
             if (item) {
                 // fill in mouse pos for any listeners out there
                 item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
@@ -193,7 +209,7 @@ the tooltip from webcharts).
                 }
             }
 
-            plot.getPlaceholder().trigger(eventname, [pos, item]);
+            plot.getPlaceholder().trigger(eventname, [pos, item, items]);
         }
 
         function highlight(s, point, auto) {

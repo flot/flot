@@ -234,6 +234,7 @@ Licensed under the MIT license.
                 drawSeries: [],
                 drawAxis: [],
                 draw: [],
+                clickHoverFindNearby: [],
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
