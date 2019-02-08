@@ -169,22 +169,30 @@ the tooltip from webcharts).
             pos.pageY = page.Y;
             
             var items = [];
+            var item = undefined;
             var found = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
             if(found){
                 items.push(found);
+                item = found;
             }
             
             for (var i = 0; i < plot.hooks.clickHoverFindNearby.length; ++i){
                 found = plot.hooks.clickHoverFindNearby[i](canvasX, canvasY, seriesFilter, distance);
                 if(found){
                     items.push(found);
+                    
+                    // If we don't have an item
+                    // Or if our item doesn't have a distance
+                    // Or if our new distance is closer
+                    // Choose the new one as "closest"
+                    
+                    if(!item || 
+                       (item.distance === undefined) || 
+                       (item && found.distance < item.distance) ){
+                        item = found;
+                    }
                 }
             }
-            
-            // This is a simplistic assumption. 
-            // What should really be treated as "item"?
-            
-            var item = items[0]; 
             
             if (item) {
                 // fill in mouse pos for any listeners out there

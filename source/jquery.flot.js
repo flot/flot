@@ -2548,7 +2548,7 @@ Licensed under the MIT license.
                     // (last generally means on top of)
                     if (dist < smallestDistance) {
                         smallestDistance = dist;
-                        item = [i, j / ps];
+                        item = [i, j / ps, dist];
                     }
                 }
             }
@@ -2556,13 +2556,15 @@ Licensed under the MIT license.
             if (item) {
                 i = item[0];
                 j = item[1];
+                dist = item[2];
                 ps = series[i].datapoints.pointsize;
 
                 return {
                     datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
                     dataIndex: j,
                     series: series[i],
-                    seriesIndex: i
+                    seriesIndex: i,
+                    distance: dist
                 };
             }
 
