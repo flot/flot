@@ -2525,29 +2525,65 @@ Licensed under the MIT license.
                     maxy = Number.MAX_VALUE;
                 }
 
-                for (j = 0; j < points.length; j += ps) {
-                    x = points[j];
-                    y = points[j + 1];
-                    if (x == null) {
-                        continue;
+                if (s.lines.show || s.points.show) {
+                    for (j = 0; j < points.length; j += ps) {
+                        x = points[j];
+                        y = points[j + 1];
+                        if (x == null) {
+                            continue;
+                        }
+
+                        if (x - mx > maxx || x - mx < -maxx ||
+                            y - my > maxy || y - my < -maxy) {
+                            continue;
+                        }
+
+                        // We have to calculate distances in pixels, not in
+                        // data units, because the scales of the axes may be different
+                        dx = Math.abs(axisx.p2c(x) - mouseX);
+                        dy = Math.abs(axisy.p2c(y) - mouseY);
+                        dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
+
+                        // use <= to ensure last point takes precedence
+                        // (last generally means on top of)
+                        if (dist < smallestDistance) {
+                            smallestDistance = dist;
+                            item = [i, j / ps];
+                        }
+                    }
+                }
+
+                if (s.bars.show && !item) { // no other point can be nearby
+                    var barLeft, barRight,
+                        barWidth = s.bars.barWidth[0] || s.bars.barWidth;
+                    switch (s.bars.align) {
+                        case "left":
+                            barLeft = 0;
+                            break;
+                        case "right":
+                            barLeft = -barWidth;
+                            break;
+                        default:
+                            barLeft = -barWidth / 2;
                     }
 
-                    if (x - mx > maxx || x - mx < -maxx ||
-                        y - my > maxy || y - my < -maxy) {
-                        continue;
-                    }
+                    barRight = barLeft + barWidth;
 
-                    // We have to calculate distances in pixels, not in
-                    // data units, because the scales of the axes may be different
-                    dx = Math.abs(axisx.p2c(x) - mouseX);
-                    dy = Math.abs(axisy.p2c(y) - mouseY);
-                    dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
+                    var fillTowards = s.bars.fillTowards || 0;
+                    var bottom = fillTowards > s.yaxis.min ? Math.min(s.yaxis.max, fillTowards) : s.yaxis.min;
 
-                    // use <= to ensure last point takes precedence
-                    // (last generally means on top of)
-                    if (dist < smallestDistance) {
-                        smallestDistance = dist;
-                        item = [i, j / ps];
+                    for (j = 0; j < points.length; j += ps) {
+                        var x = points[j], y = points[j + 1];
+                        if (x == null)
+                            continue;
+
+                        // for a bar graph, the cursor must be inside the bar
+                        if (series[i].bars.horizontal ?
+                            (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
+                             my >= y + barLeft && my <= y + barRight) :
+                            (mx >= x + barLeft && mx <= x + barRight &&
+                             my >= Math.min(bottom, y) && my <= Math.max(bottom, y)))
+                                item = [i, j / ps];
                     }
                 }
             }
