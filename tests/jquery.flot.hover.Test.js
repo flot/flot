@@ -208,5 +208,87 @@ describe("flot hover plugin", function () {
             expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.x).toEqual(evt.x);
             expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.y).toEqual(evt.y);
         });
+	
+        it('should call hooked function when canvas is hovered over', function(){
+            var spy = jasmine.createSpy('spy');
+            
+            options.hooks = {clickHoverFindNearby: [spy]};
+            plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
+            
+            var eventHolder = plot.getEventHolder(),
+                offset = plot.getPlotOffset(),
+                axisx = plot.getXAxes()[0],
+                axisy = plot.getYAxes()[0],
+                x = axisx.p2c(2) + offset.left,
+                y = axisy.p2c(3) + offset.top,
+                noButton = 0;
+            
+            
+            simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(100);
+            
+            expect(spy).toHaveBeenCalled();
+        });
+        
+        it('should pass item returned from hook in items', function(){
+            var testItem = {distance: 5};
+            var hook = function(){
+                return testItem;
+            }
+            
+            options.hooks = {clickHoverFindNearby: [hook]};
+            plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
+            
+            
+            $(plot.getPlaceholder()).on('plothover', function(event, pos, item, items){
+                var seenTestItem = false;
+                for(const i of items){
+                    if(i === testItem){
+                        seenTestItem = true;
+                    }
+                }
+                expect(seenTestItem).toBe(true);
+            });
+            
+            var eventHolder = plot.getEventHolder(),
+                offset = plot.getPlotOffset(),
+                axisx = plot.getXAxes()[0],
+                axisy = plot.getYAxes()[0],
+                x = axisx.p2c(2) + offset.left,
+                y = axisy.p2c(3) + offset.top,
+                noButton = 0;
+            
+            
+            simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(100);
+            
+        })
+        
+        if('should choose closest item from items returned by hooks', function(){
+            var distance = 5,
+                testItem = {distance: distance};
+            var hook = function(){
+                return testItem;
+            }
+            
+            options.hooks = {clickHoverFindNearby: [hook]};
+            
+            $(plot.getPlaceholder()).on('plothover', function(event, pos, item, items){
+                expect(item.distance < distance).toBe(true);
+            });
+            
+            
+            var eventHolder = plot.getEventHolder(),
+                offset = plot.getPlotOffset(),
+                axisx = plot.getXAxes()[0],
+                axisy = plot.getYAxes()[0],
+                x = axisx.p2c(2) + offset.left,
+                y = axisy.p2c(3) + offset.top,
+                noButton = 0;
+            
+            
+            simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(100);
+        });
     });
 });
