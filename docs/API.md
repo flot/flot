@@ -1692,7 +1692,7 @@ hooks in the plugins bundled with Flot.
     
     seriesindex - The index of the series hovered over
     
-    distance - The distance from the cursor the item is.
+    distance - Distance, in pixels, between the item and cursor.
                If distance is returned as undefined, the item will
                be treated as "infinite" distance, and will not be
                chosen instead of an item with a distance returned
