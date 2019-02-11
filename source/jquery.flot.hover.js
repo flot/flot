@@ -171,14 +171,14 @@ the tooltip from webcharts).
             var items = [];
             var item = undefined;
             var found = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
-            if(found){
+            if (found){
                 items.push(found);
                 item = found;
             }
             
             for (var i = 0; i < plot.hooks.clickHoverFindNearby.length; ++i){
                 found = plot.hooks.clickHoverFindNearby[i](canvasX, canvasY, seriesFilter, distance);
-                if(found){
+                if (found){
                     items.push(found);
                     
                     // If we don't have an item
