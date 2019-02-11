@@ -2494,104 +2494,34 @@ Licensed under the MIT license.
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {
-            var maxDistance = radius,
-                smallestDistance = maxDistance * maxDistance + 1,
+            var i, j,
                 item = null,
-                dx, dy, dist,
-                i, j, ps;
+                smallestDistance = radius * radius + 1;
 
-            for (i = series.length - 1; i >= 0; --i) {
+            for (var i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(i)) continue;
 
                 var s = series[i];
                 if (!s.datapoints) return;
-                var x, y,
-                    axisx = s.xaxis,
-                    axisy = s.yaxis,
-                    points = s.datapoints.points,
-                    mx = axisx.c2p(mouseX), // precompute some stuff to make the loop faster
-                    my = axisy.c2p(mouseY),
-                    maxx = maxDistance / axisx.scale,
-                    maxy = maxDistance / axisy.scale;
-
-                ps = s.datapoints.pointsize;
-                // with inverse transforms, we can't use the maxx/maxy
-                // optimization, sadly
-                if (axisx.options.inverseTransform) {
-                    maxx = Number.MAX_VALUE;
-                }
-
-                if (axisy.options.inverseTransform) {
-                    maxy = Number.MAX_VALUE;
-                }
 
                 if (s.lines.show || s.points.show) {
-                    for (j = 0; j < points.length; j += ps) {
-                        x = points[j];
-                        y = points[j + 1];
-                        if (x == null) {
-                            continue;
-                        }
-
-                        if (x - mx > maxx || x - mx < -maxx ||
-                            y - my > maxy || y - my < -maxy) {
-                            continue;
-                        }
-
-                        // We have to calculate distances in pixels, not in
-                        // data units, because the scales of the axes may be different
-                        dx = Math.abs(axisx.p2c(x) - mouseX);
-                        dy = Math.abs(axisy.p2c(y) - mouseY);
-                        dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
-
-                        // use <= to ensure last point takes precedence
-                        // (last generally means on top of)
-                        if (dist < smallestDistance) {
-                            smallestDistance = dist;
-                            item = [i, j / ps];
-                        }
+                    var found = findNearbyPoint(s, mouseX, mouseY, radius, smallestDistance, computeDistance);
+                    if (found) {
+                        smallestDistance = found.distance;
+                        item = [i, found.dataIndex];
                     }
                 }
 
                 if (s.bars.show && !item) { // no other point can be nearby
-                    var barLeft, barRight,
-                        barWidth = s.bars.barWidth[0] || s.bars.barWidth;
-                    switch (s.bars.align) {
-                        case "left":
-                            barLeft = 0;
-                            break;
-                        case "right":
-                            barLeft = -barWidth;
-                            break;
-                        default:
-                            barLeft = -barWidth / 2;
-                    }
-
-                    barRight = barLeft + barWidth;
-
-                    var fillTowards = s.bars.fillTowards || 0;
-                    var bottom = fillTowards > s.yaxis.min ? Math.min(s.yaxis.max, fillTowards) : s.yaxis.min;
-
-                    for (j = 0; j < points.length; j += ps) {
-                        var x = points[j], y = points[j + 1];
-                        if (x == null)
-                            continue;
-
-                        // for a bar graph, the cursor must be inside the bar
-                        if (series[i].bars.horizontal ?
-                            (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
-                             my >= y + barLeft && my <= y + barRight) :
-                            (mx >= x + barLeft && mx <= x + barRight &&
-                             my >= Math.min(bottom, y) && my <= Math.max(bottom, y)))
-                                item = [i, j / ps];
-                    }
+                    var foundIndex = findNearbyBar(s, mouseX, mouseY);
+                    if (foundIndex) item = [i, foundIndex];
                 }
             }
 
             if (item) {
                 i = item[0];
                 j = item[1];
-                ps = series[i].datapoints.pointsize;
+                var ps = series[i].datapoints.pointsize;
 
                 return {
                     datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
@@ -2602,6 +2532,96 @@ Licensed under the MIT license.
             }
 
             return null;
+        }
+
+        function findNearbyPoint (series, mouseX, mouseY, maxDistance, smallestDistance, computeDistance) {
+            var mx = series.xaxis.c2p(mouseX),
+                my = series.yaxis.c2p(mouseY),
+                maxx = maxDistance / series.xaxis.scale,
+                maxy = maxDistance / series.yaxis.scale,
+                points = series.datapoints.points,
+                ps = series.datapoints.pointsize;
+
+            // with inverse transforms, we can't use the maxx/maxy
+            // optimization, sadly
+            if (series.xaxis.options.inverseTransform) {
+                maxx = Number.MAX_VALUE;
+            }
+
+            if (series.yaxis.options.inverseTransform) {
+                maxy = Number.MAX_VALUE;
+            }
+
+            var found = null;
+            for (var j = 0; j < points.length; j += ps) {
+                var x = points[j];
+                var y = points[j + 1];
+                if (x == null) {
+                    continue;
+                }
+
+                if (x - mx > maxx || x - mx < -maxx ||
+                    y - my > maxy || y - my < -maxy) {
+                    continue;
+                }
+
+                // We have to calculate distances in pixels, not in
+                // data units, because the scales of the axes may be different
+                var dx = Math.abs(series.xaxis.p2c(x) - mouseX);
+                var dy = Math.abs(series.yaxis.p2c(y) - mouseY);
+                var dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
+
+                // use <= to ensure last point takes precedence
+                // (last generally means on top of)
+                if (dist < smallestDistance) {
+                    smallestDistance = dist;
+                    found = { dataIndex: j / ps, distance: dist };
+                }
+            }
+
+            return found;
+        }
+
+        function findNearbyBar (series, mouseX, mouseY) {
+            var barLeft, barRight,
+                barWidth = series.bars.barWidth[0] || series.bars.barWidth,
+                mx = series.xaxis.c2p(mouseX),
+                my = series.yaxis.c2p(mouseY),
+                points = series.datapoints.points,
+                ps = series.datapoints.pointsize;
+
+            switch (series.bars.align) {
+                case "left":
+                    barLeft = 0;
+                    break;
+                case "right":
+                    barLeft = -barWidth;
+                    break;
+                default:
+                    barLeft = -barWidth / 2;
+            }
+
+            barRight = barLeft + barWidth;
+
+            var fillTowards = series.bars.fillTowards || 0;
+            var bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
+
+            var foundIndex = null;
+            for (var j = 0; j < points.length; j += ps) {
+                var x = points[j], y = points[j + 1];
+                if (x == null)
+                    continue;
+
+                // for a bar graph, the cursor must be inside the bar
+                if (series.bars.horizontal ?
+                    (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
+                        my >= y + barLeft && my <= y + barRight) :
+                    (mx >= x + barLeft && mx <= x + barRight &&
+                        my >= Math.min(bottom, y) && my <= Math.max(bottom, y)))
+                        foundIndex = j / ps;
+            }
+
+            return foundIndex;
         }
 
         function findNearbyInterpolationPoint(posX, posY, seriesFilter) {
