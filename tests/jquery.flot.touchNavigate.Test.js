@@ -408,7 +408,7 @@ describe("flot touch navigate plugin", function () {
             ];
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
-        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -443,7 +443,7 @@ describe("flot touch navigate plugin", function () {
 
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
-        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -480,7 +480,7 @@ describe("flot touch navigate plugin", function () {
 
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
-        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBe(initialXmin);
         expect(xaxis.max).toBe(initialXmax);
@@ -517,7 +517,7 @@ describe("flot touch navigate plugin", function () {
 
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
-        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -556,7 +556,7 @@ describe("flot touch navigate plugin", function () {
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
         simulate.touchmove(eventHolder, pointCoords[2].x, pointCoords[2].y);
-        simulate.touchend(eventHolder, pointCoords[2].x, pointCoords[2].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -595,7 +595,7 @@ describe("flot touch navigate plugin", function () {
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
         simulate.touchmove(eventHolder, pointCoords[2].x, pointCoords[2].y);
-        simulate.touchend(eventHolder, pointCoords[2].x, pointCoords[2].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBe(initialXmin);
         expect(xaxis.max).toBe(initialXmax);
@@ -986,6 +986,48 @@ describe("flot touch navigate plugin", function () {
           expect(xaxis.max).toBeCloseTo(initialXmax, 6);
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
+
+        });
+
+        it('should not recenter for doubletap event triggered by touchmove', function() {
+          //when touchmove to somewhere close to last doubletap point, another doubletap will be triggered
+          //this doubletap event should not do recenter
+          plot = $.plot(placeholder, [
+              [
+                  [-10, 120],
+                  [-10, 120]
+              ]
+          ], options);
+          var eventHolder = plot.getEventHolder(),
+          xaxis = plot.getXAxes()[0],
+          yaxis = plot.getYAxes()[0],
+          initialXmin = xaxis.min,
+          initialXmax = xaxis.max,
+          initialYmin = yaxis.min,
+          initialYmax = yaxis.max,
+          canvasCoords = [ { x : 1, y : 2 }, { x : 3, y : 5 }],
+          pointCoords = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+          ];
+
+          //simulate double tap
+          simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+          //drag the plot
+          simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          
+          //check if the drag modified the plot correctly
+          expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
         });
 

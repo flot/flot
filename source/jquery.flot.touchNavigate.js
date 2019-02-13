@@ -151,7 +151,7 @@
 
         doubleTap = {
             recenterPlot: function(e) {
-                if (e && e.details && e.details.type === 'touchMove') {
+                if (e && e.detail && e.detail.type === 'touchmove') {
                     // do not recenter during touch moving;
                     return;
                 }

@@ -26,9 +26,17 @@ describe("flot navigate plugin interactions", function () {
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
+        jasmine.clock().install();
+    });
+
+    afterEach(function () {
+        jasmine.clock().uninstall();
     });
 
     it('do smart pans on mouse drag by default', function () {
+        var oldFrameRate = options.pan.frameRate;
+        options.pan.frameRate = -1;
+
         plot = $.plot(placeholder, [
             [[0, 0],
             [10, 10]]
@@ -42,6 +50,12 @@ describe("flot navigate plugin interactions", function () {
         simulate.mouseDown(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 50 + plot.width(), 80);
+
+        expect(xaxis.min).toBe(-10);
+        expect(xaxis.max).toBe(0);
+        expect(yaxis.min).toBe(0);
+        expect(yaxis.max).toBe(10);
+
         simulate.mouseUp(eventHolder, 50 + plot.width(), 80);
 
         expect(xaxis.min).toBe(-10);
@@ -53,6 +67,12 @@ describe("flot navigate plugin interactions", function () {
         simulate.mouseDown(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 60, 70 + plot.height());
+
+        expect(xaxis.min).toBe(-10);
+        expect(xaxis.max).toBe(0);
+        expect(yaxis.min).toBe(10);
+        expect(yaxis.max).toBe(20);
+
         simulate.mouseUp(eventHolder, 60, 70 + plot.height());
 
         expect(xaxis.min).toBe(-10);
@@ -60,21 +80,45 @@ describe("flot navigate plugin interactions", function () {
         expect(yaxis.min).toBe(10);
         expect(yaxis.max).toBe(20);
 
+        // cover finite frame rate case
+        plot.destroy();
+        options.pan.frameRate = 10;
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        eventHolder = plot.getEventHolder();
+        xaxis = plot.getXAxes()[0];
+        yaxis = plot.getYAxes()[0];
+
         // drag diagonally do not snap
         simulate.mouseDown(eventHolder, plot.width() - 50, plot.height() - 70);
         simulate.mouseMove(eventHolder, plot.width() - 50, plot.height() - 70);
+        jasmine.clock().tick(100);
         simulate.mouseMove(eventHolder, -50, -70);
+        jasmine.clock().tick(100);
+
+        expect(xaxis.min).toBe(10);
+        expect(xaxis.max).toBe(20);
+        expect(yaxis.min).toBe(-10);
+        expect(yaxis.max).toBe(0);
+
         simulate.mouseUp(eventHolder, -50, -70);
 
-        expect(xaxis.min).toBe(0);
-        expect(xaxis.max).toBe(10);
-        expect(yaxis.min).toBe(0);
-        expect(yaxis.max).toBe(10);
+        expect(xaxis.min).toBe(10);
+        expect(xaxis.max).toBe(20);
+        expect(yaxis.min).toBe(-10);
+        expect(yaxis.max).toBe(0);
+
+        options.pan.frameRate = oldFrameRate;
     });
 
     it('do non-smart pans on mouse drag in non-smart pan mode', function () {
         var oldPanMode = options.pan.mode;
         options.pan.mode = '';
+        var oldFrameRate = options.pan.frameRate;
+        options.pan.frameRate = -1;
 
         plot = $.plot(placeholder, [
             [[0, 0],
@@ -86,28 +130,45 @@ describe("flot navigate plugin interactions", function () {
         var yaxis = plot.getYAxes()[0];
 
         // drag almost horizontally do not snap
-        simulate.mouseDown(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 50 + plot.width(), 80);
-        simulate.mouseUp(eventHolder, 50 + plot.width(), 80);
+        var movement = { x: [50, 50 + plot.width()], y: [70, 80] };
+        simulate.mouseDown(eventHolder, movement.x[0], movement.y[0]);
+        simulate.mouseMove(eventHolder, movement.x[0], movement.y[0]);
+        simulate.mouseMove(eventHolder, movement.x[1], movement.y[1]);
 
         expect(xaxis.min).toBe(-10);
         expect(xaxis.max).toBe(0);
         expect(yaxis.min).toBeGreaterThan(0);
         expect(yaxis.max).toBeGreaterThan(10);
+        simulate.mouseUp(eventHolder, movement.x[1], movement.y[1]);
+
+        // cover finite frame rate case
+        plot.destroy();
+        options.pan.frameRate = 10;
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        eventHolder = plot.getEventHolder();
+        xaxis = plot.getXAxes()[0];
+        yaxis = plot.getYAxes()[0];
 
         // drag almost vertically do not snap
-        simulate.mouseDown(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 60, 60 + plot.height());
-        simulate.mouseUp(eventHolder, 60, 60 + plot.height());
+        movement = { x: [50, 60], y: [70, 70 + plot.height()] };
+        simulate.mouseDown(eventHolder, movement.x[0], movement.y[0]);
+        simulate.mouseMove(eventHolder, movement.x[0], movement.y[0]);
+        jasmine.clock().tick(100);
+        simulate.mouseMove(eventHolder, movement.x[1], movement.y[1]);
+        jasmine.clock().tick(100);
 
-        expect(xaxis.min).toBeLessThan(-10);
-        expect(xaxis.max).toBeLessThan(0);
+        expect(xaxis.min).toBeLessThan(0);
+        expect(xaxis.max).toBeLessThan(10);
         expect(yaxis.min).toBe(10);
         expect(yaxis.max).toBe(20);
+        simulate.mouseUp(eventHolder, movement.x[1], movement.y[1]);
 
         options.pan.mode = oldPanMode;
+        options.pan.frameRate = oldFrameRate;
     });
 
     it('lock smart pan snap direction on mouse drag in smart-lock pan mode', function () {
