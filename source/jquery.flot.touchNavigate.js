@@ -5,7 +5,8 @@
 
     var options = {
         pan: {
-            enableTouch: false
+            enableTouch: false,
+            touchMode: ''
         }
     };
 
@@ -27,8 +28,11 @@
                 prevTouchedAxis: 'none',
                 currentTouchedAxis: 'none',
                 touchedAxis: null,
-                navigationConstraint: 'unconstrained'
+                navigationConstraint: 'unconstrained',
+                initialState: null,
             },
+            smartPanLock = options.pan.touchMode === 'smartLock',
+            useSmartPan = smartPanLock || options.pan.touchMode === 'smart',
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
@@ -59,25 +63,45 @@
             start: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
                 updateData(e, 'pan', gestureState, navigationState);
+
+                if (useSmartPan) {
+                    var point = getPoint(e, 'pan');
+                    navigationState.initialState = plot.navigationState(point.x, point.y);
+                }
             },
 
             drag: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
-                plot.pan({
-                    left: -delta(e, 'pan', gestureState).x,
-                    top: -delta(e, 'pan', gestureState).y,
-                    axes: navigationState.touchedAxis
-                });
-                updatePrevPanPosition(e, 'pan', gestureState, navigationState);
+
+                if (useSmartPan) {
+                    var point = getPoint(e, 'pan');
+                    plot.smartPan({
+                        x: navigationState.initialState.startPageX - point.x,
+                        y: navigationState.initialState.startPageY - point.y
+                    }, navigationState.initialState, navigationState.touchedAxis, false, smartPanLock);
+                } else {
+                    plot.pan({
+                        left: -delta(e, 'pan', gestureState).x,
+                        top: -delta(e, 'pan', gestureState).y,
+                        axes: navigationState.touchedAxis
+                    });
+                    updatePrevPanPosition(e, 'pan', gestureState, navigationState);
+                }
             },
 
             end: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
+
+                if (useSmartPan) {
+                    plot.smartPan.end();
+                }
+
                 if (wasPinchEvent(e, gestureState)) {
                     updateprevPanPosition(e, 'pan', gestureState, navigationState);
                 }
             }
         };
+
         var pinchDragTimeout;
         pinch = {
             start: function(e) {
@@ -127,6 +151,10 @@
 
         doubleTap = {
             recenterPlot: function(e) {
+                if (e && e.details && e.details.type === 'touchMove') {
+                    // do not recenter during touch moving;
+                    return;
+                }
                 recenterPlotOnDoubleTap(plot, e, gestureState, navigationState);
             }
         };

@@ -28,26 +28,135 @@ describe("flot navigate plugin interactions", function () {
             .find('#test-container');
     });
 
-    it('pans on mouse drag', function () {
+    it('do smart pans on mouse drag by default', function () {
         plot = $.plot(placeholder, [
             [[0, 0],
             [10, 10]]
         ], options);
 
         eventHolder = plot.getEventHolder();
-
-        simulate.mouseDown(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 50 + plot.width(), 70);
-        simulate.mouseUp(eventHolder, 50 + plot.width(), 70);
-
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];
+
+        // drag almost horizontally snap to x direction
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50 + plot.width(), 80);
+        simulate.mouseUp(eventHolder, 50 + plot.width(), 80);
 
         expect(xaxis.min).toBe(-10);
         expect(xaxis.max).toBe(0);
         expect(yaxis.min).toBe(0);
         expect(yaxis.max).toBe(10);
+
+        // drag almost vertically snap to y direction
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 60, 70 + plot.height());
+        simulate.mouseUp(eventHolder, 60, 70 + plot.height());
+
+        expect(xaxis.min).toBe(-10);
+        expect(xaxis.max).toBe(0);
+        expect(yaxis.min).toBe(10);
+        expect(yaxis.max).toBe(20);
+
+        // drag diagonally do not snap
+        simulate.mouseDown(eventHolder, plot.width() - 50, plot.height() - 70);
+        simulate.mouseMove(eventHolder, plot.width() - 50, plot.height() - 70);
+        simulate.mouseMove(eventHolder, -50, -70);
+        simulate.mouseUp(eventHolder, -50, -70);
+
+        expect(xaxis.min).toBe(0);
+        expect(xaxis.max).toBe(10);
+        expect(yaxis.min).toBe(0);
+        expect(yaxis.max).toBe(10);
+    });
+
+    it('do non-smart pans on mouse drag in non-smart pan mode', function () {
+        var oldPanMode = options.pan.mode;
+        options.pan.mode = '';
+
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        eventHolder = plot.getEventHolder();
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+
+        // drag almost horizontally do not snap
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50 + plot.width(), 80);
+        simulate.mouseUp(eventHolder, 50 + plot.width(), 80);
+
+        expect(xaxis.min).toBe(-10);
+        expect(xaxis.max).toBe(0);
+        expect(yaxis.min).toBeGreaterThan(0);
+        expect(yaxis.max).toBeGreaterThan(10);
+
+        // drag almost vertically do not snap
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 60, 60 + plot.height());
+        simulate.mouseUp(eventHolder, 60, 60 + plot.height());
+
+        expect(xaxis.min).toBeLessThan(-10);
+        expect(xaxis.max).toBeLessThan(0);
+        expect(yaxis.min).toBe(10);
+        expect(yaxis.max).toBe(20);
+
+        options.pan.mode = oldPanMode;
+    });
+
+    it('lock smart pan snap direction on mouse drag in smart-lock pan mode', function () {
+        var oldPanMode = options.pan.mode;
+        options.pan.mode = 'smartLock';
+        var oldFrameRate = options.pan.frameRate;
+        options.pan.frameRate = -1;
+
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        eventHolder = plot.getEventHolder();
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max;
+
+        // drag almost horizontally then vertically snap to x direction
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50 + plot.width() / 2, 80);
+        simulate.mouseMove(eventHolder, 50 + plot.width(), 70 + plot.height());
+        simulate.mouseUp(eventHolder, 50 + plot.width(), 70 + plot.height());
+
+        expect(xaxis.min).toBeLessThan(initialXmin);
+        expect(xaxis.max).toBeLessThan(initialXmax);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+
+        // drag almost vertically then horizontally snap to y direction
+        plot.recenter({});
+
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 60, 70 + plot.height());
+        simulate.mouseMove(eventHolder, 50 + plot.width(), 70 + plot.height());
+        simulate.mouseUp(eventHolder, 50 + plot.width(), 70 + plot.height());
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBeGreaterThan(initialYmin);
+        expect(yaxis.max).toBeGreaterThan(initialYmax);
+
+        options.pan.mode = oldPanMode;
+        options.pan.frameRate = oldFrameRate;
     });
 
     it('zooms out on mouse scroll down', function () {
