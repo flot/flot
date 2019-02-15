@@ -298,6 +298,7 @@ can set the default in the options.
                 y: plotState.startPageY - page.Y
             }, plotState, panAxes);
             panHint = null;
+            prevDelta = { x: 0, y: 0 };
         }
 
         function onDblClick(e) {
