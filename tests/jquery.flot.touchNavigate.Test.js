@@ -605,6 +605,41 @@ describe("flot touch navigate plugin", function () {
         options.pan.touchMode = oldTouchMode;
       });
 
+      it('should not drag if pan mode is invalid', function () {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = '';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0],
+            initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 100 }],
+            pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+            ];
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
       it('should drag the logarithmic plot', function() {
           var d1 = [];
           for (var i = 0; i < 14; i += 0.2) {

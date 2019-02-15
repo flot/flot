@@ -60,7 +60,7 @@ intermediate pans, the plot will then not update until the mouse button is
 released).
 
 **mode** a string specifies the pan mode for mouse interaction. Accepted values:
-empty string for normal mode: no pan hint or direction snapping;
+'manual': no pan hint or direction snapping;
 'smart': The graph shows pan hint bar and the pan movement will snap
 to one direction when the drag direction is close to it;
 'smartLock'. The graph shows pan hint bar and the pan movement will always
@@ -71,7 +71,7 @@ Default: 'smart'.
 and double tap (to recenter).
 
 **touchMode** a string specifies the pan mode of touch pan.
-The accepted values is the sams as **mode** option. Default: '' (normal)
+The accepted values is the sams as **mode** option. Default: 'manual'
 
 Example API usage:
 ```js

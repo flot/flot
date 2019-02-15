@@ -68,7 +68,7 @@ intermediate pans, the plot will then not update until the mouse button is
 released).
 
 **mode** a string specifies the pan mode for mouse interaction. Accepted values:
-empty string for normal mode: no pan hint or direction snapping;
+'manual': no pan hint or direction snapping;
 'smart': The graph shows pan hint bar and the pan movement will snap
 to one direction when the drag direction is close to it;
 'smartLock'. The graph shows pan hint bar and the pan movement will always
@@ -143,7 +143,8 @@ can set the default in the options.
     function initNevigation(plot, options) {
         var panAxes = null;
         var canDrag = false;
-        var smartPanLock = options.pan.mode === 'smartLock',
+        var useManualPan = options.pan.mode === 'manual',
+            smartPanLock = options.pan.mode === 'smartLock',
             useSmartPan = smartPanLock || options.pan.mode === 'smart';
 
         function onZoomClick(e, zoomOut, amount) {
@@ -273,7 +274,7 @@ can set the default in the options.
 
             if (useSmartPan) {
                 plotState = plot.navigationState(page.X, page.Y);
-            } else {
+            } else if (useManualPan) {
                 prevDragPosition.x = page.X;
                 prevDragPosition.y = page.Y;
             }
@@ -289,7 +290,7 @@ can set the default in the options.
                         x: plotState.startPageX - page.X,
                         y: plotState.startPageY - page.Y
                     }, plotState, panAxes, false, smartPanLock);
-                } else {
+                } else if (useManualPan) {
                     plot.pan({
                         left: prevDragPosition.x - page.X,
                         top: prevDragPosition.y - page.Y,
@@ -309,7 +310,7 @@ can set the default in the options.
                         x: plotState.startPageX - page.X,
                         y: plotState.startPageY - page.Y
                     }, plotState, panAxes, false, smartPanLock);
-                } else {
+                } else if (useManualPan) {
                     plot.pan({
                         left: prevDragPosition.x - page.X,
                         top: prevDragPosition.y - page.Y,
@@ -340,7 +341,7 @@ can set the default in the options.
                     y: plotState.startPageY - page.Y
                 }, plotState, panAxes, false, smartPanLock);
                 plot.smartPan.end();
-            } else {
+            } else if (useManualPan) {
                 plot.pan({
                     left: prevDragPosition.x - page.X,
                     top: prevDragPosition.y - page.Y,

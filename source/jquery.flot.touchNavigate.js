@@ -6,7 +6,7 @@
     var options = {
         pan: {
             enableTouch: false,
-            touchMode: ''
+            touchMode: 'manual'
         }
     };
 
@@ -31,6 +31,7 @@
                 navigationConstraint: 'unconstrained',
                 initialState: null,
             },
+            useManualPan = options.pan.touchMode === 'manual',
             smartPanLock = options.pan.touchMode === 'smartLock',
             useSmartPan = smartPanLock || options.pan.touchMode === 'smart',
             pan, pinch, doubleTap;
@@ -79,7 +80,7 @@
                         x: navigationState.initialState.startPageX - point.x,
                         y: navigationState.initialState.startPageY - point.y
                     }, navigationState.initialState, navigationState.touchedAxis, false, smartPanLock);
-                } else {
+                } else if (useManualPan) {
                     plot.pan({
                         left: -delta(e, 'pan', gestureState).x,
                         top: -delta(e, 'pan', gestureState).y,

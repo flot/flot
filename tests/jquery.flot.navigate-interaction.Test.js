@@ -116,7 +116,7 @@ describe("flot navigate plugin interactions", function () {
 
     it('do non-smart pans on mouse drag in non-smart pan mode', function () {
         var oldPanMode = options.pan.mode;
-        options.pan.mode = '';
+        options.pan.mode = 'manual';
         var oldFrameRate = options.pan.frameRate;
         options.pan.frameRate = -1;
 
@@ -215,6 +215,50 @@ describe("flot navigate plugin interactions", function () {
         expect(xaxis.max).toBe(initialXmax);
         expect(yaxis.min).toBeGreaterThan(initialYmin);
         expect(yaxis.max).toBeGreaterThan(initialYmax);
+
+        options.pan.mode = oldPanMode;
+        options.pan.frameRate = oldFrameRate;
+    });
+
+    it('do not move graph on mouse drag if pan mode is invalid', function () {
+        var oldPanMode = options.pan.mode;
+        options.pan.mode = '';
+        var oldFrameRate = options.pan.frameRate;
+        options.pan.frameRate = -1;
+
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        eventHolder = plot.getEventHolder();
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max;
+
+        // do not drag in all cases
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50 + plot.width() / 2, 70);
+        simulate.mouseUp(eventHolder, 50 + plot.width(), 70);
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+        
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70 + plot.height());
+        simulate.mouseUp(eventHolder, 50, 70 + plot.height());
+        
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
 
         options.pan.mode = oldPanMode;
         options.pan.frameRate = oldFrameRate;
