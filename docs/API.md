@@ -1679,8 +1679,16 @@ hooks in the plugins bundled with Flot.
     seriesFilter is a function to determine if the series should be
     checked.
     
-    distance is the base distance from an item that you should use
+    radius is the base distance from an item that you should use
     as an area to search in if you aren't searching in strict bounds
+    
+    computeDistance is a function to utilize to compute the distance
+    from the cursor. It may not be provided, so you will still need
+    to provide your own distance calculation
+    
+    items is an array you should push your found items into. It is
+    unsorted and may hold items from any other plugin or flot's 
+    base calculation. 
     
     The item to be returned should have the following:
     

@@ -251,8 +251,8 @@ describe("flot hover plugin", function () {
 
         it('should pass item returned from hook in items', function() {
             var testItem = {distance: 5};
-            var hook = function() {
-                return testItem;
+            var hook = function(_0, _1, _2, _3, _4, _5, items) {
+                items.push(testItem);
             }
 
             options.hooks = {clickHoverFindNearby: [hook]};
@@ -283,8 +283,8 @@ describe("flot hover plugin", function () {
         it('should choose closest item from items returned by hooks', function() {
             var distance = 5,
                 testItem = {distance: distance};
-            var hook = function() {
-                return testItem;
+            var hook = function(_0, _1, _2, _3, _4, _5, items) {
+                items.push(testItem);
             }
 
             options.hooks = {clickHoverFindNearby: [hook]};

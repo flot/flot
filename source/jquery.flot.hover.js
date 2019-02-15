@@ -167,37 +167,23 @@ the tooltip from webcharts).
 
             pos.pageX = page.X;
             pos.pageY = page.Y;
-            
-            var items = [];
-            var item = undefined;
-            var found = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
-            if (found){
-                items.push(found);
-                item = found;
+
+            var items = plot.findNearbyItems(canvasX, canvasY, seriesFilter, distance);
+            var item = items[0];
+
+            for (var i = 1; i < items.length; ++i) {
+               if (item.distance === undefined || 
+                   items[i].distance < item.distance) {
+                  item = items[i];
+               }
             }
-            
-            for (var i = 0; i < plot.hooks.clickHoverFindNearby.length; ++i){
-                found = plot.hooks.clickHoverFindNearby[i](canvasX, canvasY, seriesFilter, distance);
-                if (found){
-                    items.push(found);
-                    
-                    // If we don't have an item
-                    // Or if our item doesn't have a distance
-                    // Or if our new distance is closer
-                    // Choose the new one as "closest"
-                    
-                    if(!item || 
-                       (item.distance === undefined) || 
-                       (item && found.distance < item.distance) ){
-                        item = found;
-                    }
-                }
-            }
-            
+
             if (item) {
                 // fill in mouse pos for any listeners out there
                 item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
                 item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top, 10);
+            } else {
+               item = null;
             }
 
             if (options.grid.autoHighlight) {
