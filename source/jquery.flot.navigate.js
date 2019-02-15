@@ -67,6 +67,13 @@ update itself while the user is panning around on it (set to null to disable
 intermediate pans, the plot will then not update until the mouse button is
 released).
 
+**mode** a string specifies the pan mode for mouse interaction. Accepted values:
+'manual': no pan hint or direction snapping;
+'smart': The graph shows pan hint bar and the pan movement will snap
+to one direction when the drag direction is close to it;
+'smartLock'. The graph shows pan hint bar and the pan movement will always
+snap to a direction that the drag diorection started with.
+
 Example API usage:
 ```js
     plot = $.plot(...);
@@ -107,7 +114,8 @@ can set the default in the options.
             interactive: false,
             active: false,
             cursor: "move",
-            frameRate: 60
+            frameRate: 60,
+            mode: 'smart'
         },
         xaxis: {
             axisZoom: true, //zoom axis when mouse over it is allowed
@@ -129,8 +137,15 @@ can set the default in the options.
     var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
     function init(plot) {
+        plot.hooks.processOptions.push(initNevigation);
+    }
+
+    function initNevigation(plot, options) {
         var panAxes = null;
         var canDrag = false;
+        var useManualPan = options.pan.mode === 'manual',
+            smartPanLock = options.pan.mode === 'smartLock',
+            useSmartPan = smartPanLock || options.pan.mode === 'smart';
 
         function onZoomClick(e, zoomOut, amount) {
             var page = browser.getPageXY(e);
@@ -174,6 +189,7 @@ can set the default in the options.
             panHint = null,
             panTimeout = null,
             plotState,
+            prevDragPosition = { x: 0, y: 0 },
             isPanAction = false;
 
         function onMouseWheel(e, delta) {
@@ -255,29 +271,54 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            plotState = plot.navigationState(page.X, page.Y);
-        }
 
+            if (useSmartPan) {
+                plotState = plot.navigationState(page.X, page.Y);
+            } else if (useManualPan) {
+                prevDragPosition.x = page.X;
+                prevDragPosition.y = page.Y;
+            }
+        }
+        
         function onDrag(e) {
             var page = browser.getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
-                plot.smartPan({
-                    x: plotState.startPageX - page.X,
-                    y: plotState.startPageY - page.Y
-                }, plotState, panAxes);
-
+                if (useSmartPan) {
+                    plot.smartPan({
+                        x: plotState.startPageX - page.X,
+                        y: plotState.startPageY - page.Y
+                    }, plotState, panAxes, false, smartPanLock);
+                } else if (useManualPan) {
+                    plot.pan({
+                        left: prevDragPosition.x - page.X,
+                        top: prevDragPosition.y - page.Y,
+                        axes: panAxes
+                    });
+                    prevDragPosition.x = page.X;
+                    prevDragPosition.y = page.Y;
+                }
                 return;
             }
 
             if (panTimeout || !frameRate) return;
 
             panTimeout = setTimeout(function() {
-                plot.smartPan({
-                    x: plotState.startPageX - page.X,
-                    y: plotState.startPageY - page.Y
-                }, plotState, panAxes);
+                if (useSmartPan) {
+                    plot.smartPan({
+                        x: plotState.startPageX - page.X,
+                        y: plotState.startPageY - page.Y
+                    }, plotState, panAxes, false, smartPanLock);
+                } else if (useManualPan) {
+                    plot.pan({
+                        left: prevDragPosition.x - page.X,
+                        top: prevDragPosition.y - page.Y,
+                        axes: panAxes
+                    });
+                    prevDragPosition.x = page.X;
+                    prevDragPosition.y = page.Y;
+                }
 
                 panTimeout = null;
             }, 1 / frameRate * 1000);
@@ -293,11 +334,22 @@ can set the default in the options.
             var page = browser.getPageXY(e);
 
             plot.getPlaceholder().css('cursor', prevCursor);
-            plot.smartPan({
-                x: plotState.startPageX - page.X,
-                y: plotState.startPageY - page.Y
-            }, plotState, panAxes);
-            panHint = null;
+
+            if (useSmartPan) {
+                plot.smartPan({
+                    x: plotState.startPageX - page.X,
+                    y: plotState.startPageY - page.Y
+                }, plotState, panAxes, false, smartPanLock);
+                plot.smartPan.end();
+            } else if (useManualPan) {
+                plot.pan({
+                    left: prevDragPosition.x - page.X,
+                    top: prevDragPosition.y - page.Y,
+                    axes: panAxes
+                });
+                prevDragPosition.x = 0;
+                prevDragPosition.y = 0;
+            }
         }
 
         function onDblClick(e) {
@@ -513,6 +565,22 @@ can set the default in the options.
             return delta;
         }
 
+        var lockedDirection = null;
+        var lockDeltaDirection = function(delta) {
+            if (!lockedDirection && Math.max(Math.abs(delta.x), Math.abs(delta.y)) >= SNAPPING_CONSTANT) {
+                lockedDirection = Math.abs(delta.x) < Math.abs(delta.y) ? 'y' : 'x';
+            }
+
+            switch (lockedDirection) {
+                case 'x':
+                    return { x: delta.x, y: 0 };
+                case 'y':
+                    return { x: 0, y: delta.y };
+                default:
+                    return { x: 0, y: 0 };
+            }
+        }
+
         var isDiagonalMode = function(delta) {
             if (Math.abs(delta.x) > 0 && Math.abs(delta.y) > 0) {
                 return true;
@@ -532,11 +600,11 @@ can set the default in the options.
         }
 
         var prevDelta = { x: 0, y: 0 };
-        plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
-            var snap = shouldSnap(delta),
+        plot.smartPan = function(delta, initialState, panAxes, preventEvent, smartLock) {
+            var snap = smartLock ? true : shouldSnap(delta),
                 axes = plot.getAxes(),
                 opts;
-            delta = adjustDeltaToSnap(delta);
+            delta = smartLock ? lockDeltaDirection(delta) : adjustDeltaToSnap(delta);
 
             if (isDiagonalMode(delta)) {
                 initialState.diagMode = true;
@@ -615,6 +683,13 @@ can set the default in the options.
                 plot.getPlaceholder().trigger("plotpan", [plot, delta, panAxes, initialState]);
             }
         };
+
+        plot.smartPan.end = function() {
+            panHint = null;
+            lockedDirection = null;
+            prevDelta = { x: 0, y: 0 };
+            plot.triggerRedrawOverlay();
+        }
 
         function shutdown(plot, eventHolder) {
             eventHolder.unbind("mousewheel", onMouseWheel);
