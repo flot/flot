@@ -111,6 +111,9 @@ The plugin allso adds the following methods to the plot object:
             // only accept left-click
             if (e.which !== 1) return;
 
+            // reinitialize currentMode
+            selection.currentMode = 'xy';
+
             // cancel out any text selections
             document.body.focus();
 
