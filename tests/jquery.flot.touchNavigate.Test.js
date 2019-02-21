@@ -389,8 +389,8 @@ describe("flot touch navigate plugin", function () {
 
         plot = $.plot(placeholder, [
             [
-                [-10, 120],
-                [-10, 120]
+                [-10, -10],
+                [120, 120]
             ]
         ], options);
 
@@ -403,18 +403,241 @@ describe("flot touch navigate plugin", function () {
             initialYmax = yaxis.max,
             canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 100 }],
             pointCoords = [
-                    getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
-                    getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
             ];
-
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
-        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
 
         expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+      });
+
+      it('should snap horizontal drag to x direction in smart pan mode', function() {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = 'smart';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0];
+
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 2 }],
+            pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+            ];
+
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
+      it('should snap vertical drag to x direction in smart pan mode', function() {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = 'smart';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0];
+
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 2, y : 100 }],
+            pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+            ];
+
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
+      it('should no snap diagonal drag in smart pan mode', function() {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = 'smart';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0];
+
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 100 }],
+            pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+            ];
+
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
+      it('should snap horizontally-start-drag to x direction in smartLock pan mode', function() {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = 'smartLock';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0];
+
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 2 }, { x: 100, y: 100 }],
+            pointCoords = [
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y),
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[2].x, canvasCoords[2].y)
+            ];
+        
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulate.touchmove(eventHolder, pointCoords[2].x, pointCoords[2].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
+      it('should snap vertically-start-drag to y direction in smartLock pan mode', function() {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = 'smartLock';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0];
+
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 2, y : 100 }, { x: 100, y: 100 }],
+            pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[2].x, canvasCoords[2].y)
+            ];
+
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulate.touchmove(eventHolder, pointCoords[2].x, pointCoords[2].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
+      it('should not drag if pan mode is invalid', function () {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = '';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0],
+            initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 100 }],
+            pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+            ];
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulateTouchEvent([], eventHolder, 'touchend'); // it can correctly trigger panend event.
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+
+        options.pan.touchMode = oldTouchMode;
       });
 
       it('should drag the logarithmic plot', function() {
@@ -671,7 +894,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], {
               xaxes: [{ autoScale: 'exact', plotPan: false }],
-              yaxes: [{ autoScale: 'exact' }],
+              yaxes: [{ autoScale: 'exact', plotPan: false }],
               zoom: { interactive: true, active: true, amount: 10 },
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
@@ -682,8 +905,8 @@ describe("flot touch navigate plugin", function () {
               initialXmin = xaxis.min,
               initialXmax = xaxis.max,
               pointCoords = [
-                      { x: 0, y: 10 },
-                      { x: 5, y: 15 }
+                      { x: 0, y: 50 },
+                      { x: 50, y: 100 }
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
@@ -692,7 +915,7 @@ describe("flot touch navigate plugin", function () {
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
           expect(xaxis.min).toBe(0);
-          expect(yaxis.max).toBe(10);
+          expect(xaxis.max).toBe(10);
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
       });
@@ -798,6 +1021,48 @@ describe("flot touch navigate plugin", function () {
           expect(xaxis.max).toBeCloseTo(initialXmax, 6);
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
+
+        });
+
+        it('should not recenter for doubletap event triggered by touchmove', function() {
+          //when touchmove to somewhere close to last doubletap point, another doubletap will be triggered
+          //this doubletap event should not do recenter
+          plot = $.plot(placeholder, [
+              [
+                  [-10, 120],
+                  [-10, 120]
+              ]
+          ], options);
+          var eventHolder = plot.getEventHolder(),
+          xaxis = plot.getXAxes()[0],
+          yaxis = plot.getYAxes()[0],
+          initialXmin = xaxis.min,
+          initialXmax = xaxis.max,
+          initialYmin = yaxis.min,
+          initialYmax = yaxis.max,
+          canvasCoords = [ { x : 1, y : 2 }, { x : 3, y : 5 }],
+          pointCoords = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+          ];
+
+          //simulate double tap
+          simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+          //drag the plot
+          simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          
+          //check if the drag modified the plot correctly
+          expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
         });
 

@@ -1727,7 +1727,7 @@ Licensed under the MIT license.
         }
 
         function newTick(v, label, axis, type) {
-            if (!label) {
+            if (label === null) {
                 switch (type) {
                     case 'min':
                     case 'max':
