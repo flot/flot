@@ -198,8 +198,8 @@ don't work unless the canvas is attached to the DOM.
                 this.SVGContainer.style.position = 'absolute';
                 this.SVGContainer.style.top = '0px';
                 this.SVGContainer.style.left = '0px';
-                this.SVGContainer.style.bottom = '0px';
-                this.SVGContainer.style.right = '0px';
+                this.SVGContainer.style.height = '100%';
+                this.SVGContainer.style.width = '100%';
                 this.SVGContainer.style.pointerEvents = 'none';
                 this.element.parentNode.appendChild(this.SVGContainer);
 
