@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.2.0]
+
+### Changes ###
+
+- Added new pan modes for mouse and touch interactions.
+
+### Bug fixes ###
+
+- Fixed issue with empty string tick label being replaced by auto-generated label.
+- Fixed issue with hovering over bars no longer working.
+- Fixed tracking example to update legend again.
+- Fixed issue with tooltips not being correct for stacked graphs.
+
 ## [2.0.1]
 
 ## Notable Breaking Changes For Existing flot Users
