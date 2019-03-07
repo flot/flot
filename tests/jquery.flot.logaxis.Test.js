@@ -170,6 +170,29 @@ describe("unit tests for the log scale functions", function() {
         expect(axis.min).toBe(0.1);
         expect(axis.max).toBe(1);
     });
+
+    it('should set min of axis with no data associated with it to be greater than 0', function() {
+        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+                xaxes: [
+                    {
+                        mode: 'log',
+                        min: 0,
+                        max: 10
+                    },
+                    {
+                        mode: 'log',
+                        autoScale: 'loose',
+                        min: 0,
+                        max: 10,
+                        show: true
+                    }]
+            }),
+            axis,
+
+        axis = plot.getXAxes()[1];
+
+        expect(axis.min).toBeGreaterThan(0);
+    });
 });
 
 describe("integration tests for log scale functions", function() {
