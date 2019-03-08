@@ -12,7 +12,8 @@ describe("flot touch navigate plugin", function () {
             xaxes: [{ autoScale: 'exact' }],
             yaxes: [{ autoScale: 'exact' }],
             zoom: { interactive: true, active: true, amount: 10 },
-            pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
+            pan: { interactive: true, active: true, frameRate: -1, enableTouch: true },
+            recenter: { interactive: true, enableTouch: true }
         };
         jasmine.clock().install();
     });

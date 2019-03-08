@@ -20,6 +20,9 @@ describe("flot navigate plugin interactions", function () {
         pan: {
             interactive: true,
             active: true
+        },
+        recenter: {
+            interactive: true
         }
     };
 
@@ -408,6 +411,9 @@ describe("flot navigate plugin interactions", function () {
         pan: {
             interactive: true,
             highlighted: true
+        },
+        recenter: {
+            interactive: true
         },
         selection: {
             mode: 'smart',
