@@ -113,6 +113,11 @@
                 presetNavigationState(e, 'pinch', gestureState);
                 setPrevDistance(e, gestureState);
                 updateData(e, 'pinch', gestureState, navigationState);
+
+                if (useSmartPan) {
+                    var point = getPoint(e, 'pinch');
+                    navigationState.initialState = plot.navigationState(point.x, point.y);
+                }
             },
 
             drag: function(e) {
@@ -121,12 +126,23 @@
                 }
                 pinchDragTimeout = setTimeout(function() {
                     presetNavigationState(e, 'pinch', gestureState);
-                    plot.pan({
-                        left: -delta(e, 'pinch', gestureState).x,
-                        top: -delta(e, 'pinch', gestureState).y,
-                        axes: navigationState.touchedAxis
-                    });
-                    updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
+
+                    if (useSmartPan) {
+                        var point = getPoint(e, 'pinch');
+                        plot.smartPan({
+                            x: navigationState.initialState.startPageX - point.x,
+                            y: navigationState.initialState.startPageY - point.y
+                        }, navigationState.initialState, navigationState.touchedAxis, false, smartPanLock);
+                    } else if (useManualPan) {
+                        plot.pan({
+                            left: -delta(e, 'pinch', gestureState).x,
+                            top: -delta(e, 'pinch', gestureState).y,
+                            axes: navigationState.touchedAxis
+                        });
+                        updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
+                    }
+
+
 
                     var dist = pinchDistance(e);
 
@@ -147,6 +163,10 @@
                 }
                 presetNavigationState(e, 'pinch', gestureState);
                 gestureState.prevDistance = null;
+
+                if (useSmartPan) {
+                    plot.smartPan.end();
+                }
             }
         };
 
