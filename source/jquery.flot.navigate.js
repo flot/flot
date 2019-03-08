@@ -117,6 +117,9 @@ can set the default in the options.
             frameRate: 60,
             mode: 'smart'
         },
+        recenter: {
+            interactive: false
+        },
         xaxis: {
             axisZoom: true, //zoom axis when mouse over it is allowed
             plotZoom: true, //zoom axis is allowed for plot zoom
@@ -353,16 +356,19 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
-            plot.activate();
-
             var axes = plot.getTouchedAxis(e.clientX, e.clientY),
                 event;
+
+            plot.activate();
+
+            plot.recenter({ axes: axes[0] ? axes : null });
+
             if (axes[0]) {
                 event = new $.Event('re-center', { detail: {
                     axisTouched: axes[0]
                 }});
             } else {
-                event = new $.Event('re-center', {detail: e});
+                event = new $.Event('re-center', { detail: e });
             }
             plot.getPlaceholder().trigger(event);
         }
@@ -400,7 +406,9 @@ can set the default in the options.
                 eventHolder.bind("mouseup", onMouseUp);
             }
 
-            eventHolder.dblclick(onDblClick);
+            if (o.recenter.interactive) {
+                eventHolder.dblclick(onDblClick);
+            }
             eventHolder.click(onClick);
         }
 
