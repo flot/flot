@@ -975,6 +975,90 @@ describe("flot touch navigate plugin", function () {
           expect(yaxis.min).toBe(previousYmin);
           expect(yaxis.max).toBe(previousYmax);
         });
+
+        it('can do smart pan for pinch move', function() {
+          var oldTouchMode = options.pan.touchMode;
+          options.pan.touchMode = 'smart';
+  
+          plot = $.plot(placeholder, [
+              [
+                  [-10, -10],
+                  [120, 120]
+              ]
+          ], options);
+  
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0];
+  
+          var initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 5 }],
+              initialCoords = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x + 1, canvasCoords[0].y + 1),
+              ],
+              finalCoordsPinch = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x + 1, canvasCoords[1].y + 1),
+              ];
+
+          //simulate pinch
+          simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchmove');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchend');
+
+          expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(yaxis.min).toBe(initialYmin);
+          expect(yaxis.max).toBe(initialYmax);
+
+          options.pan.touchMode = oldTouchMode;
+        });
+
+        it('can disable pinch', function() {
+          var oldEnablePinch = options.pan.enablePinch;
+          options.pan.enablePinch = false;
+
+          plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+          ], options);
+
+          var eventHolder = plot.getEventHolder(),
+          xaxis = plot.getXAxes()[0],
+          yaxis = plot.getYAxes()[0];
+
+          var initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 5 }],
+              initialCoords = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x + 1, canvasCoords[0].y + 1),
+              ],
+              finalCoordsPinch = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x + 1, canvasCoords[1].y + 1),
+              ];
+
+          //simulate pinch
+          simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchmove');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchend');
+
+          expect(xaxis.min).toBe(initialXmin);
+          expect(xaxis.max).toBe(initialXmax);
+          expect(yaxis.min).toBe(initialYmin);
+          expect(yaxis.max).toBe(initialYmax);
+
+          options.pan.enablePinch = oldEnablePinch;
+        })
     });
 
     describe('doubleTap', function() {
