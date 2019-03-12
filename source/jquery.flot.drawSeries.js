@@ -31,7 +31,6 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 y2 = points[i + 1];
 
                 if (x1 === null || x2 === null) {
-                    console.log('MP:',mx,my);
                     mx = null;
                     my = null;
                     continue;
