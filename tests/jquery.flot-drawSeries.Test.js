@@ -114,6 +114,33 @@ describe('drawSeries', function() {
                     ctx.lineTo.calls.allArgs()));
         });
 
+        it('should draw the lines when trailing step interpolation is enabled', function () {
+            series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
+            series.lines.steps = true;
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo).toHaveBeenCalled();
+        });
+
+        it('should fill the area when trailing step interpolation is enabled', function () {
+            series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
+            series.lines.steps = true;
+            series.lines.fill = true;
+            series.lines.lineWidth = 0;
+
+            spyOn(ctx, 'moveTo').and.callThrough();
+            spyOn(ctx, 'lineTo').and.callThrough();
+            spyOn(ctx, 'fill').and.callThrough();
+
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.moveTo).toHaveBeenCalled();
+            expect(ctx.lineTo).toHaveBeenCalled();
+            expect(ctx.fill).toHaveBeenCalled();
+        });
 
         function validatePointsAreInsideTheAxisRanges(points) {
             points.forEach(function(point) {
