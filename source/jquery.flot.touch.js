@@ -22,7 +22,7 @@
                 prevTap: { x: 0, y: 0 },
                 currentTap: { x: 0, y: 0 },
                 interceptedLongTap: false,
-                allowEventPropagation: false,
+                isMultipleTouch: false,
                 prevTapTime: null,
                 tapStartTime: null,
                 longTapTriggerId: null
@@ -112,7 +112,7 @@
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
 
-                if (!gestureState.allowEventPropagation) {
+                if (!gestureState.isMultipleTouch) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
                 }
             },
@@ -137,7 +137,7 @@
             touchmove: function(e) {
                 preventEventPropagation(e);
                 gestureState.twoTouches = isPinchEvent(e);
-                if (!gestureState.allowEventPropagation) {
+                if (!gestureState.isMultipleTouch) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
                 }
             },
@@ -276,9 +276,8 @@
         }
 
         function preventEventPropagation(e) {
-            if (!gestureState.allowEventPropagation) {
+            if (!gestureState.isMultipleTouch) {
                 e.preventDefault();
-                e.stopPropagation();
             }
         }
 
@@ -296,9 +295,9 @@
 
         function updateOnMultipleTouches(e) {
             if (e.touches.length >= 3) {
-                gestureState.allowEventPropagation = true;
+                gestureState.isMultipleTouch = true;
             } else {
-                gestureState.allowEventPropagation = false;
+                gestureState.isMultipleTouch = false;
             }
         }
 
