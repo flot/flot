@@ -22,7 +22,7 @@
                 prevTap: { x: 0, y: 0 },
                 currentTap: { x: 0, y: 0 },
                 interceptedLongTap: false,
-                isMultipleTouch: false,
+                isMultipleTouches: false,
                 prevTapTime: null,
                 tapStartTime: null,
                 longTapTriggerId: null
@@ -107,18 +107,18 @@
             },
 
             touchmove: function(e) {
-                preventEventPropagation(e);
+                preventNonMultipleTouchesDefault(e);
 
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
 
-                if (!gestureState.isMultipleTouch) {
+                if (!gestureState.isMultipleTouches) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
                 }
             },
 
             touchend: function(e) {
-                preventEventPropagation(e);
+                preventNonMultipleTouchesDefault(e);
 
                 if (wasPinchEvent(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
@@ -135,21 +135,21 @@
             },
 
             touchmove: function(e) {
-                preventEventPropagation(e);
+                preventNonMultipleTouchesDefault(e);
                 gestureState.twoTouches = isPinchEvent(e);
-                if (!gestureState.isMultipleTouch) {
+                if (!gestureState.isMultipleTouches) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
                 }
             },
 
             touchend: function(e) {
-                preventEventPropagation(e);
+                preventNonMultipleTouchesDefault(e);
             }
         };
 
         var doubleTap = {
             onDoubleTap: function(e) {
-                preventEventPropagation(e);
+                preventNonMultipleTouchesDefault(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
         };
@@ -205,7 +205,7 @@
             touchend: function(e) {
                 if (tap.isTap(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('tap', { detail: e }));
-                    preventEventPropagation(e);
+                    preventNonMultipleTouchesDefault(e);
                 }
             },
 
@@ -275,8 +275,8 @@
             return false;
         }
 
-        function preventEventPropagation(e) {
-            if (!gestureState.isMultipleTouch) {
+        function preventNonMultipleTouchesDefault(e) {
+            if (!gestureState.isMultipleTouches) {
                 e.preventDefault();
             }
         }
@@ -295,9 +295,9 @@
 
         function updateOnMultipleTouches(e) {
             if (e.touches.length >= 3) {
-                gestureState.isMultipleTouch = true;
+                gestureState.isMultipleTouches = true;
             } else {
-                gestureState.isMultipleTouch = false;
+                gestureState.isMultipleTouches = false;
             }
         }
 
