@@ -75,8 +75,6 @@
                 case 'tap':
                     tap[e.type](e);
                     break;
-                default:
-                    break;
             }
         }
 

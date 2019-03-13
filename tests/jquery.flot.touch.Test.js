@@ -28,6 +28,33 @@ describe("flot touch plugin", function () {
         expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
     });
 
+    it('do not interpret gestures when user interaction is not active', () => {
+        jasmine.clock().install().mockDate();
+        
+        var oldZoomActive = options.zoom.active,
+            oldPanActive = options.pan.active;
+        options.zoom.active = false;
+        options.pan.active = false;
+
+        plot = $.plot(placeholder, [[]], options);
+        var eventHolder = plot.getEventHolder(),
+            spy = jasmine.createSpy('interpreted touch event handler'),
+            coords = [{x: 10, y: 20}];
+        
+        simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+        jasmine.clock().tick(100);
+        simulate.sendTouchEvents(coords, eventHolder, 'touchmove');
+        jasmine.clock().tick(100);
+        simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+        jasmine.clock().tick(100);
+
+        expect(spy).not.toHaveBeenCalled();
+
+        options.zoom.active = oldZoomActive;
+        options.pan.active = oldPanActive;
+        jasmine.clock().uninstall();
+    });
+
     describe('long tap', function() {
 
         beforeEach(function() {
