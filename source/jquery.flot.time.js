@@ -16,7 +16,7 @@ API.txt for details.
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
-            timeBase: 'seconds' // are the values in milliseconds or seconds
+            timeBase: 'seconds' // are the values in given in mircoseconds, milliseconds or seconds
         },
         yaxis: {
             timeBase: 'seconds'
@@ -327,10 +327,10 @@ API.txt for details.
         var timeUnitSize;
         if (opts.timeBase === 'seconds') {
             timeUnitSize = timeUnitSizeSeconds;
-        } else if (opts.timeBase === 'milliseconds') {
-            timeUnitSize = timeUnitSizeMilliseconds;
-        } else {
+        } else if (opts.timeBase === 'microseconds') {
             timeUnitSize = timeUnitSizeMicroseconds;
+        } else {
+            timeUnitSize = timeUnitSizeMilliseconds;
         }
 
         if (opts.minTickSize !== null && opts.minTickSize !== undefined) {
@@ -447,10 +447,10 @@ API.txt for details.
             v1000 = d.getTime();
             if (opts && opts.timeBase === 'seconds') {
                 v = v1000 / 1000;
-            } else if (opts && opts.timeBase === 'milliseconds') {
-                v = v1000;
-            } else {
+            } else if (opts && opts.timeBase === 'microseconds') {
                 v = v1000 * 1000;
+            } else {
+                v = v1000;
             }
 
             ticks.push(v);
@@ -478,10 +478,10 @@ API.txt for details.
             } else {
                 if (opts.timeBase === 'seconds') {
                     d.setTime((v + step) * 1000);
-                } else if (opts.timeBase === 'milliseconds') {
-                    d.setTime(v + step);
-                } else {
+                } else if (opts.timeBase === 'microseconds') {
                     d.setTime((v + step) / 1000);
+                } else {
+                    d.setTime(v + step);
                 }
             }
         } while (v < axis.max && v !== prev);
@@ -514,10 +514,10 @@ API.txt for details.
                         var timeUnitSize;
                         if (opts.timeBase === 'seconds') {
                             timeUnitSize = timeUnitSizeSeconds;
-                        } else if (opts.timeBase === 'milliseconds') {
-                            timeUnitSize = timeUnitSizeMilliseconds;
-                        } else {
+                        } else if (opts.timeBase === 'microseconds') {
                             timeUnitSize = timeUnitSizeMicroseconds;
+                        } else {
+                            timeUnitSize = timeUnitSizeMilliseconds;
                         }
 
 						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
@@ -529,10 +529,10 @@ API.txt for details.
 
                         if (opts.timeBase === 'seconds') {
                             factor = 1;
-                        } else if (opts.timeBase === 'milliseconds') {
-                            factor = 1000;
-                        } else {
+                        } else if (opts.timeBase === 'microseconds') {
                             factor = 1000000
+                        } else {
+                            factor = 1000;
                         }
 
                         if (t < timeUnitSize.second) {
