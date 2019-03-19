@@ -31,28 +31,27 @@ describe("flot touch plugin", function () {
     it('do not stop origin touch event propagation if it is allowed', () => {
         jasmine.clock().install().mockDate();
         
-        var oldPropagateOriginEvent = options.propagateOriginTouch ;
-        options.propagateOriginTouch = false;
+        var oldPropagateOriginTouch = options.propagateOriginTouch ;
+        options.propagateOriginTouch = true;
 
         plot = $.plot(placeholder, [[]], options);
         var eventHolder = plot.getEventHolder(),
-            spy = jasmine.createSpy('origin touch event handler'),
-            coords = [{x: 10, y: 20}];
+            spy = jasmine.createSpy('origin touch event handler');
 
-        placeholder[0].addEventListener('touchstart', spy, { once: true });
-        placeholder[0].addEventListener('touchmove', spy, { once: true });
-        placeholder[0].addEventListener('touchend', spy, { once: true });
-        
-        simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+        eventHolder.parentNode.addEventListener('touchstart', spy, { once: true });
+        eventHolder.parentNode.addEventListener('touchmove', spy, { once: true });
+        eventHolder.parentNode.addEventListener('touchend', spy, { once: true });
+
+        eventHolder.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [new Touch({ identifier: 0, target: eventHolder })] }));
         jasmine.clock().tick(100);
-        simulate.sendTouchEvents(coords, eventHolder, 'touchmove');
+        eventHolder.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, touches: [new Touch({ identifier: 0, target: eventHolder })] }));
         jasmine.clock().tick(100);
-        simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+        eventHolder.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [new Touch({ identifier: 0, target: eventHolder })] }));
         jasmine.clock().tick(100);
 
         expect(spy).toHaveBeenCalledTimes(3);
 
-        options.propagateOriginTouch = oldPropagateOriginEvent;
+        options.propagateOriginTouch = oldPropagateOriginTouch;
         jasmine.clock().uninstall();
     });
 
