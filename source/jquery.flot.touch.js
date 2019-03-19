@@ -7,7 +7,10 @@
     var options = {
         pan: {
             enableTouch: false
-        }
+        },
+        touch: {
+            propagateOriginEvent: false
+        },
     };
 
     function init(plot) {
@@ -22,7 +25,7 @@
                 prevTap: { x: 0, y: 0 },
                 currentTap: { x: 0, y: 0 },
                 interceptedLongTap: false,
-                isMultipleTouches: false,
+                isUnsupportedGesture: false,
                 prevTapTime: null,
                 tapStartTime: null,
                 longTapTriggerId: null
@@ -105,18 +108,18 @@
             },
 
             touchmove: function(e) {
-                preventNonMultipleTouchesDefault(e);
+                preventEventDefault(e);
 
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
 
-                if (!gestureState.isMultipleTouches) {
+                if (!gestureState.isUnsupportedGesture) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
                 }
             },
 
             touchend: function(e) {
-                preventNonMultipleTouchesDefault(e);
+                preventEventDefault(e);
 
                 if (wasPinchEvent(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
@@ -133,21 +136,21 @@
             },
 
             touchmove: function(e) {
-                preventNonMultipleTouchesDefault(e);
+                preventEventDefault(e);
                 gestureState.twoTouches = isPinchEvent(e);
-                if (!gestureState.isMultipleTouches) {
+                if (!gestureState.isUnsupportedGesture) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
                 }
             },
 
             touchend: function(e) {
-                preventNonMultipleTouchesDefault(e);
+                preventEventDefault(e);
             }
         };
 
         var doubleTap = {
             onDoubleTap: function(e) {
-                preventNonMultipleTouchesDefault(e);
+                preventEventDefault(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
         };
@@ -203,7 +206,7 @@
             touchend: function(e) {
                 if (tap.isTap(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('tap', { detail: e }));
-                    preventNonMultipleTouchesDefault(e);
+                    preventEventDefault(e);
                 }
             },
 
@@ -273,9 +276,12 @@
             return false;
         }
 
-        function preventNonMultipleTouchesDefault(e) {
-            if (!gestureState.isMultipleTouches) {
+        function preventEventDefault(e) {
+            if (!gestureState.isUnsupportedGesture) {
                 e.preventDefault();
+                if (!options.touch.propagateOriginEvent) {
+                    e.stopPropagation();
+                }
             }
         }
 
@@ -293,9 +299,9 @@
 
         function updateOnMultipleTouches(e) {
             if (e.touches.length >= 3) {
-                gestureState.isMultipleTouches = true;
+                gestureState.isUnsupportedGesture = true;
             } else {
-                gestureState.isMultipleTouches = false;
+                gestureState.isUnsupportedGesture = false;
             }
         }
 

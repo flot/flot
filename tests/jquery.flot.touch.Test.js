@@ -28,18 +28,20 @@ describe("flot touch plugin", function () {
         expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
     });
 
-    it('do not interpret gestures when user interaction is not active', () => {
+    it('do not stop origin touch event propagation if it is allowed', () => {
         jasmine.clock().install().mockDate();
         
-        var oldZoomActive = options.zoom.active,
-            oldPanActive = options.pan.active;
-        options.zoom.active = false;
-        options.pan.active = false;
+        var oldPropagateOriginEvent = options.touch.propagateOriginEvent;
+        options.touch.propagateOriginEvent = false;
 
         plot = $.plot(placeholder, [[]], options);
         var eventHolder = plot.getEventHolder(),
-            spy = jasmine.createSpy('interpreted touch event handler'),
+            spy = jasmine.createSpy('origin touch event handler'),
             coords = [{x: 10, y: 20}];
+
+        placeholder.addEventListener('touchstart', spy, { once: true });
+        placeholder.addEventListener('touchmove', spy, { once: true });
+        placeholder.addEventListener('touchend', spy, { once: true });
         
         simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
         jasmine.clock().tick(100);
@@ -48,10 +50,9 @@ describe("flot touch plugin", function () {
         simulate.sendTouchEvents(coords, eventHolder, 'touchend');
         jasmine.clock().tick(100);
 
-        expect(spy).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledTimes(3);
 
-        options.zoom.active = oldZoomActive;
-        options.pan.active = oldPanActive;
+        options.touch.propagateOriginEvent = oldPropagateOriginEvent;
         jasmine.clock().uninstall();
     });
 
