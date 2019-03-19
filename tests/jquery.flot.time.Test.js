@@ -106,7 +106,7 @@ describe('A Flot chart with absolute time axes', function () {
                 {v: 10, label: '00.000010'}
             ]);
         });
-        it('creates quarter-second timestaps', function () {
+        it('creates quarter-second ticks', function () {
             plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0, 1], [1, 2]]], null, 'seconds', [250, 'millisecond']);
 
             expect(validateTickLabelFormat(plot.getAxes().xaxis.ticks, /0\d\.(00|25|50|75)/)).toEqual(true);
@@ -115,7 +115,7 @@ describe('A Flot chart with absolute time axes', function () {
                 {v: 1, label: '01.00'}
             ])
         });
-        it('creates quarter-millisecond timestaps', function () {
+        it('creates quarter-millisecond ticks', function () {
             plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0, 1], [1, 2]]], null, 'milliseconds', [250, 'microsecond']);
 
             expect(validateTickLabelFormat(plot.getAxes().xaxis.ticks, /00\.00\d(00|25|50|75)/)).toEqual(true);
