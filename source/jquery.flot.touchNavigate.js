@@ -4,9 +4,11 @@
     'use strict';
 
     var options = {
+        zoom: {
+            enableTouch: false
+        },
         pan: {
             enableTouch: false,
-            enablePinch: true,
             touchMode: 'manual'
         }
     };
@@ -32,23 +34,24 @@
                 navigationConstraint: 'unconstrained',
                 initialState: null,
             },
-            useManualPan = options.pan.touchMode === 'manual',
+            useManualPan = options.pan.interactive && options.pan.enableTouch && options.pan.touchMode === 'manual',
             smartPanLock = options.pan.touchMode === 'smartLock',
-            useSmartPan = smartPanLock || options.pan.touchMode === 'smart',
+            useSmartPan = options.pan.interactive && options.pan.enableTouch && (smartPanLock || options.pan.touchMode === 'smart'),
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
+            if (o.zoom.interactive && o.zoom.enableTouch) {
+                eventHolder[0].addEventListener('pinchstart', pinch.start, false);
+                eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
+                eventHolder[0].addEventListener('pinchend', pinch.end, false);
+            }
+
             if (o.pan.interactive) {
                 eventHolder[0].addEventListener('panstart', pan.start, false);
                 eventHolder[0].addEventListener('pandrag', pan.drag, false);
                 eventHolder[0].addEventListener('panend', pan.end, false);
-                if (o.pan.enablePinch) {
-                    eventHolder[0].addEventListener('pinchstart', pinch.start, false);
-                    eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
-                    eventHolder[0].addEventListener('pinchend', pinch.end, false);
-                }
                 eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
             }
         }
@@ -144,8 +147,6 @@
                         });
                         updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
                     }
-
-
 
                     var dist = pinchDistance(e);
 

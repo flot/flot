@@ -13,7 +13,8 @@ The plugin supports these options:
     zoom: {
         interactive: false,
         active: false,
-        amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+        amount: 1.5,         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+        enableTouch: false
     }
 
     pan: {
