@@ -28,7 +28,7 @@ The plugin supports these options:
 
     recenter: {
         interactive: false,
-        enableTouch: false,
+        enableTouch: false
     }
 
     xaxis: {
