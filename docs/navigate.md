@@ -69,7 +69,7 @@ snap to a direction that the drag diorection started with.
 Default: 'smart'.
 
 **enableTouch** enables the touch support, for pan (to drag), pinch (to zoom and move),
-or double tap (to recenter).
+and double tap (to recenter).	or double tap (to recenter).
 
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'

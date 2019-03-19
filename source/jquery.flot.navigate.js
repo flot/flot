@@ -354,21 +354,24 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
-            var axes = plot.getTouchedAxis(e.clientX, e.clientY),
-                event;
-
             plot.activate();
+            var o = plot.getOptions()
 
-            plot.recenter({ axes: axes[0] ? axes : null });
+            if (o.pan.interactive && o.pan.allowRecenter) {
+                var axes = plot.getTouchedAxis(e.clientX, e.clientY),
+                    event;
 
-            if (axes[0]) {
-                event = new $.Event('re-center', { detail: {
-                    axisTouched: axes[0]
-                }});
-            } else {
-                event = new $.Event('re-center', { detail: e });
+                plot.recenter({ axes: axes[0] ? axes : null });
+    
+                if (axes[0]) {
+                    event = new $.Event('re-center', { detail: {
+                        axisTouched: axes[0]
+                    }});
+                } else {
+                    event = new $.Event('re-center', { detail: e });
+                }
+                plot.getPlaceholder().trigger(event);
             }
-            plot.getPlaceholder().trigger(event);
         }
 
         function onClick(e) {
@@ -404,9 +407,7 @@ can set the default in the options.
                 eventHolder.bind("mouseup", onMouseUp);
             }
 
-            if (o.pan.allowRecenter) {
-                eventHolder.dblclick(onDblClick);
-            }
+            eventHolder.dblclick(onDblClick);
             eventHolder.click(onClick);
         }
 
