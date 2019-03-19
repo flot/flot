@@ -39,7 +39,7 @@
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
-            if (o.pan.interactive && o.pan.enableTouch) {
+            if (o.pan.interactive) {
                 eventHolder[0].addEventListener('panstart', pan.start, false);
                 eventHolder[0].addEventListener('pandrag', pan.drag, false);
                 eventHolder[0].addEventListener('panend', pan.end, false);
