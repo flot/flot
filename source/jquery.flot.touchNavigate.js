@@ -34,9 +34,9 @@
                 navigationConstraint: 'unconstrained',
                 initialState: null,
             },
-            useManualPan = options.pan.interactive && options.pan.enableTouch && options.pan.touchMode === 'manual',
+            useManualPan = options.pan.interactive && options.pan.touchMode === 'manual',
             smartPanLock = options.pan.touchMode === 'smartLock',
-            useSmartPan = options.pan.interactive && options.pan.enableTouch && (smartPanLock || options.pan.touchMode === 'smart'),
+            useSmartPan = options.pan.interactive && (smartPanLock || options.pan.touchMode === 'smart'),
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
@@ -48,7 +48,7 @@
                 eventHolder[0].addEventListener('pinchend', pinch.end, false);
             }
 
-            if (o.pan.interactive) {
+            if (o.pan.interactive && o.pan.enableTouch) {
                 eventHolder[0].addEventListener('panstart', pan.start, false);
                 eventHolder[0].addEventListener('pandrag', pan.drag, false);
                 eventHolder[0].addEventListener('panend', pan.end, false);
@@ -127,7 +127,6 @@
                 }
                 pinchDragTimeout = setTimeout(function() {
                     presetNavigationState(e, 'pinch', gestureState);
-
                     plot.pan({
                         left: -delta(e, 'pinch', gestureState).x,
                         top: -delta(e, 'pinch', gestureState).y,
