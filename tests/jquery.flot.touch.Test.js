@@ -31,8 +31,8 @@ describe("flot touch plugin", function () {
     it('do not stop origin touch event propagation if it is allowed', () => {
         jasmine.clock().install().mockDate();
         
-        var oldPropagateOriginEvent = options.touch.propagateOriginEvent;
-        options.touch.propagateOriginEvent = false;
+        var oldPropagateOriginEvent = options.propagateOriginTouch ;
+        options.propagateOriginTouch = false;
 
         plot = $.plot(placeholder, [[]], options);
         var eventHolder = plot.getEventHolder(),
@@ -52,7 +52,7 @@ describe("flot touch plugin", function () {
 
         expect(spy).toHaveBeenCalledTimes(3);
 
-        options.touch.propagateOriginEvent = oldPropagateOriginEvent;
+        options.propagateOriginTouch = oldPropagateOriginEvent;
         jasmine.clock().uninstall();
     });
 

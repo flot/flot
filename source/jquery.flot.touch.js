@@ -8,9 +8,7 @@
         pan: {
             enableTouch: false
         },
-        touch: {
-            propagateOriginEvent: false
-        },
+        propagateOriginTouch: false
     };
 
     function init(plot) {

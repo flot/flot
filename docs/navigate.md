@@ -26,6 +26,8 @@ The plugin supports these options:
         touchMode: ""
     }
 
+    propagateOriginTouch: false
+
     xaxis: {
         axisZoom: true, //zoom axis when mouse over it is allowed
         plotZoom: true, //zoom axis is allowed for plot zoom
@@ -72,6 +74,8 @@ and double tap (to recenter).
 
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'
+
+**propagateOriginTouch** set true to allow the propagation of origin touch events (e.g. 'touchstart') that is already handled for pan or pinch.
 
 Example API usage:
 ```js
