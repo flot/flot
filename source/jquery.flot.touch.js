@@ -5,9 +5,6 @@
     'use strict';
 
     var options = {
-        pan: {
-            enableTouch: false
-        },
         propagateOriginTouch: false
     };
 
@@ -220,7 +217,7 @@
             }
         };
 
-        if (options.pan.enableTouch === true) {
+        if (options.pan.enableTouch === true || options.zoom.enableTouch) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
         };
