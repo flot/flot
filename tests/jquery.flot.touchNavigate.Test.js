@@ -352,7 +352,7 @@ describe("flot touch navigate plugin", function () {
             ], {
                 xaxes: [{ autoScale: 'exact', plotZoom: false, plotPan: false }],
                 yaxes: [{ autoScale: 'exact' }],
-                zoom: { interactive: true, active: true, amount: 10 },
+                zoom: { interactive: true, active: true, amount: 10, enableTouch: true },
                 pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
             });
 
