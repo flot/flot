@@ -115,7 +115,8 @@ can set the default in the options.
             active: false,
             cursor: "move",
             frameRate: 60,
-            mode: 'smart'
+            mode: 'smart',
+            allowRecenter: true
         },
         xaxis: {
             axisZoom: true, //zoom axis when mouse over it is allowed
@@ -354,17 +355,23 @@ can set the default in the options.
 
         function onDblClick(e) {
             plot.activate();
+            var o = plot.getOptions()
 
-            var axes = plot.getTouchedAxis(e.clientX, e.clientY),
-                event;
-            if (axes[0]) {
-                event = new $.Event('re-center', { detail: {
-                    axisTouched: axes[0]
-                }});
-            } else {
-                event = new $.Event('re-center', {detail: e});
+            if (o.pan.interactive && o.pan.allowRecenter) {
+                var axes = plot.getTouchedAxis(e.clientX, e.clientY),
+                    event;
+
+                plot.recenter({ axes: axes[0] ? axes : null });
+    
+                if (axes[0]) {
+                    event = new $.Event('re-center', { detail: {
+                        axisTouched: axes[0]
+                    }});
+                } else {
+                    event = new $.Event('re-center', { detail: e });
+                }
+                plot.getPlaceholder().trigger(event);
             }
-            plot.getPlaceholder().trigger(event);
         }
 
         function onClick(e) {

@@ -24,10 +24,11 @@ The plugin supports these options:
         frameRate: 60,
         mode: "smart",       // enable smart pan mode
         enableTouch: false,
-        touchMode: ""
+        touchMode: "",
+        allowRecenter: true
     }
 
-    propagateOriginTouch: false
+    propagateOriginTouch: false,
 
     xaxis: {
         axisZoom: true, //zoom axis when mouse over it is allowed
@@ -76,7 +77,10 @@ and double tap (to recenter).
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'
 
-**propagateOriginTouch** set true to allow the propagation of origin touch events (e.g. 'touchstart') that is already handled for pan or pinch.
+**propagateOriginTouch** set true to allow the propagation of origin touch events
+(e.g. 'touchstart') that is already handled for pan or pinch. Default: false.
+
+**allowRecenter** enables the recenter behavior when pan interaction is enabled. Default: true.
 
 Example API usage:
 ```js
