@@ -10,7 +10,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
     "use strict";
 
     function DrawSeries() {
-        function plotLine(datapoints, xoffset, yoffset, axisx, axisy, ctx) {
+        function plotLine(datapoints, xoffset, yoffset, axisx, axisy, ctx, steps) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
                 prevx = null,
@@ -19,6 +19,8 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 y1 = 0.0,
                 x2 = 0.0,
                 y2 = 0.0,
+                mx = null,
+                my = null,
                 i = 0;
 
             ctx.beginPath();
@@ -29,7 +31,31 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 y2 = points[i + 1];
 
                 if (x1 === null || x2 === null) {
+                    mx = null;
+                    my = null;
                     continue;
+                }
+
+                if(steps){
+                    if (mx !== null && my !== null) {
+                        // if middle point exists, transfer p2 -> p1 and p1 -> mp
+                        x2 = x1;
+                        y2 = y1;
+                        x1 = mx;
+                        y1 = my;
+
+                        // 'remove' middle point
+                        mx = null;
+                        my = null;
+
+                        // subtract pointsize from i to have current point p1 handled again
+                        i -= ps;
+                    } else if (y1 !== y2 && x1 !== x2) {
+                        // create a middle point
+                        y2 = y1;
+                        mx = x2;
+                        my = y1;
+                    }
                 }
 
                 // clip with ymin
@@ -112,7 +138,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
             ctx.stroke();
         }
 
-        function plotLineArea(datapoints, axisx, axisy, fillTowards, ctx) {
+        function plotLineArea(datapoints, axisx, axisy, fillTowards, ctx, steps) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
                 bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
@@ -120,7 +146,9 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 ypos = 1,
                 areaOpen = false,
                 segmentStart = 0,
-                segmentEnd = 0;
+                segmentEnd = 0,
+                mx = null,
+                my = null;
 
             // we process each segment in two turns, first forward
             // direction to sketch out top, then once we hit the
@@ -162,7 +190,31 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 }
 
                 if (x1 == null || x2 == null) {
+                    mx = null;
+                    my = null;
                     continue;
+                }
+
+                if(steps){
+                    if (mx !== null && my !== null) {
+                        // if middle point exists, transfer p2 -> p1 and p1 -> mp
+                        x2 = x1;
+                        y2 = y1;
+                        x1 = mx;
+                        y1 = my;
+
+                        // 'remove' middle point
+                        mx = null;
+                        my = null;
+
+                        // subtract pointsize from i to have current point p1 handled again
+                        i -= ps;
+                    } else if (y1 !== y2 && x1 !== x2) {
+                        // create a middle point
+                        y2 = y1;
+                        mx = x2;
+                        my = y1;
+                    }
                 }
 
                 // clip x values
@@ -304,11 +356,11 @@ This plugin is used by flot for drawing lines, plots, bars or area.
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight, getColorOrGradient);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0, ctx);
+                plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0, ctx, series.lines.steps);
             }
 
             if (lw > 0) {
-                plotLine(datapoints, 0, 0, series.xaxis, series.yaxis, ctx);
+                plotLine(datapoints, 0, 0, series.xaxis, series.yaxis, ctx, series.lines.steps);
             }
 
             ctx.restore();
