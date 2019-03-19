@@ -16,7 +16,7 @@ API.txt for details.
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
-            timeBase: 'seconds' // are the values in milliseconds or seconds
+            timeBase: 'seconds' // are the values in given in mircoseconds, milliseconds or seconds
         },
         yaxis: {
             timeBase: 'seconds'
@@ -24,6 +24,67 @@ API.txt for details.
     };
 
     var floorInBase = $.plot.saturated.floorInBase;
+
+    // A mix-in to provide microsecond support to Date like classes.
+    var MicroSecondSupportMixIn = (function(){
+
+        var MixIn = function(Base) {
+            return class extends Base {
+
+                constructor(microEpoch) {
+                    super(microEpoch);
+                    this.microseconds = null;
+                    this.microEpoch = null;
+                    this.update(microEpoch);
+                }
+
+                update(microEpoch) {
+                    super.setTime(microEpoch);
+
+                    // Round epoch to 3 decimal accuracy
+                    microEpoch = Math.round(microEpoch*1000)/1000;
+                    this.microEpoch = microEpoch;
+
+                    // Microseconds are stored as integers
+                    var seconds = microEpoch/1000;
+                    this.microseconds = 1000000 * (seconds - Math.floor(seconds));
+                }
+
+                getTime() {
+                    return this.microEpoch;
+                }
+
+                setTime(microEpoch) {
+                    this.update(microEpoch);
+                }
+
+                getMicroseconds() {
+                    return this.microseconds;
+                };
+
+                setMicroseconds(microseconds) {
+                    // Replace the microsecond part (6 last digits) in microEpoch
+                    var epochWithoutMicroseconds = 1000*Math.floor(this.microEpoch/1000);
+                    var newEpoch = epochWithoutMicroseconds + microseconds/1000;
+                    this.update(newEpoch);
+                };
+
+                setUTCMicroseconds(microseconds) { this.setMicroseconds(microseconds); }
+
+                getUTCMicroseconds() { return this.getMicroseconds(); }
+            };
+        };
+
+        return MixIn;
+    })();
+
+    // Extend Date and timezoneJS.Date (if found) with microsecond support.
+    var MicroDate = class extends MicroSecondSupportMixIn(Date) {};
+    var MicroTimezoneJS;
+
+    if (typeof timezoneJS !== "undefined" && typeof timezoneJS.Date !== "undefined") {
+        MicroTimezoneJS = class extends MicroSecondSupportMixIn(timezoneJS.Date) {}
+    }
 
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.
@@ -37,6 +98,18 @@ API.txt for details.
 			n = "" + n;
 			pad = "" + (pad == null ? "0" : pad);
 			return n.length == 1 ? pad + n : n;
+		};
+
+		var formatMicroseconds = function(n, dec) {
+			if (dec < 6 && dec > 0) {
+				var magnitude = Math.pow(10,dec-6);
+				n = Math.round(Math.round(n*magnitude)/magnitude);
+				n = ('00000' + n).slice(-6,-(6 - dec));
+			} else {
+                n = Math.round(n)
+				n = ('00000' + n).slice(-6);
+			}
+			return n;
 		};
 
         var r = [];
@@ -61,10 +134,13 @@ API.txt for details.
 			hours12 = hours;
 		}
 
+        var decimals = -1;
         for (var i = 0; i < fmt.length; ++i) {
 			var c = fmt.charAt(i);
 
-			if (escape) {
+            if (!isNaN(Number(c)) && Number(c) > 0) {
+                decimals = Number(c);
+            } else if (escape) {
 				switch (c) {
 					case 'a': c = "" + dayNames[d.getDay()]; break;
 					case 'b': c = "" + monthNames[d.getMonth()]; break;
@@ -80,6 +156,7 @@ API.txt for details.
 					case 'q':
 						c = "" + (Math.floor(d.getMonth() / 3) + 1); break;
 					case 'S': c = leftPad(d.getSeconds()); break;
+					case 's': c = "" + formatMicroseconds(d.getMicroseconds(),decimals); break;
 					case 'y': c = leftPad(d.getFullYear() % 100); break;
 					case 'Y': c = "" + d.getFullYear(); break;
 					case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
@@ -124,7 +201,7 @@ API.txt for details.
         addProxyMethod(utc, "getTime", d, "getTime");
         addProxyMethod(utc, "setTime", d, "setTime");
 
-        var props = ["Date", "Day", "FullYear", "Hours", "Milliseconds", "Minutes", "Month", "Seconds"];
+        var props = ["Date", "Day", "FullYear", "Hours", "Minutes", "Month", "Seconds", "Milliseconds", "Microseconds"];
 
         for (var p = 0; p < props.length; p++) {
             addProxyMethod(utc, "get" + props[p], d, "getUTC" + props[p]);
@@ -141,6 +218,8 @@ API.txt for details.
 
         if (opts && opts.timeBase === 'seconds') {
             ts *= 1000;
+        } else if (opts.timeBase === 'microseconds') {
+            ts /= 1000;
         }
 
         if (ts > maxDateValue) {
@@ -150,23 +229,24 @@ API.txt for details.
         }
 
         if (opts.timezone === "browser") {
-            return new Date(ts);
+            return new MicroDate(ts);
         } else if (!opts.timezone || opts.timezone === "utc") {
-            return makeUtcWrapper(new Date(ts));
+            return makeUtcWrapper(new MicroDate(ts));
         } else if (typeof timezoneJS !== "undefined" && typeof timezoneJS.Date !== "undefined") {
-            var d = new timezoneJS.Date();
+            var d = new MicroTimezoneJS(ts);
             // timezone-js is fickle, so be sure to set the time zone before
             // setting the time.
             d.setTimezone(opts.timezone);
             d.setTime(ts);
             return d;
         } else {
-            return makeUtcWrapper(new Date(ts));
+            return makeUtcWrapper(new MicroDate(ts));
         }
     }
 
-    // map of app. size of time units in milliseconds
+    // map of app. size of time units in seconds
     var timeUnitSizeSeconds = {
+        "microsecond": 0.000001,
         "millisecond": 0.001,
         "second": 1,
         "minute": 60,
@@ -177,7 +257,9 @@ API.txt for details.
         "year": 365.2425 * 24 * 60 * 60
     };
 
+    // map of app. size of time units in milliseconds
     var timeUnitSizeMilliseconds = {
+        "microsecond": 0.001,
         "millisecond": 1,
         "second": 1000,
         "minute": 60 * 1000,
@@ -188,10 +270,25 @@ API.txt for details.
         "year": 365.2425 * 24 * 60 * 60 * 1000
     };
 
+    // map of app. size of time units in microseconds
+    var timeUnitSizeMicroseconds = {
+        "microsecond": 1,
+        "millisecond": 1000,
+        "second": 1000000,
+        "minute": 60 * 1000000,
+        "hour": 60 * 60 * 1000000,
+        "day": 24 * 60 * 60 * 1000000,
+        "month": 30 * 24 * 60 * 60 * 1000000,
+        "quarter": 3 * 30 * 24 * 60 * 60 * 1000000,
+        "year": 365.2425 * 24 * 60 * 60 * 1000000
+    };
+
     // the allowed tick sizes, after 1 year we use
     // an integer algorithm
 
     var baseSpec = [
+        [1, "microsecond"], [2, "microsecond"], [5, "microsecond"], [10, "microsecond"],
+        [25, "microsecond"], [50, "microsecond"], [100, "microsecond"], [250, "microsecond"], [500, "microsecond"],
         [1, "millisecond"], [2, "millisecond"], [5, "millisecond"], [10, "millisecond"],
         [25, "millisecond"], [50, "millisecond"], [100, "millisecond"], [250, "millisecond"], [500, "millisecond"],
         [1, "second"], [2, "second"], [5, "second"], [10, "second"],
@@ -227,7 +324,14 @@ API.txt for details.
             (opts.minTickSize && opts.minTickSize[1] ===
             "quarter") ? specQuarters : specMonths;
 
-        var timeUnitSize = opts.timeBase === 'seconds' ? timeUnitSizeSeconds : timeUnitSizeMilliseconds;
+        var timeUnitSize;
+        if (opts.timeBase === 'seconds') {
+            timeUnitSize = timeUnitSizeSeconds;
+        } else if (opts.timeBase === 'microseconds') {
+            timeUnitSize = timeUnitSizeMicroseconds;
+        } else {
+            timeUnitSize = timeUnitSizeMilliseconds;
+        }
 
         if (opts.minTickSize !== null && opts.minTickSize !== undefined) {
             if (typeof opts.tickSize === "number") {
@@ -284,7 +388,9 @@ API.txt for details.
 
         var step = tickSize * timeUnitSize[unit];
 
-        if (unit === "millisecond") {
+        if (unit === "microsecond") {
+            d.setMicroseconds(floorInBase(d.getMicroseconds(), tickSize));
+        } else if (unit === "millisecond") {
             d.setMilliseconds(floorInBase(d.getMilliseconds(), tickSize));
         } else if (unit === "second") {
             d.setSeconds(floorInBase(d.getSeconds(), tickSize));
@@ -303,10 +409,13 @@ API.txt for details.
 
         // reset smaller components
 
-        if (step >= timeUnitSize.second) {
-            d.setMilliseconds(0);
+        if (step >= timeUnitSize.millisecond) {
+            if (step >= timeUnitSize.second) {
+                d.setMicroseconds(0);
+            } else {
+                d.setMicroseconds(d.getMilliseconds()*1000);
+            }
         }
-
         if (step >= timeUnitSize.minute) {
             d.setSeconds(0);
         }
@@ -338,6 +447,8 @@ API.txt for details.
             v1000 = d.getTime();
             if (opts && opts.timeBase === 'seconds') {
                 v = v1000 / 1000;
+            } else if (opts && opts.timeBase === 'microseconds') {
+                v = v1000 * 1000;
             } else {
                 v = v1000;
             }
@@ -367,6 +478,8 @@ API.txt for details.
             } else {
                 if (opts.timeBase === 'seconds') {
                     d.setTime((v + step) * 1000);
+                } else if (opts.timeBase === 'microseconds') {
+                    d.setTime((v + step) / 1000);
                 } else {
                     d.setTime(v + step);
                 }
@@ -398,15 +511,41 @@ API.txt for details.
 							(axis.options.minTickSize &&
                                 axis.options.minTickSize[1] == "quarter");
 
-                        var timeUnitSize = opts.timeBase === 'seconds' ? timeUnitSizeSeconds : timeUnitSizeMilliseconds;
+                        var timeUnitSize;
+                        if (opts.timeBase === 'seconds') {
+                            timeUnitSize = timeUnitSizeSeconds;
+                        } else if (opts.timeBase === 'microseconds') {
+                            timeUnitSize = timeUnitSizeMicroseconds;
+                        } else {
+                            timeUnitSize = timeUnitSizeMilliseconds;
+                        }
 
 						var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
 						var span = axis.max - axis.min;
 						var suffix = (opts.twelveHourClock) ? " %p" : "";
 						var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
+                        var factor;
 						var fmt;
 
-						if (t < timeUnitSize.minute) {
+                        if (opts.timeBase === 'seconds') {
+                            factor = 1;
+                        } else if (opts.timeBase === 'microseconds') {
+                            factor = 1000000
+                        } else {
+                            factor = 1000;
+                        }
+
+                        if (t < timeUnitSize.second) {
+                            var decimals = -Math.floor(Math.log10(t/factor))
+
+                            // the two-and-halves require an additional decimal
+                            if (String(t).indexOf('25') > -1) {
+                                decimals++;
+                            }
+
+							fmt = "%S.%" + decimals + "s";
+                        } else
+                        if (t < timeUnitSize.minute) {
 							fmt = hourCode + ":%M:%S" + suffix;
 						} else if (t < timeUnitSize.day) {
 							if (span < 2 * timeUnitSize.day) {
