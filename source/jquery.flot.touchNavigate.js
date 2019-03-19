@@ -7,9 +7,6 @@
         pan: {
             enableTouch: false,
             touchMode: 'manual'
-        },
-        recenter: {
-            enableTouch: false
         }
     };
 
@@ -49,10 +46,10 @@
                 eventHolder[0].addEventListener('pinchstart', pinch.start, false);
                 eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
                 eventHolder[0].addEventListener('pinchend', pinch.end, false);
-            }
 
-            if (o.recenter.interactive && o.recenter.enableTouch) {
-                eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+                if (o.pan.allowRecenter) {
+                    eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+                }
             }
         }
 
@@ -165,7 +162,7 @@
             }
         };
 
-        if (options.pan.enableTouch === true || options.recenter.enableTouch === true ) {
+        if (options.pan.enableTouch === true) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
         }

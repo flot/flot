@@ -23,12 +23,8 @@ The plugin supports these options:
         frameRate: 60,
         mode: "smart",       // enable smart pan mode
         enableTouch: false,
-        touchMode: ""
-    }
-
-    recenter: {
-        interactive: false,
-        enableTouch: false
+        touchMode: "",
+        allowRecenter: true
     }
 
     xaxis: {
@@ -47,7 +43,7 @@ The plugin supports these options:
 ```
 **interactive** enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
-around; the same for zoom and recenter.
+around; the same for zoom.
 
 **active** is true after a touch tap on plot. This enables plot navigation.
 Once activated, zoom and pan cannot be deactivated. When the plot becomes active,
@@ -77,6 +73,8 @@ or double tap (to recenter).
 
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'
+
+**allowRecenter** enables the recenter behavior when pan interaction is enabled.
 
 Example API usage:
 ```js

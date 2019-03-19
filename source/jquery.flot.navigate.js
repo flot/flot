@@ -115,10 +115,8 @@ can set the default in the options.
             active: false,
             cursor: "move",
             frameRate: 60,
-            mode: 'smart'
-        },
-        recenter: {
-            interactive: false
+            mode: 'smart',
+            allowRecenter: true
         },
         xaxis: {
             axisZoom: true, //zoom axis when mouse over it is allowed
@@ -406,7 +404,7 @@ can set the default in the options.
                 eventHolder.bind("mouseup", onMouseUp);
             }
 
-            if (o.recenter.interactive) {
+            if (o.pan.allowRecenter) {
                 eventHolder.dblclick(onDblClick);
             }
             eventHolder.click(onClick);

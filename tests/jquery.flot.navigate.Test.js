@@ -11,8 +11,7 @@ describe("flot navigate plugin", function () {
             xaxes: [{ autoScale: 'exact' }],
             yaxes: [{ autoScale: 'exact' }],
             zoom: { interactive: true, active: true, amount: 10 },
-            pan: { interactive: true, active: true, frameRate: -1 },
-            recenter: { interactive: true }
+            pan: { interactive: true, active: true, frameRate: -1 }
         };
     });
 
@@ -784,8 +783,7 @@ describe("flot navigate plugin", function () {
                 ]
               ], {
                   zoom: { interactive: true, active: false, amount: 10 },
-                  pan: { interactive: true, active: false},
-                  recenter: { interactive: true }
+                  pan: { interactive: true, active: false}
               });
 
               var eventHolder = plot.getEventHolder(),
