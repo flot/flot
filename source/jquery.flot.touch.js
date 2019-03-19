@@ -277,7 +277,7 @@
         function preventEventDefault(e) {
             if (!gestureState.isUnsupportedGesture) {
                 e.preventDefault();
-                if (!options.touch.propagateOriginEvent) {
+                if (!plot.getOptions().propagateOriginTouch) {
                     e.stopPropagation();
                 }
             }
