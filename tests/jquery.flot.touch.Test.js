@@ -39,9 +39,9 @@ describe("flot touch plugin", function () {
             spy = jasmine.createSpy('origin touch event handler'),
             coords = [{x: 10, y: 20}];
 
-        placeholder.addEventListener('touchstart', spy, { once: true });
-        placeholder.addEventListener('touchmove', spy, { once: true });
-        placeholder.addEventListener('touchend', spy, { once: true });
+        placeholder[0].addEventListener('touchstart', spy, { once: true });
+        placeholder[0].addEventListener('touchmove', spy, { once: true });
+        placeholder[0].addEventListener('touchend', spy, { once: true });
         
         simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
         jasmine.clock().tick(100);
