@@ -281,6 +281,10 @@ can set the default in the options.
         }
         
         function onDrag(e) {
+            if (!isPanAction) { 
+                return; 
+            }
+
             var page = browser.getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
 
@@ -325,6 +329,10 @@ can set the default in the options.
         }
 
         function onDragEnd(e) {
+            if (!isPanAction) { 
+                return; 
+            }
+
             if (panTimeout) {
                 clearTimeout(panTimeout);
                 panTimeout = null;
