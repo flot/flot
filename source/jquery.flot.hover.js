@@ -53,6 +53,24 @@ the tooltip from webcharts).
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
 
+        var tap = {
+            generatePlothoverEvent: function (e) {
+                var o = plot.getOptions(),
+                    newEvent = new CustomEvent('mouseevent');
+
+                //transform from touch event to mouse event format
+                newEvent.pageX = e.detail.changedTouches[0].pageX;
+                newEvent.pageY = e.detail.changedTouches[0].pageY;
+                newEvent.clientX = e.detail.changedTouches[0].clientX;
+                newEvent.clientY = e.detail.changedTouches[0].clientY;
+
+                if (o.grid.hoverable) {
+                    doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
+                }
+                return false;
+            }
+        };
+
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
@@ -101,24 +119,6 @@ the tooltip from webcharts).
                     }, searchDistance);
             }
         }
-
-        var tap = {
-            generatePlothoverEvent: function (e) {
-                var o = plot.getOptions(),
-                    newEvent = new CustomEvent('mouseevent');
-
-                //transform from touch event to mouse event format
-                newEvent.pageX = e.detail.changedTouches[0].pageX;
-                newEvent.pageY = e.detail.changedTouches[0].pageY;
-                newEvent.clientX = e.detail.changedTouches[0].clientX;
-                newEvent.clientY = e.detail.changedTouches[0].clientY;
-
-                if (o.grid.hoverable) {
-                    doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
-                }
-                return false;
-            }
-        };
 
         if (options.grid.hoverable || options.grid.clickable) {
             plot.hooks.bindEvents.push(bindEvents);
