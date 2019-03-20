@@ -10,6 +10,9 @@
         pan: {
             enableTouch: false,
             touchMode: 'manual'
+        },
+        recenter: {
+            enableTouch: true
         }
     };
 
@@ -52,11 +55,11 @@
                 eventHolder[0].addEventListener('panstart', pan.start, false);
                 eventHolder[0].addEventListener('pandrag', pan.drag, false);
                 eventHolder[0].addEventListener('panend', pan.end, false);
-                if (o.pan.allowRecenter) {
-                    eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
-                }
             }
 
+            if ((o.recenter.interactive && o.recenter.enableTouch)) {
+                eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+            }
         }
 
         function shutdown(plot, eventHolder) {

@@ -24,8 +24,12 @@ The plugin supports these options:
         frameRate: 60,
         mode: "smart",       // enable smart pan mode
         enableTouch: false,
-        touchMode: "",
-        allowRecenter: true
+        touchMode: ""
+    }
+
+    recenter: {
+        interactive: true,
+        enableTouch: true
     }
 
     propagateOriginTouch: false,
@@ -46,7 +50,7 @@ The plugin supports these options:
 ```
 **interactive** enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
-around; the same for zoom.
+around; the same for zoom and recenter.
 
 **active** is true after a touch tap on plot. This enables plot navigation.
 Once activated, zoom and pan cannot be deactivated. When the plot becomes active,
@@ -71,16 +75,14 @@ to one direction when the drag direction is close to it;
 snap to a direction that the drag diorection started with.
 Default: 'smart'.
 
-**enableTouch** enables the touch support, including pan (to drag), pinch (to zoom and move),
-and double tap (to recenter).
+**enableTouch** enables the touch support, for pan (to drag), pinch (to zoom and move),
+or double tap (to recenter).
 
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'
 
 **propagateOriginTouch** set true to allow the propagation of origin touch events
 (e.g. 'touchstart') that is already handled for pan or pinch. Default: false.
-
-**allowRecenter** enables the recenter behavior when pan interaction is enabled. Default: true.
 
 Example API usage:
 ```js

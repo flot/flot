@@ -103,7 +103,7 @@
             },
 
             touchmove: function(e) {
-                preventEventDefault(e);
+                preventEventBehaviors(e);
 
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
@@ -114,7 +114,7 @@
             },
 
             touchend: function(e) {
-                preventEventDefault(e);
+                preventEventBehaviors(e);
 
                 if (wasPinchEvent(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
@@ -131,7 +131,7 @@
             },
 
             touchmove: function(e) {
-                preventEventDefault(e);
+                preventEventBehaviors(e);
                 gestureState.twoTouches = isPinchEvent(e);
                 if (!gestureState.isUnsupportedGesture) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
@@ -139,13 +139,13 @@
             },
 
             touchend: function(e) {
-                preventEventDefault(e);
+                preventEventBehaviors(e);
             }
         };
 
         var doubleTap = {
             onDoubleTap: function(e) {
-                preventEventDefault(e);
+                preventEventBehaviors(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
         };
@@ -201,7 +201,7 @@
             touchend: function(e) {
                 if (tap.isTap(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('tap', { detail: e }));
-                    preventEventDefault(e);
+                    preventEventBehaviors(e);
                 }
             },
 
@@ -271,7 +271,7 @@
             return false;
         }
 
-        function preventEventDefault(e) {
+        function preventEventBehaviors(e) {
             if (!gestureState.isUnsupportedGesture) {
                 e.preventDefault();
                 if (!plot.getOptions().propagateOriginTouch) {
