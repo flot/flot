@@ -443,4 +443,52 @@ describe("flot navigate plugin interactions", function () {
         expect(spy).toHaveBeenCalledWith('dblclick', jasmine.any(Function), jasmine.any(Boolean));
     });
 
+    it('do recenter for double click by default', () => {
+        plot = $.plot(placeholder, [
+            [[0, 0], [10, 10]]
+        ], {
+            xaxes: [{ autoScale: 'exact' }],
+            yaxes: [{ autoScale: 'exact' }],
+        });
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0],
+            spyRecenter = jasmine.createSpy('spy');
+        $(plot.getPlaceholder()).on('re-center', spyRecenter);
+
+        plot.pan({ left: 10, top: 10});
+
+        simulate.dblclick(eventHolder, 200, 150);
+
+        expect(xaxis.options.offset).toEqual({ below: 0, above: 0 });
+        expect(yaxis.options.offset).toEqual({ below: 0, above: 0 });
+        expect(spyRecenter).toHaveBeenCalled();
+    });
+
+    it('do not recenter for double click if recenter is disabled', () => {
+        plot = $.plot(placeholder, [
+            [[0, 0], [10, 10]]
+        ], {
+            xaxes: [{ autoScale: 'exact' }],
+            yaxes: [{ autoScale: 'exact' }],
+            pan: { interactive: true },
+            zoom: { interactive: true },
+            recenter: { interactive: false },
+        });
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0],
+            spyRecenter = jasmine.createSpy('spy');
+        $(plot.getPlaceholder()).on('re-center', spyRecenter);
+
+        plot.pan({ left: 10, top: 10});
+
+        simulate.dblclick(eventHolder, 200, 150);
+
+        expect(xaxis.options.offset).not.toEqual({ below: 0, above: 0 });
+        expect(yaxis.options.offset).not.toEqual({ below: 0, above: 0 });
+        expect(spyRecenter).not.toHaveBeenCalled();
+    });
 });
