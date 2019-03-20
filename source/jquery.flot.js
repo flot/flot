@@ -892,25 +892,6 @@ Licensed under the MIT license.
                             }
                             points[k + m] = null;
                         }
-                    } else {
-                        // a little bit of line specific stuff that
-                        // perhaps shouldn't be here, but lacking
-                        // better means...
-                        if (insertSteps && k > 0 &&
-                            points[k - ps] != null &&
-                            points[k - ps] !== points[k] &&
-                            points[k - ps + 1] !== points[k + 1]) {
-                            // copy the point to make room for a middle point
-                            for (m = 0; m < ps; ++m) {
-                                points[k + ps + m] = points[k + m];
-                            }
-
-                            // middle point has same y
-                            points[k + 1] = points[k - ps + 1];
-
-                            // we've added a point, better reflect that
-                            k += ps;
-                        }
                     }
                 }
 
