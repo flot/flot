@@ -41,7 +41,9 @@ gulp.task('build_flot_minified', function() {
     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
         .pipe(maps.init())
         .pipe(babel({
-            presets: ['es2015']
+            "presets": [
+                "@babel/preset-env"
+            ]
         }))
         .pipe(concat('jquery.flot.js'))
         .pipe(uglify())
