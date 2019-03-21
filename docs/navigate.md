@@ -32,7 +32,7 @@ The plugin supports these options:
         enableTouch: true
     }
 
-    propagateOriginTouch: false,
+    propagateSupportedGesture: false,
 
     xaxis: {
         axisZoom: true, //zoom axis when mouse over it is allowed
@@ -81,7 +81,7 @@ or double tap (to recenter).
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'
 
-**propagateOriginTouch** set true to allow the propagation of origin touch events
+**propagateSupportedGesture** set true to allow the propagation of origin touch events
 (e.g. 'touchstart') that is already handled for pan or pinch. Default: false.
 
 Example API usage:

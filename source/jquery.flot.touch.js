@@ -5,7 +5,7 @@
     'use strict';
 
     var options = {
-        propagateOriginTouch: false
+        propagateSupportedGesture: false
     };
 
     function init(plot) {
@@ -274,7 +274,7 @@
         function preventEventBehaviors(e) {
             if (!gestureState.isUnsupportedGesture) {
                 e.preventDefault();
-                if (!plot.getOptions().propagateOriginTouch) {
+                if (!plot.getOptions().propagateSupportedGesture) {
                     e.stopPropagation();
                 }
             }
