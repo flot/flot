@@ -278,17 +278,22 @@
     // Generate a list of legend entries in their final order
     function getLegendEntries(series, labelFormatter, sorted) {
         var lf = labelFormatter,
-            legendEntries = series.map(function(s, i) {
-                return {
-                    label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
-                    color: s.color,
-                    options: {
-                        lines: s.lines,
-                        points: s.points,
-                        bars: s.bars
+            legendEntries = series.reduce(function(validEntries, s, i) {
+                var labelEval = (lf ? lf(s.label, s) : s.label)
+                if (s.hasOwnProperty("label") ? labelEval : true) {
+                    var entry = {
+                        label: labelEval || 'Plot ' + (i + 1),
+                        color: s.color,
+                        options: {
+                            lines: s.lines,
+                            points: s.points,
+                            bars: s.bars
+                        }
                     }
-                };
-            });
+                    validEntries.push(entry)
+                }
+                return validEntries;
+            }, []);
 
         // Sort the legend using either the default or a custom comparator
         if (sorted) {
