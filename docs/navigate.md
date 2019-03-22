@@ -13,7 +13,8 @@ The plugin supports these options:
     zoom: {
         interactive: false,
         active: false,
-        amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+        amount: 1.5,         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+        enableTouch: false
     }
 
     pan: {
@@ -25,6 +26,13 @@ The plugin supports these options:
         enableTouch: false,
         touchMode: ""
     }
+
+    recenter: {
+        interactive: true,
+        enableTouch: true
+    }
+
+    propagateSupportedGesture: false,
 
     xaxis: {
         axisZoom: true, //zoom axis when mouse over it is allowed
@@ -42,7 +50,7 @@ The plugin supports these options:
 ```
 **interactive** enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
-around; the same for zoom.
+around; the same for zoom and recenter.
 
 **active** is true after a touch tap on plot. This enables plot navigation.
 Once activated, zoom and pan cannot be deactivated. When the plot becomes active,
@@ -67,11 +75,14 @@ to one direction when the drag direction is close to it;
 snap to a direction that the drag diorection started with.
 Default: 'smart'.
 
-**enableTouch** enables the touch support, including pan (to drag), pinch (to zoom and move),
-and double tap (to recenter).
+**enableTouch** enables the touch support, for pan (to drag), pinch (to zoom and move),
+or double tap (to recenter).
 
 **touchMode** a string specifies the pan mode of touch pan.
 The accepted values is the sams as **mode** option. Default: 'manual'
+
+**propagateSupportedGesture** set true to allow the propagation of origin touch events
+(e.g. 'touchstart') that is already handled for pan or pinch. Default: false.
 
 Example API usage:
 ```js

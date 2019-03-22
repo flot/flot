@@ -11,7 +11,7 @@ describe("flot touch navigate plugin", function () {
         options = {
             xaxes: [{ autoScale: 'exact' }],
             yaxes: [{ autoScale: 'exact' }],
-            zoom: { interactive: true, active: true, amount: 10 },
+            zoom: { interactive: true, active: true, amount: 10, enableTouch: true },
             pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
         };
         jasmine.clock().install();
@@ -352,7 +352,7 @@ describe("flot touch navigate plugin", function () {
             ], {
                 xaxes: [{ autoScale: 'exact', plotZoom: false, plotPan: false }],
                 yaxes: [{ autoScale: 'exact' }],
-                zoom: { interactive: true, active: true, amount: 10 },
+                zoom: { interactive: true, active: true, amount: 10, enableTouch: true },
                 pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
             });
 
@@ -975,6 +975,48 @@ describe("flot touch navigate plugin", function () {
           expect(yaxis.min).toBe(previousYmin);
           expect(yaxis.max).toBe(previousYmax);
         });
+
+        it('can disable pinch', function() {
+          var oldTouchZoom = options.zoom.enableTouch;
+          options.zoom.enableTouch = false;
+
+          plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+          ], options);
+
+          var eventHolder = plot.getEventHolder(),
+          xaxis = plot.getXAxes()[0],
+          yaxis = plot.getYAxes()[0];
+
+          var initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 5 }],
+              initialCoords = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x + 1, canvasCoords[0].y + 1),
+              ],
+              finalCoordsPinch = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x + 1, canvasCoords[1].y + 1),
+              ];
+
+          //simulate pinch
+          simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchmove');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchend');
+
+          expect(xaxis.min).toBe(initialXmin);
+          expect(xaxis.max).toBe(initialXmax);
+          expect(yaxis.min).toBe(initialYmin);
+          expect(yaxis.max).toBe(initialYmax);
+
+          options.zoom.enableTouch = oldTouchZoom;
+        })
     });
 
     describe('doubleTap', function() {

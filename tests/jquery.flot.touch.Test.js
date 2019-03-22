@@ -28,6 +28,36 @@ describe("flot touch plugin", function () {
         expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
     });
 
+    it('do not stop origin touch event propagation if it is allowed', () => {	
+        jasmine.clock().install().mockDate();	
+
+        var oldPropagateSupportedGesture = options.propagateSupportedGesture ;	
+        options.propagateSupportedGesture = true;	
+
+        plot = $.plot(placeholder, [[]], options);	
+        var eventHolder = plot.getEventHolder(),	
+            spy = jasmine.createSpy('origin touch event handler');	
+
+        eventHolder.parentNode.addEventListener('touchstart', spy, { once: true });	
+        eventHolder.parentNode.addEventListener('touchmove', spy, { once: true });	
+        eventHolder.parentNode.addEventListener('touchend', spy, { once: true });
+
+        var bubbleTouchEvents = [
+            new UIEvent('touchstart', { bubbles: true }),
+            new UIEvent('touchmove', { bubbles: true }),
+            new UIEvent('touchend', { bubbles: true }),
+        ];
+        bubbleTouchEvents.forEach((event) => {
+            event.touches = [{ identifier: 0, target: eventHolder }];
+            eventHolder.dispatchEvent(event);
+        });
+
+        expect(spy).toHaveBeenCalledTimes(3);	
+
+        options.propagateSupportedGesture = oldPropagateSupportedGesture;	
+        jasmine.clock().uninstall();	
+    });
+
     describe('long tap', function() {
 
         beforeEach(function() {

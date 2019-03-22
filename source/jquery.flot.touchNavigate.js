@@ -4,9 +4,15 @@
     'use strict';
 
     var options = {
+        zoom: {
+            enableTouch: false
+        },
         pan: {
             enableTouch: false,
             touchMode: 'manual'
+        },
+        recenter: {
+            enableTouch: true
         }
     };
 
@@ -31,21 +37,27 @@
                 navigationConstraint: 'unconstrained',
                 initialState: null,
             },
-            useManualPan = options.pan.touchMode === 'manual',
+            useManualPan = options.pan.interactive && options.pan.touchMode === 'manual',
             smartPanLock = options.pan.touchMode === 'smartLock',
-            useSmartPan = smartPanLock || options.pan.touchMode === 'smart',
+            useSmartPan = options.pan.interactive && (smartPanLock || options.pan.touchMode === 'smart'),
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
-            if (o.pan.interactive) {
-                eventHolder[0].addEventListener('panstart', pan.start, false);
-                eventHolder[0].addEventListener('pandrag', pan.drag, false);
-                eventHolder[0].addEventListener('panend', pan.end, false);
+            if (o.zoom.interactive && o.zoom.enableTouch) {
                 eventHolder[0].addEventListener('pinchstart', pinch.start, false);
                 eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
                 eventHolder[0].addEventListener('pinchend', pinch.end, false);
+            }
+
+            if (o.pan.interactive && o.pan.enableTouch) {
+                eventHolder[0].addEventListener('panstart', pan.start, false);
+                eventHolder[0].addEventListener('pandrag', pan.drag, false);
+                eventHolder[0].addEventListener('panend', pan.end, false);
+            }
+
+            if ((o.recenter.interactive && o.recenter.enableTouch)) {
                 eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
             }
         }
@@ -152,15 +164,14 @@
 
         doubleTap = {
             recenterPlot: function(e) {
-                if (e && e.detail && e.detail.type === 'touchmove') {
-                    // do not recenter during touch moving;
-                    return;
+                if (e && e.detail && e.detail.type === 'touchstart') {
+                    // only do not recenter for touch start;
+                    recenterPlotOnDoubleTap(plot, e, gestureState, navigationState);
                 }
-                recenterPlotOnDoubleTap(plot, e, gestureState, navigationState);
             }
         };
 
-        if (options.pan.enableTouch === true) {
+        if (options.pan.enableTouch === true || options.zoom.enableTouch === true) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
         }
@@ -187,7 +198,16 @@
         if ((navigationState.currentTouchedAxis === 'x' && navigationState.prevTouchedAxis === 'x') ||
             (navigationState.currentTouchedAxis === 'y' && navigationState.prevTouchedAxis === 'y') ||
             (navigationState.currentTouchedAxis === 'none' && navigationState.prevTouchedAxis === 'none')) {
+            var event;
+
             plot.recenter({ axes: navigationState.touchedAxis });
+
+            if (navigationState.touchedAxis) {
+                event = new $.Event('re-center', { detail: { axisTouched: navigationState.touchedAxis } });
+            } else {
+                event = new $.Event('re-center', { detail: e });
+            }
+            plot.getPlaceholder().trigger(event);
         }
     }
 

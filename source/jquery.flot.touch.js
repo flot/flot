@@ -5,9 +5,7 @@
     'use strict';
 
     var options = {
-        pan: {
-            enableTouch: false
-        }
+        propagateSupportedGesture: false
     };
 
     function init(plot) {
@@ -22,7 +20,7 @@
                 prevTap: { x: 0, y: 0 },
                 currentTap: { x: 0, y: 0 },
                 interceptedLongTap: false,
-                allowEventPropagation: false,
+                isUnsupportedGesture: false,
                 prevTapTime: null,
                 tapStartTime: null,
                 longTapTriggerId: null
@@ -75,8 +73,6 @@
                 case 'tap':
                     tap[e.type](e);
                     break;
-                default:
-                    break;
             }
         }
 
@@ -107,18 +103,18 @@
             },
 
             touchmove: function(e) {
-                preventEventPropagation(e);
+                preventEventBehaviors(e);
 
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
 
-                if (!gestureState.allowEventPropagation) {
+                if (!gestureState.isUnsupportedGesture) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
                 }
             },
 
             touchend: function(e) {
-                preventEventPropagation(e);
+                preventEventBehaviors(e);
 
                 if (wasPinchEvent(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
@@ -135,21 +131,21 @@
             },
 
             touchmove: function(e) {
-                preventEventPropagation(e);
+                preventEventBehaviors(e);
                 gestureState.twoTouches = isPinchEvent(e);
-                if (!gestureState.allowEventPropagation) {
+                if (!gestureState.isUnsupportedGesture) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
                 }
             },
 
             touchend: function(e) {
-                preventEventPropagation(e);
+                preventEventBehaviors(e);
             }
         };
 
         var doubleTap = {
             onDoubleTap: function(e) {
-                preventEventPropagation(e);
+                preventEventBehaviors(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
         };
@@ -205,7 +201,7 @@
             touchend: function(e) {
                 if (tap.isTap(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('tap', { detail: e }));
-                    preventEventPropagation(e);
+                    preventEventBehaviors(e);
                 }
             },
 
@@ -221,7 +217,7 @@
             }
         };
 
-        if (options.pan.enableTouch === true) {
+        if (options.pan.enableTouch === true || options.zoom.enableTouch) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
         };
@@ -275,10 +271,12 @@
             return false;
         }
 
-        function preventEventPropagation(e) {
-            if (!gestureState.allowEventPropagation) {
+        function preventEventBehaviors(e) {
+            if (!gestureState.isUnsupportedGesture) {
                 e.preventDefault();
-                e.stopPropagation();
+                if (!plot.getOptions().propagateSupportedGesture) {
+                    e.stopPropagation();
+                }
             }
         }
 
@@ -296,9 +294,9 @@
 
         function updateOnMultipleTouches(e) {
             if (e.touches.length >= 3) {
-                gestureState.allowEventPropagation = true;
+                gestureState.isUnsupportedGesture = true;
             } else {
-                gestureState.allowEventPropagation = false;
+                gestureState.isUnsupportedGesture = false;
             }
         }
 
