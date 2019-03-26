@@ -24,6 +24,8 @@
     "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
     "concat": "^1.0.3",
+    "file-exist": "0.0.4",
+    "files-exist": "^1.1.0",
     "gulp": "^4.0.0",
     "gulp-babel": "^8.0.0",
     "gulp-concat": "^2.6.1",
@@ -46,8 +48,5 @@
     "tmp": "0.0.33",
     "webcharts-development-settings": "^1.0.9"
   },
-  "dependencies": {
-    "file-exist": "0.0.4",
-    "files-exist": "^1.1.0"
-  }
+  "dependencies": {}
 }
