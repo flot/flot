@@ -98,7 +98,7 @@ the tooltip from webcharts).
 
         function shutdown(plot, eventHolder) {
             eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
-            eventHolder[0].removeEventListener('tap', triggerCleanupEvent);
+            eventHolder[0].removeEventListener('touchevent', triggerCleanupEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
