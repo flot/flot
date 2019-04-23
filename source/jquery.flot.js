@@ -2495,7 +2495,7 @@ Licensed under the MIT license.
 
                 if (s.bars.show && !item) { // no other point can be nearby
                     var foundIndex = findNearbyBar(s, mouseX, mouseY);
-                    if (foundIndex) item = [i, foundIndex];
+                    if (foundIndex !== null) item = [i, foundIndex];
                 }
             }
 
