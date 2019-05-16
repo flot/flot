@@ -2709,7 +2709,7 @@ Licensed under the MIT license.
             executeHooks(hooks.drawOverlay, [octx, overlay]);
             var event = new CustomEvent('onDrawingDone');
             plot.getEventHolder().dispatchEvent(event);
-            plot.getPlaceholder().trigger('onDrawingDone');
+            plot.getPlaceholder().trigger('drawingdone');
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
