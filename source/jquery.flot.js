@@ -46,7 +46,7 @@ Licensed under the MIT license.
             axis.tickDecimals = precision;
         }
 
-        var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
+        var factor = axis.tickDecimals ? parseFloat('1e' + axis.tickDecimals) : 1,
             formatted = "" + Math.round(value * factor) / factor;
 
         // If tickDecimals was specified, ensure that we have exactly that
@@ -68,7 +68,7 @@ Licensed under the MIT license.
         var expPosition = ("" + value).indexOf("e"),
             exponentValue = parseInt(("" + value).substr(expPosition + 1)),
             tenExponent = expPosition !== -1 ? exponentValue : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
-            roundWith = Math.pow(10, tenExponent),
+            roundWith = parseFloat('1e' + tenExponent),
             x = value / roundWith;
 
         if (precision) {
@@ -1517,7 +1517,7 @@ Licensed under the MIT license.
                 dec = tickDecimals;
             }
 
-            var magn = Math.pow(10, -dec),
+            var magn = parseFloat('1e-' + dec),
                 norm = delta / magn;
 
             if (norm > 2.25 && norm < 3 && (dec + 1) <= tickDecimals) {
@@ -1537,7 +1537,7 @@ Licensed under the MIT license.
                 dec = tickDecimals;
             }
 
-            var magn = Math.pow(10, -dec),
+            var magn = parseFloat('1e-' + dec),
                 norm = delta / magn, // norm is between 1.0 and 10.0
                 size;
 
