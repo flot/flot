@@ -1517,7 +1517,7 @@ Licensed under the MIT license.
                 dec = tickDecimals;
             }
 
-            var magn = parseFloat('1e-' + (-dec)),
+            var magn = parseFloat('1e' + (-dec)),
                 norm = delta / magn;
 
             if (norm > 2.25 && norm < 3 && (dec + 1) <= tickDecimals) {
@@ -1537,7 +1537,7 @@ Licensed under the MIT license.
                 dec = tickDecimals;
             }
 
-            var magn = parseFloat('1e-' + (-dec)),
+            var magn = parseFloat('1e' + (-dec)),
                 norm = delta / magn, // norm is between 1.0 and 10.0
                 size;
 
