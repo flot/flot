@@ -186,11 +186,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             plot.hooks.draw.push(function(plot, ctx) {
                 $.each(plot.getAxes(), function(flotAxisName, axis) {
                     var opts = axis.options;
+                    var axisName = axis.direction + axis.n;
                     if (!opts || !opts.axisLabel || !axis.show) {
+                        if (typeof axisLabels[axisName] !== 'undefined') {axisLabels[axisName].cleanup();}
                         return;
                     }
-
-                    var axisName = axis.direction + axis.n;
                     axisLabels[axisName].draw(axis.box);
                 });
             });
