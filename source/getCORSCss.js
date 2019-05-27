@@ -7,6 +7,27 @@
         root.getCrossDomainCSSRules = factory();
     }
 }(typeof window !== 'undefined' ? window : this, function () {
+    /**
+     * Detect if document already has a "crossOrigin" link in document, in order to not creating same link multiple times .
+     * @param {Object} document means current document element.
+     * @param {String} link A href string which not set "crossOrigin" attr and is CORS compared to current domain.
+     * @returns {Boolean} A boolean that returns true if the link already set "crossOrigin" attr, or false if not.
+     */
+    function isCrossOriginEnabledForLink(document, link) {
+        for (let i = 0; i < document.styleSheets.length; i++) {
+            if (document.styleSheets[i].href === link && document.styleSheets[i].ownerNode.crossOrigin) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Create a new link element which is CORS and set crossOrigin attribute.
+     * @param {Object} document which is current document element.
+     * @param {String} link A href string which not set "crossOrigin" attr and is CORS compared to current domain.
+     * @returns {Promise} A promise that resolves to load a new link element in document.
+     */
     function enableCrossOriginOnLinkAsync(document, link) {
         if (!isCrossOriginEnabledForLink(document, link)) {
             return new Promise((resolve) => {
@@ -23,14 +44,6 @@
         }
     }
 
-    function isCrossOriginEnabledForLink(document, link) {
-        for (let i = 0; i < document.styleSheets.length; i++) {
-            if (document.styleSheets[i].href === link && document.styleSheets[i].ownerNode.crossOrigin) {
-                return true;
-            }
-        }
-        return false;
-    }
     const getCrossDomainCSSRules = async function(document) {
         let rulesList = [];
         for (let i = 0; i < document.styleSheets.length; i++) {
