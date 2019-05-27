@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/flot/flot#readme",
   "devDependencies": {
+    "@babel/polyfill": "^7.4.4",
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.4.0",
     "@babel/plugin-external-helpers": "^7.2.0",

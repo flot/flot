@@ -7,6 +7,8 @@ var maps = require('gulp-sourcemaps');
 var gulpSequence = require('gulp-sequence');
 
 var files = [
+    './node_modules/regenerator-runtime/runtime.js',
+    './source/getCORSCss.js',
     './source/jquery.canvaswrapper.js',
     './source/jquery.colorhelpers.js',
     './source/jquery.flot.js',
@@ -46,7 +48,6 @@ gulp.task('build_flot_minified', function() {
             ]
         }))
         .pipe(concat('jquery.flot.js'))
-        .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/es5'));
 });
