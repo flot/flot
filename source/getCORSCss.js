@@ -1,12 +1,12 @@
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
+(function(root, factory) {
+    if (typeof define === 'function' && define.amd) {
         define(factory);
-    } else if (typeof exports === "object") {
+    } else if (typeof exports === 'object') {
         module.exports = factory();
     } else {
         root.getCrossDomainCSSRules = factory();
     }
-}(typeof window !== 'undefined' ? window : this, function () {
+})(typeof window !== 'undefined' ? window : this, () => {
     /**
      * Detect if document already has a "crossOrigin" link in document, in order to not creating same link multiple times .
      * @param {Object} document means current document element.
@@ -23,45 +23,65 @@
     }
 
     /**
+     * Delete unused CORS link once the replaced link loads ready.
+     * @param {Object} document means current document element.
+     * @param {String} link A href string which not set "crossOrigin" attr and is CORS compared to current domain.
+     */
+    function deleteUnusedLink(document, link) {
+        const linkList = document.getElementsByTagName('link');
+        for (let i = 0; i < linkList.length; i++) {
+            if (linkList[i].href === link && !linkList[i].crossOrigin) {
+                linkList[i].remove();
+                return;
+            }
+        }
+    }
+
+    const promiseMap = new Map();
+    /**
      * Create a new link element which is CORS and set crossOrigin attribute.
      * @param {Object} document which is current document element.
      * @param {String} link A href string which not set "crossOrigin" attr and is CORS compared to current domain.
      * @returns {Promise} A promise that resolves to load a new link element in document.
      */
     function enableCrossOriginOnLinkAsync(document, link) {
-        if (!isCrossOriginEnabledForLink(document, link)) {
-            return new Promise((resolve) => {
-                let newLink = document.createElement('link');
+        if (!promiseMap.has(link) && !isCrossOriginEnabledForLink(document, link)) {
+            const linkPromise = new Promise((resolve) => {
+                const newLink = document.createElement('link');
                 newLink.rel = 'stylesheet';
                 newLink.href = link;
-                newLink.crossOrigin = "anonymous";
+                newLink.crossOrigin = 'anonymous';
                 newLink.onload = function() {
-                    console.log(link + ' updated');
+                    promiseMap.delete(link);
+                    deleteUnusedLink(document, link);
                     resolve();
                 };
                 document.querySelector('head').appendChild(newLink);
             });
+            promiseMap.set(link, linkPromise);
+            return linkPromise;
         }
+        return promiseMap.get(link);
     }
 
     const getCrossDomainCSSRules = async function(document) {
-        let rulesList = [];
+        const rulesList = [];
         for (let i = 0; i < document.styleSheets.length; i++) {
             // in Chrome, the external CSS files are empty when the page is directly loaded from disk
             let rules = [];
             try {
                 rules = document.styleSheets[i].cssRules;
-            }catch (e) {
-                console.log(e);
+            } catch (err) {
                 await enableCrossOriginOnLinkAsync(document, document.styleSheets[i].href);
+                i--;
             }
             for (let j = 0; j < rules.length; j++) {
-                let rule = rules[j];
+                const rule = rules[j];
                 rulesList.push(rule.cssText);
             }
         }
-        return [...new Set(rulesList)];
-    }
+        return rulesList;
+    };
 
     return getCrossDomainCSSRules;
-}));
+});
