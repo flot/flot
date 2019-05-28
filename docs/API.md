@@ -1193,11 +1193,15 @@ can call:
     redraws (e.g. from a mousemove). You can get to the overlay by
     setting up a drawOverlay hook.
     This function will also trigger the dispatching of the
-    'onDrawingDone' custom event, which can be used to notify listeners
-    (drawOverlay hooks) about the finishing of a drawing operation.
+    'onDrawingDone' custom event on the eventholder, and 'drawingdone'
+    event on the placeholder, which can be used to notify listeners
+    about the finishing of a drawing operation (drawOverlay hooks).
     Use addEventListener('onDrawingDone', callback) and
-    removeEventListener('onDrawingDone', callback), to register and unregister
-    handlers for 'onDrawingDone' event.
+    removeEventListener('onDrawingDone', callback) to register and
+    unregister handlers for 'onDrawingDone' event, or use
+    $('#placeholder').bind('drawingdone', callback) and
+    $('#placeholder').unbind('drawingdone', callback) to 
+    register and unregister handlers for 'drawingdone' event.
 
  - width()/height()
 
@@ -1648,11 +1652,16 @@ hooks in the plugins bundled with Flot.
     metrics computed by Flot, e.g. plot.width()/plot.height(). See the
     crosshair plugin for an example.
 
-    This hook dispatches the 'onDrawingDone' custom event.
-    It notifies listeners about the finishing of a drawing operation.
-    Use addEventListener('onDrawingDone', callback) and
-    removeEventListener('onDrawingDone', callback), to register and unregister
-    handlers for 'onDrawingDone' event.
+    After this hook executes, the dispatching of the 'onDrawingDone'
+    custom event on the eventholder will be triggered, as well as the
+    'drawingdone' event will be fired on the placeholder, which can
+    be used to notify listeners about the finishing of a drawing
+    operation. Use addEventListener('onDrawingDone', callback) and
+    removeEventListener('onDrawingDone', callback) to register and
+    unregister handlers for 'onDrawingDone' event, or use
+    $('#placeholder').bind('drawingdone', callback) and
+    $('#placeholder').unbind('drawingdone', callback) to
+    register and unregister handlers for 'drawingdone' event.
 
  - resize   [phase 7]
 
