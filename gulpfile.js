@@ -4,10 +4,12 @@ var uglify = require('gulp-uglify');
 var babel = require('gulp-babel');
 var filesExist = require('files-exist');
 var maps = require('gulp-sourcemaps');
+var babelify = require("babelify");
+var browserify = require('browserify');
 var gulpSequence = require('gulp-sequence');
+var source = require('vinyl-source-stream');
 
 var files = [
-    './node_modules/regenerator-runtime/runtime.js',
     './source/getCORSCss.js',
     './source/jquery.canvaswrapper.js',
     './source/jquery.colorhelpers.js',
@@ -39,17 +41,42 @@ gulp.task('build_flot_source', function() {
         .pipe(gulp.dest('dist/source'));
 });
 
-gulp.task('build_flot_minified', function() {
+// gulp.task('build_flot_minified', function() {
+//     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
+//         .pipe(maps.init())
+//         .pipe(babel({
+//             "presets": [
+//                 "@babel/preset-env"
+//             ]
+//         }))
+//         .pipe(concat('jquery.flot.js'))
+//         .pipe(uglify())
+//         .pipe(maps.write('./'))
+//         .pipe(gulp.dest('dist/es5'));
+// });
+
+gulp.task('build_flot_minified_start', function() {
     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
-        .pipe(maps.init())
-        .pipe(babel({
-            "presets": [
-                "@babel/preset-env"
-            ]
-        }))
         .pipe(concat('jquery.flot.js'))
+        .pipe(gulp.dest('dist/es5'));
+});
+
+gulp.task('browserify_flot', function() {
+    var b = browserify({
+        entries: "dist/es5/jquery.flot.js"
+    });
+    return b.transform(babelify, {presets: ["@babel/preset-env"]})
+        .bundle()
+        .pipe(source("jquery.flot.js"))
+        .pipe(gulp.dest("dist/es5"));
+});
+
+gulp.task('build_flot_minified_end', function() {
+    return gulp.src(filesExist("dist/es5/jquery.flot.js", { exceptionMessage: 'Missing file' }))
+        .pipe(maps.init())
+        .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/es5'));
 });
 
-gulp.task('build', gulp.series('build_flot_source', 'build_flot_minified'));
+gulp.task('build', gulp.series('build_flot_source', 'build_flot_minified_start', 'browserify_flot', 'build_flot_minified_end'));
