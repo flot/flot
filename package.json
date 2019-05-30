@@ -19,6 +19,10 @@
   },
   "homepage": "https://github.com/flot/flot#readme",
   "devDependencies": {
+    "karma-browserify": "^6.0.0",
+    "babelify": "~10.0.0",
+    "vinyl-source-stream": "~2.0.0",
+    "browserify": "~16.2.3",
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.4.0",
     "@babel/plugin-external-helpers": "^7.2.0",
@@ -47,5 +51,7 @@
     "tmp": "0.0.33",
     "webcharts-development-settings": "^1.0.9"
   },
-  "dependencies": {}
+  "dependencies": {
+    "regenerator-runtime": "~0.13.2"
+  }
 }
