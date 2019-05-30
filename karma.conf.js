@@ -59,10 +59,11 @@ module.exports = function(config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['jasmine-jquery', 'jasmine'],
+        frameworks: ['jasmine-jquery', 'jasmine', 'browserify'],
 
         // list of files / patterns to load in the browser
         files: sources.concat([
+            'source/getCORSCss.js',
             'node_modules/webcharts-development-settings/testsUtils/*.js',
             { pattern: 'tests/svgstyle.css', included: true, served: true },
             'tests/*.Test.js'
@@ -75,9 +76,12 @@ module.exports = function(config) {
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
             '*.js': ['eslint'],
-            'tests/**/*.js': ['eslint']
+            'tests/**/*.js': ['eslint'],
+            'source/*.js' : ['browserify'],
         },
-
+        browserify: {
+            transform: [ ['babelify', {'presets': ["@babel/preset-env"]}]]
+        },
         eslint: {
             stopOnError: config.stopOnEsLintError ? true : false,
             showWarnings: true,

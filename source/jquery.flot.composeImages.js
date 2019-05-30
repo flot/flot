@@ -1,3 +1,5 @@
+import regeneratorRuntime from "regenerator-runtime";
+import {getCrossDomainCSSRules} from "./getCORSCss";
 /** ## jquery.flot.composeImages.js
 
 This plugin is used to expose a function used to overlap several canvases and

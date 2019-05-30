@@ -8,6 +8,8 @@ var babelify = require("babelify");
 var browserify = require('browserify');
 var gulpSequence = require('gulp-sequence');
 var source = require('vinyl-source-stream');
+var fs = require('fs');
+
 
 var files = [
     './source/getCORSCss.js',
@@ -35,25 +37,26 @@ var files = [
     './source/jquery.flot.legend.js'
 ];
 
+gulp.task('modify jquery.flot.composeImages.js first', async function() {
+    fs.readFile('./source/jquery.flot.composeImages.js', (err, data) => {
+        if (err) {
+            return console.log(err);
+        }
+        var content = data.toString();
+        var new_content = content.replace(`import {getCrossDomainCSSRules} from "./getCORSCss";`,`//import {getCrossDomainCSSRules} from "./getCORSCss";`);
+        fs.writeFile('./source/jquery.flot.composeImages.js', new_content, (err) => {
+            if (err) {
+                return console.error(err);
+            }
+        })
+    });
+});
+
 gulp.task('build_flot_source', function() {
     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
         .pipe(concat('jquery.flot.js'))
         .pipe(gulp.dest('dist/source'));
 });
-
-// gulp.task('build_flot_minified', function() {
-//     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
-//         .pipe(maps.init())
-//         .pipe(babel({
-//             "presets": [
-//                 "@babel/preset-env"
-//             ]
-//         }))
-//         .pipe(concat('jquery.flot.js'))
-//         .pipe(uglify())
-//         .pipe(maps.write('./'))
-//         .pipe(gulp.dest('dist/es5'));
-// });
 
 gulp.task('build_flot_minified_start', function() {
     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
@@ -74,9 +77,24 @@ gulp.task('browserify_flot', function() {
 gulp.task('build_flot_minified_end', function() {
     return gulp.src(filesExist("dist/es5/jquery.flot.js", { exceptionMessage: 'Missing file' }))
         .pipe(maps.init())
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/es5'));
 });
 
-gulp.task('build', gulp.series('build_flot_source', 'build_flot_minified_start', 'browserify_flot', 'build_flot_minified_end'));
+gulp.task('modify jquery.flot.composeImages.js in the end', async function() {
+    fs.readFile('./source/jquery.flot.composeImages.js', (err, data) => {
+        if (err) {
+            return console.log(err);
+        }
+        var content = data.toString();
+        var new_content = content.replace(`//import {getCrossDomainCSSRules} from "./getCORSCss";`,`import {getCrossDomainCSSRules} from "./getCORSCss";`);
+        fs.writeFile('./source/jquery.flot.composeImages.js', new_content, (err) => {
+            if (err) {
+                return console.error(err);
+            }
+        })
+    });
+});
+
+gulp.task('build', gulp.series('modify jquery.flot.composeImages.js first', 'build_flot_source', 'build_flot_minified_start', 'browserify_flot', 'build_flot_minified_end', 'modify jquery.flot.composeImages.js in the end'));
