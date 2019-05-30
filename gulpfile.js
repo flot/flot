@@ -77,7 +77,7 @@ gulp.task('browserify_flot', function() {
 gulp.task('build_flot_minified_end', function() {
     return gulp.src(filesExist("dist/es5/jquery.flot.js", { exceptionMessage: 'Missing file' }))
         .pipe(maps.init())
-        // .pipe(uglify())
+        .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/es5'));
 });
