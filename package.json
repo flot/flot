@@ -1,6 +1,6 @@
 {
   "name": "flot",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "main": "dist/es5/jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError",
