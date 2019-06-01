@@ -61,15 +61,46 @@ function enableCrossOriginOnLinkAsync(document, link) {
     return promiseMap.get(link);
 }
 
+/**
+ * Create a new link element which is CORS and set crossOrigin attribute on Safari.
+ * Safari will create the new link and load ready synchronously.
+ * @param {Object} document which is current document element.
+ * @param {String} link A href string which not set "crossOrigin" attr and is CORS compared to current domain.
+ */
+function enableSafariCrossOriginOnLinkAsync(document, link) {
+    if (!promiseMap.has(link) && !isCrossOriginEnabledForLink(document, link)) {
+        const newLink = document.createElement('link');
+        newLink.rel = 'stylesheet';
+        newLink.href = link;
+        newLink.crossOrigin = 'anonymous';
+        const linkBundle = getCrossOriginLinkAndParent(document, link);
+        linkBundle.parentNode.insertBefore(newLink, linkBundle.node);
+        linkBundle.node.remove();
+    }
+}
+
 export const getCrossDomainCSSRules = async function(document) {
     const rulesList = [];
     for (let i = 0; i < document.styleSheets.length; i++) {
         // in Chrome, the external CSS files are empty when the page is directly loaded from disk
         let rules = [];
+        let isSafari = false;
         try {
             rules = document.styleSheets[i].cssRules;
+            if (rules === null
+                && document.styleSheets[i].href
+                && !document.styleSheets[i].href.includes(document.styleSheets[i].ownerNode.baseURI)
+                && !document.styleSheets[i].ownerNode.crossOrigin) {
+                rules = [];
+                isSafari = true;
+                throw new TypeError('on Safari, the CORS cssRule Exception will be ignored and return null, which should be an error');
+            }
         } catch (err) {
-            await enableCrossOriginOnLinkAsync(document, document.styleSheets[i].href);
+            if (isSafari) {
+                enableSafariCrossOriginOnLinkAsync(document, document.styleSheets[i].href);
+            } else {
+                await enableCrossOriginOnLinkAsync(document, document.styleSheets[i].href);
+            }
             i--;
         }
         for (let j = 0; j < rules.length; j++) {
