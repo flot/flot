@@ -68,7 +68,7 @@ function enableCrossOriginOnLinkAsync(document, link) {
  * @param {String} link A href string which not set "crossOrigin" attr and is CORS compared to current domain.
  */
 function enableSafariCrossOriginOnLinkAsync(document, link) {
-    if (!promiseMap.has(link) && !isCrossOriginEnabledForLink(document, link)) {
+    if (!isCrossOriginEnabledForLink(document, link)) {
         const newLink = document.createElement('link');
         newLink.rel = 'stylesheet';
         newLink.href = link;
