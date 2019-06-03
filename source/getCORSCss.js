@@ -77,7 +77,7 @@ export const getCrossDomainCSSRules = async function(document) {
                 && !document.styleSheets[i].ownerNode.crossOrigin) {
                 rules = [];
                 //On Safari, the CORS cssRule Exception will be ignored and return null, so we manually throw the exception for Safari to keep align with other browsers
-                throw new DOMException(`Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules`, 'SecurityError');
+                throw new DOMException("Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules", 'SecurityError');
             }
         } catch (err) {
             await enableCrossOriginOnLinkAsync(document, document.styleSheets[i].href);
