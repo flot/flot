@@ -785,6 +785,10 @@ Licensed under the MIT license.
                     points: []
                 };
 
+                if (prevSeries && prevSeries[i] && prevSeries[i].datapoints && prevSeries[i].datapoints.pointsize) {
+                    s.datapoints.pointsize = prevSeries[i].datapoints.pointsize;
+                }
+                
                 if (s.datapoints.points.length === 0) {
                     s.datapoints.points = reusePoints(prevSeries, i);
                 }
