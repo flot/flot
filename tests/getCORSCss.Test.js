@@ -8,8 +8,7 @@ describe("getCrossDomainCSSRules", function() {
         });
         expect(() => {document.styleSheets[2].cssRules;}).toThrow(new DOMException("Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules", 'SecurityError'));
         await getCrossDomainCSSRules(document);
-        expect(document.styleSheets[2].ownerNode.crossOrigin).toBe('anonymous');
-        expect(document.styleSheets[1].ownerNode.crossOrigin).toBeNull();
-
+        expect(document.styleSheets[2].ownerNode.crossOrigin).toBe('anonymous'); // should set crossOrigin attr successfully.
+        expect(document.styleSheets[1].ownerNode.crossOrigin).toBeNull(); //should not change if no exception threw.
     });
 });
