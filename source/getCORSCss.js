@@ -54,7 +54,6 @@ function enableCrossOriginOnLinkAsync(document, link) {
                 resolve();
             };
             newLink.onerror = function() {
-                window.console.log('error link');
                 reject();
             };
             linkBundle.parentNode.insertBefore(newLink, linkBundle.node);
