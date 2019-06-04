@@ -63,9 +63,9 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
-            'source/getCORSCss.js',
             'node_modules/webcharts-development-settings/testsUtils/*.js',
             { pattern: 'tests/svgstyle.css', included: true, served: true },
+            { pattern: 'tests/corscss.css', included: true, served: true },
             'tests/*.Test.js'
         ]),
 
@@ -77,6 +77,7 @@ module.exports = function(config) {
         preprocessors: {
             '*.js': ['eslint'],
             'tests/**/*.js': ['eslint'],
+            'tests/getCORSCss.Test.js': ['eslint', 'browserify'],
             'source/*.js' : ['browserify'],
         },
         browserify: {

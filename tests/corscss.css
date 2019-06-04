@@ -1,0 +1,5 @@
+/* Used in a test from getCORSCss.Test. */
+circle.FakeCORSCss {
+    stroke: whitesmoke;
+    stroke-width: 4px;
+}

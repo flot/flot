@@ -42,7 +42,7 @@ const promiseMap = new Map();
  */
 function enableCrossOriginOnLinkAsync(document, link) {
     if (!promiseMap.has(link) && !isCrossOriginEnabledForLink(document, link)) {
-        const linkPromise = new Promise((resolve) => {
+        const linkPromise = new Promise((resolve, reject) => {
             const newLink = document.createElement('link');
             newLink.rel = 'stylesheet';
             newLink.href = link;
@@ -52,6 +52,9 @@ function enableCrossOriginOnLinkAsync(document, link) {
                 promiseMap.delete(link);
                 linkBundle.node.remove();
                 resolve();
+            };
+            newLink.onerror = function() {
+                reject();
             };
             linkBundle.parentNode.insertBefore(newLink, linkBundle.node);
         });
@@ -68,6 +71,14 @@ export const getCrossDomainCSSRules = async function(document) {
         let rules = [];
         try {
             rules = document.styleSheets[i].cssRules;
+            if (rules === null
+                && document.styleSheets[i].href
+                && !document.styleSheets[i].href.includes(document.styleSheets[i].ownerNode.baseURI)
+                && !document.styleSheets[i].ownerNode.crossOrigin) {
+                rules = [];
+                //On Safari, the CORS cssRule Exception will be ignored and return null, so we manually throw the exception for Safari to keep align with other browsers
+                throw new DOMException("Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules", 'SecurityError');
+            }
         } catch (err) {
             await enableCrossOriginOnLinkAsync(document, document.styleSheets[i].href);
             i--;
