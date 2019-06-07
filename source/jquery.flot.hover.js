@@ -35,247 +35,232 @@ the tooltip from webcharts).
     };
 
     var browser = $.plot.browser;
+    var highlights = [];
 
-    function init(plot) {
-        plot.hooks.processOptions.push(initHover);
+    var eventType = {
+        click: 'click',
+        hover: 'hover'
     }
 
-    function initHover(plot, options) {
-        var highlights = [];
+    var lastMouseMoveEvent;
 
-        var eventType = {
-            click: 'click',
-            hover: 'hover'
+    var plot;
+
+    function bindEvents(plot, eventHolder) {
+        var o = plot.getOptions();
+
+        if (o.grid.hoverable || o.grid.clickable) {
+            eventHolder[0].addEventListener('touchevent', triggerCleanupEvent, false);
+            eventHolder[0].addEventListener('tap', tap.generatePlothoverEvent, false);
         }
 
-        var lastMouseMoveEvent = plot.getPlaceholder()[0].lastMouseMoveEvent;
+        if (o.grid.clickable) {
+            eventHolder.bind("click", onClick);
+        }
 
-        plot.highlight = highlight;
-        plot.unhighlight = unhighlight;
+        if (o.grid.hoverable) {
+            eventHolder.bind("mousemove", onMouseMove);
 
-        var tap = {
-            generatePlothoverEvent: function (e) {
-                var o = plot.getOptions(),
-                    newEvent = new CustomEvent('mouseevent');
+            // Use bind, rather than .mouseleave, because we officially
+            // still support jQuery 1.2.6, which doesn't define a shortcut
+            // for mouseenter or mouseleave.  This was a bug/oversight that
+            // was fixed somewhere around 1.3.x.  We can return to using
+            // .mouseleave when we drop support for 1.2.6.
 
-                //transform from touch event to mouse event format
-                newEvent.pageX = e.detail.changedTouches[0].pageX;
-                newEvent.pageY = e.detail.changedTouches[0].pageY;
-                newEvent.clientX = e.detail.changedTouches[0].clientX;
-                newEvent.clientY = e.detail.changedTouches[0].clientY;
+            eventHolder.bind("mouseleave", onMouseLeave);
+        }
+    }
 
-                if (o.grid.hoverable) {
-                    doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
-                }
-                return false;
+    function shutdown(plot, eventHolder) {
+        eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
+        eventHolder[0].removeEventListener('touchevent', triggerCleanupEvent);
+        eventHolder.unbind("mousemove", onMouseMove);
+        eventHolder.unbind("mouseleave", onMouseLeave);
+        eventHolder.unbind("click", onClick);
+        highlights = [];
+    }
+
+    var tap = {
+        generatePlothoverEvent: function (e) {
+            var o = plot.getOptions(),
+                newEvent = new CustomEvent('mouseevent');
+
+            //transform from touch event to mouse event format
+            newEvent.pageX = e.detail.changedTouches[0].pageX;
+            newEvent.pageY = e.detail.changedTouches[0].pageY;
+            newEvent.clientX = e.detail.changedTouches[0].clientX;
+            newEvent.clientY = e.detail.changedTouches[0].clientY;
+
+            if (o.grid.hoverable) {
+                doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
             }
-        };
-
-        function bindEvents(plot, eventHolder) {
-            var o = plot.getOptions();
-
-            if (o.grid.hoverable || o.grid.clickable) {
-                eventHolder[0].addEventListener('touchevent', triggerCleanupEvent, false);
-                eventHolder[0].addEventListener('tap', tap.generatePlothoverEvent, false);
-            }
-
-            if (options.grid.clickable) {
-                eventHolder.click(onClick);
-            }
-
-            if (options.grid.hoverable) {
-                eventHolder.mousemove(onMouseMove);
-
-                // Use bind, rather than .mouseleave, because we officially
-                // still support jQuery 1.2.6, which doesn't define a shortcut
-                // for mouseenter or mouseleave.  This was a bug/oversight that
-                // was fixed somewhere around 1.3.x.  We can return to using
-                // .mouseleave when we drop support for 1.2.6.
-
-                eventHolder.bind("mouseleave", onMouseLeave);
-            }
+            return false;
         }
+    };
 
-        function shutdown(plot, eventHolder) {
-            eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
-            eventHolder[0].removeEventListener('touchevent', triggerCleanupEvent);
-            eventHolder.unbind("mousemove", onMouseMove);
-            eventHolder.unbind("mouseleave", onMouseLeave);
-            eventHolder.unbind("click", onClick);
-            highlights = [];
-        }
-
-        function doTriggerClickHoverEvent(event, eventType, searchDistance) {
-            var series = plot.getData();
-            if (event !== undefined 
-                && series.length > 0 
-                && series[0].xaxis.c2p !== undefined 
-                && series[0].yaxis.c2p !== undefined) {
-                var eventToTrigger = "plot" + eventType;
-                var seriesFlag = eventType + "able";
-                triggerClickHoverEvent(eventToTrigger, event,
-                    function(i) {
-                        return series[i][seriesFlag] !== false;
-                    }, searchDistance);
-            }
-        }
-
-        if (options.grid.hoverable || options.grid.clickable) {
-            plot.hooks.bindEvents.push(bindEvents);
-            plot.hooks.shutdown.push(shutdown);
-            plot.hooks.drawOverlay.push(drawOverlay);
-            plot.hooks.processRawData.push(processRawData);
-        }
-
-        function onMouseMove(e) {
-            lastMouseMoveEvent = e;
-            plot.getPlaceholder()[0].lastMouseMoveEvent = e;
-            doTriggerClickHoverEvent(e, eventType.hover);
-        }
-
-        function onMouseLeave(e) {
-            lastMouseMoveEvent = undefined;
-            plot.getPlaceholder()[0].lastMouseMoveEvent = undefined;
-            triggerClickHoverEvent("plothover", e,
+    function doTriggerClickHoverEvent(event, eventType, searchDistance) {
+        var series = plot.getData();
+        if (event !== undefined 
+            && series.length > 0 
+            && series[0].xaxis.c2p !== undefined 
+            && series[0].yaxis.c2p !== undefined) {
+            var eventToTrigger = "plot" + eventType;
+            var seriesFlag = eventType + "able";
+            triggerClickHoverEvent(eventToTrigger, event,
                 function(i) {
-                    return false;
-                });
+                    return series[i][seriesFlag] !== false;
+                }, searchDistance);
+        }
+    }
+
+    function onMouseMove(e) {
+        lastMouseMoveEvent = e;
+        plot.getPlaceholder()[0].lastMouseMoveEvent = e;
+        doTriggerClickHoverEvent(e, eventType.hover);
+    }
+
+    function onMouseLeave(e) {
+        lastMouseMoveEvent = undefined;
+        plot.getPlaceholder()[0].lastMouseMoveEvent = undefined;
+        triggerClickHoverEvent("plothover", e,
+            function(i) {
+                return false;
+            });
+    }
+
+    function onClick(e) {
+        doTriggerClickHoverEvent(e, eventType.click);
+    }
+
+    function triggerCleanupEvent() {
+        plot.unhighlight();
+        plot.getPlaceholder().trigger('plothovercleanup');
+    }
+
+    // trigger click or hover event (they send the same parameters
+    // so we share their code)
+    function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
+        var options = plot.getOptions(),
+            offset = plot.offset(),
+            page = browser.getPageXY(event),
+            canvasX = page.X - offset.left,
+            canvasY = page.Y - offset.top,
+            pos = plot.c2p({
+                left: canvasX,
+                top: canvasY
+            }),
+            distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
+
+        pos.pageX = page.X;
+        pos.pageY = page.Y;
+
+        var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
+
+        if (item) {
+            // fill in mouse pos for any listeners out there
+            item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
+            item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top, 10);
         }
 
-        function onClick(e) {
-            doTriggerClickHoverEvent(e, eventType.click);
-        }
-
-        function triggerCleanupEvent() {
-            plot.unhighlight();
-            plot.getPlaceholder().trigger('plothovercleanup');
-        }
-
-        // trigger click or hover event (they send the same parameters
-        // so we share their code)
-        function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
-            var options = plot.getOptions(),
-                offset = plot.offset(),
-                page = browser.getPageXY(event),
-                canvasX = page.X - offset.left,
-                canvasY = page.Y - offset.top,
-                pos = plot.c2p({
-                    left: canvasX,
-                    top: canvasY
-                }),
-                distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
-
-            pos.pageX = page.X;
-            pos.pageY = page.Y;
-
-            var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
-
-            if (item) {
-                // fill in mouse pos for any listeners out there
-                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
-                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top, 10);
-            }
-
-            if (options.grid.autoHighlight) {
-                // clear auto-highlights
-                for (var i = 0; i < highlights.length; ++i) {
-                    var h = highlights[i];
-                    if ((h.auto === eventname &&
-                        !(item && h.series === item.series &&
-                            h.point[0] === item.datapoint[0] &&
-                            h.point[1] === item.datapoint[1])) || !item) {
-                        unhighlight(h.series, h.point);
-                    }
-                }
-
-                if (item) {
-                    highlight(item.series, item.datapoint, eventname);
-                }
-            }
-
-            plot.getPlaceholder().trigger(eventname, [pos, item]);
-        }
-
-        function highlight(s, point, auto) {
-            if (typeof s === "number") {
-                s = plot.getData()[s];
-            }
-
-            if (typeof point === "number") {
-                var ps = s.datapoints.pointsize;
-                point = s.datapoints.points.slice(ps * point, ps * (point + 1));
-            }
-
-            var i = indexOfHighlight(s, point);
-            if (i === -1) {
-                highlights.push({
-                    series: s,
-                    point: point,
-                    auto: auto
-                });
-
-                plot.triggerRedrawOverlay();
-            } else if (!auto) {
-                highlights[i].auto = false;
-            }
-        }
-
-        function unhighlight(s, point) {
-            if (s == null && point == null) {
-                highlights = [];
-                plot.triggerRedrawOverlay();
-                return;
-            }
-
-            if (typeof s === "number") {
-                s = plot.getData()[s];
-            }
-
-            if (typeof point === "number") {
-                var ps = s.datapoints.pointsize;
-                point = s.datapoints.points.slice(ps * point, ps * (point + 1));
-            }
-
-            var i = indexOfHighlight(s, point);
-            if (i !== -1) {
-                highlights.splice(i, 1);
-
-                plot.triggerRedrawOverlay();
-            }
-        }
-
-        function indexOfHighlight(s, p) {
+        if (options.grid.autoHighlight) {
+            // clear auto-highlights
             for (var i = 0; i < highlights.length; ++i) {
                 var h = highlights[i];
-                if (h.series === s &&
-                    h.point[0] === p[0] &&
-                    h.point[1] === p[1]) {
-                    return i;
+                if ((h.auto === eventname &&
+                    !(item && h.series === item.series &&
+                        h.point[0] === item.datapoint[0] &&
+                        h.point[1] === item.datapoint[1])) || !item) {
+                    unhighlight(h.series, h.point);
                 }
             }
 
-            return -1;
-        }
-
-        function processRawData() {
-            triggerCleanupEvent();
-            doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
-        }
-
-        function drawOverlay(plot, octx, overlay) {
-            var plotOffset = plot.getPlotOffset(),
-                i, hi;
-
-            octx.save();
-            octx.translate(plotOffset.left, plotOffset.top);
-            for (i = 0; i < highlights.length; ++i) {
-                hi = highlights[i];
-
-                if (hi.series.bars.show) drawBarHighlight(hi.series, hi.point, octx);
-                else drawPointHighlight(hi.series, hi.point, octx, plot);
+            if (item) {
+                highlight(item.series, item.datapoint, eventname);
             }
-            octx.restore();
         }
+
+        plot.getPlaceholder().trigger(eventname, [pos, item]);
+    }
+
+    function highlight(s, point, auto) {
+        if (typeof s === "number") {
+            s = plot.getData()[s];
+        }
+
+        if (typeof point === "number") {
+            var ps = s.datapoints.pointsize;
+            point = s.datapoints.points.slice(ps * point, ps * (point + 1));
+        }
+
+        var i = indexOfHighlight(s, point);
+        if (i === -1) {
+            highlights.push({
+                series: s,
+                point: point,
+                auto: auto
+            });
+
+            plot.triggerRedrawOverlay();
+        } else if (!auto) {
+            highlights[i].auto = false;
+        }
+    }
+
+    function unhighlight(s, point) {
+        if (s == null && point == null) {
+            highlights = [];
+            plot.triggerRedrawOverlay();
+            return;
+        }
+
+        if (typeof s === "number") {
+            s = plot.getData()[s];
+        }
+
+        if (typeof point === "number") {
+            var ps = s.datapoints.pointsize;
+            point = s.datapoints.points.slice(ps * point, ps * (point + 1));
+        }
+
+        var i = indexOfHighlight(s, point);
+        if (i !== -1) {
+            highlights.splice(i, 1);
+
+            plot.triggerRedrawOverlay();
+        }
+    }
+
+    function indexOfHighlight(s, p) {
+        for (var i = 0; i < highlights.length; ++i) {
+            var h = highlights[i];
+            if (h.series === s &&
+                h.point[0] === p[0] &&
+                h.point[1] === p[1]) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    function processRawData() {
+        triggerCleanupEvent();
+        doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
+    }
+
+    function drawOverlay(plot, octx, overlay) {
+        var plotOffset = plot.getPlotOffset(),
+            i, hi;
+
+        octx.save();
+        octx.translate(plotOffset.left, plotOffset.top);
+        for (i = 0; i < highlights.length; ++i) {
+            hi = highlights[i];
+
+            if (hi.series.bars.show) drawBarHighlight(hi.series, hi.point, octx);
+            else drawPointHighlight(hi.series, hi.point, octx, plot);
+        }
+        octx.restore();
     }
 
     function drawPointHighlight(series, point, octx, plot) {
@@ -335,6 +320,24 @@ the tooltip from webcharts).
             function() {
                 return fillStyle;
             }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
+    }
+
+    function initHover(plot, options) {
+        plot.highlight = highlight;
+        plot.unhighlight = unhighlight;
+        if (options.grid.hoverable || options.grid.clickable) {
+            plot.hooks.drawOverlay.push(drawOverlay);
+            plot.hooks.processRawData.push(processRawData);
+        }
+
+        lastMouseMoveEvent = plot.getPlaceholder()[0].lastMouseMoveEvent;
+    }
+
+    function init(plt) {
+        plot = plt;
+        plot.hooks.bindEvents.push(bindEvents);
+        plot.hooks.shutdown.push(shutdown);
+        plot.hooks.processOptions.push(initHover);
     }
 
     $.plot.plugins.push({

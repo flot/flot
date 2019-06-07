@@ -4,6 +4,7 @@
   "main": "dist/es5/jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError",
+    "karma": "node node_modules/karma/bin/karma start --no-auto-watch",
     "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurrency=1",
     "build": "node ./node_modules/gulp/bin/gulp.js build",
     "dont-break": "dont-break --timeout 300",
