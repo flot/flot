@@ -35,15 +35,16 @@ API.txt for details.
 
             // Round epoch to 3 decimal accuracy
             microEpoch = Math.round(microEpoch*1000)/1000;
-            this.microEpoch = microEpoch;
 
             // Microseconds are stored as integers
             var seconds = microEpoch/1000;
             this.microseconds = 1000000 * (seconds - Math.floor(seconds));
         };
 
+        var oldGetTime = newDate.getTime.bind(newDate);
         newDate.getTime = function () {
-            return this.microEpoch;
+            var microEpoch = oldGetTime() + this.microseconds / 1000;
+            return microEpoch;
         };
 
         newDate.setTime = function (microEpoch) {
@@ -56,7 +57,7 @@ API.txt for details.
 
         newDate.setMicroseconds = function(microseconds) {
             // Replace the microsecond part (6 last digits) in microEpoch
-            var epochWithoutMicroseconds = 1000*Math.floor(this.microEpoch/1000);
+            var epochWithoutMicroseconds = oldGetTime();
             var newEpoch = epochWithoutMicroseconds + microseconds/1000;
             this.update(newEpoch);
         };
