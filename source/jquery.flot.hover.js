@@ -69,6 +69,8 @@ the tooltip from webcharts).
 
             eventHolder.bind("mouseleave", onMouseLeave);
         }
+
+        doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
     }
 
     function shutdown(plot, eventHolder) {
@@ -245,7 +247,6 @@ the tooltip from webcharts).
 
     function processRawData() {
         triggerCleanupEvent();
-        doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
     }
 
     function drawOverlay(plot, octx, overlay) {
