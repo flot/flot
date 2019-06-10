@@ -33,6 +33,7 @@ var files = [
     './source/jquery.flot.time.js',
     './source/jquery.flot.axislabels.js',
     './source/jquery.flot.selection.js',
+    './source/jquery.flot.categories.js',
     './source/jquery.flot.composeImages.js',
     './source/jquery.flot.legend.js'
 ];
