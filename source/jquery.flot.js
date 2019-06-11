@@ -2500,7 +2500,7 @@ Licensed under the MIT license.
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
         function findItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
-            var i, j, k, foundItems = [];
+            var i, j, k, foundItems = [],
                 items = [],
                 smallestDistance = radius * radius + 1;
 
