@@ -234,6 +234,7 @@ Licensed under the MIT license.
                 drawSeries: [],
                 drawAxis: [],
                 draw: [],
+                clickHoverFindNearby: [],
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
@@ -345,6 +346,7 @@ Licensed under the MIT license.
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
+        plot.findNearbyItems = findNearbyItems;
         plot.findNearbyInterpolationPoint = findNearbyInterpolationPoint;
         plot.computeValuePrecision = computeValuePrecision;
         plot.computeTickSize = computeTickSize;
@@ -2473,10 +2475,33 @@ Licensed under the MIT license.
             }
         }
 
-        // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
+        function findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
+            var items = findItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
+            executeHooks(hooks.clickHoverFindNearby, [mouseX, mouseY, seriesFilter, radius, computeDistance, items]);
+            return items;
+        }
+
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {
-            var i, j,
-                item = null,
+            var items = findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
+            var closest = items[0];
+ 
+            for (var i = 1; i < items.length; ++i) {
+               if (closest.distance != undefined && items[i].distance < closest.distance) {
+                  closest = items[i];
+               }
+            }
+ 
+            if (closest) {
+                return closest;
+            }
+
+            return null;
+         }
+
+        // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
+        function findItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
+            var i, j, k, foundItems = [];
+                items = [],
                 smallestDistance = radius * radius + 1;
 
             for (var i = series.length - 1; i >= 0; --i) {
@@ -2489,30 +2514,35 @@ Licensed under the MIT license.
                     var found = findNearbyPoint(s, mouseX, mouseY, radius, smallestDistance, computeDistance);
                     if (found) {
                         smallestDistance = found.distance;
-                        item = [i, found.dataIndex];
+                        items.push([i, found.dataIndex]);
                     }
                 }
 
                 if (s.bars.show && !item) { // no other point can be nearby
                     var foundIndex = findNearbyBar(s, mouseX, mouseY);
-                    if (foundIndex) item = [i, foundIndex];
+                    if (foundIndex) {
+                        items.push([i, foundIndex]);
+                    }
                 }
             }
 
-            if (item) {
-                i = item[0];
-                j = item[1];
-                var ps = series[i].datapoints.pointsize;
+            if (items.length) {
+                for (k = 0; i < items.length; k++) {
+                    i = item[k][0];
+                    j = item[k][1];
+                    var ps = series[i].datapoints.pointsize;
 
-                return {
-                    datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
-                    dataIndex: j,
-                    series: series[i],
-                    seriesIndex: i
-                };
+                    foundItems.push({
+                        datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
+                        dataIndex: j,
+                        series: series[i],
+                        seriesIndex: i,
+                        distance: smallestDistance
+                    });
+                }
             }
 
-            return null;
+            return foundItems;
         }
 
         function findNearbyPoint (series, mouseX, mouseY, maxDistance, smallestDistance, computeDistance) {

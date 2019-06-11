@@ -1032,7 +1032,7 @@ You can use "plotclick" and "plothover" events like this:
 ```js
 $.plot($("#placeholder"), [ d ], { grid: { clickable: true } });
 
-$("#placeholder").bind("plotclick", function (event, pos, item) {
+$("#placeholder").bind("plotclick", function (event, pos, items) {
     alert("You clicked at " + pos.x + ", " + pos.y);
     // axis coordinates for other axes, if present, are in pos.x2, pos.x3, ...
     // if you need global screen coordinates, they are pos.pageX, pos.pageY
@@ -1052,6 +1052,7 @@ item: {
     dataIndex: the index of the point in the data array
     series: the series object
     seriesIndex: the index of the series
+    distance: the distance from the cursor
     pageX, pageY: the global screen coordinates of the point
 }
 ```
@@ -1668,6 +1669,53 @@ hooks in the plugins bundled with Flot.
     ```function (plot, width, height)```
 
     The resize hook is used to be notified after the plot was resized.
+
+ - clickHoverFindNearby   [phase 7]
+     ```function (canvasX, canvasY, seriesFilter, distance)```
+    
+    The clickHoverFindNearby hook is used to extend the hover and click
+    events. It will be called whenever an attempt to determine if an
+    item has been hovered over or clicked on happens. You are expected
+    to provide an item or null in return depending on if an item is
+    being hovered over.
+    
+    canvasX and canvasY are the plot-space coordinates that are being
+    hovered over. Being in plot-space and not canvas-space, these may
+    be negative as the plot generally does not take up the whole 
+    canvas.
+    
+    seriesFilter is a function to determine if the series should be
+    checked.
+    
+    radius is the base distance from an item that you should use
+    as an area to search in if you aren't searching in strict bounds
+    
+    computeDistance is a function to utilize to compute the distance
+    from the cursor. It may not be provided, so you will still need
+    to provide your own distance calculation
+    
+    items is an array you should push your found items into. It is
+    unsorted and may hold items from any other plugin or flot's 
+    base calculation. 
+    
+    The item to be returned should have the following:
+    
+    datapoint - The specific bit of information hovered over
+    
+    dataindex - The index of the passed in datapoint in a series
+    
+    series - The information about the series that was hovered over
+    
+    seriesindex - The index of the series hovered over
+    
+    distance - Distance, in pixels, between the item and cursor.
+               If distance is returned as undefined, the item will
+               be treated as "infinite" distance, and will not be
+               chosen instead of an item with a distance returned
+               
+    Distance is added here to the items previously returned from
+    'findNearbyItem' so that we can decide which item should be
+    returned as 'item' to 'plothover' and 'plotclick' events
 
  - shutdown  [phase 8]
 
