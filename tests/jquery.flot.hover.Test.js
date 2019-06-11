@@ -245,10 +245,10 @@ describe("flot hover plugin", function () {
             simulate.mouseMove(eventHolder, x, y, noButton);
             jasmine.clock().tick(100);
 
-             expect(spy).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalled();
         });
 
-         it('should pass item returned from hook in items', function() {
+        it('should pass item returned from hook in items', function() {
             var testItem = {distance: 5};
             var hook = function(_0, _1, _2, _3, _4, _5, items) {
                 items.push(testItem);
@@ -279,7 +279,7 @@ describe("flot hover plugin", function () {
             jasmine.clock().tick(100);
         })
 
-         it('should choose closest item from items returned by hooks', function() {
+        it('should choose closest item from items returned by hooks', function() {
             var distance = 5,
                 testItem = {distance: distance};
             var hook = function(_0, _1, _2, _3, _4, _5, items) {
