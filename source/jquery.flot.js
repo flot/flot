@@ -2453,14 +2453,30 @@ Licensed under the MIT license.
         };
 
         function computeBarWidth(series) {
+            var xValues = [];
             var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE,
                 distance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
 
             if (isFinite(distance)) {
                 minDistance = distance;
             }
+
             for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
-                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
+                xValues.push(series.datapoints.points[j]);
+            }
+
+            var sortFunction = function (a, b) {
+                return a - b;
+            }
+
+            xValues.sort(sortFunction);
+
+            for (var j = 1; j < xValues.length - 1; j++) {
+                if (xValues[j] === xValues[j - 1]) {
+                    continue;
+                }
+
+                distance = Math.abs(xValues[j] - xValues[j - 1]);
                 if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
                 }
