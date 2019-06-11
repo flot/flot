@@ -2518,7 +2518,7 @@ Licensed under the MIT license.
                     }
                 }
 
-                if (s.bars.show && !item) { // no other point can be nearby
+                if (s.bars.show && !items.length) { // no other point can be nearby
                     var foundIndex = findNearbyBar(s, mouseX, mouseY);
                     if (foundIndex) {
                         items.push([i, foundIndex]);
@@ -2527,9 +2527,9 @@ Licensed under the MIT license.
             }
 
             if (items.length) {
-                for (k = 0; i < items.length; k++) {
-                    i = item[k][0];
-                    j = item[k][1];
+                for (k = 0; k < items.length; k++) {
+                    i = items[k][0];
+                    j = items[k][1];
                     var ps = series[i].datapoints.pointsize;
 
                     foundItems.push({
