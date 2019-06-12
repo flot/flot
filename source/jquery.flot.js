@@ -2461,21 +2461,24 @@ Licensed under the MIT license.
                 minDistance = distance;
             }
 
-            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
-                xValues.push(series.datapoints.points[j]);
+            for (var j = 0; j < series.datapoints.points.length; j += pointsize) {
+                if (isFinite(series.datapoints.points[j]) && series.datapoints.points[j] !== null) {
+                    xValues.push(series.datapoints.points[j]);
+                }
             }
 
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+
+            xValues = xValues.filter( onlyUnique );
             var sortFunction = function (a, b) {
                 return a - b;
             }
 
             xValues.sort(sortFunction);
 
-            for (var j = 1; j < xValues.length - 1; j++) {
-                if (xValues[j] === xValues[j - 1]) {
-                    continue;
-                }
-
+            for (var j = 1; j < xValues.length; j++) {
                 distance = Math.abs(xValues[j] - xValues[j - 1]);
                 if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;

@@ -259,7 +259,7 @@ describe('drawSeries', function() {
         });
     });
 
-    describe('drawSeriesBars', function() {
+    fdescribe('drawSeriesBars', function() {
         var minx = -200, maxx = 200, miny = -100, maxy = 100,
             series, ctx, plotWidth, plotHeight, plotOffset,
             drawSeriesBars = jQuery.plot.drawSeries.drawSeriesBars,
