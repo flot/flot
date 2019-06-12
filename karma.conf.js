@@ -10,8 +10,7 @@ module.exports = function(config) {
     var browsersMatrix = {
             'win': ['Firefox', 'Chrome', 'Edge'],
             'linux': ['Firefox', 'Chrome'],
-            // 'mac': ['Safari', 'Firefox', 'Chrome']
-            'mac': ['Chrome']
+            'mac': ['Safari', 'Firefox', 'Chrome']
         },
         isWin = /^win/.test(process.platform),
         isLinux = /^linux/.test(process.platform),
