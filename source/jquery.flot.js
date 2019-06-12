@@ -2472,11 +2472,6 @@ Licensed under the MIT license.
             }
 
             xValues = xValues.filter( onlyUnique );
-            var sortFunction = function (a, b) {
-                return a - b;
-            }
-
-            xValues.sort(sortFunction);
 
             for (var j = 1; j < xValues.length; j++) {
                 distance = Math.abs(xValues[j] - xValues[j - 1]);
