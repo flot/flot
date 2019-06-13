@@ -184,6 +184,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                         ctx.fill();
                         areaOpen = false;
                         ps = -ps;
+                        ypos = 1;
                         i = segmentStart = segmentEnd + ps;
                         continue;
                     }
