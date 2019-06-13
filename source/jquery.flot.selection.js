@@ -457,16 +457,16 @@ The plugin allso adds the following methods to the plot object:
                 ctx.translate(plotOffset.left, plotOffset.top);
 
                 var c = $.color.parse(o.selection.color);
-                var v = o.selection.visualization;
+                var visualization = o.selection.visualization;
 
-                var sf = 1;
+                var scalingFactor = 1;
 
                 // use a dimmer scaling factor if visualization is "fill"
-                if (v === "fill") {
-                    sf = 0.8;
+                if (visualization === "fill") {
+                    scalingFactor = 0.8;
                 }
 
-                ctx.strokeStyle = c.scale('a', sf).toString();
+                ctx.strokeStyle = c.scale('a', scalingFactor).toString();
                 ctx.lineWidth = 1;
                 ctx.lineJoin = o.selection.shape;
                 ctx.fillStyle = c.scale('a', 0.4).toString();
@@ -488,7 +488,7 @@ The plugin allso adds the following methods to the plot object:
                     x = 0;
                 }
 
-                if (v === "fill") {
+                if (visualization === "fill") {
                     ctx.fillRect(x, y, w, h);
                     ctx.strokeRect(x, y, w, h);
                 } else {
