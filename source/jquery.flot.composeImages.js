@@ -1,5 +1,3 @@
-import regeneratorRuntime from "regenerator-runtime";
-import {getCrossDomainCSSRules} from "./getCORSCss";
 /** ## jquery.flot.composeImages.js
 
 This plugin is used to expose a function used to overlap several canvases and
@@ -111,6 +109,20 @@ temporary images load their data.
         img.src = canvas.toDataURL('image/png');
     }
 
+    function getCSSRules(document) {
+        var styleSheets = document.styleSheets,
+            rulesList = [];
+        for (var i = 0; i < styleSheets.length; i++) {
+            // in Chrome, the external CSS files are empty when the page is directly loaded from disk
+            var rules = styleSheets[i].cssRules || [];
+            for (var j = 0; j < rules.length; j++) {
+                var rule = rules[j];
+                rulesList.push(rule.cssText);
+            }
+        }
+        return rulesList;
+    }
+
     function embedCSSRulesInSVG(rules, svg) {
         var text = [
             '<svg class="snapshot ' + svg.classList + '" width="' + svg.width.baseVal.value * pixelRatio + '" height="' + svg.height.baseVal.value * pixelRatio + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
@@ -125,8 +137,8 @@ temporary images load their data.
         return text;
     }
 
-    async function copySVGToImgMostBrowsers(svg, img) {
-        var rules = await getCrossDomainCSSRules(document),
+    function copySVGToImgMostBrowsers(svg, img) {
+        var rules = getCSSRules(document),
             source = embedCSSRulesInSVG(rules, svg);
 
         source = patchSVGSource(source);
@@ -137,7 +149,7 @@ temporary images load their data.
         img.src = url;
     }
 
-    async function copySVGToImgSafari(svg, img) {
+    function copySVGToImgSafari(svg, img) {
         // Use this method to convert a string buffer array to a binary string.
         // Do so by breaking up large strings into smaller substrings; this is necessary to avoid the
         // "maximum call stack size exceeded" exception that can happen when calling 'String.fromCharCode.apply'
@@ -153,7 +165,7 @@ temporary images load their data.
             return binaryString;
         };
 
-        var rules = await getCrossDomainCSSRules(document),
+        var rules = getCSSRules(document),
             source = embedCSSRulesInSVG(rules, svg),
             data,
             utf8BinaryString;
