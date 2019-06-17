@@ -95,6 +95,18 @@ describe("flot legend plugin", function() {
         expect(entryLabel.textContent).toBe(label);
     });
 
+    it('should display the plot icon', function(){
+        var label = 'custom label';
+        options.series.label = label;
+        plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
+
+        var legendSvg = document.getElementsByClassName('legendLayer')[0];
+        var firstLegendEntry = legendSvg.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'g')[0];
+        var entryHTML =  firstLegendEntry.innerHTML;
+
+        expect(entryHTML.includes('#line')).toBe(true);
+    });
+
     it('should take into account the show option', function() {
         options.legend.show = false;
         plot = $.plot(placeholder, [[1, 3, 5, 6]], options);

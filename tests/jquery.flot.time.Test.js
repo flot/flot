@@ -56,6 +56,20 @@ describe('A Flot chart with absolute time axes', function () {
         ]);
     });
 
+    it('shows year time ticks', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[-373597200000, 1], [1199142000000, 2]]], '%Y', 'milliseconds');
+
+        var ticks = plot.getAxes().xaxis.ticks
+        expect(firstAndLast(ticks)).toEqual([
+            {v: -373597200000, label: '1958'},
+            {v: 1199142000000, label: '2007'}
+        ]);
+        ticks.sort((a, b) => a.v - b.v);
+        for (var i = 1; i < ticks.length; i++) {
+            expect(ticks[i].v).toBeGreaterThan(ticks[i - 1].v);
+        }
+    });
+
     describe('date generator', function () {
         it('clamps values greater than Date() range to the limit of Date()', function () {
             var dateGenerator = $.plot.dateGenerator;
