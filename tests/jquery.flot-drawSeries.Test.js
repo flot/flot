@@ -142,6 +142,63 @@ describe('drawSeries', function() {
             expect(ctx.fill).toHaveBeenCalled();
         });
 
+        it('should draw area fills before and after nulls', function () {
+            const format = {
+                x: true,
+                y: false,
+                number: true,
+                required: true,
+                computeRange: true,
+                defaultValue: null
+            };
+            const filledSeries = {
+                lines: {
+                    lineWidth: 1,
+                    fill: true,
+                },
+                xaxis: {
+                    min: minx,
+                    max: maxx,
+                    p2c: function(p) { return p; }
+                },
+                yaxis: {
+                    min: miny,
+                    max: maxy,
+                    p2c: function(p) { return p; }
+                },
+                datapoints: {
+                    points: [
+                        0, 100, 0,
+                        25, 80, 20,
+                        null, null, null,
+                        75, 80, 20,
+                        100, 100, 0,
+                    ],
+                    format: [format, format, format],
+                    pointsize: 3,
+                }
+            };
+
+            drawSeriesLines(filledSeries, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            function isPixelFilled(ctx, x, y) {
+                return ctx.getImageData(x, y, 1, 1).data[3] > 0;
+            }
+
+            /**
+            The plot drawn looks something like this:
+              |\  /|
+              |/  \|
+            */
+            const leftFilled = isPixelFilled(ctx, 10, 50);
+            const middleFilled = isPixelFilled(ctx, 50, 50);
+            const rightFilled = isPixelFilled(ctx, 90, 50);
+
+            expect(leftFilled).toBe(true);
+            expect(middleFilled).toBe(false);
+            expect(rightFilled).toBe(true);
+        });
+
         function validatePointsAreInsideTheAxisRanges(points) {
             points.forEach(function(point) {
                 var x = point[0], y = point[1];
