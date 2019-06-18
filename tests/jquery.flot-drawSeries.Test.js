@@ -538,7 +538,7 @@ describe('drawSeries', function() {
             var axes = plot.getAxes();
 
             var barWidth = plot.getData()[0].bars.barWidth[0] || plot.getData()[0].bars.barWidth;
-            expect(barWidth).toEqual(4);
+            expect(barWidth).toEqual(1.6); // expected width will be .8 * (10 - 8)
         });
     });
 });
