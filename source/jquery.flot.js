@@ -2472,6 +2472,7 @@ Licensed under the MIT license.
             }
 
             xValues = xValues.filter( onlyUnique );
+            xValues.sort(function(a, b){return a - b});
 
             for (var j = 1; j < xValues.length; j++) {
                 distance = Math.abs(xValues[j] - xValues[j - 1]);
