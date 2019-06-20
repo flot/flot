@@ -1728,15 +1728,10 @@ Licensed under the MIT license.
 
         function snapRangeToTicks(axis, ticks, series) {
             var anyDataInSeries = function(series) {
-                for (var i = 0; i < series.length; i++) {
-                    if (series[i].datapoints.points.length > 0) {
-                        return true;
-                    }
-                }
-
-                return false;
+                return series.some(e => e.datapoints.points.length > 0);
             }
-            if (axis.options.autoScale === "loose" && ticks.length > 0 && series.length > 0 && anyDataInSeries(series)) {
+
+            if (axis.options.autoScale === "loose" && ticks.length > 0 && anyDataInSeries(series)) {
                 // snap to ticks
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
