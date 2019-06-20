@@ -225,7 +225,7 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(120);
         });
 
-        fit('should use the specified axis min and max for loose autoscaling if no data is set', function () {
+        it('should use the specified axis min and max for loose autoscaling if no data is set', function () {
             options.xaxis = {autoScale: 'loose', min: 1, max: 50};
             options.yaxis = {autoScale: 'loose', min: 1, max: 100};
             plot = $.plot(placeholder, [[]], options);
