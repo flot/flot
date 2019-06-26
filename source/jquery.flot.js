@@ -1338,7 +1338,7 @@ Licensed under the MIT license.
                     // make the ticks
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
-                    snapRangeToTicks(axis, axis.ticks);
+                    snapRangeToTicks(axis, axis.ticks, series);
 
                     //for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
@@ -1726,8 +1726,12 @@ Licensed under the MIT license.
             };
         }
 
-        function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoScale === "loose" && ticks.length > 0) {
+        function snapRangeToTicks(axis, ticks, series) {
+            var anyDataInSeries = function(series) {
+                return series.some(e => e.datapoints.points.length > 0);
+            }
+
+            if (axis.options.autoScale === "loose" && ticks.length > 0 && anyDataInSeries(series)) {
                 // snap to ticks
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
