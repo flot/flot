@@ -2514,7 +2514,7 @@ Licensed under the MIT license.
 
                 if (s.bars.show && !item) { // no other point can be nearby
                     var foundIndex = findNearbyBar(s, mouseX, mouseY);
-                    if (foundIndex !== null) item = [i, foundIndex];
+                    if (foundIndex >= 0) item = [i, foundIndex];
                 }
             }
 
@@ -2606,7 +2606,7 @@ Licensed under the MIT license.
             var fillTowards = series.bars.fillTowards || 0;
             var bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
 
-            var foundIndex = null;
+            var foundIndex = -1;
             for (var j = 0; j < points.length; j += ps) {
                 var x = points[j], y = points[j + 1];
                 if (x == null)
