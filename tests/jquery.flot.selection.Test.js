@@ -83,7 +83,7 @@ describe("flot navigate plugin interactions", function () {
         var ranges = plot.getSelection();
         expect(ranges.xaxis.from).toEqual(0);
         expect(ranges.xaxis.to).toEqual(10);
-        expect(ranges.yaxis.from).toBeCloseTo(3.6, 1);
+        expect(Math.floor(ranges.yaxis.from * 10) / 10).toBeCloseTo(3.6, 1); //test on travis gives 3.67, locally 3.64
         expect(ranges.yaxis.to).toBeCloseTo(4.2, 1);
     });
     it('selection mode xy zooms the x & y axis', function () {
@@ -118,7 +118,7 @@ describe("flot navigate plugin interactions", function () {
         var ranges = plot.getSelection();
         expect(ranges.xaxis.from).toBeCloseTo(0.9, 1);
         expect(ranges.xaxis.to).toBeCloseTo(1.2, 1);
-        expect(ranges.yaxis.from).toBeCloseTo(3.6, 1);
+        expect(Math.floor(ranges.yaxis.from * 10) / 10).toBeCloseTo(3.6, 1); //test on travis gives 3.67, locally 3.64
         expect(ranges.yaxis.to).toBeCloseTo(4.2, 1);
     });
     it('setselection fires plotselected event', function (done) {
