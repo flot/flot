@@ -1,7 +1,7 @@
 /* eslint-disable */
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
-fdescribe("flot navigate plugin interactions", function () {
+describe("flot navigate plugin interactions", function () {
     'use strict';
 
     var placeholder, plot, eventHolder;
@@ -46,8 +46,8 @@ fdescribe("flot navigate plugin interactions", function () {
         jasmine.clock().tick(50);
         simulate.mouseUp(eventHolder, clientX + 70, clientY - 80);
         var ranges = plot.getSelection();
-        expect(ranges.xaxis.from).toBeCloseTo(0.88);
-        expect(ranges.xaxis.to).toBeCloseTo(1.23);
+        expect(ranges.xaxis.from).toBeCloseTo(0.9, 1);
+        expect(ranges.xaxis.to).toBeCloseTo(1.2, 1);
         expect(ranges.yaxis.from).toEqual(0);
         expect(ranges.yaxis.to).toEqual(10);
     });
@@ -83,8 +83,8 @@ fdescribe("flot navigate plugin interactions", function () {
         var ranges = plot.getSelection();
         expect(ranges.xaxis.from).toEqual(0);
         expect(ranges.xaxis.to).toEqual(10);
-        expect(ranges.yaxis.from).toBeCloseTo(3.64);
-        expect(ranges.yaxis.to).toBeCloseTo(4.2);
+        expect(ranges.yaxis.from).toBeCloseTo(3.6, 1);
+        expect(ranges.yaxis.to).toBeCloseTo(4.2, 1);
     });
     it('selection mode xy zooms the x & y axis', function () {
         plot = $.plot(placeholder, [
@@ -116,10 +116,10 @@ fdescribe("flot navigate plugin interactions", function () {
         jasmine.clock().tick(50);
         simulate.mouseUp(eventHolder, clientX + 70, clientY - 130);
         var ranges = plot.getSelection();
-        expect(ranges.xaxis.from).toBeCloseTo(0.88);
-        expect(ranges.xaxis.to).toBeCloseTo(1.23);
-        expect(ranges.yaxis.from).toBeCloseTo(3.64);
-        expect(ranges.yaxis.to).toBeCloseTo(4.2);
+        expect(ranges.xaxis.from).toBeCloseTo(0.9, 1);
+        expect(ranges.xaxis.to).toBeCloseTo(1.2, 1);
+        expect(ranges.yaxis.from).toBeCloseTo(3.6, 1);
+        expect(ranges.yaxis.to).toBeCloseTo(4.2, 1);
     });
     it('setselection fires plotselected event', function (done) {
         plot = $.plot(placeholder, [
@@ -144,8 +144,8 @@ fdescribe("flot navigate plugin interactions", function () {
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
         $(placeholder).on('plotselected', function (e, ranges) {
-            expect(ranges.xaxis.from).toBeCloseTo(0.88);
-            expect(ranges.xaxis.to).toBeCloseTo(1.23);
+            expect(ranges.xaxis.from).toBeCloseTo(0.9, 1);
+            expect(ranges.xaxis.to).toBeCloseTo(1.2, 1);
             expect(ranges.yaxis.from).toEqual(0);
             expect(ranges.yaxis.to).toEqual(10);
             done();
