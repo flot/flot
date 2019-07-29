@@ -113,12 +113,14 @@ temporary images load their data.
         var styleSheets = document.styleSheets,
             rulesList = [];
         for (var i = 0; i < styleSheets.length; i++) {
-            // in Chrome, the external CSS files are empty when the page is directly loaded from disk
-            var rules = styleSheets[i].cssRules || [];
-            for (var j = 0; j < rules.length; j++) {
-                var rule = rules[j];
-                rulesList.push(rule.cssText);
-            }
+            try {
+                // in Chrome, the external CSS files are empty when the page is directly loaded from disk
+                var rules = styleSheets[i].cssRules || [];
+                for (var j = 0; j < rules.length; j++) {
+                    var rule = rules[j];
+                    rulesList.push(rule.cssText);
+                }
+            } catch (e) {}
         }
         return rulesList;
     }
