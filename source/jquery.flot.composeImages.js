@@ -113,6 +113,7 @@ temporary images load their data.
         var styleSheets = document.styleSheets,
             rulesList = [];
         for (var i = 0; i < styleSheets.length; i++) {
+            // CORS requests for style sheets throw and an exception on Chrome > 64
             try {
                 // in Chrome, the external CSS files are empty when the page is directly loaded from disk
                 var rules = styleSheets[i].cssRules || [];
@@ -120,7 +121,9 @@ temporary images load their data.
                     var rule = rules[j];
                     rulesList.push(rule.cssText);
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.log('Failed to get some css rules');
+            }
         }
         return rulesList;
     }
