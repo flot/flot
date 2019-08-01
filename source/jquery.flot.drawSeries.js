@@ -36,6 +36,12 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     continue;
                 }
 
+                if (isNaN(x1) || isNaN(x2) || isNaN(y1) || isNaN(y2)) {
+                    prevx = null;
+                    prevy = null;
+                    continue;
+                }
+
                 if(steps){
                     if (mx !== null && my !== null) {
                         // if middle point exists, transfer p2 -> p1 and p1 -> mp
