@@ -142,6 +142,24 @@ describe('drawSeries', function() {
             expect(ctx.fill).toHaveBeenCalled();
         });
 
+        /*
+        Should draw something like this (big gap between first two slopes, smaller gap between next two)
+
+         /    \    /
+        /      \  /
+        */
+        it('should move pen when NaNs are encountered', function () {
+            series.datapoints.points = [-1, -1, 0, 0, 1, NaN, 2, NaN, 3, 0, 4, -1, NaN, 34, 6, -1, 7, 0];
+
+            spyOn(ctx, 'moveTo').and.callThrough();
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.moveTo).toHaveBeenCalledTimes(3);
+            expect(ctx.lineTo).toHaveBeenCalledTimes(3);
+        });
+
         it('should draw area fills before and after nulls', function () {
             const format = {
                 x: true,
