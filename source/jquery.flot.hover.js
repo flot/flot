@@ -50,7 +50,7 @@ the tooltip from webcharts).
 
             if (o.grid.hoverable || o.grid.clickable) {
                 eventHolder[0].addEventListener('touchevent', triggerCleanupEvent, false);
-                eventHolder[0].addEventListener('tap', tap.generatePlothoverEvent, false);
+                eventHolder[0].addEventListener('tap', generatePlothoverEvent, false);
             }
 
             if (o.grid.clickable) {
@@ -71,7 +71,7 @@ the tooltip from webcharts).
         }
 
         function shutdown(plot, eventHolder) {
-            eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
+            eventHolder[0].removeEventListener('tap', generatePlothoverEvent);
             eventHolder[0].removeEventListener('touchevent', triggerCleanupEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
@@ -79,23 +79,22 @@ the tooltip from webcharts).
             highlights = [];
         }
 
-        var tap = {
-            generatePlothoverEvent: function (e) {
-                var o = plot.getOptions(),
-                    newEvent = new CustomEvent('mouseevent');
 
-                //transform from touch event to mouse event format
-                newEvent.pageX = e.detail.changedTouches[0].pageX;
-                newEvent.pageY = e.detail.changedTouches[0].pageY;
-                newEvent.clientX = e.detail.changedTouches[0].clientX;
-                newEvent.clientY = e.detail.changedTouches[0].clientY;
+        function generatePlothoverEvent(e) {
+            var o = plot.getOptions(),
+                newEvent = new CustomEvent('mouseevent');
 
-                if (o.grid.hoverable) {
-                    doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
-                }
-                return false;
+            //transform from touch event to mouse event format
+            newEvent.pageX = e.detail.changedTouches[0].pageX;
+            newEvent.pageY = e.detail.changedTouches[0].pageY;
+            newEvent.clientX = e.detail.changedTouches[0].clientX;
+            newEvent.clientY = e.detail.changedTouches[0].clientY;
+
+            if (o.grid.hoverable) {
+                doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
             }
-        };
+            return false;
+        }
 
         function doTriggerClickHoverEvent(event, eventType, searchDistance) {
             var series = plot.getData();
