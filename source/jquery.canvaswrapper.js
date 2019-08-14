@@ -384,6 +384,13 @@ don't work unless the canvas is attached to the DOM.
             position = positions[i];
             if (position.x === x && position.y === y && position.text === text) {
                 position.active = true;
+                // update the transforms
+                if (transforms) {
+                    info.element.transform.baseVal.clear();
+                    transforms.forEach(function(t) {
+                        info.element.transform.baseVal.appendItem(t);
+                    });
+                }
                 return;
             } else if (position.active === false) {
                 position.active = true;
