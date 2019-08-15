@@ -1340,7 +1340,7 @@ Licensed under the MIT license.
                     // make the ticks
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
-                    snapRangeToTicks(axis, axis.ticks);
+                    snapRangeToTicks(axis, axis.ticks, series);
 
                     //for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
@@ -1728,8 +1728,12 @@ Licensed under the MIT license.
             };
         }
 
-        function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoScale === "loose" && ticks.length > 0) {
+        function snapRangeToTicks(axis, ticks, series) {
+            var anyDataInSeries = function(series) {
+                return series.some(e => e.datapoints.points.length > 0);
+            }
+
+            if (axis.options.autoScale === "loose" && ticks.length > 0 && anyDataInSeries(series)) {
                 // snap to ticks
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
@@ -2455,14 +2459,29 @@ Licensed under the MIT license.
         };
 
         function computeBarWidth(series) {
+            var xValues = [];
             var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE,
                 distance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
 
             if (isFinite(distance)) {
                 minDistance = distance;
             }
-            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
-                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
+
+            for (var j = 0; j < series.datapoints.points.length; j += pointsize) {
+                if (isFinite(series.datapoints.points[j]) && series.datapoints.points[j] !== null) {
+                    xValues.push(series.datapoints.points[j]);
+                }
+            }
+
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+
+            xValues = xValues.filter( onlyUnique );
+            xValues.sort(function(a, b){return a - b});
+
+            for (var j = 1; j < xValues.length; j++) {
+                distance = Math.abs(xValues[j] - xValues[j - 1]);
                 if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
                 }
@@ -2617,7 +2636,7 @@ Licensed under the MIT license.
             var fillTowards = series.bars.fillTowards || 0;
             var bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
 
-            var foundIndex = null;
+            var foundIndex = -1;
             for (var j = 0; j < points.length; j += ps) {
                 var x = points[j], y = points[j + 1];
                 if (x == null)

@@ -39,9 +39,9 @@ don't work unless the canvas is attached to the DOM.
         this.pixelRatio = $.plot.browser.getPixelRatio(context);
 
         // Size the canvas to match the internal dimensions of its container
-
-        var box = container.getBoundingClientRect();
-        this.resize(box.width, box.height);
+        var width = $(container).width();
+        var height = $(container).height();
+        this.resize(width, height);
 
         // Collection of HTML div layers for text overlaid onto the canvas
 
