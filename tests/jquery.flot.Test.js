@@ -225,6 +225,21 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(120);
         });
 
+        it('should use the specified axis min and max for loose autoscaling if no data is set', function () {
+            options.xaxis = {autoScale: 'loose', min: 1, max: 50};
+            options.yaxis = {autoScale: 'loose', min: 1, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+            plot.setupGrid(true);
+            plot.draw();
+
+            expect(axes.xaxis.min).toBe(1);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(1);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
         it('should keep the axis min 0 for loose autoscaling if all values are positive', function () {
             options.xaxis = {autoScale: 'loose', min: 0, max: 50};
             options.yaxis = {autoScale: 'loose', min: 0, max: 100};

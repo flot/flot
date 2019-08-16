@@ -115,8 +115,9 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
+            var o = plot.getOptions();
             // only accept left-click
-            if (e.which !== 1) return;
+            if (e.which !== 1 || o.selection.mode === null) return;
 
             // reinitialize currentMode
             selection.currentMode = 'xy';
