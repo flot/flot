@@ -377,6 +377,15 @@ don't work unless the canvas is attached to the DOM.
 
         y += 0.75 * info.height;
 
+
+        // update the transforms
+        if (transforms) {
+            info.element.transform.baseVal.clear();
+            transforms.forEach(function(t) {
+                info.element.transform.baseVal.appendItem(t);
+            });
+        }
+
         // Determine whether this text already exists at this position.
         // If so, mark it for inclusion in the next render pass.
 
@@ -384,13 +393,6 @@ don't work unless the canvas is attached to the DOM.
             position = positions[i];
             if (position.x === x && position.y === y && position.text === text) {
                 position.active = true;
-                // update the transforms
-                if (transforms) {
-                    info.element.transform.baseVal.clear();
-                    transforms.forEach(function(t) {
-                        info.element.transform.baseVal.appendItem(t);
-                    });
-                }
                 return;
             } else if (position.active === false) {
                 position.active = true;
@@ -436,12 +438,6 @@ don't work unless the canvas is attached to the DOM.
         position.element.setAttributeNS(null, 'x', x);
         position.element.setAttributeNS(null, 'y', y);
         position.element.style.textAlign = halign;
-
-        if (transforms) {
-            transforms.forEach(function(t) {
-                info.element.transform.baseVal.appendItem(t);
-            });
-        }
     };
 
     var addTspanElements = function(text, element, x) {
