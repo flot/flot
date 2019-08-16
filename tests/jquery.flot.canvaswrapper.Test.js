@@ -128,7 +128,7 @@ describe('CanvasWrapper', function() {
         expect(box2.top).not.toBe(box1.top);
     });
 
-    fit('should add the same text with the correct horizontal alignment', function() {
+    it('should add the same text with the correct horizontal alignment', function() {
         var canvas = newCanvas(placeholder);
         canvas.addText('layerA', 100, 200, '123', 'a', 0, 200, 'center', 'top');
         canvas.addText('layerA', 100, 200, '234', 'a');
@@ -142,7 +142,7 @@ describe('CanvasWrapper', function() {
         expect(box2.top).toBe(box1.top);
     });
 
-    fit('should add the same text with the correct vertical alignment', function() {
+    it('should add the same text with the correct vertical alignment', function() {
         var canvas = newCanvas(placeholder);
         canvas.addText('layerA', 100, 200, '123', 'a', 0, 200, 'left', 'bottom');
         canvas.addText('layerA', 100, 200, '234', 'a');
@@ -156,7 +156,7 @@ describe('CanvasWrapper', function() {
         expect(box2.top).not.toBe(box1.top);
     });
 
-    fit('should add the same text with the correct tranforms', function() {
+    it('should add the same text with the correct tranforms', function() {
         var canvas = newCanvas(placeholder);
         var transforms = [], translate;
         var svgLayer = canvas.getSVGLayer('layerA');
