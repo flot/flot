@@ -9,6 +9,7 @@ selection: {
     mode: null or "x" or "y" or "xy" or "smart",
     color: color,
     shape: "round" or "miter" or "bevel",
+    visualization: "fill" or "focus",
     minSize: number of pixels
 }
 
@@ -18,6 +19,12 @@ In "x" mode, the user will only be able to specify the x range, similarly for
 specified. "color" is color of the selection (if you need to change the color
 later on, you can get to it with plot.getOptions().selection.color). "shape"
 is the shape of the corners of the selection.
+
+The way how the selection is visualized, can be changed by using the option
+"visualization". Flot currently supports two modes: "focus" and "fill". The
+option "focus" draws a colored bezel around the selected area while keeping
+the selected area clear. The option "fill" highlights (i.e., fills) the
+selected area with a colored highlight.
 
 "minSize" is the minimum size a selection can be in pixels. This value can
 be customized to determine the smallest size a selection can be and still
@@ -111,6 +118,9 @@ The plugin allso adds the following methods to the plot object:
             var o = plot.getOptions();
             // only accept left-click
             if (e.which !== 1 || o.selection.mode === null) return;
+
+            // reinitialize currentMode
+            selection.currentMode = 'xy';
 
             // cancel out any text selections
             document.body.focus();
@@ -448,8 +458,16 @@ The plugin allso adds the following methods to the plot object:
                 ctx.translate(plotOffset.left, plotOffset.top);
 
                 var c = $.color.parse(o.selection.color);
+                var visualization = o.selection.visualization;
 
-                ctx.strokeStyle = c.scale('a', 1).toString();
+                var scalingFactor = 1;
+
+                // use a dimmer scaling factor if visualization is "fill"
+                if (visualization === "fill") {
+                    scalingFactor = 0.8;
+                }
+
+                ctx.strokeStyle = c.scale('a', scalingFactor).toString();
                 ctx.lineWidth = 1;
                 ctx.lineJoin = o.selection.shape;
                 ctx.fillStyle = c.scale('a', 0.4).toString();
@@ -471,9 +489,14 @@ The plugin allso adds the following methods to the plot object:
                     x = 0;
                 }
 
-                ctx.fillRect(0, 0, plot.width(), plot.height());
-                ctx.clearRect(x, y, w, h);
-                drawSelectionDecorations(ctx, x, y, w, h, oX, oY, selectionDirection(plot));
+                if (visualization === "fill") {
+                    ctx.fillRect(x, y, w, h);
+                    ctx.strokeRect(x, y, w, h);
+                } else {
+                    ctx.fillRect(0, 0, plot.width(), plot.height());
+                    ctx.clearRect(x, y, w, h);
+                    drawSelectionDecorations(ctx, x, y, w, h, oX, oY, selectionDirection(plot));
+                }
 
                 ctx.restore();
             }
@@ -494,6 +517,7 @@ The plugin allso adds the following methods to the plot object:
         options: {
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
+                visualization: "focus", // "focus" or "fill"
                 color: "#888888",
                 shape: "round", // one of "round", "miter", or "bevel"
                 minSize: 5 // minimum number of pixels
