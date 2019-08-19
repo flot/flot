@@ -1,7 +1,7 @@
 /* eslint-disable */
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
-fdescribe("flot legend plugin", function() {
+describe("flot legend plugin", function() {
     var placeholder, plot;
     var options, legendContainer, legendSettings
 
