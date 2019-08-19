@@ -2465,7 +2465,8 @@ Licensed under the MIT license.
                 minDistance = distance;
             }
 
-            for (var j = 0; j < series.datapoints.points.length; j += pointsize) {
+            var start = series.bars.horizontal ? 1 : 0;
+            for (var j = start; j < series.datapoints.points.length; j += pointsize) {
                 if (isFinite(series.datapoints.points[j]) && series.datapoints.points[j] !== null) {
                     xValues.push(series.datapoints.points[j]);
                 }
