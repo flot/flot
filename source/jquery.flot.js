@@ -2458,11 +2458,10 @@ Licensed under the MIT license.
 
         function computeBarWidth(series) {
             var xValues = [];
-            var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE,
-                distance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE;
 
-            if (isFinite(distance)) {
-                minDistance = distance;
+            if (series.datapoints.points.length <= pointsize) {
+                minDistance = 1;
             }
 
             for (var j = 0; j < series.datapoints.points.length; j += pointsize) {
@@ -2471,7 +2470,7 @@ Licensed under the MIT license.
                 }
             }
 
-            function onlyUnique(value, index, self) { 
+            function onlyUnique(value, index, self) {
                 return self.indexOf(value) === index;
             }
 
@@ -2479,7 +2478,7 @@ Licensed under the MIT license.
             xValues.sort(function(a, b){return a - b});
 
             for (var j = 1; j < xValues.length; j++) {
-                distance = Math.abs(xValues[j] - xValues[j - 1]);
+                var distance = Math.abs(xValues[j] - xValues[j - 1]);
                 if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
                 }
