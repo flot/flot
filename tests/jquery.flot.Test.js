@@ -419,6 +419,19 @@ describe('flot', function() {
             expect(limits.xmax).toBe(12 + 6 / 2);
         });
 
+        it('should change the limits of y to fit the width of the bars when they are horizontal', function () {
+            var series = {
+                    lines: { show: false },
+                    bars: { show: true, align: 'center', barWidth: 6, horizontal: true }
+                },
+                limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
+
+            limits = plot.adjustSeriesDataRange(series, limits);
+
+            expect(limits.ymin).toBe(11 - 6 / 2);
+            expect(limits.ymax).toBe(13 + 6 / 2);
+        });
+
         it('should change the limits of x to reserve only the needed space given by width of the bars', function () {
             var series = {
                     lines: { show: false },
