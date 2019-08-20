@@ -243,6 +243,9 @@ the tooltip from webcharts).
 
         function processRawData() {
             triggerCleanupEvent();
+        }
+
+        function setupGrid() {
             doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
         }
 
@@ -326,6 +329,7 @@ the tooltip from webcharts).
             if (options.grid.hoverable || options.grid.clickable) {
                 plot.hooks.drawOverlay.push(drawOverlay);
                 plot.hooks.processRawData.push(processRawData);
+                plot.hooks.setupGrid.push(setupGrid);
             }
 
             lastMouseMoveEvent = plot.getPlaceholder()[0].lastMouseMoveEvent;
