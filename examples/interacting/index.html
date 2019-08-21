@@ -60,13 +60,6 @@
 			}
 		});
 
-		window.setInterval(function () {
-			plot.setData([
-				{ data: sin, label: "sin(x)"},
-				{ data: cos, label: "cos(x)"}
-			]);
-		}, 2000);
-
 		$("<div id='tooltip'></div>").css({
 			position: "absolute",
 			display: "none",
