@@ -2608,17 +2608,27 @@ Licensed under the MIT license.
 
             var foundIndex = -1;
             for (var j = 0; j < points.length; j += ps) {
-                var x = points[j], y = points[j + 1];
+                var x = points[j], y = points[j + 1], y2;
                 if (x == null)
                     continue;
 
                 // for a bar graph, the cursor must be inside the bar
-                if (series.bars.horizontal ?
-                    (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
-                        my >= y + barLeft && my <= y + barRight) :
-                    (mx >= x + barLeft && mx <= x + barRight &&
-                        my >= Math.min(bottom, y) && my <= Math.max(bottom, y)))
-                        foundIndex = j / ps;
+                if (ps >= 3 && (y2 = points[j + 2]) != null) {
+                    // we have a third coordinate which is the bottom of the filled area/bar
+                    if (series.bars.horizontal ?
+                        (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
+                            my >= y + barLeft && my <= y + barRight) :
+                        (mx >= x + barLeft && mx <= x + barRight &&
+                            my >= Math.min(y2, y) && my <= Math.max(y2, y)))
+                            foundIndex = j / ps;
+                } else {
+                    if (series.bars.horizontal ?
+                        (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
+                            my >= y + barLeft && my <= y + barRight) :
+                        (mx >= x + barLeft && mx <= x + barRight &&
+                            my >= Math.min(bottom, y) && my <= Math.max(bottom, y)))
+                            foundIndex = j / ps;
+                }
             }
 
             return foundIndex;
