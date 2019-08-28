@@ -232,5 +232,31 @@ describe("flot hover plugin", function () {
 
             expect(getEntireCanvasData(canvas)).toContainPixelColor(rgba(10, 20, 30, 1));
         });
+
+        it('should correctly highlight bars with bottom points specified', function() {
+            options.series.bars = { show: true, barWidth: 0.5 };
+            options.series.lines = undefined;
+            plot = $.plot(placeholder, [ [ [0, 5, 2], [1, 7, 2], [2, 6, 2] ] ], options);
+
+            var eventHolder = plot.getEventHolder(),
+                canvas = eventHolder,
+                offset = plot.getPlotOffset(),
+                axisx = plot.getXAxes()[0],
+                axisy = plot.getYAxes()[0],
+                x = axisx.p2c(1.25) + offset.left,
+                y = axisy.p2c(1) + offset.top,
+                noButton = 0;
+
+            simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(100);
+
+            expect(getEntireCanvasData(canvas)).not.toContainPixelColor(rgba(10, 20, 30, 1));
+
+            y = axisy.p2c(4) + offset.top;
+            simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(100);
+
+            expect(getEntireCanvasData(canvas)).toContainPixelColor(rgba(10, 20, 30, 1));
+        });
     });
 });
