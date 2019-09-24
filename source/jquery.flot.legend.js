@@ -64,7 +64,7 @@
                 family: style.fontFamily
             });
 
-            labelWidth = info.width;
+            var labelWidth = info.width;
             // 36px = 1.5em + 6px margin
             var iconWidth = 48;
             if (columnWidths[columnIndex]) {
