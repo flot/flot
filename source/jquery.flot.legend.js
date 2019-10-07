@@ -11,7 +11,9 @@
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: 'ne', // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
-            sorted: null // default to no legend sorting
+            sorted: null, // default to no legend sorting
+            backgroundColor: null, 
+            backgroundOpacity: 0 // No background shows by default
         }
     };
 
@@ -154,6 +156,20 @@
             options.legend.container.style.width = width + 'px';
             options.legend.container.style.height = height + 'em';
         }
+
+        // ----------------------------------------------------------------------------------------
+        // Control backgroundColor
+        // ----------------------------------------------------------------------------------------
+        if(options.legend.backgroundColor){
+            $('.legendLayer rect.background').css({
+                'fill': options.legend.backgroundColor, // New SVG 2.0 spec, uses fill
+                'background': options.legend.backgroundColor, // Back compau with SVG 1.1
+            });            
+        }
+        // ----------------------------------------------------------------------------------------
+        // Control background-opacity
+        // ----------------------------------------------------------------------------------------
+        $('.legendLayer rect.background').css('opacity', options.legend.backgroundOpacity? options.legend.backgroundOpacity : 1);
     }
 
     // Generate html for a shape
