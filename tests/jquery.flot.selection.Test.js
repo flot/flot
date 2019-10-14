@@ -12,6 +12,9 @@ describe("flot selection plugin", function() {
             selection: {
                 mode: 'smart',
                 minSize: 30,
+            },
+            testDrag: {
+                on: false
             }
         };
 
@@ -57,61 +60,93 @@ describe("flot selection plugin", function() {
             y: Math.floor(bBox.top + m.y)};
     }
 
-    it('should draw the selection rectangle with "fill" option', function(){
+    describe ("basic tests", function() {
+        it('should draw the selection rectangle with "fill" option', function(){
 
-        options.selection.visualization = "fill";
+            options.selection.visualization = "fill";
 
-        var plot = $.plot(placeholder, [[]], options);
-        var eventHolder = plot.getEventHolder();
-        var ctx = eventHolder.getContext('2d');
-        var mouseEnd = { x: mouseStart.x + 100, y: mouseStart.y + 100 };
+            var plot = $.plot(placeholder, [[]], options);
+            var eventHolder = plot.getEventHolder();
+            var ctx = eventHolder.getContext('2d');
+            var mouseEnd = { x: mouseStart.x + 100, y: mouseStart.y + 100 };
 
-        spyOn(ctx, 'strokeRect').and.callThrough();
-        spyOn(ctx, 'closePath').and.callThrough();
+            spyOn(ctx, 'strokeRect').and.callThrough();
+            spyOn(ctx, 'closePath').and.callThrough();
 
-        doDragStart(eventHolder, mouseStart);
-        doDrag(eventHolder, mouseEnd);
-        doDragEnd(eventHolder, mouseEnd);
+            doDragStart(eventHolder, mouseStart);
+            doDrag(eventHolder, mouseEnd);
+            doDragEnd(eventHolder, mouseEnd);
 
-        expect(ctx.strokeRect).toHaveBeenCalled();
-        expect(ctx.closePath).not.toHaveBeenCalled();
+            expect(ctx.strokeRect).toHaveBeenCalled();
+            expect(ctx.closePath).not.toHaveBeenCalled();
+        });
+
+        it('should draw the focusing selection window by default', function(){
+
+            var plot = $.plot(placeholder, [[]], options);
+            var eventHolder = plot.getEventHolder();
+            var ctx = eventHolder.getContext('2d');
+            var mouseEnd = { x: mouseStart.x + 100, y: mouseStart.y + 100 };
+
+            spyOn(ctx, 'strokeRect').and.callThrough();
+            spyOn(ctx, 'closePath').and.callThrough();
+
+            doDragStart(eventHolder, mouseStart);
+            doDrag(eventHolder, mouseEnd);
+            doDragEnd(eventHolder, mouseEnd);
+
+            expect(ctx.strokeRect).not.toHaveBeenCalled();
+            expect(ctx.closePath).toHaveBeenCalled();
+        });
+
+        it('should not draw anything if selection range is less than the minimum set in options', function(){
+
+            var plot = $.plot(placeholder, [[]], options);
+            var eventHolder = plot.getEventHolder();
+            var ctx = eventHolder.getContext('2d');
+            var delta = options.selection.minSize - 1;
+            var mouseEnd = { x: mouseStart.x + delta, y: mouseStart.y + delta };
+
+            spyOn(ctx, 'strokeRect').and.callThrough();
+            spyOn(ctx, 'closePath').and.callThrough();
+
+            doDragStart(eventHolder, mouseStart);
+            doDrag(eventHolder, mouseEnd);
+            doDragEnd(eventHolder, mouseEnd);
+
+            expect(ctx.strokeRect).not.toHaveBeenCalled();
+            expect(ctx.closePath).not.toHaveBeenCalled();
+        });
     });
 
-    it('should draw the focusing selection window by default', function(){
+    describe ("with other drag-based plugin", function() {
+        it('should not do selection when drag plugin is enabled', function(){
+            options.selection.visualization = "fill";
+            options.testDrag.on = true;
 
-        var plot = $.plot(placeholder, [[]], options);
-        var eventHolder = plot.getEventHolder();
-        var ctx = eventHolder.getContext('2d');
-        var mouseEnd = { x: mouseStart.x + 100, y: mouseStart.y + 100 };
+            var that = this;
+            var plot = $.plot(placeholder, [[]], options);
+            var eventHolder = plot.getEventHolder();
+            var mouseEnd = { x: mouseStart.x + 100, y: mouseStart.y + 100 };
 
-        spyOn(ctx, 'strokeRect').and.callThrough();
-        spyOn(ctx, 'closePath').and.callThrough();
+            $(placeholder).on('plotselected', function (e, ranges) {
+                that.wasPlotSelectedCalled = true;
+            });
+    
+            doDragStart(eventHolder, mouseStart);
+            doDrag(eventHolder, mouseEnd);
+            doDragEnd(eventHolder, mouseEnd);
+            expect(that.wasPlotSelectedCalled).toBeFalsy();
+            
+            // ensure that when other drag-based plugin is disabled we successfully trigger plotselected event
+            options.testDrag.on = false;
+            plot = $.plot(placeholder, [[]], options);
 
-        doDragStart(eventHolder, mouseStart);
-        doDrag(eventHolder, mouseEnd);
-        doDragEnd(eventHolder, mouseEnd);
-
-        expect(ctx.strokeRect).not.toHaveBeenCalled();
-        expect(ctx.closePath).toHaveBeenCalled();
-    });
-
-    it('should not draw anything if selection range is less than the minimum set in options', function(){
-
-        var plot = $.plot(placeholder, [[]], options);
-        var eventHolder = plot.getEventHolder();
-        var ctx = eventHolder.getContext('2d');
-        var delta = options.selection.minSize - 1;
-        var mouseEnd = { x: mouseStart.x + delta, y: mouseStart.y + delta };
-
-        spyOn(ctx, 'strokeRect').and.callThrough();
-        spyOn(ctx, 'closePath').and.callThrough();
-
-        doDragStart(eventHolder, mouseStart);
-        doDrag(eventHolder, mouseEnd);
-        doDragEnd(eventHolder, mouseEnd);
-
-        expect(ctx.strokeRect).not.toHaveBeenCalled();
-        expect(ctx.closePath).not.toHaveBeenCalled();
+            doDragStart(eventHolder, mouseStart);
+            doDrag(eventHolder, mouseEnd);
+            doDragEnd(eventHolder, mouseEnd);
+            expect(that.wasPlotSelectedCalled).toBeTruthy();
+        });
     });
 });
 

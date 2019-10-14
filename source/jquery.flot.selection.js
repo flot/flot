@@ -104,9 +104,7 @@ The plugin allso adds the following methods to the plot object:
         // make this plugin much slimmer.
         var savedhandlers = {};
 
-        var mouseUpHandler = null;
-
-        function onMouseMove(e) {
+        function onDrag(e) {
             if (selection.active) {
                 updateSelection(e);
 
@@ -114,7 +112,7 @@ The plugin allso adds the following methods to the plot object:
             }
         }
 
-        function onMouseDown(e) {
+        function onDragStart(e) {
             var o = plot.getOptions();
             // only accept left-click
             if (e.which !== 1 || o.selection.mode === null) return;
@@ -138,15 +136,9 @@ The plugin allso adds the following methods to the plot object:
             setSelectionPos(selection.first, e);
 
             selection.active = true;
-
-            // this is a bit silly, but we have to use a closure to be
-            // able to whack the same handler again
-            mouseUpHandler = function (e) { onMouseUp(e); };
-
-            $(document).one("mouseup", mouseUpHandler);
         }
 
-        function onMouseUp(e) {
+        function onDragEnd(e) {
             mouseUpHandler = null;
 
             // revert drag stuff for old-school browsers
@@ -360,8 +352,9 @@ The plugin allso adds the following methods to the plot object:
         plot.hooks.bindEvents.push(function(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.selection.mode != null) {
-                eventHolder.mousemove(onMouseMove);
-                eventHolder.mousedown(onMouseDown);
+                plot.addEventHandler("dragstart", onDragStart, eventHolder, 0);
+                plot.addEventHandler("drag", onDrag, eventHolder, 0);
+                plot.addEventHandler("dragend", onDragEnd, eventHolder, 0);
             }
         });
 
@@ -503,12 +496,9 @@ The plugin allso adds the following methods to the plot object:
         });
 
         plot.hooks.shutdown.push(function (plot, eventHolder) {
-            eventHolder.unbind("mousemove", onMouseMove);
-            eventHolder.unbind("mousedown", onMouseDown);
-
-            if (mouseUpHandler) {
-                $(document).unbind("mouseup", mouseUpHandler);
-            }
+            eventHolder.unbind("dragstart", onDragStart);
+            eventHolder.unbind("drag", onDrag);
+            eventHolder.unbind("dragend", onDragEnd);
         });
     }
 
