@@ -90,6 +90,12 @@ describe('A Flot chart with absolute time axes', function () {
                 {v: 1000000, label: '1970/01/01 00:01'}
             ]);
         });
+
+        it('persists millisecond values', function() {
+            var dateGenerator = $.plot.dateGenerator;
+
+            expect(dateGenerator(123123, { timeBase: 'microseconds' }).getTime()).toEqual(123.123);
+        });
     });
 
     describe('sub-second ticks', function () {
