@@ -139,8 +139,6 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onDragEnd(e) {
-            mouseUpHandler = null;
-
             // revert drag stuff for old-school browsers
             if (document.onselectstart !== undefined) {
                 document.onselectstart = savedhandlers.onselectstart;
