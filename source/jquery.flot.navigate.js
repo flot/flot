@@ -489,6 +489,18 @@ can set the default in the options.
                     min = max;
                     max = tmp;
                 }
+                
+                // test for zoom limits zoomRange: [min,max]
+                if (opts.zoomRange) {
+                    // zoomed in too far
+                    if (max - min < opts.zoomRange[0]) {
+                        continue;
+                    }
+                    // zoomed out to far
+                    if (max -min > opts.zoomRange[1]) {
+                        continue;
+                    }
+                }
 
                 var offsetBelow = $.plot.saturated.saturate(navigationOffset.below - (axis.min - min));
                 var offsetAbove = $.plot.saturated.saturate(navigationOffset.above - (axis.max - max));
@@ -520,10 +532,18 @@ can set the default in the options.
                 if ((!opts.axisPan && args.axes) || (!opts.plotPan && !args.axes)) {
                     return;
                 }
+                
+                // calc min delta (revealing left edge of plot)
+                var minD = axis.p2c(opts.panRange[0])-axis.p2c(axis.min);
+                // calc max delta (revealing right edge of plot)
+                var maxD = axis.p2c(opts.panRange[1])-axis.p2c(axis.max);
+                // limit delta to min or max
+                if (d>=maxD) d = maxD;
+                if (d<=minD) d = minD;
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) + d) - axis.c2p(axis.p2c(axis.min))),
-                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) + d) - axis.c2p(axis.p2c(axis.max)));
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) + d) - axis.min),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) + d) - axis.max);
 
                     if (!isFinite(navigationOffsetBelow)) {
                         navigationOffsetBelow = 0;
@@ -675,10 +695,18 @@ can set the default in the options.
                     return;
                 }
 
-                if (d !== 0) {
-                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin))),
-                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax)));
+                // calc min delta (revealing left edge of plot)
+                var minD = p+axis.p2c(opts.panRange[0])-axis.p2c(axisMin);
+                // calc max delta (revealing right edge of plot)
+                var maxD = p+axis.p2c(opts.panRange[1])-axis.p2c(axisMax);
+                // limit delta to min or max
+                if (d>=maxD) d = maxD;
+                if (d<=minD) d = minD;
 
+                if (d !== 0) {
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axisMin),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axisMax);
+                    
                     if (!isFinite(navigationOffsetBelow)) {
                         navigationOffsetBelow = 0;
                     }
