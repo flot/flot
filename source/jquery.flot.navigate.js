@@ -542,9 +542,9 @@ can set the default in the options.
                 }
                 
                 // calc min delta (revealing left edge of plot)
-                var minD = p+axis.p2c(opts.panRange[0])-axis.p2c(axis.min);
+                var minD = axis.p2c(opts.panRange[0])-axis.p2c(axis.min);
                 // calc max delta (revealing right edge of plot)
-                var maxD = p+axis.p2c(opts.panRange[1])-axis.p2c(axis.max);
+                var maxD = axis.p2c(opts.panRange[1])-axis.p2c(axis.max);
                 // limit delta to min or max if enabled
                 if (opts.panRange[0] !== undefined && d >= maxD) d = maxD;
                 if (opts.panRange[1] !== undefined && d<=minD) d = minD;
