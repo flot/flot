@@ -38,7 +38,9 @@ The plugin supports these options:
         axisZoom: true, //zoom axis when mouse over it is allowed
         plotZoom: true, //zoom axis is allowed for plot zoom
         axisPan: true, //pan axis when mouse over it is allowed
-        plotPan: true //pan axis is allowed for plot pan
+        plotPan: true, //pan axis is allowed for plot pan
+        panRange: [undefined, undefined], // no limit on pan range, or [min, max] in axis units
+        zoomRange: [undefined, undefined], // no limit on zoom range, or [closest zoom, furthest zoom] in axis units
     }
 
     yaxis: {
@@ -46,6 +48,8 @@ The plugin supports these options:
         plotZoom: true, //zoom axis is allowed for plot zoom
         axisPan: true, //pan axis when mouse over it is allowed
         plotPan: true //pan axis is allowed for plot pan
+        panRange: [undefined, undefined], // no limit on pan range, or [min, max] in axis units
+        zoomRange: [undefined, undefined], // no limit on zoom range, or [closest zoom, furthest zoom] in axis units
     }
 ```
 **interactive** enables the built-in drag/click behaviour. If you enable
@@ -124,13 +128,17 @@ can set the default in the options.
             axisZoom: true, //zoom axis when mouse over it is allowed
             plotZoom: true, //zoom axis is allowed for plot zoom
             axisPan: true, //pan axis when mouse over it is allowed
-            plotPan: true //pan axis is allowed for plot pan
+            plotPan: true, //pan axis is allowed for plot pan
+            panRange: [undefined, undefined], // no limit on pan range, or [min, max] in axis units
+            zoomRange: [undefined, undefined], // no limit on zoom range, or [closest zoom, furthest zoom] in axis units
         },
         yaxis: {
             axisZoom: true,
             plotZoom: true,
             axisPan: true,
-            plotPan: true
+            plotPan: true,
+            panRange: [undefined, undefined], // no limit on pan range, or [min, max] in axis units
+            zoomRange: [undefined, undefined], // no limit on zoom range, or [closest zoom, furthest zoom] in axis units
         }
     };
 
@@ -534,12 +542,12 @@ can set the default in the options.
                 }
                 
                 // calc min delta (revealing left edge of plot)
-                var minD = axis.p2c(opts.panRange[0])-axis.p2c(axis.min);
+                var minD = p+axis.p2c(opts.panRange[0])-axis.p2c(axis.min);
                 // calc max delta (revealing right edge of plot)
-                var maxD = axis.p2c(opts.panRange[1])-axis.p2c(axis.max);
-                // limit delta to min or max
-                if (d>=maxD) d = maxD;
-                if (d<=minD) d = minD;
+                var maxD = p+axis.p2c(opts.panRange[1])-axis.p2c(axis.max);
+                // limit delta to min or max if enabled
+                if (opts.panRange[0] !== undefined && d >= maxD) d = maxD;
+                if (opts.panRange[1] !== undefined && d<=minD) d = minD;
 
                 if (d !== 0) {
                     var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) + d) - axis.min),
@@ -699,9 +707,9 @@ can set the default in the options.
                 var minD = p+axis.p2c(opts.panRange[0])-axis.p2c(axisMin);
                 // calc max delta (revealing right edge of plot)
                 var maxD = p+axis.p2c(opts.panRange[1])-axis.p2c(axisMax);
-                // limit delta to min or max
-                if (d>=maxD) d = maxD;
-                if (d<=minD) d = minD;
+                // limit delta to min or max if enabled
+                if (opts.panRange[0] !== undefined && d >= maxD) d = maxD;
+                if (opts.panRange[1] !== undefined && d<=minD) d = minD;
 
                 if (d !== 0) {
                     var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axisMin),
