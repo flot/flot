@@ -550,8 +550,8 @@ can set the default in the options.
                 if (opts.panRange[1] !== undefined && d<=minD) d = minD;
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) + d) - axis.min),
-                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) + d) - axis.max);
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) + d) - axis.c2p(axis.p2c(axis.min))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) + d) - axis.c2p(axis.p2c(axis.max)));
 
                     if (!isFinite(navigationOffsetBelow)) {
                         navigationOffsetBelow = 0;
@@ -712,8 +712,8 @@ can set the default in the options.
                 if (opts.panRange[1] !== undefined && d<=minD) d = minD;
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axisMin),
-                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axisMax);
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax)));
                     
                     if (!isFinite(navigationOffsetBelow)) {
                         navigationOffsetBelow = 0;
