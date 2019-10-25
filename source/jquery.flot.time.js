@@ -480,7 +480,10 @@ API.txt for details.
             $.each(plot.getAxes(), function(axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === "time") {
-                    axis.tickGenerator = dateTickGenerator;
+					axis.tickGenerator = dateTickGenerator;
+					
+					// if a tick formatter is already provided do not overwrite it
+					if ('tickFormatter' in opts && opts.tickFormatter !== null) return;
 
                     axis.tickFormatter = function (v, axis) {
                         var d = dateGenerator(v, axis.options);
