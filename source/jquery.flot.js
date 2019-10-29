@@ -2604,7 +2604,7 @@ Licensed under the MIT license.
             barRight = barLeft + barWidth;
 
             var fillTowards = series.bars.fillTowards || 0;
-            var bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
+            var defaultBottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
 
             var foundIndex = -1;
             for (var j = 0; j < points.length; j += ps) {
@@ -2612,6 +2612,7 @@ Licensed under the MIT license.
                 if (x == null)
                     continue;
 
+                var bottom = ps === 3 ? points[j + 2] : defaultBottom;
                 // for a bar graph, the cursor must be inside the bar
                 if (series.bars.horizontal ?
                     (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
