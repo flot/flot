@@ -251,8 +251,12 @@ the tooltip from webcharts).
             return -1;
         }
 
-        function processRawData() {
+        function processDatapoints() {
             triggerCleanupEvent();
+            doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
+        }
+
+        function setupGrid() {
             doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
         }
 
@@ -335,7 +339,8 @@ the tooltip from webcharts).
             plot.unhighlight = unhighlight;
             if (options.grid.hoverable || options.grid.clickable) {
                 plot.hooks.drawOverlay.push(drawOverlay);
-                plot.hooks.processRawData.push(processRawData);
+                plot.hooks.processDatapoints.push(processDatapoints);
+                plot.hooks.setupGrid.push(setupGrid);
             }
 
             lastMouseMoveEvent = plot.getPlaceholder()[0].lastMouseMoveEvent;
