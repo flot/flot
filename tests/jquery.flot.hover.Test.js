@@ -190,8 +190,11 @@ describe("flot hover plugin", function () {
         });
 
         it('should update the current hover point to the placeholder when the plot created again', function () {
+            var hovered = false;
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
-
+            $(placeholder).bind("plothover", function (event, pos, item) {
+                hovered = true;
+            });
             var eventHolder = plot.getEventHolder(),
                 offset = plot.getPlotOffset(),
                 axisx = plot.getXAxes()[0],
@@ -202,11 +205,12 @@ describe("flot hover plugin", function () {
 
             let evt = simulate.mouseMove(eventHolder, x, y, noButton);
             jasmine.clock().tick(1000);
-
+            hovered = false;
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
 
             expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.x).toEqual(evt.x);
             expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.y).toEqual(evt.y);
+            expect(hovered).toEqual(true);
         });
 
         it('should highlight a bar when hovered', function() {

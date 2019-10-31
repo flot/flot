@@ -2460,20 +2460,20 @@ Licensed under the MIT license.
 
         function computeBarWidth(series) {
             var xValues = [];
-            var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE,
-                distance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE;
 
-            if (isFinite(distance)) {
-                minDistance = distance;
+            if (series.datapoints.points.length <= pointsize) {
+                minDistance = 1;
             }
 
-            for (var j = 0; j < series.datapoints.points.length; j += pointsize) {
+            var start = series.bars.horizontal ? 1 : 0;
+            for (var j = start; j < series.datapoints.points.length; j += pointsize) {
                 if (isFinite(series.datapoints.points[j]) && series.datapoints.points[j] !== null) {
                     xValues.push(series.datapoints.points[j]);
                 }
             }
 
-            function onlyUnique(value, index, self) { 
+            function onlyUnique(value, index, self) {
                 return self.indexOf(value) === index;
             }
 
@@ -2481,7 +2481,7 @@ Licensed under the MIT license.
             xValues.sort(function(a, b){return a - b});
 
             for (var j = 1; j < xValues.length; j++) {
-                distance = Math.abs(xValues[j] - xValues[j - 1]);
+                var distance = Math.abs(xValues[j] - xValues[j - 1]);
                 if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
                 }
@@ -2634,7 +2634,7 @@ Licensed under the MIT license.
             barRight = barLeft + barWidth;
 
             var fillTowards = series.bars.fillTowards || 0;
-            var bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
+            var defaultBottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
 
             var foundIndex = -1;
             for (var j = 0; j < points.length; j += ps) {
@@ -2642,6 +2642,7 @@ Licensed under the MIT license.
                 if (x == null)
                     continue;
 
+                var bottom = ps === 3 ? points[j + 2] : defaultBottom;
                 // for a bar graph, the cursor must be inside the bar
                 if (series.bars.horizontal ?
                     (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
