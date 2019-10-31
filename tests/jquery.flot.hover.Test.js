@@ -1,4 +1,4 @@
-fdescribe("flot hover plugin", function () {
+describe("flot hover plugin", function () {
     var placeholder, plot, options;
 
     var rgba = window.colors.rgba;
