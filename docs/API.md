@@ -1670,14 +1670,16 @@ hooks in the plugins bundled with Flot.
 
     The resize hook is used to be notified after the plot was resized.
 
- - clickHoverFindNearby   [phase 7]
+ - findNearbyItems   [phase 7]
      ```function (canvasX, canvasY, seriesFilter, distance)```
     
-    The clickHoverFindNearby hook is used to extend the hover and click
-    events. It will be called whenever an attempt to determine if an
-    item has been hovered over or clicked on happens. You are expected
-    to provide an item or null in return depending on if an item is
-    being hovered over.
+    The findNearbyItems hook is used to extend the default behavior of
+    the flot-provided 'findNearbyItems' function. The hover plugin is
+    an example of a plugin that leverages this method to return items 
+    that will be highlighted when hovered over. So, as an example, a new
+    plugin might provide this hook to allow the hover plugin to highlight
+    points that the flot-provided findNearbyItems method would have 
+    otherwise not found.
     
     canvasX and canvasY are the plot-space coordinates that are being
     hovered over. Being in plot-space and not canvas-space, these may

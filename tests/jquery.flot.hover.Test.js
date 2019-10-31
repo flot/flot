@@ -1,4 +1,4 @@
-describe("flot hover plugin", function () {
+fdescribe("flot hover plugin", function () {
     var placeholder, plot, options;
 
     var rgba = window.colors.rgba;
@@ -231,7 +231,7 @@ describe("flot hover plugin", function () {
         it('should call hooked function when canvas is hovered over', function() {
             var spy = jasmine.createSpy('spy');
 
-            options.hooks = {clickHoverFindNearby: [spy]};
+            options.hooks = {findNearbyItems: [spy]};
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
 
             var eventHolder = plot.getEventHolder(),
@@ -254,7 +254,7 @@ describe("flot hover plugin", function () {
                 items.push(testItem);
             }
 
-            options.hooks = {clickHoverFindNearby: [hook]};
+            options.hooks = {findNearbyItems: [hook]};
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
 
             $(plot.getPlaceholder()).on('plothover', function(event, pos, item, items) {
@@ -286,7 +286,7 @@ describe("flot hover plugin", function () {
                 items.push(testItem);
             }
 
-            options.hooks = {clickHoverFindNearby: [hook]};
+            options.hooks = {findNearbyItems: [hook]};
 
             $(plot.getPlaceholder()).on('plothover', function(event, pos, item, items) {
                 expect(item.distance < distance).toBe(true);

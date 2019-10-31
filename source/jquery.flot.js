@@ -234,7 +234,7 @@ Licensed under the MIT license.
                 drawSeries: [],
                 drawAxis: [],
                 draw: [],
-                clickHoverFindNearby: [],
+                findNearbyItems: [],
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
@@ -2496,7 +2496,7 @@ Licensed under the MIT license.
 
         function findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
             var items = findItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
-            executeHooks(hooks.clickHoverFindNearby, [mouseX, mouseY, seriesFilter, radius, computeDistance, items]);
+            executeHooks(hooks.findNearbyItems, [mouseX, mouseY, seriesFilter, radius, computeDistance, items]);
             return items;
         }
 
