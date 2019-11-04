@@ -156,10 +156,10 @@ the tooltip from webcharts).
             var item = items[0];
 
             for (var i = 1; i < items.length; ++i) {
-            if (item.distance === undefined || 
-                items[i].distance < item.distance) {
-                item = items[i];
-            }
+                if (item.distance === undefined || 
+                    items[i].distance < item.distance) {
+                    item = items[i];
+                }
             }
 
             if (item) {

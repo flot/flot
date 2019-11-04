@@ -490,6 +490,96 @@ describe('flot', function() {
         });
     });
 
+    describe('findNearbyItems', function() {
+        var placeholder, plot, sampledata = [[[0, 1], [1, 1.1], [2, 1.2]], [[0, 2], [1, 2.1], [2, 2.2]]];
+        var options = {
+            series: {
+                shadowSize: 0, // don't draw shadows
+                lines: { show: false },
+                points: { show: true, fill: false, symbol: 'circle' }
+            }
+        };
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should be able to find the nearest points to the given coordinates', function() {
+            plot = $.plot(placeholder, sampledata, {});
+            var items = plot.findNearbyItems(0, 0, function() {
+                return true;
+            }, Number.MAX_VALUE);
+            expect(items.length).toEqual(2);
+            expect(items[0].datapoint[0]).toEqual(sampledata[1][0][0]);
+            expect(items[0].datapoint[1]).toEqual(sampledata[1][0][1]);
+            expect(items[0].dataIndex).toEqual(0);
+            expect(items[1].datapoint[0]).toEqual(sampledata[0][0][0]);
+            expect(items[1].datapoint[1]).toEqual(sampledata[0][0][1]);
+            expect(items[1].dataIndex).toEqual(0);
+        });
+
+        it('should be able to search in a certain radius', function() {
+            options.xaxis = {autoScale: 'none', min: 0, max: 2};
+            options.yaxis = {autoScale: 'none', min: 0, max: 3};
+            plot = $.plot(placeholder, sampledata, options);
+            var items = plot.findNearbyItems(2, 0.5, function() {
+                return true;
+            }, 1);
+            expect(items.length).toEqual(0);
+
+            var mouseCanvasLocation = plot.p2c({ x: 2, y: 1.5 }); // y-location is closer to first series than second
+            var lowerSeriesLastYCanvasLocation = plot.p2c({ x: 2, y: 1.2 });
+            items = plot.findNearbyItems(mouseCanvasLocation.left, mouseCanvasLocation.top, function() {
+                return true;
+            }, Math.abs(mouseCanvasLocation.top - lowerSeriesLastYCanvasLocation.top) + 1);
+            expect(items.length).toEqual(1);
+            expect(items[0].datapoint[0]).toEqual(sampledata[0][2][0]);
+            expect(items[0].datapoint[1]).toEqual(sampledata[0][2][1]);
+            expect(items[0].dataIndex).toEqual(2);
+        });
+
+        it('should return arbitrary items specified by hook callback', function() {
+            options.xaxis = {autoScale: 'none', min: 0, max: 2};
+            options.yaxis = {autoScale: 'none', min: 0, max: 3};
+            var hookCallback = function(_0, x, y, series, seriesIndex, distance, _6, items) {
+                var ps = series[seriesIndex].datapoints.pointsize;
+                var dataIndex;
+                if (seriesIndex === 0) {
+                    dataIndex = 1;
+                    items.push({ // return 2nd value in 1st series
+                        datapoint: series[seriesIndex].datapoints.points.slice(dataIndex * ps, (dataIndex + 1) * ps),
+                        dataIndex: dataIndex,
+                        series: series[seriesIndex],
+                        seriesIndex: seriesIndex,
+                        distance: 3
+                    });
+                } else {
+                    dataIndex = 0;
+                    items.push({ // return 1st value in 2nd series
+                        datapoint: series[seriesIndex].datapoints.points.slice(dataIndex * ps, (dataIndex + 1) * ps),
+                        dataIndex: dataIndex,
+                        series: series[seriesIndex],
+                        seriesIndex: seriesIndex,
+                        distance: 1 // artificially make this point closer for testing purposes
+                    });
+                }
+            }
+            options.hooks = {findNearbyItems: [hookCallback]};
+            plot = $.plot(placeholder, sampledata, options);
+            var items = plot.findNearbyItems(2, 0.5, function() {
+                return true;
+            }, 0);
+
+            expect(items.length).toEqual(2);
+            expect(items[0].distance).toBeLessThan(items[1].distance);
+            expect(items[0].datapoint[0]).toEqual(sampledata[1][0][0]);
+            expect(items[0].datapoint[1]).toEqual(sampledata[1][0][1]);
+            expect(items[1].datapoint[0]).toEqual(sampledata[0][1][0]);
+            expect(items[1].datapoint[1]).toEqual(sampledata[0][1][1]);
+        });
+    });
+
     describe('findNearbyInterpolationPoint', function() {
         var placeholder, plot, sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
 

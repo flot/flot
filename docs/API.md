@@ -1671,23 +1671,24 @@ hooks in the plugins bundled with Flot.
     The resize hook is used to be notified after the plot was resized.
 
  - findNearbyItems   [phase 7]
-     ```function (canvasX, canvasY, seriesFilter, distance)```
+     ```function (canvasX, canvasY, series, radius, computeDistance, items)```
     
     The findNearbyItems hook is used to extend the default behavior of
-    the flot-provided 'findNearbyItems' function. The hover plugin is
-    an example of a plugin that leverages this method to return items 
-    that will be highlighted when hovered over. So, as an example, a new
-    plugin might provide this hook to allow the hover plugin to highlight
-    points that the flot-provided findNearbyItems method would have 
-    otherwise not found.
+    the flot-provided 'findNearbyItems' function. The hover plugin will take
+    advantage of this new capability by reporting the whole set of items
+    discovered by findNearbyItems (including the ones the user-defined hook
+    has found) in the args of the hover or click events it will raise. This
+    allows user to describe non-default behaviors for items found on hover or 
+    click through their hook.
     
-    canvasX and canvasY are the plot-space coordinates that are being
-    hovered over. Being in plot-space and not canvas-space, these may
-    be negative as the plot generally does not take up the whole 
-    canvas.
+    canvasX and canvasY are the canvas-space coordinates used to search from 
+    for the nearby items.
     
-    seriesFilter is a function to determine if the series should be
-    checked.
+    series is the data series that was allowed by the seriesFilter function
+    provided by the wrapper 'findNearbyItems' function.
+
+    seriesIndex is the index of the data series. This is largely being provided
+    as it is needed in the returned item (if found).
     
     radius is the base distance from an item that you should use
     as an area to search in if you aren't searching in strict bounds
@@ -1698,17 +1699,18 @@ hooks in the plugins bundled with Flot.
     
     items is an array you should push your found items into. It is
     unsorted and may hold items from any other plugin or flot's 
-    base calculation. 
+    base calculation. Note that the items returned by flot's base 
+    findNearbyItems method will be sorted by distance.
     
     The item to be returned should have the following:
     
     datapoint - The specific bit of information hovered over
     
-    dataindex - The index of the passed in datapoint in a series
+    dataIndex - The index of the passed in datapoint in a series
     
     series - The information about the series that was hovered over
     
-    seriesindex - The index of the series hovered over
+    seriesIndex - The index of the series hovered over
     
     distance - Distance, in pixels, between the item and cursor.
                If distance is returned as undefined, the item will
