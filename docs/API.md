@@ -1674,18 +1674,14 @@ hooks in the plugins bundled with Flot.
      ```function (canvasX, canvasY, series, radius, computeDistance, items)```
     
     The findNearbyItems hook is used to extend the default behavior of
-    the flot-provided 'findNearbyItems' function. The hover plugin will take
-    advantage of this new capability by reporting the whole set of items
-    discovered by findNearbyItems (including the ones the user-defined hook
-    has found) in the args of the hover or click events it will raise. This
-    allows user to describe non-default behaviors for items found on hover or 
-    click through their hook.
+    the flot-provided 'findNearbyItems' function. The hover plugin, as an 
+    example, will report items discovered through this hook through the 
+    hover and click events it raises.
     
     canvasX and canvasY are the canvas-space coordinates used to search from 
     for the nearby items.
     
-    series is the data series that was allowed by the seriesFilter function
-    provided by the wrapper 'findNearbyItems' function.
+    series is the current data series for which the findNearbyItems hook should return nearby data. The hook will be called for each data series separately, as long as it is not filtered out by the seriesFilter function used by the caller.
 
     seriesIndex is the index of the data series. This is largely being provided
     as it is needed in the returned item (if found).

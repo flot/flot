@@ -2515,21 +2515,7 @@ Licensed under the MIT license.
 
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {
             var items = findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
-            var closest = items[0];
- 
-            for (var i = 1; i < items.length; ++i) {
-               if (closest.distance !== undefined && 
-                   items[i].distance !== undefined && 
-                   items[i].distance < closest.distance) {
-                  closest = items[i];
-               }
-            }
- 
-            if (closest) {
-                return closest;
-            }
-
-            return null;
+            return items[0] !== undefined ? items[0] : null;
          }
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
