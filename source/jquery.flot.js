@@ -234,6 +234,7 @@ Licensed under the MIT license.
                 drawSeries: [],
                 drawAxis: [],
                 draw: [],
+                findNearbyItems: [],
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
@@ -345,6 +346,7 @@ Licensed under the MIT license.
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
+        plot.findNearbyItems = findNearbyItems;
         plot.findNearbyInterpolationPoint = findNearbyInterpolationPoint;
         plot.computeValuePrecision = computeValuePrecision;
         plot.computeTickSize = computeTickSize;
@@ -2492,55 +2494,85 @@ Licensed under the MIT license.
             }
         }
 
-        // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
+        function findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
+            var items = findItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
+            for (var i = 0; i < series.length; ++i) {
+                if (seriesFilter(i)) {
+                    executeHooks(hooks.findNearbyItems, [mouseX, mouseY, series, i, radius, computeDistance, items]);
+                }
+            }
+
+            return items.sort((a, b) => { 
+                if (b.distance === undefined) {
+                    return -1;
+                } else if (a.distance === undefined && b.distance !== undefined) {
+                    return 1;
+                }
+
+                return a.distance - b.distance ;
+            });
+        }
+
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {
-            var i, j,
-                item = null,
+            var items = findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
+            return items[0] !== undefined ? items[0] : null;
+         }
+
+        // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
+        function findItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
+            var i, foundItems = [],
+                items = [],
                 smallestDistance = radius * radius + 1;
 
-            for (var i = series.length - 1; i >= 0; --i) {
+            for (i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(i)) continue;
 
                 var s = series[i];
                 if (!s.datapoints) return;
 
+                var foundPoint = false;
                 if (s.lines.show || s.points.show) {
-                    var found = findNearbyPoint(s, mouseX, mouseY, radius, smallestDistance, computeDistance);
+                    var found = findNearbyPoint(s, mouseX, mouseY, radius, computeDistance);
                     if (found) {
-                        smallestDistance = found.distance;
-                        item = [i, found.dataIndex];
+                        items.push({ seriesIndex: i, dataIndex: found.dataIndex, distance: found.distance });
+                        foundPoint = true;
                     }
                 }
 
-                if (s.bars.show && !item) { // no other point can be nearby
+                if (s.bars.show && !foundPoint) { // no other point can be nearby
                     var foundIndex = findNearbyBar(s, mouseX, mouseY);
-                    if (foundIndex >= 0) item = [i, foundIndex];
+                    if (foundIndex >= 0) {
+                        items.push({ seriesIndex: i, dataIndex: foundIndex, distance: smallestDistance });
+                    }
                 }
             }
 
-            if (item) {
-                i = item[0];
-                j = item[1];
-                var ps = series[i].datapoints.pointsize;
+            for (i = 0; i < items.length; i++) {
+                var seriesIndex = items[i].seriesIndex;
+                var dataIndex = items[i].dataIndex;
+                var smallestDistance = items[i].distance;
+                var ps = series[seriesIndex].datapoints.pointsize;
 
-                return {
-                    datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
-                    dataIndex: j,
-                    series: series[i],
-                    seriesIndex: i
-                };
+                foundItems.push({
+                    datapoint: series[seriesIndex].datapoints.points.slice(dataIndex * ps, (dataIndex + 1) * ps),
+                    dataIndex: dataIndex,
+                    series: series[seriesIndex],
+                    seriesIndex: seriesIndex,
+                    distance: Math.sqrt(smallestDistance)
+                });
             }
 
-            return null;
+            return foundItems;
         }
 
-        function findNearbyPoint (series, mouseX, mouseY, maxDistance, smallestDistance, computeDistance) {
+        function findNearbyPoint (series, mouseX, mouseY, maxDistance, computeDistance) {
             var mx = series.xaxis.c2p(mouseX),
                 my = series.yaxis.c2p(mouseY),
                 maxx = maxDistance / series.xaxis.scale,
                 maxy = maxDistance / series.yaxis.scale,
                 points = series.datapoints.points,
-                ps = series.datapoints.pointsize;
+                ps = series.datapoints.pointsize,
+                smallestDistance = Number.POSITIVE_INFINITY;
 
             // with inverse transforms, we can't use the maxx/maxy
             // optimization, sadly

@@ -152,12 +152,22 @@ the tooltip from webcharts).
             pos.pageX = page.X;
             pos.pageY = page.Y;
 
-            var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
+            var items = plot.findNearbyItems(canvasX, canvasY, seriesFilter, distance);
+            var item = items[0];
+
+            for (var i = 1; i < items.length; ++i) {
+                if (item.distance === undefined || 
+                    items[i].distance < item.distance) {
+                    item = items[i];
+                }
+            }
 
             if (item) {
                 // fill in mouse pos for any listeners out there
                 item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
                 item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top, 10);
+            } else {
+                item = null;
             }
 
             if (options.grid.autoHighlight) {
@@ -177,7 +187,7 @@ the tooltip from webcharts).
                 }
             }
 
-            plot.getPlaceholder().trigger(eventname, [pos, item]);
+            plot.getPlaceholder().trigger(eventname, [pos, item, items]);
         }
 
         function highlight(s, point, auto) {
