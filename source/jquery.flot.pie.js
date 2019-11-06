@@ -119,6 +119,7 @@ More detail and specific examples can be found in the included HTML file.
             if (options.series.pie.show) {
                 if (options.grid.hoverable) {
                     eventHolder.unbind("mousemove").mousemove(onMouseMove);
+                    eventHolder.bind("mouseleave", onMouseMove);
                 }
                 if (options.grid.clickable) {
                     eventHolder.unbind("click").click(onClick);
