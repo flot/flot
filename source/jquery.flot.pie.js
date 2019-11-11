@@ -127,6 +127,13 @@ More detail and specific examples can be found in the included HTML file.
             }
         });
 
+        plot.hooks.shutdown.push(function (plot, eventHolder) {
+            eventHolder.unbind("mousemove", onMouseMove);
+            eventHolder.unbind("mouseleave", onMouseMove);
+            eventHolder.unbind("click", onClick);
+            highlights = [];
+        });
+
         plot.hooks.processDatapoints.push(function(plot, series, data, datapoints) {
             var options = plot.getOptions();
             if (options.series.pie.show) {
