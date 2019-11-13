@@ -116,6 +116,13 @@
                 iconHtml += getEntryIconHtml(shape);
             }
 
+            // pie
+            if (options.legend.showColorRect) {
+                let updatedYPos = Number(shape.yPos.replace('em', '')) + .5 + 'em'
+                let updatedXPos = Number(shape.xPos.replace('px', '')) + 7 + 'px'
+                iconHtml = `<rect x="${updatedXPos}" y="${updatedYPos}" height="14" width="14" style="fill: ${entry.color};stroke-width:1;stroke:rgb(0,0,0);"/>${iconHtml}`
+            }
+            
             labelHtml = '<text x="' + shape.xPos + '" y="' + shape.yPos + '" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
             html[j++] = '<g>' + iconHtml + labelHtml + '</g>';
         }
