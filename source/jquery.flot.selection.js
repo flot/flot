@@ -10,6 +10,7 @@ selection: {
     color: color,
     shape: "round" or "miter" or "bevel",
     visualization: "fill" or "focus",
+    displaySelectionDecorations: true or false,
     minSize: number of pixels
 }
 
@@ -25,6 +26,10 @@ The way how the selection is visualized, can be changed by using the option
 option "focus" draws a colored bezel around the selected area while keeping
 the selected area clear. The option "fill" highlights (i.e., fills) the
 selected area with a colored highlight.
+
+There are optional selection decorations (handles) that are rendered with the
+"focus" visualization option. The selection decoration is rendered by default
+but can be turned off by setting displaySelectionDecorations to false.
 
 "minSize" is the minimum size a selection can be in pixels. This value can
 be customized to determine the smallest size a selection can be and still
@@ -450,6 +455,7 @@ The plugin allso adds the following methods to the plot object:
 
                 var c = $.color.parse(o.selection.color);
                 var visualization = o.selection.visualization;
+                var displaySelectionDecorations = o.selection.displaySelectionDecorations;
 
                 var scalingFactor = 1;
 
@@ -486,7 +492,10 @@ The plugin allso adds the following methods to the plot object:
                 } else {
                     ctx.fillRect(0, 0, plot.width(), plot.height());
                     ctx.clearRect(x, y, w, h);
-                    drawSelectionDecorations(ctx, x, y, w, h, oX, oY, selectionDirection(plot));
+
+                    if (displaySelectionDecorations) {
+                        drawSelectionDecorations(ctx, x, y, w, h, oX, oY, selectionDirection(plot));
+                    }
                 }
 
                 ctx.restore();
@@ -506,6 +515,7 @@ The plugin allso adds the following methods to the plot object:
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
                 visualization: "focus", // "focus" or "fill"
+                displaySelectionDecorations: true, // true or false (currently only relevant for the focus visualization)
                 color: "#888888",
                 shape: "round", // one of "round", "miter", or "bevel"
                 minSize: 5 // minimum number of pixels
