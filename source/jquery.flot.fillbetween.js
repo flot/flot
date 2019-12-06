@@ -61,10 +61,10 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
                 return;
             }
             
-            format = datapoints.format;
+            var format = datapoints.format;
             var plotHasId = function(id) {
                 var plotData = plot.getData();
-                for (i = 0; i < plotData.length; i++) {
+                for (var i = 0; i < plotData.length; i++) {
                     if (plotData[i].id === id) {
                         return true;
                     }
