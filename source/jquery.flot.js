@@ -1488,14 +1488,9 @@ Licensed under the MIT license.
                 max = typeof axis.options.max === 'number' ? axis.options.max : axis.max,
                 plotOffset = axis.options.offset;
 
-            if (autoScale) {
-                autoScaleAxis(axis);
-                min = axis.autoScaledMin;
-                max = axis.autoScaledMax;
-            }
-
-            min = (min != null ? min : -1) + (plotOffset.below || 0);
-            max = (max != null ? max : 1) + (plotOffset.above || 0);
+            autoScaleAxis(axis);
+            min = (min != null ? min : axis.autoScaledMin) + (plotOffset.below || 0);
+            max = (max != null ? max : axis.autoScaledMax) + (plotOffset.above || 0);
 
             if (min > max) {
                 var tmp = min;
@@ -2502,7 +2497,7 @@ Licensed under the MIT license.
                 }
             }
 
-            return items.sort((a, b) => { 
+            return items.sort((a, b) => {
                 if (b.distance === undefined) {
                     return -1;
                 } else if (a.distance === undefined && b.distance !== undefined) {
