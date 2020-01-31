@@ -4,7 +4,6 @@
 describe('drawSeries', function() {
 
     describe('drawSeriesLines', function() {
-        var asdf = 123;
         var minx = 0, maxx = 200, miny = 0, maxy = 100,
             series, ctx, plotWidth, plotHeight, plotOffset,
             drawSeriesLines = jQuery.plot.drawSeries.drawSeriesLines,
