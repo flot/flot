@@ -847,8 +847,6 @@ Licensed under the MIT license.
                 ps = s.datapoints.pointsize;
                 points = s.datapoints.points;
 
-                var insertSteps = s.lines.show && s.lines.steps;
-
                 for (j = k = 0; j < data.length; ++j, k += ps) {
                     p = data[j];
 
@@ -980,8 +978,8 @@ Licensed under the MIT license.
             var eventList = eventManager[key] || [];
 
             eventList.push({"event": event, "handler": handler, "eventHolder": eventHolder, "priority": priority});
-            eventList.sort((a, b) => b.priority - a.priority );
-            eventList.forEach( eventData => {
+            eventList.sort((a, b) => b.priority - a.priority);
+            eventList.forEach(eventData => {
                 eventData.eventHolder.unbind(eventData.event, eventData.handler);
                 eventData.eventHolder.bind(eventData.event, eventData.handler);
             });
@@ -2437,8 +2435,7 @@ Licensed under the MIT license.
                 if (series.bars.horizontal) {
                     range.ymin += delta;
                     range.ymax += delta + barWidth;
-                }
-                else {
+                } else {
                     range.xmin += delta;
                     range.xmax += delta + barWidth;
                 }
@@ -2467,7 +2464,7 @@ Licensed under the MIT license.
             }
 
             var start = series.bars.horizontal ? 1 : 0;
-            for (var j = start; j < series.datapoints.points.length; j += pointsize) {
+            for (let j = start; j < series.datapoints.points.length; j += pointsize) {
                 if (isFinite(series.datapoints.points[j]) && series.datapoints.points[j] !== null) {
                     xValues.push(series.datapoints.points[j]);
                 }
@@ -2477,10 +2474,10 @@ Licensed under the MIT license.
                 return self.indexOf(value) === index;
             }
 
-            xValues = xValues.filter( onlyUnique );
-            xValues.sort(function(a, b){return a - b});
+            xValues = xValues.filter(onlyUnique);
+            xValues.sort(function(a, b) { return a - b });
 
-            for (var j = 1; j < xValues.length; j++) {
+            for (let j = 1; j < xValues.length; j++) {
                 var distance = Math.abs(xValues[j] - xValues[j - 1]);
                 if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
@@ -2502,21 +2499,21 @@ Licensed under the MIT license.
                 }
             }
 
-            return items.sort((a, b) => { 
+            return items.sort((a, b) => {
                 if (b.distance === undefined) {
                     return -1;
                 } else if (a.distance === undefined && b.distance !== undefined) {
                     return 1;
                 }
 
-                return a.distance - b.distance ;
+                return a.distance - b.distance;
             });
         }
 
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {
             var items = findNearbyItems(mouseX, mouseY, seriesFilter, radius, computeDistance);
             return items[0] !== undefined ? items[0] : null;
-         }
+        }
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
         function findItems(mouseX, mouseY, seriesFilter, radius, computeDistance) {
@@ -2550,7 +2547,7 @@ Licensed under the MIT license.
             for (i = 0; i < items.length; i++) {
                 var seriesIndex = items[i].seriesIndex;
                 var dataIndex = items[i].dataIndex;
-                var smallestDistance = items[i].distance;
+                var itemDistance = items[i].distance;
                 var ps = series[seriesIndex].datapoints.pointsize;
 
                 foundItems.push({
@@ -2558,7 +2555,7 @@ Licensed under the MIT license.
                     dataIndex: dataIndex,
                     series: series[seriesIndex],
                     seriesIndex: seriesIndex,
-                    distance: Math.sqrt(smallestDistance)
+                    distance: Math.sqrt(itemDistance)
                 });
             }
 
@@ -2641,17 +2638,19 @@ Licensed under the MIT license.
             var foundIndex = -1;
             for (var j = 0; j < points.length; j += ps) {
                 var x = points[j], y = points[j + 1];
-                if (x == null)
+                if (x == null) {
                     continue;
+                }
 
                 var bottom = ps === 3 ? points[j + 2] : defaultBottom;
                 // for a bar graph, the cursor must be inside the bar
-                if (series.bars.horizontal ?
-                    (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
-                        my >= y + barLeft && my <= y + barRight) :
-                    (mx >= x + barLeft && mx <= x + barRight &&
-                        my >= Math.min(bottom, y) && my <= Math.max(bottom, y)))
-                        foundIndex = j / ps;
+                if (series.bars.horizontal
+                    ? (mx <= Math.max(bottom, x) && mx >= Math.min(bottom, x) &&
+                        my >= y + barLeft && my <= y + barRight)
+                    : (mx >= x + barLeft && mx <= x + barRight &&
+                        my >= Math.min(bottom, y) && my <= Math.max(bottom, y))) {
+                    foundIndex = j / ps;
+                }
             }
 
             return foundIndex;

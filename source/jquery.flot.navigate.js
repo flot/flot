@@ -282,10 +282,10 @@ can set the default in the options.
                 prevDragPosition.y = page.Y;
             }
         }
-        
+
         function onDrag(e) {
-            if (!isPanAction) { 
-                return; 
+            if (!isPanAction) {
+                return;
             }
 
             var page = browser.getPageXY(e);
@@ -332,8 +332,8 @@ can set the default in the options.
         }
 
         function onDragEnd(e) {
-            if (!isPanAction) { 
-                return; 
+            if (!isPanAction) {
+                return;
             }
 
             if (panTimeout) {

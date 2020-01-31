@@ -5,6 +5,8 @@ describe("flot hover plugin", function () {
     var getEntireCanvasData = window.colors.getEntireCanvasData;
     var canvasData = window.colors.canvasData;
 
+    var asdf = 1234;
+
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');

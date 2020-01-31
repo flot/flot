@@ -35,7 +35,7 @@
                 currentTouchedAxis: 'none',
                 touchedAxis: null,
                 navigationConstraint: 'unconstrained',
-                initialState: null,
+                initialState: null
             },
             useManualPan = options.pan.interactive && options.pan.touchMode === 'manual',
             smartPanLock = options.pan.touchMode === 'smartLock',

@@ -79,7 +79,6 @@ the tooltip from webcharts).
             highlights = [];
         }
 
-
         function generatePlothoverEvent(e) {
             var o = plot.getOptions(),
                 newEvent = new CustomEvent('mouseevent');
@@ -98,10 +97,10 @@ the tooltip from webcharts).
 
         function doTriggerClickHoverEvent(event, eventType, searchDistance) {
             var series = plot.getData();
-            if (event !== undefined
-                && series.length > 0
-                && series[0].xaxis.c2p !== undefined
-                && series[0].yaxis.c2p !== undefined) {
+            if (event !== undefined &&
+                series.length > 0 &&
+                series[0].xaxis.c2p !== undefined &&
+                series[0].yaxis.c2p !== undefined) {
                 var eventToTrigger = "plot" + eventType;
                 var seriesFlag = eventType + "able";
                 triggerClickHoverEvent(eventToTrigger, event,
@@ -155,8 +154,8 @@ the tooltip from webcharts).
             var items = plot.findNearbyItems(canvasX, canvasY, seriesFilter, distance);
             var item = items[0];
 
-            for (var i = 1; i < items.length; ++i) {
-                if (item.distance === undefined || 
+            for (let i = 1; i < items.length; ++i) {
+                if (item.distance === undefined ||
                     items[i].distance < item.distance) {
                     item = items[i];
                 }
@@ -172,7 +171,7 @@ the tooltip from webcharts).
 
             if (options.grid.autoHighlight) {
                 // clear auto-highlights
-                for (var i = 0; i < highlights.length; ++i) {
+                for (let i = 0; i < highlights.length; ++i) {
                     var h = highlights[i];
                     if ((h.auto === eventname &&
                         !(item && h.series === item.series &&

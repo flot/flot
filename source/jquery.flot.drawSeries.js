@@ -42,7 +42,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     continue;
                 }
 
-                if(steps){
+                if (steps) {
                     if (mx !== null && my !== null) {
                         // if middle point exists, transfer p2 -> p1 and p1 -> mp
                         x2 = x1;
@@ -202,7 +202,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     continue;
                 }
 
-                if(steps){
+                if (steps) {
                     if (mx !== null && my !== null) {
                         // if middle point exists, transfer p2 -> p1 and p1 -> mp
                         x2 = x1;
@@ -482,8 +482,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     drawLeft = true;
                     drawRight = false;
                 }
-            }
-            else {
+            } else {
                 drawLeft = drawRight = drawTop = true;
                 drawBottom = false;
                 left = x + barLeft;

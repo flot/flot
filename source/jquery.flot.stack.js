@@ -78,7 +78,7 @@ charts or filled areas).
             if (s.stack == null || s.stack === false) return;
 
             var needsBottom = s.bars.show || (s.lines.show && s.lines.fill);
-            var hasBottom = datapoints.pointsize > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y);
+            var hasBottom = datapoints.pointsize > 2 && (s.bars.horizontal ? datapoints.format[2].x : datapoints.format[2].y);
             // Series data is missing bottom points - need to format
             if (needsBottom && !hasBottom) {
                 addBottomPoints(s, datapoints);
