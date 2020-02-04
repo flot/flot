@@ -52,7 +52,7 @@
         var columnWidths = [];
         var style = window.getComputedStyle(document.querySelector('body'));
         for (i = 0; i < entries.length; ++i) {
-            var columnIndex = i % options.legend.noColumns;
+            let columnIndex = i % options.legend.noColumns;
             entry = entries[i];
             shape.label = entry.label;
             var info = plot.getSurface().getTextInfo('', shape.label, {
@@ -78,7 +78,7 @@
 
         // Generate html for icons and labels from a list of entries
         for (i = 0; i < entries.length; ++i) {
-            var columnIndex = i % options.legend.noColumns;
+            let columnIndex = i % options.legend.noColumns;
             entry = entries[i];
             iconHtml = '';
             shape.label = entry.label;

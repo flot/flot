@@ -249,9 +249,9 @@ formatters and transformers to and from logarithmic representation.
                 .map(function(series) {
                     return plot.computeRangeForDataSeries(series, null, isValid);
                 }),
-            min = axis.direction === 'x' 
-            ? Math.min(0.1, range && range[0] ? range[0].xmin : 0.1) 
-            : Math.min(0.1, range && range[0] ? range[0].ymin : 0.1);
+            min = axis.direction === 'x'
+                ? Math.min(0.1, range && range[0] ? range[0].xmin : 0.1)
+                : Math.min(0.1, range && range[0] ? range[0].ymin : 0.1);
 
         axis.min = min;
 

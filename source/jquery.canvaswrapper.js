@@ -386,7 +386,6 @@ don't work unless the canvas is attached to the DOM.
 
         y += 0.75 * info.height;
 
-
         // Determine whether this text already exists at this position.
         // If so, mark it for inclusion in the next render pass.
 
@@ -447,7 +446,7 @@ don't work unless the canvas is attached to the DOM.
         position.element.style.textAlign = halign;
         // update the transforms
         updateTransforms(position.element, transforms);
-   };
+    };
 
     var addTspanElements = function(text, element, x) {
         var lines = text.split('<br>'),
