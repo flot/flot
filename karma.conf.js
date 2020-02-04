@@ -63,7 +63,7 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
-            'node_modules/webcharts-development-settings/testsUtils/*.js',
+            'tests/testUtils/*.js',
             { pattern: 'tests/svgstyle.css', included: true, served: true },
             'tests/*.Test.js'
         ]),
@@ -82,7 +82,7 @@ module.exports = function(config) {
             stopOnError: config.stopOnEsLintError ? true : false,
             showWarnings: true,
             engine: {
-                configFile: 'node_modules/webcharts-development-settings/.eslintrc.json',
+                configFile: '.eslintrc.json',
                 emitError: true,
                 emitWarning: true
             }

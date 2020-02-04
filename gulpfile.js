@@ -4,7 +4,6 @@ var uglify = require('gulp-uglify');
 var babel = require('gulp-babel');
 var filesExist = require('files-exist');
 var maps = require('gulp-sourcemaps');
-var gulpSequence = require('gulp-sequence');
 
 var files = [
     './source/jquery.canvaswrapper.js',
@@ -32,24 +31,24 @@ var files = [
     './source/jquery.flot.legend.js'
 ];
 
-gulp.task('build_flot_source', function() {
+function buildFlotSource () {
     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
         .pipe(concat('jquery.flot.js'))
         .pipe(gulp.dest('dist/source'));
-});
+}
 
-gulp.task('build_flot_minified', function() {
+function buildFlotMinified () {
     return gulp.src(filesExist(files, { exceptionMessage: 'Missing file' }))
-        .pipe(maps.init())
-        .pipe(babel({
-            "presets": [
-                "@babel/preset-env"
-            ]
-        }))
-        .pipe(concat('jquery.flot.js'))
-        .pipe(uglify())
-        .pipe(maps.write('./'))
-        .pipe(gulp.dest('dist/es5'));
-});
+    .pipe(maps.init())
+    .pipe(babel({
+        "presets": [
+            "@babel/preset-env"
+        ]
+    }))
+    .pipe(concat('jquery.flot.js'))
+    .pipe(uglify())
+    .pipe(maps.write('./'))
+    .pipe(gulp.dest('dist/es5'));
+}
 
-gulp.task('build', gulp.series('build_flot_source', 'build_flot_minified'));
+exports.build = gulp.series(buildFlotSource, buildFlotMinified);
