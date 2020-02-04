@@ -483,7 +483,7 @@ API.txt for details.
 					axis.tickGenerator = dateTickGenerator;
 					
 					// if a tick formatter is already provided do not overwrite it
-					if ('tickFormatter' in opts && opts.tickFormatter !== null) return;
+					if ('tickFormatter' in opts && typeof opts.tickFormatter === 'function') return;
 
                     axis.tickFormatter = function (v, axis) {
                         var d = dateGenerator(v, axis.options);
