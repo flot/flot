@@ -223,6 +223,18 @@ describe('CanvasWrapper', function() {
         expect(elem.childNodes.length).toBe(4);
     });
 
+    it('should evenly space multi line text', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '1<br>2<br>3<br>4', 'a');
+        canvas.render();
+
+        var elem = placeholder.find('.a')[0];
+        expect(elem.childNodes[0].getAttribute('dy')).toBe('0em');
+        for (var i = 1; i < 4; i++) {
+            expect(elem.childNodes[i].getAttribute('dy')).toBe('1em');
+        }
+    });
+
     it('should update the cache position of the elements', function() {
         var canvas = newCanvas(placeholder);
         canvas.addText('layerA', 100, 200, '123', 'a');
