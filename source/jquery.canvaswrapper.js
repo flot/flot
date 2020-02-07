@@ -460,7 +460,7 @@ don't work unless the canvas is attached to the DOM.
                 tspan = element.childNodes[i];
             }
             tspan.textContent = lines[i];
-            offset = i * 1 + 'em';
+            offset = (i === 0 ? 0 : 1) + 'em';
             tspan.setAttributeNS(null, 'dy', offset);
             tspan.setAttributeNS(null, 'x', x);
         }
