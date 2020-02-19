@@ -401,6 +401,9 @@ API.txt for details.
                 d.setMicroseconds(d.getMilliseconds() * 1000);
             }
         }
+		if (step >= timeUnitSize.second) {
+            d.setMilliseconds(0);
+        }
         if (step >= timeUnitSize.minute) {
             d.setSeconds(0);
         }
