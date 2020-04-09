@@ -151,8 +151,8 @@
             legendEl.css('pointerEvents', 'none');
         } else {
             legendEl = $(html.join('')).appendTo(options.legend.container)[0];
-            options.legend.container.style.width = width + 'px';
-            options.legend.container.style.height = height + 'em';
+            $(options.legend.container).get(0).style.width = width + 'px';
+            $(options.legend.container).get(0).style.height = height + 'em';
         }
     }
 
