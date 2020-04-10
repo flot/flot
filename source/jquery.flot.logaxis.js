@@ -227,7 +227,7 @@ formatters and transformers to and from logarithmic representation.
 
     It is used for clamping the starting point of a logarithmic axis.
     This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
-    The function is usefull since the logarithmic representation can not show
+    The function is useful since the logarithmic representation can not show
     values less than or equal to 0.
     */
     function setDataminRange(plot, axis) {
