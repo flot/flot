@@ -951,6 +951,37 @@ describe('flot', function() {
                 expect(yaxis.max).toEqual(ticks[ticks.length - 1].v);
             });
 
+            it('should not show y axis endpoints for horizontal bars with showTickLabels = all', function() {
+                var plot = $.plot(placeholder, [[[1, -3], [15, 30], [7, 20], [2, 5]]], {
+                    xaxis: {
+                        autoScale: 'exact',
+                        showTickLabels: 'all'
+                    },
+                    yaxis: {
+                        autoScale: 'exact',
+                        showTickLabels: 'all'
+                    },
+                    series: {
+                        bars: {
+                            lineWidth: 1,
+                            show: true,
+                            fillColor: 'blue',
+                            barWidth: 0.8,
+                            horizontal: true
+                        }
+                    }
+                });
+
+                var xaxis = plot.getXAxes()[0],
+                    yaxis = plot.getYAxes()[0],
+                    ticks = yaxis.ticks;
+                expect(yaxis.min).not.toEqual(ticks[0].v);
+                expect(yaxis.max).not.toEqual(ticks[ticks.length - 1].v);
+                ticks = xaxis.ticks;
+                expect(xaxis.min).toEqual(ticks[0].v);
+                expect(xaxis.max).toEqual(ticks[ticks.length - 1].v);
+            });
+
             it('should show endpoints for multiple series type where showTickLabels = all', function() {
                 var plot = $.plot(placeholder, [{
                     data: [[-3, 2], [20, 15], [4, 5]],
