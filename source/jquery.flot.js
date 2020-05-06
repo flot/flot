@@ -1761,7 +1761,7 @@ Licensed under the MIT license.
             }
             if (axis.options.showTickLabels === 'all') {
                 var associatedSeries = series.filter(function(s) {
-                        return s.xaxis === axis;
+                        return s.bars.horizontal ? s.yaxis === axis : s.xaxis === axis;
                     }),
                     notAllBarSeries = associatedSeries.some(function(s) {
                         return !s.bars.show;
