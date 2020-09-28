@@ -48,7 +48,7 @@ charts or filled areas).
                     break;
                 }
 
-                if (allseries[i].stack === s.stack) {
+                if (allseries[i].stack === s.stack && allseries[i].data.length) {
                     res = allseries[i];
                 }
             }
