@@ -763,7 +763,7 @@ More detail and specific examples can be found in the included HTML file.
                 label: {
                     show: "auto",
                     formatter: function(label, slice) {
-                        return "<div style='font-size:x-small;text-align:center;padding:2px;color:" + slice.color + ";'>" + label + "<br/>" + Math.round(slice.percent) + "%</div>";
+                        return "<div style='font-size:x-small;text-align:center;padding:2px;color:" + slice.color + ";'>" + label + "<br>" + Math.round(slice.percent) + "%</div>";
                     },    // formatter function
                     radius: 1,    // radius at which to place the labels (based on full calculated radius if <=1, or hard pixel value)
                     background: {
