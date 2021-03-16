@@ -347,6 +347,20 @@ describe('flot', function() {
             expect(limits.ymin).toBe(1);
             expect(limits.ymax).toBe(3);
         });
+
+        it('should correctly compute the minimum and maximum when 3rd coordinate is specified for horizontal bars', function () {
+            options.series.points.show = false;
+            options.series.bars = { show: true, horizontal: true };
+            plot = $.plot(placeholder, [[[10, 0, 5], [12, 1, 5], [8, 2, 5]]], options);
+
+            var series = plot.getData();
+            var limits = plot.computeRangeForDataSeries(series[0], true);
+
+            expect(limits.xmin).toBe(5);
+            expect(limits.xmax).toBe(12);
+            expect(limits.ymin).toBe(0);
+            expect(limits.ymax).toBe(2);
+        });
     });
 
     describe('adjustSeriesDataRange', function() {

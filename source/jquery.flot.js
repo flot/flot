@@ -826,8 +826,8 @@ Licensed under the MIT license.
                         var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0] && s.data[0].length ? s.data[0].length : 3);
                         if (expectedPs > 2) {
                             format.push({
-                                x: false,
-                                y: true,
+                                x: s.bars.horizontal,
+                                y: !s.bars.horizontal,
                                 number: true,
                                 required: false,
                                 computeRange: s.yaxis.options.autoScale !== 'none',
