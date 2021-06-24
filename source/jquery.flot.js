@@ -1520,7 +1520,7 @@ Licensed under the MIT license.
             var magn = parseFloat('1e' + (-dec)),
                 norm = delta / magn;
 
-            if (norm > 2.25 && norm < 3 && (dec + 1) <= tickDecimals) {
+            if (norm > 2.25 && norm < 3 && (tickDecimals == null || (dec + 1) <= tickDecimals)) {
                 //we need an extra decimals when tickSize is 2.5
                 ++dec;
             }
