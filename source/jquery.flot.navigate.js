@@ -699,7 +699,7 @@ can set the default in the options.
                 p = prevDelta[axis.direction];
 
                 //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
-                if ((!opts.axisPan && panAxes) || (!panAxes && !opts.plotPan)) {
+                if ((!opts.axisPan && panAxes) || (!panAxes && !opts.plotPan) || p === d) {
                     return;
                 }
 
@@ -707,13 +707,20 @@ can set the default in the options.
                 var minD = p + axis.p2c(opts.panRange[0]) - axis.p2c(axisMin);
                 // calc max delta (revealing right edge of plot)
                 var maxD = p + axis.p2c(opts.panRange[1]) - axis.p2c(axisMax);
+                const deltaIsInverted = axis.direction === 'y' === !axis.options.inverted;
+                // if minD is beyond maxD the range is zoomed out beyond the panRange so do nothing
+                if ((!deltaIsInverted && minD > maxD) || (deltaIsInverted && minD < maxD)) {
+                    return;
+                }
                 // limit delta to min or max if enabled
-                if (opts.panRange[0] !== undefined && d >= maxD) d = maxD;
-                if (opts.panRange[1] !== undefined && d <= minD) d = minD;
+                const deltaIsBeyondMax = deltaIsInverted ? d <= maxD : d >= maxD;
+                const deltaIsBeyondMin = deltaIsInverted ? d >= minD : d <= minD;
+                if (opts.panRange[0] !== undefined && deltaIsBeyondMin) d = minD;
+                if (opts.panRange[1] !== undefined && deltaIsBeyondMax) d = maxD;
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin))),
-                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax)));
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axisMin),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axisMax);
 
                     if (!isFinite(navigationOffsetBelow)) {
                         navigationOffsetBelow = 0;

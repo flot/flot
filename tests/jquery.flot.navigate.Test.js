@@ -545,6 +545,177 @@ describe("flot navigate plugin", function () {
 
         });
 
+        const invertedTestCases = [
+            {xAxisInverted: true, yAxisInverted: false}, 
+            {xAxisInverted: false, yAxisInverted: true}, 
+            {xAxisInverted: true, yAxisInverted: true}, 
+            {xAxisInverted: false, yAxisInverted: false}, 
+            {xAxisInverted: true, yAxisInverted: undefined}, 
+            {xAxisInverted: undefined, yAxisInverted: true}, 
+            {xAxisInverted: undefined, yAxisInverted: undefined}
+        ];
+        const smartPanTestCases = [{
+                xPanAmount: 1,
+                yPanAmount: 0,
+                inverted: false,
+                expectedXMin: 10,
+                expectedXMax: 20,
+                expectedYMin: 0,
+                expectedYMax: 10
+            },
+            {
+                xPanAmount: 0,
+                yPanAmount: 1,
+                expectedXMin: 0,
+                expectedXMax: 10,
+                expectedYMin: 10,
+                expectedYMax: 20
+            },
+            {
+                xPanAmount: 1,
+                yPanAmount: 1,
+                expectedXMin: 10,
+                expectedXMax: 20,
+                expectedYMin: 10,
+                expectedYMax: 20
+            },
+            {
+                xPanAmount: -1,
+                yPanAmount: 0,
+                expectedXMin: -10,
+                expectedXMax: 0,
+                expectedYMin: 0,
+                expectedYMax: 10
+            },
+            {
+                xPanAmount: 0,
+                yPanAmount: -1,
+                expectedXMin: 0,
+                expectedXMax: 10,
+                expectedYMin: -10,
+                expectedYMax: 0
+            },
+            {
+                xPanAmount: -1,
+                yPanAmount: -1,
+                expectedXMin: -10,
+                expectedXMax: 0,
+                expectedYMin: -10,
+                expectedYMax: 0
+            },
+            {
+                xPanAmount: 3,
+                yPanAmount: 0,
+                expectedXMin: 10,
+                expectedXMax: 20,
+                expectedYMin: 0,
+                expectedYMax: 10
+            },
+            {
+                xPanAmount: 0,
+                yPanAmount: 3,
+                expectedXMin: 0,
+                expectedXMax: 10,
+                expectedYMin: 10,
+                expectedYMax: 20
+            },
+            {
+                xPanAmount: -3,
+                yPanAmount: 0,
+                expectedXMin: -10,
+                expectedXMax: 0,
+                expectedYMin: 0,
+                expectedYMax: 10
+            },
+            {
+                xPanAmount: 0,
+                yPanAmount: -3,
+                expectedXMin: 0,
+                expectedXMax: 10,
+                expectedYMin: -10,
+                expectedYMax: 0
+            },
+            {
+                xPanAmount: -3,
+                yPanAmount: -3,
+                expectedXMin: -10,
+                expectedXMax: 0,
+                expectedYMin: -10,
+                expectedYMax: 0
+            },
+        ];
+        invertedTestCases.forEach(invertedAxisData => {
+            smartPanTestCases.forEach(testCase => {
+                it(`smartPan updates min and max as expected when using panRange where: xAxisInverted = ${invertedAxisData.xAxisInverted}` +
+                `, yAxisInverted = ${invertedAxisData.yAxisInverted}, xPan = ${testCase.xPanAmount}, yPan = ${testCase.yPanAmount}`, function () {
+                    var xaxis, yaxis;
+        
+                    options.xaxes[0]['panRange'] = [-10, 20];
+                    options.xaxes[0]['inverted'] = invertedAxisData.xAxisInverted;
+                    options.yaxes[0]['panRange'] = [-10, 20];
+                    options.yaxes[0]['inverted'] = invertedAxisData.yAxisInverted;
+
+                    plot = $.plot(placeholder, [
+                        [
+                            [0, 0],
+                            [10, 10]
+                        ]
+                    ], options);
+        
+                    xaxis = plot.getXAxes()[0];
+                    yaxis = plot.getYAxes()[0];
+        
+                    const xPan = plot.width() * testCase.xPanAmount * ( invertedAxisData.xAxisInverted ? -1 : 1 );
+                    const yPan = -plot.height() * testCase.yPanAmount * ( invertedAxisData.yAxisInverted ? -1 : 1 );
+                    plot.smartPan({
+                        x: xPan,
+                        y: yPan
+                    }, plot.navigationState());
+        
+                    expect(xaxis.min).toBe(testCase.expectedXMin);
+                    expect(xaxis.max).toBe(testCase.expectedXMax);
+                    expect(yaxis.min).toBe(testCase.expectedYMin);
+                    expect(yaxis.max).toBe(testCase.expectedYMax);
+        
+                });
+            });
+        });
+
+        it('when zoomed out beyond panRange, pan will not update axis', function() {
+            var xaxis, yaxis;
+        
+            options.xaxes[0]['panRange'] = [-15, 25];
+            options.xaxes[0]['zoomRange'] = [0, 40];
+            options.yaxes[0]['panRange'] = [-15, 25];
+            options.yaxes[0]['zoomRange'] = [0, 40];
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+            plot.zoom({
+                amount: 0.25
+            });
+
+            const xPan = plot.width() *  .1; // pan 10% of width
+            const yPan = -plot.height() * .1; // pan 10% of height
+            plot.smartPan({
+                x: xPan,
+                y: yPan
+            }, plot.navigationState());
+            
+            // assert that pan did nothing
+            expect(xaxis.min).toBeCloseTo(-15);
+            expect(xaxis.max).toBeCloseTo(25);
+            expect(yaxis.min).toBeCloseTo(-15);
+            expect(yaxis.max).toBeCloseTo(25);
+        });
+
         it('restore xaxis offset on snap on y direction if returns from diagonal snap', function () {
             var xaxis, yaxis;
 
