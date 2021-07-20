@@ -75,4 +75,4 @@ Examples are included in the examples folder of this repository, but they can be
 ## CircleCI
 
 [CircleCI](https://circleci.com/) is used in this repo to run [dont-break](https://www.npmjs.com/package/dont-break),
-which checks if the current version of flot breaks unit tests on specified dependent projects.
+which checks if the current version of flot breaks unit tests on specified dependent projects. 
