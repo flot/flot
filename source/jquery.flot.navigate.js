@@ -707,6 +707,10 @@ can set the default in the options.
                 var minD = p + axis.p2c(opts.panRange[0]) - axis.p2c(axisMin);
                 // calc max delta (revealing right edge of plot)
                 var maxD = p + axis.p2c(opts.panRange[1]) - axis.p2c(axisMax);
+                // flip direction of calculation for y axis
+                // because screen coordinates and plot coordinates are flipped along the y-axis
+                if (axis.direction === 'y') [minD,maxD] = [maxD,minD];
+
                 // limit delta to min or max if enabled
                 if (opts.panRange[0] !== undefined && d >= maxD) d = maxD;
                 if (opts.panRange[1] !== undefined && d <= minD) d = minD;
