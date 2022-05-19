@@ -31,7 +31,6 @@ API.txt for details.
 
         var oldSetTime = newDate.setTime.bind(newDate);
         newDate.update = function(microEpoch) {
-
             // Round epoch to 3 decimal accuracy
             microEpoch = Math.round(microEpoch * 1000) / 1000;
 
