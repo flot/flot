@@ -107,6 +107,12 @@ describe('A Flot chart with absolute time axes', function () {
 
             expect(dateGenerator(123123, { timeBase: 'microseconds' }).getTime()).toEqual(123.123);
         });
+
+        it('rounds values to nearest microsecond timestamp', function() {
+            var dateGenerator = $.plot.dateGenerator;
+
+            expect(dateGenerator(999.9, { timeBase: 'microseconds' }).getTime()).toEqual(1);
+        });
     });
 
     describe('sub-second ticks', function () {
