@@ -56,15 +56,15 @@ describe('A Flot chart with absolute time axes', function () {
         ]);
     });
 
-    it('creates enough time ticks', function() {
+    it('creates time ticks in expected locations', function() {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0.95, 1], [1.95, 2]]], undefined, 'seconds');
 
         var ticks = plot.getAxes().xaxis.ticks;
-        expect(ticks.length).toBeGreaterThan(10);
-        ticks.sort((a, b) => a.v - b.v);
-        for (var i = 1; i < ticks.length; i++) {
-            expect(ticks[i].v - ticks[i - 1].v).toBeLessThan(0.5);
-        }
+        expect(ticks.length).toEqual(14);
+
+        // Check that the first generated tick is less than 1/4 of the way along the plot area width
+        var firstTickLocation = plot.getAxes().xaxis.p2c(ticks[1].v);
+        expect(firstTickLocation).toBeLessThan(plot.offset().left + (plot.width() / 4));
     });
 
     it('shows year time ticks', function () {
