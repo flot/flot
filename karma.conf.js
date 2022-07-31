@@ -49,7 +49,8 @@ module.exports = function(config) {
         'lib/globalize.js',
         'lib/globalize.culture.en-US.js',
         'lib/jquery.event.drag.js',
-        'lib/jquery.mousewheel.js'
+        'lib/jquery.mousewheel.js',
+        'node_modules/jasmine-jquery/lib/jasmine-jquery.js'
     ].concat(coverage_sources);
 
     var settings = {
@@ -59,7 +60,7 @@ module.exports = function(config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['jasmine-jquery', 'jasmine'],
+        frameworks: ['jasmine'],
 
         // list of files / patterns to load in the browser
         files: sources.concat([
