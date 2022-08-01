@@ -56,6 +56,17 @@ describe('A Flot chart with absolute time axes', function () {
         ]);
     });
 
+    it('creates time ticks in expected locations', function() {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0.95, 1], [1.95, 2]]], undefined, 'seconds');
+
+        var ticks = plot.getAxes().xaxis.ticks;
+        expect(ticks.length).toEqual(14);
+
+        // Check that the first generated tick is less than 1/4 of the way along the plot area width
+        var firstTickLocation = plot.getAxes().xaxis.p2c(ticks[1].v);
+        expect(firstTickLocation).toBeLessThan(plot.offset().left + (plot.width() / 4));
+    });
+
     it('shows year time ticks', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[-373597200000, 1], [1199142000000, 2]]], '%Y', 'milliseconds');
 
@@ -95,6 +106,12 @@ describe('A Flot chart with absolute time axes', function () {
             var dateGenerator = $.plot.dateGenerator;
 
             expect(dateGenerator(123123, { timeBase: 'microseconds' }).getTime()).toEqual(123.123);
+        });
+
+        it('rounds values to nearest microsecond timestamp', function() {
+            var dateGenerator = $.plot.dateGenerator;
+
+            expect(dateGenerator(999.9, { timeBase: 'microseconds' }).getTime()).toEqual(1);
         });
     });
 
