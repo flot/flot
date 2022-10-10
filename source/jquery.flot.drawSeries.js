@@ -45,22 +45,20 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 if (steps) {
                     if (mx !== null && my !== null) {
                         // if middle point exists, transfer p2 -> p1 and p1 -> mp
-                        x2 = x1;
-                        y2 = y1;
                         x1 = mx;
                         y1 = my;
 
                         // 'remove' middle point
                         mx = null;
                         my = null;
-
-                        // subtract pointsize from i to have current point p1 handled again
-                        i -= ps;
                     } else if (y1 !== y2 && x1 !== x2) {
                         // create a middle point
                         y2 = y1;
                         mx = x2;
                         my = y1;
+
+                        // subtract pointsize from i to have current point p1 handled again
+                        i -= ps;
                     }
                 }
 
