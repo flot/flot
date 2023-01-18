@@ -6,7 +6,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 ### Public methods
 */
 
-(function($) {
+(function ($) {
     "use strict";
 
     function DrawSeries() {
@@ -23,7 +23,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 my = null,
                 i = 0;
 
-            var initPoints = function () {
+            var initPoints = function (i) {
                 x1 = points[i - ps];
                 y1 = points[i - ps + 1];
                 x2 = points[i];
@@ -42,14 +42,15 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     mx = null;
                     my = null;
 
-                    // subtract pointsize from i to have current point p1 handled again
-                    i -= ps;
+                    return true;
                 } else if (y1 !== y2 && x1 !== x2) {
                     // create a middle point
                     y2 = y1;
                     mx = x2;
                     my = y1;
                 }
+
+                return false;
             };
 
             var handleYMinClipping = function () {
@@ -137,7 +138,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 
             ctx.beginPath();
             for (i = ps; i < points.length; i += ps) {
-                initPoints();
+                initPoints(i);
 
                 if (x1 === null || x2 === null) {
                     mx = null;
@@ -151,7 +152,13 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     continue;
                 }
 
-                if (steps) handleSteps();
+                if (steps) {
+                    var wasMidPointPresent = handleSteps();
+                    if (wasMidPointPresent) {
+                        // Subtract pointsize from i to have current point p1 handled again.
+                        i -= ps;
+                    }
+                }
                 if (handleYMinClipping()) continue;
                 if (handleYMaxClipping()) continue;
                 if (handleXMinClipping()) continue;
@@ -162,13 +169,15 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 
             // Connects last two points in case middle point exists after the loop.
             if (mx !== null && my !== null) {
-                initPoints();
+                initPoints(i);
                 handleSteps();
-                handleYMinClipping();
-                handleYMaxClipping();
-                handleXMinClipping();
-                handleXMaxClipping();
-                drawLine();
+
+                if (!handleYMinClipping() &&
+                    !handleYMaxClipping() &&
+                    !handleXMinClipping() &&
+                    !handleXMaxClipping()) {
+                    drawLine();
+                }
             }
 
             ctx.stroke();
@@ -658,7 +667,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     barLeft = -barWidth / 2;
             }
 
-            var fillStyleCallback = series.bars.fill ? function(bottom, top) {
+            var fillStyleCallback = series.bars.fill ? function (bottom, top) {
                 return getFillStyle(series.bars, series.color, bottom, top, getColorOrGradient);
             } : null;
 
