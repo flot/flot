@@ -152,9 +152,12 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                     continue;
                 }
 
-                if (steps && handleSteps()) {
-                    // Subtract pointsize from i to have current point p1 handled again if middle point was present.
-                    i -= ps;
+                if (steps) {
+                    var hadMiddlePoint = handleSteps();
+                    if (hadMiddlePoint) {         
+                        // Subtract pointsize from i to have current point p1 handled again.
+                        i -= ps;
+                    }
                 }
                 if (handleYMinClipping()) continue;
                 if (handleYMaxClipping()) continue;
