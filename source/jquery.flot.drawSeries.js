@@ -23,12 +23,122 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 my = null,
                 i = 0;
 
-            ctx.beginPath();
-            for (i = ps; i < points.length; i += ps) {
+            var initPoints = function (i) {
                 x1 = points[i - ps];
                 y1 = points[i - ps + 1];
                 x2 = points[i];
                 y2 = points[i + 1];
+            };
+
+            var handleSteps = function () {
+                if (mx !== null && my !== null) {
+                    // if middle point exists, transfer p2 -> p1 and p1 -> mp
+                    x2 = x1;
+                    y2 = y1;
+                    x1 = mx;
+                    y1 = my;
+
+                    // 'remove' middle point
+                    mx = null;
+                    my = null;
+
+                    return true;
+                } else if (y1 !== y2 && x1 !== x2) {
+                    // create a middle point
+                    y2 = y1;
+                    mx = x2;
+                    my = y1;
+                }
+
+                return false;
+            };
+
+            var handleYMinClipping = function () {
+                if (y1 <= y2 && y1 < axisy.min) {
+                    if (y2 < axisy.min) {
+                        // line segment is outside
+                        return true;
+                    }
+                    // compute new intersection point
+                    x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.min;
+                } else if (y2 <= y1 && y2 < axisy.min) {
+                    if (y1 < axisy.min) {
+                        return true;
+                    }
+
+                    x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.min;
+                }
+            };
+
+            var handleYMaxClipping = function () {
+                if (y1 >= y2 && y1 > axisy.max) {
+                    if (y2 > axisy.max) {
+                        return true;
+                    }
+
+                    x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.max;
+                } else if (y2 >= y1 && y2 > axisy.max) {
+                    if (y1 > axisy.max) {
+                        return true;
+                    }
+
+                    x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.max;
+                }
+            };
+
+            var handleXMinClipping = function () {
+                if (x1 <= x2 && x1 < axisx.min) {
+                    if (x2 < axisx.min) {
+                        return true;
+                    }
+
+                    y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.min;
+                } else if (x2 <= x1 && x2 < axisx.min) {
+                    if (x1 < axisx.min) {
+                        return true;
+                    }
+
+                    y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.min;
+                }
+            };
+
+            var handleXMaxClipping = function () {
+                if (x1 >= x2 && x1 > axisx.max) {
+                    if (x2 > axisx.max) {
+                        return true;
+                    }
+
+                    y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.max;
+                } else if (x2 >= x1 && x2 > axisx.max) {
+                    if (x1 > axisx.max) {
+                        return true;
+                    }
+
+                    y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.max;
+                }
+            };
+
+            var drawLine = function () {
+                if (x1 !== prevx || y1 !== prevy) {
+                    ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
+                }
+
+                prevx = x2;
+                prevy = y2;
+                ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
+            };
+
+            ctx.beginPath();
+            for (i = ps; i < points.length; i += ps) {
+                initPoints(i);
 
                 if (x1 === null || x2 === null) {
                     mx = null;
@@ -43,104 +153,33 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 }
 
                 if (steps) {
-                    if (mx !== null && my !== null) {
-                        // if middle point exists, transfer p2 -> p1 and p1 -> mp
-                        x2 = x1;
-                        y2 = y1;
-                        x1 = mx;
-                        y1 = my;
-
-                        // 'remove' middle point
-                        mx = null;
-                        my = null;
-
-                        // subtract pointsize from i to have current point p1 handled again
+                    var hadMiddlePoint = handleSteps();
+                    if (hadMiddlePoint) {         
+                        // Subtract pointsize from i to have current point p1 handled again.
                         i -= ps;
-                    } else if (y1 !== y2 && x1 !== x2) {
-                        // create a middle point
-                        y2 = y1;
-                        mx = x2;
-                        my = y1;
                     }
                 }
+                if (handleYMinClipping()) continue;
+                if (handleYMaxClipping()) continue;
+                if (handleXMinClipping()) continue;
+                if (handleXMaxClipping()) continue;
 
-                // clip with ymin
-                if (y1 <= y2 && y1 < axisy.min) {
-                    if (y2 < axisy.min) {
-                        // line segment is outside
-                        continue;
-                    }
-                    // compute new intersection point
-                    x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                    y1 = axisy.min;
-                } else if (y2 <= y1 && y2 < axisy.min) {
-                    if (y1 < axisy.min) {
-                        continue;
-                    }
-
-                    x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
-                    y2 = axisy.min;
-                }
-
-                // clip with ymax
-                if (y1 >= y2 && y1 > axisy.max) {
-                    if (y2 > axisy.max) {
-                        continue;
-                    }
-
-                    x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                    y1 = axisy.max;
-                } else if (y2 >= y1 && y2 > axisy.max) {
-                    if (y1 > axisy.max) {
-                        continue;
-                    }
-
-                    x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
-                    y2 = axisy.max;
-                }
-
-                // clip with xmin
-                if (x1 <= x2 && x1 < axisx.min) {
-                    if (x2 < axisx.min) {
-                        continue;
-                    }
-
-                    y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                    x1 = axisx.min;
-                } else if (x2 <= x1 && x2 < axisx.min) {
-                    if (x1 < axisx.min) {
-                        continue;
-                    }
-
-                    y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
-                    x2 = axisx.min;
-                }
-
-                // clip with xmax
-                if (x1 >= x2 && x1 > axisx.max) {
-                    if (x2 > axisx.max) {
-                        continue;
-                    }
-
-                    y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                    x1 = axisx.max;
-                } else if (x2 >= x1 && x2 > axisx.max) {
-                    if (x1 > axisx.max) {
-                        continue;
-                    }
-
-                    y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
-                    x2 = axisx.max;
-                }
-
-                if (x1 !== prevx || y1 !== prevy) {
-                    ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
-                }
-
-                prevx = x2;
-                prevy = y2;
-                ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
+                drawLine();
             }
+
+            // Connects last two points in case middle point exists after the loop.
+            if (mx !== null && my !== null) {
+                initPoints(i);
+                handleSteps();
+
+                if (!handleYMinClipping() &&
+                    !handleYMaxClipping() &&
+                    !handleXMinClipping() &&
+                    !handleXMaxClipping()) {
+                    drawLine();
+                }
+            }
+
             ctx.stroke();
         }
 
