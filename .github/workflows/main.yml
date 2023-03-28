@@ -1,0 +1,46 @@
+name: 'main'
+
+on:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      # Install dependencies
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+      # Specify npm version
+      # See: https://github.com/actions/setup-node/issues/529
+      - run: npm i -g npm@8
+      - run: npm ci
+
+      # Build
+      - run: npm run build
+
+      # Pack
+      - run: npm pack
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: |
+            flot-*.tgz
+          if-no-files-found: error
+
+      # Test
+      - run: npm run test
+
+      # Publish web npm package
+      - if: startsWith(github.ref, 'refs/tags/v')
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
