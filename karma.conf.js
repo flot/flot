@@ -8,9 +8,9 @@ module.exports = function(config) {
     'use strict';
 
     var browsersMatrix = {
-            'win': ['Firefox', 'Chrome', 'Edge'],
-            'linux': ['Firefox', 'Chrome'],
-            'mac': ['Safari', 'Firefox', 'Chrome']
+            'win': ['FirefoxHeadless', 'ChromeHeadless', 'Edge'],
+            'linux': ['FirefoxHeadless', 'ChromeHeadless'],
+            'mac': ['Safari', 'FirefoxHeadless', 'ChromeHeadless']
         },
         isWin = /^win/.test(process.platform),
         isLinux = /^linux/.test(process.platform),
