@@ -37,10 +37,7 @@ jobs:
           if-no-files-found: error
 
       # Test
-      - name: Run headless test
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: npm test
+      - run: npm test
 
       # Publish web npm package
       - if: startsWith(github.ref, 'refs/tags/v')
