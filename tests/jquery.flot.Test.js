@@ -269,19 +269,18 @@ describe('flot', function() {
     });
 
     describe('computeRangeForDataSeries', function() {
-        var placeholder, plot;
-
-        var options = {
-            series: {
-                shadowSize: 0, // don't draw shadows
-                lines: { show: false },
-                points: { show: true, fill: false, symbol: 'circle' }
-            }
-        };
+        var placeholder, plot, options;
 
         beforeEach(function() {
             placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
                 .find('#test-container');
+            options = {
+                series: {
+                    shadowSize: 0, // don't draw shadows
+                    lines: { show: false },
+                    points: { show: true, fill: false, symbol: 'circle' }
+                }
+            };
         });
 
         it('should return Infinity and -Infinity for the minimum and the maximum respectively of x and y for an empty series', function () {
@@ -591,6 +590,7 @@ describe('flot', function() {
             expect(items[0].datapoint[1]).toEqual(sampledata[1][0][1]);
             expect(items[1].datapoint[0]).toEqual(sampledata[0][1][0]);
             expect(items[1].datapoint[1]).toEqual(sampledata[0][1][1]);
+            options.hooks = {};
         });
     });
 
