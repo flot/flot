@@ -95,24 +95,30 @@
                 iconHtml += getEntryIconHtml(shape);
             }
             // bars
-            if (entry.options.bars.show) {
+            else if (entry.options.bars.show) {
                 shape.name = 'bar';
                 shape.fillColor = entry.color;
                 iconHtml += getEntryIconHtml(shape);
             }
             // lines
-            if (entry.options.lines.show && !entry.options.lines.fill) {
+            else if (entry.options.lines.show && !entry.options.lines.fill) {
                 shape.name = 'line';
                 shape.strokeColor = entry.color;
                 shape.strokeWidth = entry.options.lines.lineWidth;
                 iconHtml += getEntryIconHtml(shape);
             }
             // points
-            if (entry.options.points.show) {
+            else if (entry.options.points.show) {
                 shape.name = entry.options.points.symbol;
                 shape.strokeColor = entry.color;
                 shape.fillColor = entry.options.points.fillColor;
                 shape.strokeWidth = entry.options.points.lineWidth;
+                iconHtml += getEntryIconHtml(shape);
+            }
+            // Other
+            else {
+                shape.name = 'box';
+                shape.fillColor = entry.color;
                 iconHtml += getEntryIconHtml(shape);
             }
 
@@ -247,13 +253,11 @@
                     '/>';
                 break;
             default:
-                // default is circle
-                html = '<use xlink:href="#circle" class="legendIcon" ' +
+                // default is box
+                html = '<use xlink:href="#box" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
-                    'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
         }
@@ -309,6 +313,10 @@
                 '<path d="M5,2 L5,8 M2,5 L8,5 Z"/>' +
                 '<path d="M10,7 L10,13 M7,10 L13,10 Z"/>' +
                 '<path d="M15,-3 L15,3 M12,0 L18,0 Z"/>' +
+            '</symbol>' +
+
+            '<symbol id="box" stroke-width="0" viewBox="-5 -5 25 25">' +
+                '<rect x="-2.1" y="-2.1" width="20" height="20"/>' +
             '</symbol>' +
         '</defs>';
 
