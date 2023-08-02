@@ -594,12 +594,13 @@ ActiveSupport::TimeZone.new('Asia/Shanghai').now.to_i * 1000
 
 In .NET you can get it with something like:
 
-```aspx
-public static int GetJavascriptTimestamp(System.DateTime input)
+```csharp
+public static class Ex
 {
-    System.TimeSpan span = new System.TimeSpan(System.DateTime.Parse("1/1/1970").Ticks);
-    System.DateTime time = input.Subtract(span);
-    return (long)(time.Ticks / 10000);
+    public static Int64 GetJavascriptTimestamp(this DateTime input)
+    {
+        return input.Subtract(new TimeSpan(new DateTime(1970, 1, 1).Ticks)).Ticks / 10000;
+    }
 }
 ```
 
