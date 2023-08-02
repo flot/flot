@@ -245,6 +245,7 @@ xaxis, yaxis: {
     show: null or true/false
     position: "bottom" or "top" or "left" or "right"
     mode: null or "time" ("time" requires jquery.flot.time.js plugin)
+               or "categories" ("categories" requires jquery.flot.categories.js plugin) 
     timezone: null, "browser" or timezone (only makes sense for mode: "time")
 
     color: null or color spec
