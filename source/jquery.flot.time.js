@@ -400,6 +400,9 @@ API.txt for details.
         if (step >= timeUnitSize.second) {
             d.setMilliseconds(0);
         }
+        if (step >= timeUnitSize.second) {
+            d.setMilliseconds(0);
+        }
         if (step >= timeUnitSize.minute) {
             d.setSeconds(0);
         }
