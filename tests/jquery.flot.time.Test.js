@@ -4,11 +4,11 @@
 describe('A Flot chart with absolute time axes', function () {
     'use strict';
 
-    var plot;
-    var placeholder;
+    let plot;
+    let placeholder;
 
     beforeEach(function () {
-        var fixture = setFixtures('<div id="demo-container" style="width: 800px;height: 600px">').find('#demo-container').get(0);
+        let fixture = setFixtures('<div id="demo-container" style="width: 800px;height: 600px">').find('#demo-container').get(0);
 
         placeholder = $('<div id="placeholder" style="width: 100%;height: 100%">');
         placeholder.appendTo(fixture);
@@ -20,11 +20,11 @@ describe('A Flot chart with absolute time axes', function () {
         }
     });
 
-    var firstAndLast = function (arr) {
+    let firstAndLast = function (arr) {
         return [arr[0], arr[arr.length - 1]];
     };
 
-    var createPlotWithAbsoluteTimeAxis = function (placeholder, data, formatString, base, minTickSize) {
+    let createPlotWithAbsoluteTimeAxis = function (placeholder, data, formatString, base, minTickSize) {
         return $.plot(placeholder, data, {
             xaxis: {
                 mode: 'time',
@@ -37,8 +37,8 @@ describe('A Flot chart with absolute time axes', function () {
         });
     };
 
-    var validateTickLabelFormat = function (ticks, regexFormat) {
-        var isFormatCorrect = true;
+    let validateTickLabelFormat = function (ticks, regexFormat) {
+       let isFormatCorrect = true;
         ticks.forEach(function (t) {
             if (!t.label.match(regexFormat)) {
                 isFormatCorrect = false;
@@ -59,11 +59,11 @@ describe('A Flot chart with absolute time axes', function () {
     it('creates time ticks in expected locations', function() {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0.95, 1], [1.95, 2]]], undefined, 'seconds');
 
-        var ticks = plot.getAxes().xaxis.ticks;
+        let ticks = plot.getAxes().xaxis.ticks;
         expect(ticks.length).toEqual(14);
 
         // Check that the first generated tick is less than 1/4 of the way along the plot area width
-        var firstTickLocation = plot.getAxes().xaxis.p2c(ticks[1].v);
+        let firstTickLocation = plot.getAxes().xaxis.p2c(ticks[1].v);
         expect(firstTickLocation).toBeLessThan(plot.offset().left + (plot.width() / 4));
     });
 
