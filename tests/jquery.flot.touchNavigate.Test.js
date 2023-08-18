@@ -2,8 +2,8 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("flot touch navigate plugin", function () {
-    var placeholder, plot, options;
-    var minFrameDuration = 1 / 60 * 1000;
+    let placeholder, plot, options;
+    let minFrameDuration = 1 / 60 * 1000;
 
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
@@ -24,7 +24,7 @@ describe("flot touch navigate plugin", function () {
     it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
         plot = $.plot(placeholder, [[]], options);
 
-        var eventPlaceholder = plot.getEventHolder(),
+        let eventPlaceholder = plot.getEventHolder(),
             spy = spyOn(eventPlaceholder, 'removeEventListener').and.callThrough();
 
         plot = $.plot(placeholder, [[]], options);
@@ -34,7 +34,7 @@ describe("flot touch navigate plugin", function () {
         expect(spy).toHaveBeenCalledWith('panend', jasmine.any(Function));
     });
 
-    var simulateTouchEvent = function (coords, eventHolder, eventName) {
+    let simulateTouchEvent = function (coords, eventHolder, eventName) {
         simulate.sendTouchEvents(coords, eventHolder, eventName);
         jasmine.clock().tick(minFrameDuration);
     }
@@ -48,7 +48,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -87,7 +87,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -122,7 +122,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -139,7 +139,7 @@ describe("flot touch navigate plugin", function () {
                   getPairOfCoords(xaxis, yaxis, canvasCoords[3].x, canvasCoords[3].y)
                 ];
 
-            var spy = spyOn(plot, 'zoom').and.callThrough();
+            let spy = spyOn(plot, 'zoom').and.callThrough();
 
             simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
             simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
@@ -149,7 +149,7 @@ describe("flot touch navigate plugin", function () {
         });
 
         it('should zoom the plot correctly using pageXY when the canvas is placed in the bottom scrollable area of the page', function () {
-              var largeDiv = $('<div style="height: 800px"> </div>');
+              let largeDiv = $('<div style="height: 800px"> </div>');
               $(largeDiv).insertBefore(placeholder);
 
               plot = $.plot(placeholder, [
@@ -159,7 +159,7 @@ describe("flot touch navigate plugin", function () {
                   ]
               ], options);
 
-              var eventHolder = plot.getEventHolder(),
+              let eventHolder = plot.getEventHolder(),
                   xaxis = plot.getXAxes()[0],
                   yaxis = plot.getYAxes()[0],
                   initialXmin = xaxis.min,
@@ -198,7 +198,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -237,7 +237,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -276,7 +276,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -320,7 +320,7 @@ describe("flot touch navigate plugin", function () {
                 pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
             });
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialCoords = [
@@ -356,7 +356,7 @@ describe("flot touch navigate plugin", function () {
                 pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
             });
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialCoords = [
@@ -394,7 +394,7 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -417,7 +417,7 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should snap horizontal drag to x direction in smart pan mode', function() {
-        var oldTouchMode = options.pan.touchMode;
+        let oldTouchMode = options.pan.touchMode;
         options.pan.touchMode = 'smart';
 
         plot = $.plot(placeholder, [
@@ -427,11 +427,11 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0];
 
-        var initialXmin = xaxis.min,
+        let initialXmin = xaxis.min,
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
@@ -454,7 +454,7 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should snap vertical drag to x direction in smart pan mode', function() {
-        var oldTouchMode = options.pan.touchMode;
+        let oldTouchMode = options.pan.touchMode;
         options.pan.touchMode = 'smart';
 
         plot = $.plot(placeholder, [
@@ -464,11 +464,11 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0];
 
-        var initialXmin = xaxis.min,
+        let initialXmin = xaxis.min,
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
@@ -491,7 +491,7 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should no snap diagonal drag in smart pan mode', function() {
-        var oldTouchMode = options.pan.touchMode;
+        let oldTouchMode = options.pan.touchMode;
         options.pan.touchMode = 'smart';
 
         plot = $.plot(placeholder, [
@@ -501,11 +501,11 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0];
 
-        var initialXmin = xaxis.min,
+        let initialXmin = xaxis.min,
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
@@ -528,7 +528,7 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should snap horizontally-start-drag to x direction in smartLock pan mode', function() {
-        var oldTouchMode = options.pan.touchMode;
+        let oldTouchMode = options.pan.touchMode;
         options.pan.touchMode = 'smartLock';
 
         plot = $.plot(placeholder, [
@@ -538,11 +538,11 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0];
 
-        var initialXmin = xaxis.min,
+        let initialXmin = xaxis.min,
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
@@ -567,7 +567,7 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should snap vertically-start-drag to y direction in smartLock pan mode', function() {
-        var oldTouchMode = options.pan.touchMode;
+        let oldTouchMode = options.pan.touchMode;
         options.pan.touchMode = 'smartLock';
 
         plot = $.plot(placeholder, [
@@ -577,11 +577,11 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0];
 
-        var initialXmin = xaxis.min,
+        let initialXmin = xaxis.min,
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
@@ -606,7 +606,7 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should not drag if pan mode is invalid', function () {
-        var oldTouchMode = options.pan.touchMode;
+        let oldTouchMode = options.pan.touchMode;
         options.pan.touchMode = '';
 
         plot = $.plot(placeholder, [
@@ -616,7 +616,7 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -641,12 +641,12 @@ describe("flot touch navigate plugin", function () {
       });
 
       it('should drag the logarithmic plot', function() {
-          var d1 = [];
-          for (var i = 0; i < 14; i += 0.2) {
+          let d1 = [];
+          for (let i = 0; i < 14; i += 0.2) {
               d1.push([i, 1.01 + Math.sin(i)]);
           }
 
-          var plot = $.plot(placeholder, [d1], {
+          let plot = $.plot(placeholder, [d1], {
               series: {
                   lines: { show: true },
                   points: { show: true }
@@ -657,7 +657,7 @@ describe("flot touch navigate plugin", function () {
               pan: { interactive: true, active: true, enableTouch: true }
           });
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -694,7 +694,7 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var eventHolder = plot.getEventHolder(),
+        let eventHolder = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -705,7 +705,7 @@ describe("flot touch navigate plugin", function () {
             canvasCoords = [],
             pointCoords = [];
 
-        for (var i = 1; i <= limit; i++) {
+        for (let i = 1; i <= limit; i++) {
             canvasCoords[i] = { x: i, y: i };
             pointCoords[i] = getPairOfCoords(xaxis, yaxis, canvasCoords[i].x, canvasCoords[i].y);
         }
@@ -713,7 +713,7 @@ describe("flot touch navigate plugin", function () {
         //simulate drag from (1, 1) to (100, 100) sequentially
         simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
-        for (var i = 2; i <= limit; i++) {
+        for (let i = 2; i <= limit; i++) {
             simulate.touchmove(eventHolder, pointCoords[i].x, pointCoords[i].y);
         }
 
@@ -734,7 +734,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -767,7 +767,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -800,7 +800,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -831,7 +831,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -865,7 +865,7 @@ describe("flot touch navigate plugin", function () {
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -899,7 +899,7 @@ describe("flot touch navigate plugin", function () {
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -928,7 +928,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -977,7 +977,7 @@ describe("flot touch navigate plugin", function () {
         });
 
         it('can disable pinch', function() {
-          var oldTouchZoom = options.zoom.enableTouch;
+          let oldTouchZoom = options.zoom.enableTouch;
           options.zoom.enableTouch = false;
 
           plot = $.plot(placeholder, [
@@ -987,11 +987,11 @@ describe("flot touch navigate plugin", function () {
             ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
           xaxis = plot.getXAxes()[0],
           yaxis = plot.getYAxes()[0];
 
-          var initialXmin = xaxis.min,
+          let initialXmin = xaxis.min,
               initialXmax = xaxis.max,
               initialYmin = yaxis.min,
               initialYmax = yaxis.max,
@@ -1029,7 +1029,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -1075,7 +1075,7 @@ describe("flot touch navigate plugin", function () {
                   [-10, 120]
               ]
           ], options);
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
           xaxis = plot.getXAxes()[0],
           yaxis = plot.getYAxes()[0],
           initialXmin = xaxis.min,
@@ -1117,7 +1117,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var eventHolder = plot.getEventHolder(),
+          let eventHolder = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
