@@ -1,0 +1,22 @@
+{
+    "name": "flot/flot",
+    "type": "project",
+    "description": "JavaScript plotting library for engineering and scientific applications",
+    "keywords": [
+        "flot",
+        "graph",
+        "javascript"
+    ],
+    "license": "IOLA and Ole Laursen",
+    "require": {
+    },
+    "require-dev": {
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

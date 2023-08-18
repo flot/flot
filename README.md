@@ -19,6 +19,9 @@ Generally, all modern browsers are supported.
 You need at least jQuery 1.2.6, but try at least 1.3.2 for interactive
 charts because of performance improvements in event handling.
 
+This repository can also be installed using [composer](https://getcomposer.org/)
+
+* [composer installation](docs/installation-composer.md)
 
 ## Basic usage ##
 
