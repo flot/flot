@@ -2,14 +2,14 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("unit tests for the log scale functions", function() {
-    var placeholder;
+    let placeholder;
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 800px;height: 400px">')
             .find('#test-container');
     });
 
     it('should use linear scale for low dynamic range intervals', function() {
-        var plot = $.plot(placeholder, [], {
+        let plot = $.plot(placeholder, [], {
                 xaxes: [{
                     min: 10,
                     max: 11,
@@ -24,7 +24,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     xit('should use mixed scale for medium dynamic range intervals', function() {
-        var plot = $.plot(placeholder, [], {
+        let plot = $.plot(placeholder, [], {
                 xaxes: [{
                     min: 0.2,
                     max: 8,
@@ -42,7 +42,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should use log scales for high dynamic range intervals', function() {
-        var plot = $.plot(placeholder, [], {
+        let plot = $.plot(placeholder, [], {
                 xaxes: [{
                     min: 0.0001,
                     max: 10000,
@@ -57,7 +57,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should format numbers according to their natural precision', function() {
-        var plot = $.plot(placeholder, [], {
+        let plot = $.plot(placeholder, [], {
                 xaxes: [{mode: 'log'}]
             }),
             xaxis = plot.getXAxes()[0],
@@ -73,7 +73,7 @@ describe("unit tests for the log scale functions", function() {
             ];
 
         testVector.forEach(function (t) {
-            var inputValue = t[0],
+            let inputValue = t[0],
                 expectedValue = t[1];
 
             expect(logFormatter(inputValue, xaxis)).toBe(expectedValue);
@@ -81,7 +81,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should custom the specified precision of endpoints', function(){
-        var plot = $.plot(placeholder, [], {
+        let plot = $.plot(placeholder, [], {
               xaxes: [{mode: 'log'}]
             }),
             xaxis = plot.getXAxes()[0],
@@ -104,7 +104,7 @@ describe("unit tests for the log scale functions", function() {
             ];
 
         testVector.forEach(function (t) {
-            var inputValue = t[0],
+            let inputValue = t[0],
                 expectedValue = t[1],
                 precision = t[2];
 
@@ -113,7 +113,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should handle intervals which starts close to 0', function() {
-        var testVector = [
+        let testVector = [
             [0, 50, [0.1, 100]],
             [1E-40, 1.01, [1e-35, 10]],
             [1E-40, 1E+40, [1e-39, 1e40]],
@@ -121,7 +121,7 @@ describe("unit tests for the log scale functions", function() {
             ];
 
         testVector.forEach(function (t) {
-            var min = t[0],
+            let min = t[0],
                 max = t[1],
                 expectedTicks = t[2],
                 plot = $.plot(placeholder, [], {
@@ -141,7 +141,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should set axis.min to be less than axis.max', function() {
-        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+        let plot = $.plot(placeholder, [[0, 1, 2, 3]], {
                 xaxes: [{
                     mode: 'log',
                     offset : { below: -1, above: -1 },
@@ -156,7 +156,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should set axis.max to default max if less then axis.min', function() {
-        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+        let plot = $.plot(placeholder, [[0, 1, 2, 3]], {
                 xaxes: [{
                     mode: 'log',
                     offset : { below: -5, above: -5 },
@@ -172,7 +172,7 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should set min of axis with no data associated with it to be greater than 0', function() {
-        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+        let plot = $.plot(placeholder, [[0, 1, 2, 3]], {
                 xaxes: [
                     {
                         mode: 'log',
@@ -196,18 +196,18 @@ describe("unit tests for the log scale functions", function() {
 });
 
 describe("integration tests for log scale functions", function() {
-    var placeholder;
+    let placeholder;
 
-    var compareNumbers = function(a, b) {
+    let compareNumbers = function(a, b) {
         return a - b;
     }
 
-    var queryPlotForYTicks = function() {
-        var actualTicks = [];
+    let queryPlotForYTicks = function() {
+        let actualTicks = [];
 
-        var yAxisDivs = $('.yAxis');
+        let yAxisDivs = $('.yAxis');
         expect(yAxisDivs.length).toBe(1);
-        var childDivs = yAxisDivs.find('.tickLabel');
+        let childDivs = yAxisDivs.find('.tickLabel');
         childDivs.each(function(i, e) {
             actualTicks.push(e.textContent);
         });
@@ -221,7 +221,7 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should use linear scale for low dynamic range intervals', function() {
-        var lineardata1 = [
+        let lineardata1 = [
             [0, 1],
             [1, 1.1],
             [2, 1.2],
@@ -246,7 +246,7 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should use log scales for high dynamic range intervals', function() {
-        var logdata1 = [
+        let logdata1 = [
             [0, 0.0001],
             [1, 0.001],
             [2, 0.01],
@@ -269,7 +269,7 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should allow a user specified tick formatter', function() {
-        var logdata1 = [
+        let logdata1 = [
             [0, 0.0001],
             [1, 0.001],
             [2, 0.01],
@@ -295,7 +295,7 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should set the minimum of the logaxis to minimum datapoint between 0 and 0.1', function() {
-        var logdata1 = [
+        let logdata1 = [
             [0, 0],
             [1, 0.0001],
             [2, 0.001],
@@ -306,7 +306,7 @@ describe("integration tests for log scale functions", function() {
             [7, 100]
         ];
 
-        var plot = $.plot(placeholder, [logdata1], {
+        let plot = $.plot(placeholder, [logdata1], {
                 xaxis: {
                     mode: 'log',
                     autoScale: 'exact'
@@ -323,7 +323,7 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should multiply the possible ticks with 5 if the original interval is too little', function() {
-        var logdata = [
+        let logdata = [
             [[0, 1E40], [1, 4E40], [2, 8E40], [3, 1E41], [4, 2E41], [5, 4E41]],
             [[0, 1000], [1, 1010], [2, 1E4], [3, 1E5]],
             [[0, 1], [1, 3], [2, 10], [3, 30], [4, 40], [5, 50]]
@@ -348,7 +348,7 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should use only power of ten for large intervals', function() {
-        var logdata = [
+        let logdata = [
             [[0, 1], [1, 4E20], [2, 8E30], [3, 4E41]],
             [[0, 1000], [1, 1E5], [2, 1E7], [3, 1E10]],
             [[0, 1e-12], [1, 1e-5], [2, 10], [3, 30], [4, 40], [5, 500]]
