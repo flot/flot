@@ -2,10 +2,10 @@
 
 "use strict";
 
-var literate = require('ljs');
-var fs = require('fs');
+let literate = require('ljs');
+let fs = require('fs');
 
-var docs2generate = [
+let docs2generate = [
   ['docs/canvaswrapper.md', 'jquery.canvaswrapper.js'],
  // ['docs/colorhelpers.md', 'jquery.colorhelpers.js'],
   ['docs/absRelTime.md', 'jquery.flot.absRelTime.js'],
@@ -26,7 +26,7 @@ var docs2generate = [
 
 docs2generate.forEach(function (doc) {
   console.log(doc[0], '...');
-  var documentation = literate(doc[1], {
+  let documentation = literate(doc[1], {
     code: false
   });
 
