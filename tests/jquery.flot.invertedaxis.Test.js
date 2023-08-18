@@ -2,44 +2,44 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe('unit tests for the inverted scale functions', function () {
-    var placeholder;
+    let placeholder;
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 800px;height: 400px">')
             .find('#test-container');
     });
 
     it('should have reverse linear transform set properly', function () {
-        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+        let plot = $.plot(placeholder, [[0, 1, 2, 3]], {
             xaxes: [{
                 mode: 'linear',
                 inverted: true,
             }]
         });
-        var axis = plot.getAxes().xaxis;
+        let axis = plot.getAxes().xaxis;
         expect(axis.options.transform.name).toBe('invertedTransform');
         expect(axis.options.inverseTransform.name).toBe('invertedTransform');
     });
 
     it('should have inverted log transform set properly', function () {
-        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+        let plot = $.plot(placeholder, [[0, 1, 2, 3]], {
             xaxes: [{
                 mode: 'log',
                 inverted: true,
             }]
         });
-        var axis = plot.getAxes().xaxis;
+        let axis = plot.getAxes().xaxis;
         expect(axis.options.transform.name).toBe('invertedLogTransform');
         expect(axis.options.inverseTransform.name).toBe('invertedLogInverseTransform');
     }); 
 });
 
 describe("integration tests for the inverted scale functions", function () {
-    var queryPlotForYTicks = function () {
-        var actualTicks = [];
+    let queryPlotForYTicks = function () {
+        let actualTicks = [];
     
-        var yAxisDivs = $('.yAxis');
+        let yAxisDivs = $('.yAxis');
         expect(yAxisDivs.length).toBe(1);
-        var childDivs = yAxisDivs.find('.tickLabel');
+        let childDivs = yAxisDivs.find('.tickLabel');
         childDivs.each(function (i, e) {
             actualTicks.push({
                 yPos: e.y.baseVal[0].value,
@@ -52,12 +52,12 @@ describe("integration tests for the inverted scale functions", function () {
             .map(function (a) { return a.tickName });
     };
     
-    var queryPlotForXTicks = function () {
-        var actualTicks = [];
+    let queryPlotForXTicks = function () {
+        let actualTicks = [];
     
-        var xAxisDivs = $('.xAxis');
+        let xAxisDivs = $('.xAxis');
         expect(xAxisDivs.length).toBe(1);
-        var childDivs = xAxisDivs.find('.tickLabel');
+        let childDivs = xAxisDivs.find('.tickLabel');
         childDivs.each(function (i, e) {
             actualTicks.push({
                 xPos: e.x.baseVal[0].value,
@@ -70,7 +70,7 @@ describe("integration tests for the inverted scale functions", function () {
             .map(function (a) { return a.tickName });
     };
     
-    var placeholder;
+    let placeholder;
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 800px;height: 400px">')
             .find('#test-container');
@@ -83,7 +83,7 @@ describe("integration tests for the inverted scale functions", function () {
             [2, 2],
             [3, 3]
         ];
-        var plot = $.plot(placeholder, [data], {
+        let plot = $.plot(placeholder, [data], {
             xaxis: {
                 mode: 'linear',
                 inverted: true,
@@ -110,7 +110,7 @@ describe("integration tests for the inverted scale functions", function () {
             [-2, -2],
             [-3, -3]
         ];
-        var plot = $.plot(placeholder, [data], {
+        let plot = $.plot(placeholder, [data], {
             xaxis: {
                 mode: 'linear',
                 inverted: true,
@@ -137,7 +137,7 @@ describe("integration tests for the inverted scale functions", function () {
             [10, 1],
             [100, 0.1]
         ];
-        var plot = $.plot(placeholder, [data], {
+        let plot = $.plot(placeholder, [data], {
             xaxis: {
                 mode: 'log',
                 inverted: true,
