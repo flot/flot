@@ -1,5 +1,5 @@
 describe('flot with large numbers', function() {
-    var placeholder, plot;
+    let placeholder, plot;
 
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
@@ -10,7 +10,7 @@ describe('flot with large numbers', function() {
         it('should work with large negative and positive numbers', function () {
             plot = $.plot(placeholder, [[[0, 1e308], [1, -1e308]]], {});
 
-            var yaxis = plot.getAxes().yaxis;
+            let yaxis = plot.getAxes().yaxis;
 
             expect(yaxis.max).toBeGreaterThan(1e308);
             expect(yaxis.min).toBeLessThan(-1e308);
@@ -23,7 +23,7 @@ describe('flot with large numbers', function() {
         it('should work with Number.MAX_VALUE and -Number.MAX_VALUE', function () {
             plot = $.plot(placeholder, [[[0, Number.MAX_VALUE], [1, -Number.MAX_VALUE]]], {});
 
-            var yaxis = plot.getAxes().yaxis;
+            let yaxis = plot.getAxes().yaxis;
 
             expect(yaxis.ticks.length).toBeGreaterThan(2);
             yaxis.ticks.forEach(function(tick) {
@@ -38,7 +38,7 @@ describe('flot with large numbers', function() {
                 }]
             });
 
-            var yaxis = plot.getAxes().yaxis;
+            let yaxis = plot.getAxes().yaxis;
 
             expect(yaxis.max).toBeGreaterThan(1e308);
             expect(yaxis.min).toBeLessThan(-1e308);
@@ -54,7 +54,7 @@ describe('flot with large numbers', function() {
             plot = $.plot(placeholder, [[[0, 1.1e308], [1, 0]]], {
                 yaxis: {mode: 'log'}});
 
-            var yaxis = plot.getAxes().yaxis;
+            let yaxis = plot.getAxes().yaxis;
 
             expect(yaxis.max).toBeGreaterThan(1e308);
             expect(yaxis.ticks.length).toBeGreaterThan(2);
@@ -67,7 +67,7 @@ describe('flot with large numbers', function() {
             plot = $.plot(placeholder, [[[0, Number.MAX_VALUE], [1, 0]]], {
                 yaxis: {mode: 'log'}});
 
-            var yaxis = plot.getAxes().yaxis;
+            let yaxis = plot.getAxes().yaxis;
 
             expect(yaxis.ticks.length).toBeGreaterThan(2);
             yaxis.ticks.forEach(function(tick) {
@@ -83,7 +83,7 @@ describe('flot with large numbers', function() {
                 }]
             });
 
-            var yaxis = plot.getAxes().yaxis;
+            let yaxis = plot.getAxes().yaxis;
 
             expect(yaxis.max).toBeGreaterThan(1e308);
             expect(yaxis.min).toEqual(0.1);
