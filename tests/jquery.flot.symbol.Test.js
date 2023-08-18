@@ -2,8 +2,8 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("flot symbol plugin", function() {
-    var placeholder, plot;
-    var options;
+    let placeholder, plot;
+    let options;
 
     beforeEach(function() {
         options = {
@@ -23,7 +23,7 @@ describe("flot symbol plugin", function() {
         expect(typeof plot.drawSymbol).toBe('object');
     })
 
-    var shapes = ['square', 'rectangle', 'diamond', 'triangle',  'cross', 'ellipse', 'plus'];
+    let shapes = ['square', 'rectangle', 'diamond', 'triangle',  'cross', 'ellipse', 'plus'];
     shapes.forEach(function (shape) {
         it('should provide a way to draw ' + shape + ' shapes', function () {
             plot = $.plot(placeholder, [[]], options);
