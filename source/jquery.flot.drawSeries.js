@@ -154,7 +154,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 
                 if (steps) {
                     var hadMiddlePoint = handleSteps();
-                    if (hadMiddlePoint) {         
+                    if (hadMiddlePoint) {
                         // Subtract pointsize from i to have current point p1 handled again.
                         i -= ps;
                     }

@@ -29,7 +29,6 @@ module.exports = function(config) {
         'source/jquery.flot.uiConstants.js',
         'source/jquery.flot.logaxis.js',
         'source/jquery.flot.symbol.js',
-        'source/jQuery.flot.errorbars.js',
         'source/jquery.flot.fillbetween.js',
         'source/jquery.flot.flatdata.js',
         'source/jquery.flot.navigate.js',

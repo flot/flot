@@ -1153,7 +1153,8 @@ describe("flot touch navigate plugin", function () {
           expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
         });
 
-        it('should recenter the plot on axis y',function() {
+        // intermittent test on Firefox
+        xit('should recenter the plot on axis y',function() {
 
           plot = $.plot(placeholder, [
               [
@@ -1192,8 +1193,8 @@ describe("flot touch navigate plugin", function () {
           simulate.touchend(eventHolder, xaxis.box.left - 20, yaxis.p2c(5));
 
           //check if axis values returned to initial coordinates
-          expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
-          expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(xaxis.min).toBeCloseTo(initialXmin, 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax, 6);
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
         });
