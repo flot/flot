@@ -2,7 +2,7 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("flot navigate plugin", function () {
-    var placeholder, plot, options;
+    let placeholder, plot, options;
 
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
@@ -28,7 +28,7 @@ describe("flot navigate plugin", function () {
 
     describe('zoom', function () {
         it('uses the provided amount', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -52,7 +52,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('works with autoScale', function () {
-            var xaxis, yaxis,
+            let xaxis, yaxis,
                 opts = {
                     xaxes: [{ autoScale: 'sliding-window' , min: 0, max: 100}],
                     yaxes: [{ autoScale: 'loose' }],
@@ -99,7 +99,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('uses the amount configured in the plot if none is provided', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -121,7 +121,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('uses the provided center', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -149,7 +149,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('uses the provided axes', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -178,7 +178,7 @@ describe("flot navigate plugin", function () {
         });
 
         it ('doesn\'t got to Infinity and beyond', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -199,7 +199,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('generates subunitary ticks for X axis', function () {
-            var xaxis, ticks, middle;
+            let xaxis, ticks, middle;
 
             plot = $.plot(placeholder, [
                 [
@@ -241,7 +241,7 @@ describe("flot navigate plugin", function () {
                 pan: { interactive: true, active: false, frameRate: -1 }
             });
 
-            var eventHolder = plot.getEventHolder(),
+            let eventHolder = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialCoords = [
@@ -271,7 +271,7 @@ describe("flot navigate plugin", function () {
 
         describe('with large numbers', function() {
             it ('limits the navigation offsets', function () {
-                var yaxis;
+                let yaxis;
 
                 plot = $.plot(placeholder, [
                     [
@@ -297,7 +297,7 @@ describe("flot navigate plugin", function () {
 
     describe('zoomOut', function () {
         it('uses the provided amount', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -321,7 +321,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('uses the amount configured in the plot if none is provided', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -343,7 +343,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('uses the provided center', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -372,7 +372,7 @@ describe("flot navigate plugin", function () {
         });
 
         it ('doesn\'t got to Infinity and beyond', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -393,7 +393,7 @@ describe("flot navigate plugin", function () {
         });
 
         it ('can be disabled per axis for zoom on plot', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -418,7 +418,7 @@ describe("flot navigate plugin", function () {
         });
 
         it ('can be disabled per axis for zoom on axis', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -446,7 +446,7 @@ describe("flot navigate plugin", function () {
 
     describe('smartPan', function () {
         it('uses the provided x delta', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -471,7 +471,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('uses the provided y delta', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -496,7 +496,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('snaps to the x direction when delta y is small', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -521,7 +521,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('snaps to the y direction when delta x is small', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -546,7 +546,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('restore xaxis offset on snap on y direction if returns from diagonal snap', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -558,7 +558,7 @@ describe("flot navigate plugin", function () {
             xaxis = plot.getXAxes()[0];
             yaxis = plot.getYAxes()[0];
 
-            var initialState = plot.navigationState(0, 0);
+            let initialState = plot.navigationState(0, 0);
 
             plot.smartPan({
                 x: plot.width(),
@@ -581,7 +581,7 @@ describe("flot navigate plugin", function () {
         });
 
         it ('can be disabled per axis for panning the etire plot', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -607,7 +607,7 @@ describe("flot navigate plugin", function () {
         });
 
         it ('can be disabled per axis for pan on that axis', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -633,7 +633,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('can pan close to 0 for logaxis', function () {
-            var xaxis, yaxis;
+            let xaxis, yaxis;
 
             plot = $.plot(placeholder, [
                 [
@@ -666,7 +666,7 @@ describe("flot navigate plugin", function () {
 
         describe('with large numbers', function() {
             it ('limits the navigation offsets', function () {
-                var yaxis;
+                let yaxis;
 
                 plot = $.plot(placeholder, [
                     [
