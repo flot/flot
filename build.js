@@ -1,12 +1,12 @@
 /* eslint-disable */
 
-var args = process.argv.slice(2);
-var fs = require('fs');
-var concat = require('concat');
-var tmp = require('tmp');
+let args = process.argv.slice(2);
+let fs = require('fs');
+let concat = require('concat');
+let tmp = require('tmp');
 
-var distDir = './dist/es5';
-var distFile = 'jquery.flot.js';
+let distDir = './dist/es5';
+let distFile = 'jquery.flot.js';
 
 if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir)
@@ -38,10 +38,10 @@ function concatenateFiles(destinationPath, callback) {
 
 if (args[0] === 'test') {
     console.log('testing distribution ...');
-    var tmpobj = tmp.fileSync();
+    let tmpobj = tmp.fileSync();
     concatenateFiles(tmpobj.name, function(err, result) {
-            var origBuild = fs.readFileSync(distDir + '/' + distFile, 'utf8');
-            var newBuild = fs.readFileSync(tmpobj.name, 'utf8');
+            let origBuild = fs.readFileSync(distDir + '/' + distFile, 'utf8');
+            let newBuild = fs.readFileSync(tmpobj.name, 'utf8');
 
             if (newBuild !== origBuild) {
                 console.log('The distribution file dist/es5/jquery.flot.js is not up to date. Type "npm run build" to fix it !');
