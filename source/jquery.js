@@ -13,7 +13,7 @@
  */
 /* eslint-disable */
 (function( window, undefined ) {
-var
+let
 	// A central reference to the root jQuery(document)
 	rootjQuery,
 
@@ -96,7 +96,7 @@ var
 jQuery.fn = jQuery.prototype = {
 	constructor: jQuery,
 	init: function( selector, context, rootjQuery ) {
-		var match, elem, ret, doc;
+		let match, elem, ret, doc;
 
 		// Handle $(""), $(null), $(undefined), $(false)
 		if ( !selector ) {
@@ -218,7 +218,7 @@ jQuery.fn = jQuery.prototype = {
 	pushStack: function( elems, name, selector ) {
 
 		// Build a new jQuery matched element set
-		var ret = jQuery.merge( this.constructor(), elems );
+		let ret = jQuery.merge( this.constructor(), elems );
 
 		// Add the old object onto the stack (as a reference)
 		ret.prevObject = this;
@@ -290,7 +290,7 @@ jQuery.fn = jQuery.prototype = {
 jQuery.fn.init.prototype = jQuery.fn;
 
 jQuery.extend = jQuery.fn.extend = function() {
-	var options, name, src, copy, copyIsArray, clone,
+	let options, name, src, copy, copyIsArray, clone,
 		target = arguments[0] || {},
 		i = 1,
 		length = arguments.length,
@@ -460,14 +460,14 @@ jQuery.extend({
 		// Own properties are enumerated firstly, so to speed up,
 		// if last one is own, then all properties are own.
 
-		var key;
+		let key;
 		for ( key in obj ) {}
 
 		return key === undefined || core_hasOwn.call( obj, key );
 	},
 
 	isEmptyObject: function( obj ) {
-		var name;
+		let name;
 		for ( name in obj ) {
 			return false;
 		}
@@ -482,7 +482,7 @@ jQuery.extend({
 	// context (optional): If specified, the fragment will be created in this context, defaults to document
 	// scripts (optional): If true, will include scripts passed in the html string
 	parseHTML: function( data, context, scripts ) {
-		var parsed;
+		let parsed;
 		if ( !data || typeof data !== "string" ) {
 			return null;
 		}
@@ -529,7 +529,7 @@ jQuery.extend({
 
 	// Cross-browser xml parsing
 	parseXML: function( data ) {
-		var xml, tmp;
+		let xml, tmp;
 		if ( !data || typeof data !== "string" ) {
 			return null;
 		}
@@ -579,7 +579,7 @@ jQuery.extend({
 
 	// args is for internal usage only
 	each: function( obj, callback, args ) {
-		var name,
+		let name,
 			i = 0,
 			length = obj.length,
 			isObj = length === undefined || jQuery.isFunction( obj );
@@ -636,7 +636,7 @@ jQuery.extend({
 
 	// results is for internal usage only
 	makeArray: function( arr, results ) {
-		var type,
+		let type,
 			ret = results || [];
 
 		if ( arr != null ) {
@@ -655,7 +655,7 @@ jQuery.extend({
 	},
 
 	inArray: function( elem, arr, i ) {
-		var len;
+		let len;
 
 		if ( arr ) {
 			if ( core_indexOf ) {
@@ -677,7 +677,7 @@ jQuery.extend({
 	},
 
 	merge: function( first, second ) {
-		var l = second.length,
+		let l = second.length,
 			i = first.length,
 			j = 0;
 
@@ -698,7 +698,7 @@ jQuery.extend({
 	},
 
 	grep: function( elems, callback, inv ) {
-		var retVal,
+		let retVal,
 			ret = [],
 			i = 0,
 			length = elems.length;
@@ -718,7 +718,7 @@ jQuery.extend({
 
 	// arg is for internal usage only
 	map: function( elems, callback, arg ) {
-		var value, key,
+		let value, key,
 			ret = [],
 			i = 0,
 			length = elems.length,
@@ -756,7 +756,7 @@ jQuery.extend({
 	// Bind a function to a context, optionally partially applying any
 	// arguments.
 	proxy: function( fn, context ) {
-		var tmp, args, proxy;
+		let tmp, args, proxy;
 
 		if ( typeof context === "string" ) {
 			tmp = fn[ context ];
@@ -785,7 +785,7 @@ jQuery.extend({
 	// Multifunctional method to get and set values of a collection
 	// The value/s can optionally be executed if it's a function
 	access: function( elems, fn, key, value, chainable, emptyGet, pass ) {
-		var exec,
+		let exec,
 			bulk = key == null,
 			i = 0,
 			length = elems.length;
@@ -870,7 +870,7 @@ jQuery.ready.promise = function( obj ) {
 
 			// If IE and not a frame
 			// continually check to see if the document is ready
-			var top = false;
+			let top = false;
 
 			try {
 				top = window.frameElement == null && document.documentElement;
@@ -906,11 +906,11 @@ jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" ")
 // All jQuery objects should point back to these
 rootjQuery = jQuery(document);
 // String to Object options format cache
-var optionsCache = {};
+let optionsCache = {};
 
 // Convert String-formatted options into Object-formatted ones and store in cache
 function createOptions( options ) {
-	var object = optionsCache[ options ] = {};
+	let object = optionsCache[ options ] = {};
 	jQuery.each( options.split( core_rspace ), function( _, flag ) {
 		object[ flag ] = true;
 	});
@@ -947,7 +947,7 @@ jQuery.Callbacks = function( options ) {
 		( optionsCache[ options ] || createOptions( options ) ) :
 		jQuery.extend( {}, options );
 
-	var // Last fire value (for non-forgettable lists)
+	let // Last fire value (for non-forgettable lists)
 		memory,
 		// Flag to know if list was already fired
 		fired,
@@ -996,7 +996,7 @@ jQuery.Callbacks = function( options ) {
 			add: function() {
 				if ( list ) {
 					// First, we save the current length
-					var start = list.length;
+					let start = list.length;
 					(function add( args ) {
 						jQuery.each( args, function( _, arg ) {
 							var type = jQuery.type( arg );
@@ -1027,7 +1027,7 @@ jQuery.Callbacks = function( options ) {
 			remove: function() {
 				if ( list ) {
 					jQuery.each( arguments, function( _, arg ) {
-						var index;
+						let index;
 						while( ( index = jQuery.inArray( arg, list, index ) ) > -1 ) {
 							list.splice( index, 1 );
 							// Handle firing indexes
@@ -1119,15 +1119,15 @@ jQuery.extend({
 					return this;
 				},
 				then: function( /* fnDone, fnFail, fnProgress */ ) {
-					var fns = arguments;
+					let fns = arguments;
 					return jQuery.Deferred(function( newDefer ) {
 						jQuery.each( tuples, function( i, tuple ) {
-							var action = tuple[ 0 ],
+							let action = tuple[ 0 ],
 								fn = fns[ i ];
 							// deferred[ done | fail | progress ] for forwarding actions to newDefer
 							deferred[ tuple[1] ]( jQuery.isFunction( fn ) ?
 								function() {
-									var returned = fn.apply( this, arguments );
+									let returned = fn.apply( this, arguments );
 									if ( returned && jQuery.isFunction( returned.promise ) ) {
 										returned.promise()
 											.done( newDefer.resolve )
@@ -1156,7 +1156,7 @@ jQuery.extend({
 
 		// Add list-specific methods
 		jQuery.each( tuples, function( i, tuple ) {
-			var list = tuple[ 2 ],
+			let list = tuple[ 2 ],
 				stateString = tuple[ 3 ];
 
 			// promise[ done | fail | progress ] = list.add
@@ -1191,7 +1191,7 @@ jQuery.extend({
 
 	// Deferred helper
 	when: function( subordinate /* , ..., subordinateN */ ) {
-		var i = 0,
+		let i = 0,
 			resolveValues = core_slice.call( arguments ),
 			length = resolveValues.length,
 
@@ -1243,7 +1243,7 @@ jQuery.extend({
 });
 jQuery.support = (function() {
 
-	var support,
+	let support,
 		all,
 		a,
 		select,
@@ -1414,7 +1414,7 @@ jQuery.support = (function() {
 
 	// Run tests that need a body at doc ready
 	jQuery(function() {
-		var container, div, tds, marginDiv,
+		let container, div, tds, marginDiv,
 			divReset = "padding:0;margin:0;border:0;display:block;overflow:hidden;",
 			body = document.getElementsByTagName("body")[0];
 
@@ -1507,7 +1507,7 @@ jQuery.support = (function() {
 
 	return support;
 })();
-var rbrace = /(?:\{[\s\S]*\}|\[[\s\S]*\])$/,
+let rbrace = /(?:\{[\s\S]*\}|\[[\s\S]*\])$/,
 	rmultiDash = /([A-Z])/g;
 
 jQuery.extend({
@@ -1541,7 +1541,7 @@ jQuery.extend({
 			return;
 		}
 
-		var thisCache, ret,
+		let thisCache, ret,
 			internalKey = jQuery.expando,
 			getByName = typeof name === "string",
 
@@ -1635,7 +1635,7 @@ jQuery.extend({
 			return;
 		}
 
-		var thisCache, i, l,
+		let thisCache, i, l,
 
 			isNode = elem.nodeType,
 
@@ -1717,7 +1717,7 @@ jQuery.extend({
 
 	// A method for determining if a DOM node can handle the data expando
 	acceptData: function( elem ) {
-		var noData = elem.nodeName && jQuery.noData[ elem.nodeName.toLowerCase() ];
+		let noData = elem.nodeName && jQuery.noData[ elem.nodeName.toLowerCase() ];
 
 		// nodes accept data unless otherwise specified; rejection can be conditional
 		return !noData || noData !== true && elem.getAttribute("classid") === noData;
@@ -1726,7 +1726,7 @@ jQuery.extend({
 
 jQuery.fn.extend({
 	data: function( key, value ) {
-		var parts, part, attr, name, l,
+		let parts, part, attr, name, l,
 			elem = this[0],
 			i = 0,
 			data = null;
@@ -1804,7 +1804,7 @@ function dataAttr( elem, key, data ) {
 	// data from the HTML5 data-* attribute
 	if ( data === undefined && elem.nodeType === 1 ) {
 
-		var name = "data-" + key.replace( rmultiDash, "-$1" ).toLowerCase();
+		let name = "data-" + key.replace( rmultiDash, "-$1" ).toLowerCase();
 
 		data = elem.getAttribute( name );
 
@@ -1832,7 +1832,7 @@ function dataAttr( elem, key, data ) {
 
 // checks a cache object for emptiness
 function isEmptyDataObject( obj ) {
-	var name;
+	let name;
 	for ( name in obj ) {
 
 		// if the public data object is empty, the private is still empty
@@ -1848,7 +1848,7 @@ function isEmptyDataObject( obj ) {
 }
 jQuery.extend({
 	queue: function( elem, type, data ) {
-		var queue;
+		let queue;
 
 		if ( elem ) {
 			type = ( type || "fx" ) + "queue";
@@ -1869,7 +1869,7 @@ jQuery.extend({
 	dequeue: function( elem, type ) {
 		type = type || "fx";
 
-		var queue = jQuery.queue( elem, type ),
+		let queue = jQuery.queue( elem, type ),
 			startLength = queue.length,
 			fn = queue.shift(),
 			hooks = jQuery._queueHooks( elem, type ),
@@ -1903,7 +1903,7 @@ jQuery.extend({
 
 	// not intended for public consumption - generates a queueHooks object, or returns the current one
 	_queueHooks: function( elem, type ) {
-		var key = type + "queueHooks";
+		let key = type + "queueHooks";
 		return jQuery._data( elem, key ) || jQuery._data( elem, key, {
 			empty: jQuery.Callbacks("once memory").add(function() {
 				jQuery.removeData( elem, type + "queue", true );
@@ -1915,7 +1915,7 @@ jQuery.extend({
 
 jQuery.fn.extend({
 	queue: function( type, data ) {
-		var setter = 2;
+		let setter = 2;
 
 		if ( typeof type !== "string" ) {
 			data = type;
@@ -1930,7 +1930,7 @@ jQuery.fn.extend({
 		return data === undefined ?
 			this :
 			this.each(function() {
-				var queue = jQuery.queue( this, type, data );
+				let queue = jQuery.queue( this, type, data );
 
 				// ensure a hooks for this queue
 				jQuery._queueHooks( this, type );
@@ -1952,7 +1952,7 @@ jQuery.fn.extend({
 		type = type || "fx";
 
 		return this.queue( type, function( next, hooks ) {
-			var timeout = setTimeout( next, time );
+			let timeout = setTimeout( next, time );
 			hooks.stop = function() {
 				clearTimeout( timeout );
 			};
