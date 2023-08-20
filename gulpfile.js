@@ -1,11 +1,11 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var babel = require('gulp-babel');
-var filesExist = require('files-exist');
-var maps = require('gulp-sourcemaps');
+let gulp = require('gulp');
+let concat = require('gulp-concat');
+let uglify = require('gulp-uglify');
+let babel = require('gulp-babel');
+let filesExist = require('files-exist');
+let maps = require('gulp-sourcemaps');
 
-var files = [
+let files = [
     './source/jquery.canvaswrapper.js',
     './source/jquery.colorhelpers.js',
     './source/jquery.flot.js',
