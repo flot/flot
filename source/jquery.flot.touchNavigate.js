@@ -3,7 +3,7 @@
 (function($) {
     'use strict';
 
-    var options = {
+    let options = {
         zoom: {
             enableTouch: false
         },
@@ -16,14 +16,14 @@
         }
     };
 
-    var ZOOM_DISTANCE_MARGIN = $.plot.uiConstants.ZOOM_DISTANCE_MARGIN;
+    let ZOOM_DISTANCE_MARGIN = $.plot.uiConstants.ZOOM_DISTANCE_MARGIN;
 
     function init(plot) {
         plot.hooks.processOptions.push(initTouchNavigation);
     }
 
     function initTouchNavigation(plot, options) {
-        var gestureState = {
+        let gestureState = {
                 zoomEnable: false,
                 prevDistance: null,
                 prevTapTime: 0,
@@ -43,7 +43,7 @@
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
-            var o = plot.getOptions();
+            let o = plot.getOptions();
 
             if (o.zoom.interactive && o.zoom.enableTouch) {
                 eventHolder[0].addEventListener('pinchstart', pinch.start, false);
@@ -78,7 +78,7 @@
                 updateData(e, 'pan', gestureState, navigationState);
 
                 if (useSmartPan) {
-                    var point = getPoint(e, 'pan');
+                    let point = getPoint(e, 'pan');
                     navigationState.initialState = plot.navigationState(point.x, point.y);
                 }
             },
@@ -87,7 +87,7 @@
                 presetNavigationState(e, 'pan', gestureState);
 
                 if (useSmartPan) {
-                    var point = getPoint(e, 'pan');
+                    let point = getPoint(e, 'pan');
                     plot.smartPan({
                         x: navigationState.initialState.startPageX - point.x,
                         y: navigationState.initialState.startPageY - point.y
@@ -115,7 +115,7 @@
             }
         };
 
-        var pinchDragTimeout;
+        let pinchDragTimeout;
         pinch = {
             start: function(e) {
                 if (pinchDragTimeout) {
@@ -140,7 +140,7 @@
                     });
                     updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
 
-                    var dist = pinchDistance(e);
+                    let dist = pinchDistance(e);
 
                     if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
                         zoomPlot(plot, e, gestureState, navigationState);
@@ -198,7 +198,7 @@
         if ((navigationState.currentTouchedAxis === 'x' && navigationState.prevTouchedAxis === 'x') ||
             (navigationState.currentTouchedAxis === 'y' && navigationState.prevTouchedAxis === 'y') ||
             (navigationState.currentTouchedAxis === 'none' && navigationState.prevTouchedAxis === 'none')) {
-            var event;
+            let event;
 
             plot.recenter({ axes: navigationState.touchedAxis });
 
@@ -212,7 +212,7 @@
     }
 
     function checkAxesForDoubleTap(plot, e, navigationState) {
-        var axis = plot.getTouchedAxis(e.detail.firstTouch.x, e.detail.firstTouch.y);
+        let axis = plot.getTouchedAxis(e.detail.firstTouch.x, e.detail.firstTouch.y);
         if (axis[0] !== undefined) {
             navigationState.prevTouchedAxis = axis[0].direction;
         }
@@ -231,7 +231,7 @@
     }
 
     function zoomPlot(plot, e, gestureState, navigationState) {
-        var offset = plot.offset(),
+        let offset = plot.offset(),
             center = {
                 left: 0,
                 top: 0
@@ -257,8 +257,8 @@
 
     function getAxis(plot, e, gesture, navigationState) {
         if (e.type === 'pinchstart') {
-            var axisTouch1 = plot.getTouchedAxis(e.detail.touches[0].pageX, e.detail.touches[0].pageY);
-            var axisTouch2 = plot.getTouchedAxis(e.detail.touches[1].pageX, e.detail.touches[1].pageY);
+            let axisTouch1 = plot.getTouchedAxis(e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+            let axisTouch2 = plot.getTouchedAxis(e.detail.touches[1].pageX, e.detail.touches[1].pageY);
 
             if (axisTouch1.length === axisTouch2.length && axisTouch1.toString() === axisTouch2.toString()) {
                 return axisTouch1;
