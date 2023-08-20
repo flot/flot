@@ -1,13 +1,13 @@
 // Karma configuration
 // Generated on Wed Jun 15 2016 09:05:44 GMT-0500 (CDT)
 /* eslint-disable */
-var module;
+let module;
 
 
 module.exports = function(config) {
     'use strict';
 
-    var browsersMatrix = {
+    let browsersMatrix = {
             'win': ['Firefox', 'Chrome', 'Edge'],
             'linux': ['Firefox', 'Chrome'],
             'mac': ['Safari', 'Firefox', 'Chrome']
@@ -18,7 +18,7 @@ module.exports = function(config) {
         currentOSType = isWin ? 'win' : (isLinux ? 'linux' : 'mac'),
         currentOSBrowsers = browsersMatrix[currentOSType];
 
-    var coverage_sources = [
+    let coverage_sources = [
         'source/jquery.colorhelpers.js',
         'source/jquery.canvaswrapper.js',
         'source/jquery.flot.js',
@@ -43,7 +43,7 @@ module.exports = function(config) {
         'source/jquery.flot.hover.js'
     ];
 
-    var sources = [
+    let sources = [
         'source/jquery.js',
         'lib/globalize.js',
         'lib/globalize.culture.en-US.js',
@@ -52,7 +52,7 @@ module.exports = function(config) {
         'node_modules/jasmine-jquery/lib/jasmine-jquery.js'
     ].concat(coverage_sources);
 
-    var settings = {
+    let settings = {
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
