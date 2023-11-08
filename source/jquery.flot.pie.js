@@ -448,6 +448,7 @@ More detail and specific examples can be found in the included HTML file.
                 }
 
                 function drawLabels() {
+                    var labels = [];
                     var currentAngle = startAngle;
                     var radius = options.series.pie.label.radius > 1 ? options.series.pie.label.radius : maxRadius * options.series.pie.label.radius;
 
@@ -493,6 +494,54 @@ More detail and specific examples can be found in the included HTML file.
 
                         label.css("top", labelTop);
                         label.css("left", labelLeft);
+
+                        // check to make sure that the label doesn't overlap one of the other labels
+                        let label_pos = getPositions(label);
+                        let bRepeat = false; // try moving label down if moving up doesn't work
+                        for(let j=0; j<labels.length; j++) {
+                            let tmpPos = getPositions(labels[j]);
+                            let horizontalMatch = comparePositions(label_pos[0], tmpPos[0]);
+                            let verticalMatch = comparePositions(label_pos[1], tmpPos[1]);
+                            if(horizontalMatch && verticalMatch) {
+                                // move up or down to try to avoid collision
+                                // (moving left or right doesn't generally work well)
+                                let newTop = tmpPos[1][0];
+                                if(bRepeat)
+                                    newTop -= label.height() + 1;
+                                else
+                                    newTop += label.height() + 1;
+                                label.css('top', newTop);
+                                labelTop = newTop;
+                                if(bRepeat > 3){
+                                    bRepeat = 0;
+                                }
+                                else{
+                                    j--; // retry this label to see if it conflicts now
+                                    bRepeat++;
+                                }
+                            }
+                            label_pos = getPositions(label);
+                        }
+
+                        function getPositions(box) {
+                            let $box = $(box);
+                            let pos = $box.position();
+                            return [ [ pos.left, pos.left + $box.width() ], [ pos.top, pos.top + $box.height() ] ];
+                        }
+
+                        // check for collision
+                        // Note this function is used for horizontal and vertical checks
+                        // so all comments of "left" could mean "top"
+                        function comparePositions(a, b) {
+                            // get left-most object
+                            let x1 = a[0] < b[0] ? a : b;
+                            // get the other object
+                            let x2 = a[0] < b[0] ? b : a;
+
+                            // return true if width of left-most object is right of the right-most object's position
+                            return x1[1] > x2[0];
+                        }
+                        labels.push(label);
 
                         // check to make sure that the label is not outside the canvas
                         if (0 - labelTop > 0 || 0 - labelLeft > 0 || canvasHeight - (labelTop + label.height()) < 0 || canvasWidth - (labelLeft + label.width()) < 0) {
