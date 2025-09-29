@@ -1656,7 +1656,7 @@ Licensed under the MIT license.
 
                     // we might need an extra decimal since forced
                     // ticks don't necessarily fit naturally
-                    if (!axis.mode && opts.tickDecimals == null) {
+                    if (!axis.mode && opts.tickDecimals == null && axis.delta > 0) {
                         var extraDec = Math.max(0, -Math.floor(Math.log(axis.delta) / Math.LN10) + 1),
                             ts = axis.tickGenerator(axis, plot);
 
