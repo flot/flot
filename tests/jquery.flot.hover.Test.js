@@ -9,7 +9,7 @@ describe("flot hover plugin", function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
         options = {
-            grid: { hoverable: true, clickable: true },
+            grid: { hoverable: true, clickable: true, mouseActiveRadius: 10 },
             pan: { enableTouch: true, active: true },
             series: {
                 lines: {
@@ -121,6 +121,25 @@ describe("flot hover plugin", function () {
             jasmine.clock().tick(100);
 
             expect(getEntireCanvasData(canvas)).toContainPixelColor(rgba(10, 20, 30, 1));
+        });
+
+        it('should not highlight the point when hovered from a distance larger than mouseActiveRadius', function() {
+            plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
+
+            var eventHolder = plot.getEventHolder(),
+                canvas = eventHolder,
+                offset = plot.getPlotOffset(),
+                epsilon = options.grid.mouseActiveRadius + 1,
+                axisx = plot.getXAxes()[0],
+                axisy = plot.getYAxes()[0],
+                x = axisx.p2c(2) + offset.left + epsilon,
+                y = axisy.p2c(3) + offset.top,
+                noButton = 0;
+
+            simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(100);
+
+            expect(getEntireCanvasData(canvas)).not.toContainPixelColor(rgba(10, 20, 30, 1));
         });
 
         it('should not highlight the point when hovered and the grid is not hoverable', function() {

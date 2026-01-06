@@ -2569,7 +2569,7 @@ Licensed under the MIT license.
                 maxy = maxDistance / series.yaxis.scale,
                 points = series.datapoints.points,
                 ps = series.datapoints.pointsize,
-                smallestDistance = Number.POSITIVE_INFINITY;
+                smallestDistance = computeDistance ? maxDistance : maxDistance ** 2;
 
             // with inverse transforms, we can't use the maxx/maxy
             // optimization, sadly
