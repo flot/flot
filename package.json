@@ -6,13 +6,10 @@
     "test": "grunt jshint"
   },
   "description": "Flot is a pure JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks and interactive features.",
-  "directories": {
-    "example": "examples"
-  },
   "homepage": "http://www.flotcharts.org",
   "repository": {
     "type": "git",
-    "url": "https://github.com/flot/flot.git"
+    "url": "https://github.com/thingsboard/flot.git"
   },
   "keywords": [
     "chart",
@@ -26,14 +23,9 @@
     "name": "Ole Laursen",
     "url": "https://github.com/OleLaursen"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://github.com/flot/flot/blob/master/LICENSE.txt"
-    }
-  ],
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/flot/flot/issues"
+    "url": "https://github.com/thingsboard/flot/issues"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
