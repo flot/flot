@@ -111,7 +111,7 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
-            if (e.type === "touchstart" && e.originalEvent.touches.length === 1) { // only accept single touch
+            if (e.type === "touchstart" && e.originalEvent.touches.length === 2) { // only accept double touch
                 selection.touch = true;
             } else if (e.which !== 1 || e.originalEvent.touches && e.originalEvent.touches.length > 1) { // only accept left-click
                 return;
